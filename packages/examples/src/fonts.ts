@@ -12,7 +12,7 @@ export const loadFonts = async () => {
 
   // using fontfaceobserver allows us ensure the font is loaded before using configuration for bitmap fonts.
   const fontKenfutureThin = new FontFaceObserver('kenfuture-thin');
-  var bitmapFontInstallOptions = {
+  const bitmapFontInstallOptions = {
     name: 'kenfuture-thin',
     chars: [['a', 'z'], ['0', '9'], ['A', 'Z'], ' \\|/.-^%$&*()!?+'],
     style: {
@@ -35,7 +35,7 @@ export const loadFonts = async () => {
       resolve({ bitmapGameFont });
     });
   });
-}
+};
 
 // {
 //   /** the name of the font, this will be the name you use in the fontFamily of text style to access this font */

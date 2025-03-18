@@ -29,5 +29,5 @@ export const getHostHtml = ({ code }) => {
   </body>
 </html>
 `
-  )
-}
+  );
+};

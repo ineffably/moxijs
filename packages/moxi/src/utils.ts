@@ -8,7 +8,7 @@ export const padRight = (val = '', length = 0, padWith = ' ') => {
     result += padWith;
   }
   return result;
-}
+};
 export const pr = padRight;
 
 export const getRandomInt = (max, min = 0) => (Math.floor(Math.random() * (max + 1 - min)) + min);

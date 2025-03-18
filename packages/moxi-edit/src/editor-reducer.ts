@@ -1,10 +1,10 @@
-import { EditorState, ReducerActions } from "./editor-types";
+import { EditorState, ReducerActions } from './editor-types';
 
 const persistState = (state: EditorState) => {
   // console.log('==> PersistState:', state);
   // putLocalData('ed3-editor', state);
   return state;
-}
+};
 
 export const editorReducer = (
   lastState: EditorState,
@@ -25,4 +25,4 @@ export const editorReducer = (
       return persistState({ ...lastState });
     }
   }
-}
+};

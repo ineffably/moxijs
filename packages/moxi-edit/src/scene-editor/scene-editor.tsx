@@ -8,10 +8,10 @@ export const SceneEditor = () => {
   useEffect(() => {
     (async () => {
       const renderMan = await RenderManager.create(sceneRef.current, { width: 1280, height: 720 });
-    })()
-  }, [])
+    })();
+  }, []);
 
   return(
     <div ref={sceneRef}></div>
-  )
-}
+  );
+};

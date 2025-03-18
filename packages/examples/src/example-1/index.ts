@@ -1,4 +1,4 @@
-import { Engine, RenderManager, SpriteEntity, Scene, AssetLoader } from "moxi";
+import { Engine, RenderManager, SpriteEntity, Scene, AssetLoader } from 'moxi';
 
 class Character extends SpriteEntity {
   update(deltaTime: number) {
@@ -42,4 +42,4 @@ export const Example01 = async () => {
 
   
 
-}
+};

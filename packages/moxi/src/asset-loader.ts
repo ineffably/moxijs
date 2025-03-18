@@ -23,5 +23,5 @@ export class AssetLoader {
       }
     }
     return this;
-  }
+  };
 }

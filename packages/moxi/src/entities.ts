@@ -1,4 +1,4 @@
-import PIXI from "pixi.js";
+import PIXI from 'pixi.js';
 
 export abstract class Entity extends PIXI.Container {
 
@@ -9,8 +9,8 @@ export abstract class Entity extends PIXI.Container {
       if(child.update) {
         child.update(deltaTime);
       }
-    })
-  }
+    });
+  };
 }
 
 export abstract class SpriteEntity extends PIXI.Sprite {
@@ -25,7 +25,7 @@ export abstract class SpriteEntity extends PIXI.Sprite {
       if(child.update) {
         child.update(deltaTime);
       }
-    })
+    });
   }
 }
 

@@ -45,7 +45,7 @@ export class ClientEvents {
 
     const anyEvent = (ev: OnEvent) => {
       onAnyEvent(ev);
-    }
+    };
 
     document.addEventListener('wheel', (event) => {
       const wheelDelta = this.wheelOffets || new Point();
@@ -53,7 +53,7 @@ export class ClientEvents {
       const yValue = wheelDelta.y + event.deltaY;
       this.wheelOffets = new Point(xValue, yValue);
       anyEvent({ eventType: 'wheel', event });
-    })
+    });
 
     document.addEventListener('mousemove', (event) => {
       this.lastMovePosition = this.movePosition;
@@ -77,7 +77,7 @@ export class ClientEvents {
       this.lastMouseUp = event;
       this.mouseDownEvent = null;
       anyEvent({ eventType: 'mouseup', event });
-    })
+    });
 
     document.addEventListener('keydown', (event) => {
       const { key } = event;

@@ -1,4 +1,4 @@
-import PIXI from "pixi.js";
+import PIXI from 'pixi.js';
 
 export class Scene extends PIXI.Container {
   renderer: PIXI.Renderer<HTMLCanvasElement>;
@@ -13,7 +13,7 @@ export class Scene extends PIXI.Container {
       if(child.init) {
         child.init(this.renderer);
       }
-    })
+    });
   }
 
 
@@ -22,7 +22,7 @@ export class Scene extends PIXI.Container {
       if(child.update) {
         child.update(deltaTime);
       }
-    })
+    });
   }
 
   draw(deltaTime: number) {
@@ -30,7 +30,7 @@ export class Scene extends PIXI.Container {
       if(child.draw) {
         child.draw(deltaTime);
       }
-    })
+    });
     this.renderer.render(this);
   }
 }

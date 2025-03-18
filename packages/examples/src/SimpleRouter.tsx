@@ -1,4 +1,4 @@
-import { useReducer, useEffect, createContext, useState } from "react";
+import { useReducer, useEffect, createContext, useState } from 'react';
 
 export type ActionTypes = 'Loaded' | 'HashChange';
 
@@ -34,7 +34,7 @@ export const emptyState: RouterState = {
   routesConfig: [{ path: '*' }],
   hash: '',
   path: [''],
-}
+};
 
 export const RouterContext = createContext<ProviderState>({ state: emptyState });
 
@@ -45,7 +45,7 @@ export function SimpleRouter({ initState = emptyState }: RouterProviderProps) {
   const [renderProps, setRenderProps] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    console.log('initState.routesConfig', initState.routesConfig)
+    console.log('initState.routesConfig', initState.routesConfig);
     setRoutesConfig(initState.routesConfig.map(
       (route) => ({ route: ['/'].concat(route.path.split('/').filter(Boolean)) })).map(
         (route, index) => ({ ...initState.routesConfig[index], ...route })
@@ -56,11 +56,11 @@ export function SimpleRouter({ initState = emptyState }: RouterProviderProps) {
 
     window.addEventListener('hashchange', () => {
       dispatch(({ type: 'HashChange', payload: { hash: window.location.hash } }));
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
-    console.log('state.hash', state.hash, routesConfig)
+    console.log('state.hash', state.hash, routesConfig);
     if (!routesConfig) return;
     const { path } = state;
 
@@ -69,7 +69,7 @@ export function SimpleRouter({ initState = emptyState }: RouterProviderProps) {
         entry.route.every((routePart, index) => routePart.startsWith(':') || (routePart === path[index]))
     );
 
-    console.log('found routh', foundRoute.length, path)
+    console.log('found routh', foundRoute.length, path);
 
     const fallbackRoute = routesConfig.find((route) => route.path === '*') || routesConfig[0];
 
@@ -79,13 +79,13 @@ export function SimpleRouter({ initState = emptyState }: RouterProviderProps) {
           acc[routePart.replace(':', '')] = path[index];
         }
         return acc;
-      }, {})
+      }, {});
       setRenderComponent(foundRoute[0].render);
       setRenderProps(params);
     } else if (fallbackRoute) {
       setRenderComponent(fallbackRoute.render);
     }
-  }, [state.hash, routesConfig])
+  }, [state.hash, routesConfig]);
 
   const RenderRoute = () => (renderComponent && renderComponent({ ...renderProps }));
 
@@ -93,7 +93,7 @@ export function SimpleRouter({ initState = emptyState }: RouterProviderProps) {
     <RouterContext.Provider value={{ state, dispatch }}>
       <RenderRoute />
     </RouterContext.Provider>
-  )
+  );
 }
 
 export function routerReducer(

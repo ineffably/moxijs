@@ -1,6 +1,6 @@
-import { useContext, useEffect } from "react";
-import { DockLayout, LayoutData } from "rc-dock";
-import "rc-dock/dist/rc-dock.css";
+import { useContext, useEffect } from 'react';
+import { DockLayout, LayoutData } from 'rc-dock';
+import 'rc-dock/dist/rc-dock.css';
 
 export const EditorUI = () => {
   // const { state, dispatch } = useContext(EditorContext);
@@ -9,14 +9,14 @@ export const EditorUI = () => {
     // console.log('Editor UI Loaded');
     // const editor = new Editor({ dispatch });
     // editor.init();
-  }, [])
+  }, []);
 
-  let tab = {
+  const tab = {
     content: <div>Tab Content</div>,
     closable: true,
   };
 
-  let layout = {
+  const layout = {
     dockbox: {
       mode: 'horizontal',
       children: [{
@@ -71,7 +71,7 @@ export const EditorUI = () => {
   const onLayoutChange = (...args) => {
     const [newLayout, currentTabId, direction] = args;
     console.log(args);
-  }
+  };
 
   return (
     <DockLayout
@@ -79,5 +79,5 @@ export const EditorUI = () => {
       onLayoutChange={onLayoutChange}
       style={{ position: 'absolute', left: 10, top: 10, right: 10, bottom: 10 }}
     />
-  )
-}
+  );
+};

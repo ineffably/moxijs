@@ -28,7 +28,7 @@ export class Engine {
       this.root.update(deltaTime);
       this.root.draw(deltaTime);
     }
-  }
+  };
 
   loadStage(stage: Scene) {
     this.root = stage;

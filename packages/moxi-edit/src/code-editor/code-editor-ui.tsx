@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import Editor, { loader } from '@monaco-editor/react';
 import { vFiles } from './v-files';
 import monaco from 'monaco-editor';
@@ -12,8 +12,8 @@ import sdkTypeDef from '!raw-loader!../../../moxi/lib/index.d.ts';
 // @ts-ignore
 import pixidef from '!raw-loader!../../../../node_modules/pixi.js/dist/pixi.js.d.ts';
 
-import { getHostHtml } from "./host-html";
-import { transpileTypescript } from "./transpile-typescript";
+import { getHostHtml } from './host-html';
+import { transpileTypescript } from './transpile-typescript';
 
 export const requireIntercept = (userRequireMap = {}, iframeRef: HTMLIFrameElement) => (moduleName) => {
   console.log('==> requireIntercept', moduleName);
@@ -25,22 +25,22 @@ export const requireIntercept = (userRequireMap = {}, iframeRef: HTMLIFrameEleme
   }
   const reference = (({ ...requireMap, ...userRequireMap })[moduleName]);
   if (!reference) {
-    console.error(`module for ${moduleName} was not found`)
-    return null
+    console.error(`module for ${moduleName} was not found`);
+    return null;
   }
   // debugging why charts isn't loading...
   if (moduleName.toLowerCase() === '@ux/charts') {
     console.log(reference);
   }
   return reference;
-}
+};
 
 const requireMap = {
   'pixi.js': PIXI,
   'moxi': moxi,
   'React': React,
   'ReactDOM': ReactDOM,
-}
+};
 
 const { typescript } = monaco.languages;
 
@@ -74,18 +74,18 @@ export const CodeEditorUI = () => {
 
   useEffect(() => {
     const { iframeCode, sourceCode, error } = transpileTypescript(codeText);
-    console.log('error', error)
+    console.log('error', error);
     if (error) {
       // console.log(error);
       setLastError({ error });
     }
     else {
-      setLastError({})
+      setLastError({});
       setSourceCode(sourceCode);
       setIframeCode(iframeCode);
       setRenderId(renderId + 1);
     }
-  }, [codeText])
+  }, [codeText]);
 
   useEffect(() => {
     if (iframeRef) {
@@ -94,20 +94,20 @@ export const CodeEditorUI = () => {
           const { run } = (iframeRef?.contentWindow?.window as any) || {};
 
           if (run) {
-            console.log('running: renderId:', renderId)
-            console.log(run)
+            console.log('running: renderId:', renderId);
+            console.log(run);
 
-            run({ require: requireMapping, renderId, exports: {} })
+            run({ require: requireMapping, renderId, exports: {} });
           }
         }
         catch (e) {
           // setLastError({message, source, lineno, colno, error, targetLines})
-          setLastError({ name: e.name, message: e.message })
+          setLastError({ name: e.name, message: e.message });
           // console.log('contentWindow', e)
         }
       }, 350);
     }
-  }, [iframeCode])
+  }, [iframeCode]);
 
 
   return (
@@ -123,10 +123,10 @@ export const CodeEditorUI = () => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', height: '90vh', width: '50vw' }}>
         <div id="render-target">
-          <iframe style={{ height: '90vh', width: '50vw' }} ref={r => { setIframeRef(r) }} srcDoc={getHostHtml({ code: iframeCode })} />
+          <iframe style={{ height: '90vh', width: '50vw' }} ref={r => { setIframeRef(r); }} srcDoc={getHostHtml({ code: iframeCode })} />
         </div>
         <div id="logs"></div>
       </div>
     </div>
-  )
-}
+  );
+};

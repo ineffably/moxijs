@@ -45,7 +45,7 @@ export class RenderManager {
       renderer.resize(w, h);
     }
 
-  }
+  };
 }
 
 RenderManager.getRenderer = async (options: Partial<PIXI.AutoDetectOptions>) => (

@@ -16,13 +16,7 @@ export const getHostHtml = ({ code }) => {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module">
-      window.addLink = (url => {
-        const link = document.createElement('link');
-        link.href = url;
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-      });
+    <script>
       window.run = (${code || '() => {};'})
     </script>
   </body>

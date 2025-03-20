@@ -1,5 +1,4 @@
 import { RenderManager } from 'moxi';
-import PIXI from 'pixi.js';
 import { useEffect, useRef } from 'react';
 
 export const SceneEditor = () => {

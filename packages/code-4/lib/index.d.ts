@@ -1,1 +1,1 @@
-export { Code4 } from './code-4';
+export { Code4Editor } from './code-4-editor';

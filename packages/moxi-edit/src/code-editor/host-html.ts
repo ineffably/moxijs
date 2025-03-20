@@ -13,7 +13,6 @@ export const getHostHtml = ({ code }) => {
   //   return true;
   // };
   </script>
-  <link href="iframe-html.css" rel="stylesheet">
   </head>
   <body>
     <div id="app"></div>

@@ -1,4 +1,4 @@
-import PIXI from "pixi.js";
+import PIXI from 'pixi.js';
 export declare abstract class Entity extends PIXI.Container {
     init(...args: any[]): void;
     update: (deltaTime: number) => void;

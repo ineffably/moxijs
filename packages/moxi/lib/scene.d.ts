@@ -1,4 +1,4 @@
-import PIXI from "pixi.js";
+import PIXI from 'pixi.js';
 export declare class Scene extends PIXI.Container {
     renderer: PIXI.Renderer<HTMLCanvasElement>;
     constructor(renderer: PIXI.Renderer<HTMLCanvasElement>);

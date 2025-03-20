@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const outDir = 'lib';
 
-
 module.exports = (env, argv) => {
   const { mode = 'development' } = argv;
   const devtool = mode === 'production' ? false : 'inline-source-map';
@@ -17,8 +16,6 @@ module.exports = (env, argv) => {
       library: { name: 'moxi', type: 'umd' }
     },
     externals: {
-      // 'RAPIER': '@dimforge/rapier2d',
-      // '@dimforge/rapier2d': 'RAPIER'
       'PIXI': 'pixi.js'
     },
     module: {

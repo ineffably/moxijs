@@ -1,7 +1,7 @@
 import { EditorProps } from '@monaco-editor/react';
 import type { languages } from 'monaco-editor';
 import { FileSpec } from './types';
-export declare const requireIntercept: (userRequireMap: {}, iframeRef: HTMLIFrameElement) => (moduleName: any) => any;
+export declare const requireIntercept: (userRequireMap?: {}) => (moduleName: any) => any;
 export interface Code4UIProps {
     tsDefaultsPlugin?: (d: languages.typescript.LanguageServiceDefaults) => void;
     requireMap?: Record<string, any>;

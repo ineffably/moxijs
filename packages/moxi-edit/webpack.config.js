@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+// const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const outDir = 'lib';
 
@@ -19,11 +19,25 @@ module.exports = (env, argv) => {
       library: { name: 'moxi-edit', type: 'umd' }
     },
     devServer: {
-      port: 8888,
+      port: 8788,
       static: {
         directory: path.join(__dirname, './'),
         publicPath: '/'
       },
+    },
+    externals: {
+      react: {
+        root: 'React',
+        commonjs2: 'react',
+        commonjs: 'react',
+        amd: 'react'
+      },
+      'react-dom': {
+        root: 'ReactDOM',
+        commonjs2: 'react-dom',
+        commonjs: 'react-dom',
+        amd: 'react-dom'
+      }
     },
     module: {
       noParse: [require.resolve("typescript/lib/typescript.js")],
@@ -40,14 +54,12 @@ module.exports = (env, argv) => {
       ],
     },
     resolve: {
-      plugins: [new TsconfigPathsPlugin({/* options: see below */})],
+      plugins: [new TsconfigPathsPlugin({/* options: see below */ })],
       extensions: ['.tsx', '.ts', '.js']
     },
     plugins: [
-      new MonacoWebpackPlugin(),      
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, './index.html')
-      }),
+      // new MonacoWebpackPlugin(),
+      new HtmlWebpackPlugin({ template: path.join(__dirname, './index.html') }),
     ]
   })
 }

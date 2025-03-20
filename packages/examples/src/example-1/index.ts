@@ -35,11 +35,7 @@ export const Example01 = async () => {
   const characterTexture = PIXIAssets.get('character');
   const character = new Character(characterTexture);
   scene.addChild(character);
-
   scene.init();
   
   engine.start();
-
-  
-
 };

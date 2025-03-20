@@ -4,15 +4,17 @@
   "description": "",
   "private": true,
   "workspaces": [
+    "packages/code-4",
     "packages/moxi",
     "packages/moxi-edit",
     "packages/examples"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:clean": "npm run build:clean --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "build:prod": "npm run build:prod --workspaces --if-present",
-    "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=moxi-edit\"",
+    "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=code-4\"",
     "examples": "npm run examples --workspaces --if-present",
     "editor": "npm run local --workspaces --if-present"
   },
@@ -23,6 +25,7 @@
     "concurrently": "^9.1.2",
     "eslint": "^9.22.0",
     "eslint-plugin-react": "^7.37.4",
+    "rimraf": "^6.0.1",
     "typescript-eslint": "^8.26.1"
   }
 }

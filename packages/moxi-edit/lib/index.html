@@ -11,12 +11,15 @@
     }
   </style>
   <script>
-    if (!window.appLoaded) {
-      const el = document.createElement('script');
-      el.defer = true;
-      el.src = './lib/index.js?v=' + Date.now();
-      document.body.appendChild(el);
-    }
+    window.setTimeout(() => {
+      console.log('appending bundle ... standby');
+      if (!window.appLoaded) {
+        const el = document.createElement('script');
+        el.defer = true;
+        el.src = 'lib/index.js?v=' + Date.now();
+        document.body.appendChild(el);
+      }
+    }, 500);
   </script>
 <script defer src="index.js"></script></head>
 

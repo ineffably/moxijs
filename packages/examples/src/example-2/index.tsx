@@ -1,4 +1,4 @@
-import { Code4 } from 'code-4';
+import { Code4Editor } from 'code-4';
 import { useEffect } from 'react';
 
 // @ts-ignore
@@ -12,7 +12,7 @@ export const Example02 = () => {
   }, []);
 
   return (
-    <Code4 tsDefaultsPlugin={(defaults) => {
+    <Code4Editor tsDefaultsPlugin={(defaults) => {
       defaults.addExtraLib(`declare module 'moxi' { ${sdkTypeDef} }`, 'file:///node_modules/moxi/lib/index.d.ts');
       defaults.addExtraLib(`declare module 'pixi.js' { ${pixidef} }`, 'file:///node_modules/pixi.js/dist/pixi.js.d.ts');
     }}

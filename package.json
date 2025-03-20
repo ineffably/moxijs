@@ -16,7 +16,7 @@
     "build:prod": "npm run build:prod --workspaces --if-present",
     "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=code-4\"",
     "examples": "npm run examples --workspaces --if-present",
-    "editor": "npm run local --workspaces --if-present"
+    "editor": "npm run local --workspace=moxi-edit"
   },
   "keywords": [],
   "author": "",

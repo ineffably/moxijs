@@ -19,6 +19,7 @@ export const transpileTypescript = (code: string, tsConfig = {}) => {
     const iframeValue = `
     ({require, renderId, exports} = {}) => {
     try{
+      // console.log('==RUNNING==', renderId);
       ${finalPass}
     }catch(err){
       console.error(err);

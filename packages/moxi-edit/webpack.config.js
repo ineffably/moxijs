@@ -19,25 +19,14 @@ module.exports = (env, argv) => {
       library: { name: 'moxi-edit', type: 'umd' }
     },
     devServer: {
+      client: {
+        overlay: false
+      },
       port: 8788,
       static: {
         directory: path.join(__dirname, './'),
         publicPath: '/'
       },
-    },
-    externals: {
-      react: {
-        root: 'React',
-        commonjs2: 'react',
-        commonjs: 'react',
-        amd: 'react'
-      },
-      'react-dom': {
-        root: 'ReactDOM',
-        commonjs2: 'react-dom',
-        commonjs: 'react-dom',
-        amd: 'react-dom'
-      }
     },
     module: {
       noParse: [require.resolve("typescript/lib/typescript.js")],

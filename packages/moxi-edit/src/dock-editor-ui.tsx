@@ -1,8 +1,8 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { DockLayout, LayoutData } from 'rc-dock';
 import 'rc-dock/dist/rc-dock.css';
 
-export const EditorUI = () => {
+export const DockEditor = () => {
   // const { state, dispatch } = useContext(EditorContext);
 
   useEffect(() => {

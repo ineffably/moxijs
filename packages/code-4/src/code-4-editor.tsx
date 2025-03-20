@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { ReactHTMLElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Editor, { EditorProps } from '@monaco-editor/react';
-import { vFiles } from './v-files';
 import { transpileTypescript } from './transpile-typescript';
 import type { languages } from 'monaco-editor';
 import { FileSpec } from './types';
 import { getHostHtml } from './host-html';
 
-export const requireIntercept = (userRequireMap = {}, iframeRef: HTMLIFrameElement) => (moduleName) => {
+export const requireIntercept = (userRequireMap = {}) => (moduleName) => {
   if (moduleName.endsWith('.css')) {
     return '';
   }
@@ -41,12 +40,11 @@ export const Code4Editor = ({
   }
   const [codeText, setCodeText] = useState('document.body.style.backgroundColor = "orange";');
   const [iframeRef] = useState<HTMLIFrameElement>(renderTarget);
-  const [jsCode, setJsCode] = useState('');
   const [lastError, setLastError] = useState(null as any);
   const [lastIframeCode, setIframeCode] = useState('');
   const [renderId, setRenderId] = useState(1);
   
-  const requireMapping = requireIntercept(requireMap, iframeRef);
+  const requireMapping = requireIntercept(requireMap);
 
   useEffect(() => {
     const { iframeCode, sourceCode, error } = transpileTypescript(codeText);

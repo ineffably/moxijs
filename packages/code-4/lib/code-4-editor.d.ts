@@ -8,11 +8,14 @@ export interface Code4UIProps {
     virtualFiles?: Record<string, FileSpec>;
     renderTarget?: HTMLIFrameElement;
     editorProps?: EditorProps;
+    onSourceChange?: (srcDoc: string) => void;
 }
-export declare const Code4Editor: ({ virtualFiles, requireMap, renderTarget, tsDefaultsPlugin, editorProps, }: {
+export declare const Code4Editor: ({ virtualFiles, requireMap, renderTarget, tsDefaultsPlugin, editorProps, consoleTarget, onSourceChange, }: {
     virtualFiles?: {};
     requireMap?: {};
     renderTarget?: any;
     tsDefaultsPlugin?: (d: any) => any;
     editorProps?: {};
+    consoleTarget?: any;
+    onSourceChange?: any;
 }) => import("react/jsx-runtime").JSX.Element;

@@ -26,6 +26,7 @@ export interface Code4UIProps {
   virtualFiles?: Record<string, FileSpec>;
   renderTarget?: HTMLIFrameElement;
   editorProps?: EditorProps;
+  onSourceChange?: (srcDoc: string) => void;
 }
 
 export const Code4Editor = ({
@@ -34,64 +35,68 @@ export const Code4Editor = ({
   renderTarget = null,
   tsDefaultsPlugin = (d) => null,
   editorProps = {},
+  consoleTarget = null,
+  onSourceChange = null,
 }) => {
-  if(!renderTarget) {
+  if (!renderTarget) {
     return <div>please provide a render target</div>;
   }
   const [codeText, setCodeText] = useState('document.body.style.backgroundColor = "orange";');
   const [iframeRef] = useState<HTMLIFrameElement>(renderTarget);
   const [lastError, setLastError] = useState(null as any);
-  const [lastIframeCode, setIframeCode] = useState('');
   const [renderId, setRenderId] = useState(1);
-  
+
   const requireMapping = requireIntercept(requireMap);
 
-  useEffect(() => {
-    const { iframeCode, sourceCode, error } = transpileTypescript(codeText);
-    console.log('transpileTypescript', { iframeCode, sourceCode, error, codeText });
-
-    iframeRef.srcdoc=getHostHtml({ code: iframeCode });
-    
-    
-    if (error) {
-      setLastError({ error });
-    }
-    else {
-      setLastError({});
-      setIframeCode(iframeCode);
-      setRenderId(renderId + 1);
-    }
-  }, [codeText]);
-
-  useEffect(() => {
+  const runIframeCode = () => {
     if (iframeRef) {
-      window.setTimeout(() => {
-        try {
-          const { run } = (iframeRef?.contentWindow?.window as any) || {};
-          if (run) {
-            // console.log('running: renderId:', renderId);
-            run({
-              require: requireMapping, renderId, exports: {}
-            });
-          }
-        }
-        catch (e) {
-          // setLastError({message, source, lineno, colno, error, targetLines})
-          setLastError({ name: e.name, message: e.message });
-          // console.log('contentWindow', e)
-        }
-      }, 350);
+      const { run } = (iframeRef?.contentWindow?.window as any) || {};
+      if (run) {
+        const result = run({
+          require: requireMapping, renderId, exports: {}
+        });
+        // console.log('==RESULT==', result);
+      }
     }
-  }, [lastIframeCode]);
+  };
+
+  useEffect(() => {
+    if(iframeRef) {
+      iframeRef.addEventListener('load', () => {
+        runIframeCode();
+      });
+    }
+
+    window.addEventListener('error', (ev) => {
+      const { error } = ev;
+      setLastError(ev);
+      console.log(error.message);
+      console.log(error.stack);
+    }, true);
+  }, []);
+
+  useEffect(() => {
+    const { iframeCode } = transpileTypescript(codeText);
+    const srcDoc = getHostHtml({ code: iframeCode });
+    iframeRef.srcdoc = srcDoc;
+
+    if (onSourceChange) {
+      onSourceChange(srcDoc);
+    }
+
+    setRenderId(renderId + 1);
+    // console.log('codeText', codeText);
+  }, [codeText]);
 
   return (
     <Editor
-      height='90vh'
       width="100%"
       theme="vs-dark"
-      language={'typescript'}
+      language="typescript"
       value={codeText}
-      onChange={(value) => setCodeText(value)}
+      onChange={(value) => {
+        setCodeText(value);
+      }}
       options={{ automaticLayout: true }}
       onMount={(editor, monaco) => {
         const { typescript } = monaco.languages;
@@ -109,12 +114,3 @@ export const Code4Editor = ({
     />
   );
 };
-
-/*
-      <div style={{ display: 'flex', flexDirection: 'column', height: '90vh', width: '50vw' }}>
-        <div id="render-target">
-          <iframe style={{ height: '90vh', width: '50vw' }} ref={r => { setIframeRef(r); }} srcDoc={getHostHtml({ code: iframeCode })} />
-        </div>
-        <div id="logs"></div>
-      </div>
-*/

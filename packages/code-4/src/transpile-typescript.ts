@@ -2,44 +2,32 @@ import { transpile } from 'typescript';
 
 export const transpileTypescript = (code: string, tsConfig = {}) => {
   let finalAttempt = null;
-  try {
-    const defaultTsConfig = {
-      'allowNonTsExtensions': true,
-      'target': 99,
-      'module': 1,
-      'moduleResolution': 1,
-      'resolveJsonModule': true,
-      'allowSyntheticDefaultImports': true,
-      'esModuleInterop': true
-    };
-    const finalPass = transpile(code, defaultTsConfig);
+  const defaultTsConfig = {
+    allowNonTsExtensions: true,
+    target: 99,
+    module: 1,
+    moduleResolution: 1,
+    resolveJsonModule: true,
+    allowSyntheticDefaultImports: true,
+    esModuleInterop: true,
+    ...tsConfig
+  };
 
-    finalAttempt = finalPass;
+  const finalPass = transpile(code, defaultTsConfig);
+  finalAttempt = finalPass;
 
-    const iframeValue = `
+  const iframeCode = `
     ({require, renderId, exports} = {}) => {
-    try{
       // console.log('==RUNNING==', renderId);
-      ${finalPass}
-    }catch(err){
-      console.error(err);
-      window.postMessage({err, renderId}, '*');
-      throw(err);
-    }}
-    `;
+      ${finalPass} 
+      return true;
+    }
+ `;
 
-    return {
-      error: null,
-      iframeCode: iframeValue,
-      sourceCode: finalPass,
-    };
-  }
-  catch (e) {
-    // console.log(e);
-    return {
-      error: e,
-      iframeCode: finalAttempt,
-      sourceCode: finalAttempt,
-    };
-  }
+  return {
+    error: null,
+    iframeCode,
+    sourceCode: finalPass,
+  };
+
 };

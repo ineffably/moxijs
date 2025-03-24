@@ -15,8 +15,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,
-    "strict": false,
-    "declaration": true
+    "strict": false
   },
   "exclude": [
     "node_modules",

@@ -1,7 +1,9 @@
 import PIXI from 'pixi.js';
 
 export class RenderManager {
-  static getRenderer: (options: Partial<PIXI.AutoDetectOptions>) => Promise<PIXI.Renderer>;
+  static getRenderer: (
+    options: Partial<PIXI.AutoDetectOptions>
+  ) => Promise<PIXI.Renderer>;
 
   static create: (
       htmlRoot: HTMLElement, 
@@ -14,10 +16,9 @@ export class RenderManager {
   constructor(htmlRoot: HTMLElement, renderer: PIXI.Renderer) {
     this.htmlRoot = htmlRoot;
     this.renderer = renderer;
-
+    // console.log('canvas', this.renderer.canvas);
     htmlRoot.appendChild(this.renderer.canvas);
     window.addEventListener('resize', () => this.onResize());
-
     this.onResize();
   }
 

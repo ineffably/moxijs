@@ -10,7 +10,7 @@ export class Scene extends PIXI.Container {
 
   init() {
     this.children.forEach((child: any) => {
-      if(child.init) {
+      if (child.init) {
         child.init(this.renderer);
       }
     });
@@ -19,7 +19,7 @@ export class Scene extends PIXI.Container {
 
   update(deltaTime: number) {
     this.children.forEach((child: any) => {
-      if(child.update) {
+      if (child.update) {
         child.update(deltaTime);
       }
     });
@@ -27,7 +27,7 @@ export class Scene extends PIXI.Container {
 
   draw(deltaTime: number) {
     this.children.forEach((child: any) => {
-      if(child.draw) {
+      if (child.draw) {
         child.draw(deltaTime);
       }
     });

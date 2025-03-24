@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
   "scripts": {
     "build": "webpack --mode development",
     "build:prod": "npm run clean && webpack --mode production",
@@ -16,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "dts-bundle-webpack": "^1.0.2",
     "pixi.js": "^8.8.1",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",

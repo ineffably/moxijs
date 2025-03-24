@@ -4,9 +4,5 @@ export interface FileSpec {
   name: string;
   language: 'typescript',
   value: string;
-}
-
-export interface ProjectSpec {
-  name: string;
-  files: Record<string, FileSpec>;
+  path?: string;
 }

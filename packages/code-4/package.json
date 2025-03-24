@@ -2,6 +2,7 @@
   "name": "code-4",
   "version": "0.1.0",
   "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
   "scripts": {
     "local": "webpack serve --mode development",
     "watch": "webpack watch --mode development",

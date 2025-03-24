@@ -38,8 +38,6 @@ export const init = (async () => {
   container.pivot.x = container.width / 2;
   container.pivot.y = container.height / 2;
   
-  console.log('container', container);
-
   // Listen for animate update
   app.ticker.add((time) =>
   {

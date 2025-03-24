@@ -12,4 +12,5 @@ MOXI-EDIT is an experiment to play with browser based sandboxes while builing an
 The Stage Editor should be simple but extensible and would have a built in code editor environemnt for JavaScript and TypeScript based behaviors and games. 
 
 no written mvp, no docs yet, it's very fluid 
- 
+
+[There is a demo of the basic real-time code editor here](https://ineffably.github.io/moxi/packages/moxi-edit/) 

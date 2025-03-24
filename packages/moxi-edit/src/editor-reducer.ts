@@ -1,8 +1,10 @@
-import { EditorState, ReducerActions } from './editor-types';
+import { putLocalData } from './library/local-data';
+import { EditorState, ReducerActions } from './types/editor-types';
 
 const persistState = (state: EditorState) => {
   // console.log('==> PersistState:', state);
-  // putLocalData('ed3-editor', state);
+  const { activeProject } = state;
+  putLocalData('moxi-editor', { activeProject });
   return state;
 };
 
@@ -13,6 +15,13 @@ export const editorReducer = (
   const { payload, type } = action;
 
   switch (type) {
+    case 'UpdateProject': {
+      const { activeProject } = payload;
+      return persistState({
+        ...lastState,
+        ...{ activeProject }
+      });
+    }
     case 'Loaded':
       const { isLoading } = payload;
       return persistState({

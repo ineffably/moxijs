@@ -1,5 +1,5 @@
 import PIXI from 'pixi.js';
-import { Asset } from './types';
+import { Asset } from '.';
 
 export class AssetLoader {
   PIXIAssets: PIXI.AssetsClass = PIXI.Assets;

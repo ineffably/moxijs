@@ -1,5 +1,5 @@
 import { createContext, useReducer, useEffect } from 'react';
-import { EditorState, ProviderState } from './editor-types';
+import { EditorState, ProviderState } from './types/editor-types';
 import { editorReducer } from './editor-reducer';
 
 export const emptyState: EditorState = {

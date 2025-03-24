@@ -6,8 +6,7 @@
   "workspaces": [
     "packages/code-4",
     "packages/moxi",
-    "packages/moxi-edit",
-    "packages/examples"
+    "packages/moxi-edit"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

@@ -11,17 +11,15 @@
     }
   </style>
   <script>
-    window.addEventListener('onload', () => {
-      window.setTimeout(() => {
-        if (!window.appLoaded) {
-          console.log('appending bundle ... standby');
-          const el = document.createElement('script');
-          el.defer = true;
-          el.src = 'lib/index.js?v=' + Date.now();
-          document.body.appendChild(el);
-        }
-      }, 100);
-    }, 250);
+    window.setTimeout(() => {
+      if (!window.appLoaded) {
+        console.log('appending bundle ... standby');
+        const el = document.createElement('script');
+        el.defer = true;
+        el.src = 'lib/index.js?v=' + Date.now();
+        document.body.appendChild(el);
+      }
+    }, 200);
   </script>
 </head>
 

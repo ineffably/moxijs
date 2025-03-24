@@ -7,7 +7,7 @@ import { project } from './example-projects/basic-pixi-only';
 import '@ant-design/v5-patch-for-react-19';
 import 'antd/dist/reset.css';
 import './editor.css';
-// import { ExamplePlayer } from './example-player';
+import { ProjectPlayer } from './project-player';
 
 const testProject = project as MoxiProjectSchema;
 const cachedState = getLocalData('moxi-editor') as EditorState;
@@ -23,8 +23,8 @@ export const EditorRoot = () => {
           // algorithm: [theme.darkAlgorithm, theme.compactAlgorithm],
         }}
       >
-        {/* <ExamplePlayer /> */}
         <BasicEditor />
+        {/* <ProjectPlayer /> */}
       </ConfigProvider>
     </StateProvider>
   );

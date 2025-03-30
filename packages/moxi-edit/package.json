@@ -22,7 +22,8 @@
     "pixi.js": "^8.8.1",
     "rc-dock": "^3.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "wouter": "^3.6.0"
   },
   "devDependencies": {
     "@ant-design/icons": "^6.0.0",

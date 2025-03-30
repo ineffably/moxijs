@@ -33,7 +33,7 @@ export const transpileTypescript = (code: string, tsConfig = {} as CompilerOptio
   return {
     error: null,
     iframeCode,
-    sourceCode: finalAttempt,
+    sourceCode: finalPass,
   };
 
 };

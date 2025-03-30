@@ -1,15 +1,15 @@
 import * as utils from './utils';
-import PIXI from 'pixi.js';
+import PIXI, { Point } from 'pixi.js';
 
 import { RenderManager } from './render-manager';
-import { Entity, SpriteEntity } from './entities';
+import { Entity } from './entity';
 import { Scene } from './scene';
 import { Engine } from './engine';
 import { ClientEvents } from './client-events';
 import { AssetLoader } from './asset-loader';
-
-import type { Point } from 'pixi.js';
-
+import { Behavior } from './bahavior';
+import { defaultRenderOptions, prepMoxi } from './prepare';
+import { loadFonts } from './font-loader';
 export type Asset = { src: string, alias?: string };
 
 export interface OnEvent {
@@ -34,29 +34,35 @@ export type ClientEventsType = {
   wheelDelta?: { yValue: 0 | number, xValue: 0 | number, xLast: number, yLast: number }
 }
 
-const defaultExport = {
+const exportedObjects = {
+  loadFonts,
   utils,
   PIXI,
   RenderManager,
   Entity,
-  SpriteEntity,
   Scene,
   Engine,
   ClientEvents,
   AssetLoader,
+  Behavior,
+  defaultRenderOptions,
+  prepMoxi
 };
 
-export { 
+export default exportedObjects;
+
+export {
+  loadFonts,
   utils,
   PIXI,
   RenderManager,
   Entity,
-  SpriteEntity,
   Scene,
   Engine,
   ClientEvents,
   AssetLoader,
+  Behavior,
+  defaultRenderOptions,
+  prepMoxi
 };
-
-export default defaultExport;
 

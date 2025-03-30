@@ -16,6 +16,7 @@ export interface Code4UIProps {
   consoleTarget?: HTMLTextAreaElement;
   editorProps?: EditorProps;
   onCodeChange?: (file: FileSpec, code: string) => void;
+  onMount?: (editor: any, monaco: any, compilerOptions: languages.typescript.CompilerOptions) => void;
 }
 
 export const Code4Editor = ({
@@ -26,6 +27,7 @@ export const Code4Editor = ({
   editorProps = {},
   consoleTarget = null,
   onCodeChange = null,
+  onMount = (editor, monaco) => {}
 }: Code4UIProps) => {
   if (!renderTarget) {
     return <div>please provide a render target</div>;
@@ -90,6 +92,7 @@ export const Code4Editor = ({
       onMount={(editor, monaco) => {
         const { typescript } = monaco.languages;
         const defaults = typescript.typescriptDefaults;
+        typescript.javascriptDefaults.setEagerModelSync(true)
         extraLibsPlugin(defaults);
         const compilerOptions = defaults.getCompilerOptions();
         compilerOptions.module = typescript.ModuleKind.CommonJS;
@@ -100,6 +103,7 @@ export const Code4Editor = ({
         compilerOptions.resolveJsonModule = true;
         compilerOptions.allowSyntheticDefaultImports = true;
         compilerOptions.esModuleInterop = true;
+        onMount(editor, monaco, compilerOptions);
         setCompilerOptions(compilerOptions);
         defaults.setCompilerOptions(compilerOptions);
         console.log('editor mounted');

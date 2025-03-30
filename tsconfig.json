@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "module": "commonjs",
+    "module": "CommonJS",
     "target": "ES2022",
     "lib": ["DOM", "ES2022"],
     "types": ["node"],

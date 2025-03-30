@@ -34,10 +34,6 @@ export class Engine {
   gameLoop = (tikerTime: Ticker) => {
     if (this.root) {
       const { deltaTime } = tikerTime;
-      // window.setTimeout(() => {
-      //   console.log('deltaTime', deltaTime);
-      // })
-      // 
       this.root.update(deltaTime);
       this.root.draw(deltaTime);
     }

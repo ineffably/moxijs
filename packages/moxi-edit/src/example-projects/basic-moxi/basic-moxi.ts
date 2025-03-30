@@ -1,8 +1,8 @@
 
-import { Engine, RenderManager, Scene, AssetLoader, SpriteEntity } from 'moxi';
+import { Engine, RenderManager, Scene, AssetLoader, Entity } from 'moxi';
 import PIXI from 'pixi.js';
 
-class Character extends SpriteEntity {
+class Character extends Entity {
   update(deltaTime: number) {
     super.update(deltaTime);
     this.rotation += deltaTime * 0.1;
@@ -26,7 +26,6 @@ export const init = (async () => {
 
   // // we can either call loadWorld or we can pass the world into the engine constructor.
   const engine = new Engine(scene);
-
   const assetList = [
     { src: './assets/character_robot_idle.png', alias: 'character' }
   ];
@@ -39,10 +38,6 @@ export const init = (async () => {
   scene.addChild(character);
   scene.init();
   engine.start();
-  
-  window.setTimeout(() => {
-    // engine.stop();
-  }, 10);
 });
 
 // These files are also pretranspiled for direct use in the browser.

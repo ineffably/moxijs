@@ -1,12 +1,14 @@
 import * as utils from './utils';
-import PIXI from 'pixi.js';
+import PIXI, { Point } from 'pixi.js';
 import { RenderManager } from './render-manager';
-import { Entity, SpriteEntity } from './entities';
+import { Entity } from './entity';
 import { Scene } from './scene';
 import { Engine } from './engine';
 import { ClientEvents } from './client-events';
 import { AssetLoader } from './asset-loader';
-import type { Point } from 'pixi.js';
+import { Behavior } from './bahavior';
+import { defaultRenderOptions, prepMoxi } from './prepare';
+import { loadFonts } from './font-loader';
 export type Asset = {
     src: string;
     alias?: string;
@@ -35,16 +37,19 @@ export type ClientEventsType = {
         yLast: number;
     };
 };
-declare const defaultExport: {
+declare const exportedObjects: {
+    loadFonts: () => Promise<unknown>;
     utils: typeof utils;
     PIXI: typeof PIXI;
     RenderManager: typeof RenderManager;
     Entity: typeof Entity;
-    SpriteEntity: typeof SpriteEntity;
     Scene: typeof Scene;
     Engine: typeof Engine;
     ClientEvents: typeof ClientEvents;
     AssetLoader: typeof AssetLoader;
+    Behavior: typeof Behavior;
+    defaultRenderOptions: Partial<PIXI.AutoDetectOptions>;
+    prepMoxi: typeof prepMoxi;
 };
-export { utils, PIXI, RenderManager, Entity, SpriteEntity, Scene, Engine, ClientEvents, AssetLoader, };
-export default defaultExport;
+export default exportedObjects;
+export { loadFonts, utils, PIXI, RenderManager, Entity, Scene, Engine, ClientEvents, AssetLoader, Behavior, defaultRenderOptions, prepMoxi };

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { EditorRoot } from './editor-root';
+import { EditorRoot } from './components/editor-root';
 
 (window as any).appLoaded = true;
 
@@ -11,3 +11,5 @@ if(container){
 }
 
 export { EditorRoot };
+
+export default EditorRoot;

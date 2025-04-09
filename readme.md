@@ -14,3 +14,5 @@ The Stage Editor should be simple but extensible and would have a built in code 
 no written mvp, no docs yet, it's very fluid 
 
 [There is a demo of the basic real-time code editor here](https://ineffably.github.io/moxi/packages/moxi-edit/) 
+
+[More Details in the Tasks List](./tasks.md)

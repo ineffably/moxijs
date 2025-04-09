@@ -40,9 +40,10 @@ export const init = (async () => {
 
   const spinAround = new SpinAroundEntity();
   const character = new Entity(PIXIAssets.get('character'));
+
   // TODO: do a mild refactor here.., 
   // would be nice to syntactically have character.addBehavior<CenterEntity>()
-  // this is not C# though, using a direct approach for now
+    // this is not C# though, using a direct approach for now
   character.addBehavior(new CenterEntity());
   character.addBehavior(spinAround);
 
@@ -59,7 +60,8 @@ export const init = (async () => {
   // }, 2000);
 });
 
-// These files are also pretranspiled for direct use in the browser.
+// if we are loading this in moxi-edit, we can call the init function directly.
+// this is because the file is also pretranspiled for direct use in the browser.
 if ((window as any).moxiedit) {
   init();
 }

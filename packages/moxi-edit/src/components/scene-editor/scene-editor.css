@@ -1,0 +1,6 @@
+.texture-viewer {
+  height: 100%;
+  width: 100%;
+  overflow-x: auto;
+  color: #333;
+}

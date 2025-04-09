@@ -60,7 +60,7 @@ export const Code4Editor = ({
     window.addEventListener('error', (ev) => {
       const { error } = ev;
       setLastError(ev);
-      console.log('error', error);
+      console.log('error', ev);
     }, true);
   }, []);
 
@@ -73,13 +73,19 @@ export const Code4Editor = ({
     if(!editorCompilerOptions) return;
     const { iframeCode } = transpileTypescript(codeText, editorCompilerOptions);
     const srcDoc = getHostHtml({ code: iframeCode });
-    iframeRef.srcdoc = '';
+
+    // TODO: this is brute force nonsense.
+    // I really need to do a navigate or something to trigger a window unload event.
+    iframeRef.srcdoc = ''; 
+    
     trueDebounce(() => {
       iframeRef.srcdoc = srcDoc;
     }, 500);
+
     if (onCodeChange) {
       onCodeChange(file, codeText);
     }
+    
     setRenderId(renderId + 1);
   }, [codeText, editorCompilerOptions]);
 

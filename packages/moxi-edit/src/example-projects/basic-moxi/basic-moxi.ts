@@ -40,7 +40,8 @@ export const init = (async () => {
   engine.start();
 });
 
-// These files are also pretranspiled for direct use in the browser.
+// if we are loading this in moxi-edit, we can call the init function directly.
+// this is because the file is also pretranspiled for direct use in the browser.
 if((window as any).moxiedit) {
   init();
 }

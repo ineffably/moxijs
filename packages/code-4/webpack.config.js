@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const outDir = 'lib';
+const outDir = 'lib';  
 
 module.exports = (env, argv) => {
   const { mode = 'development' } = argv;

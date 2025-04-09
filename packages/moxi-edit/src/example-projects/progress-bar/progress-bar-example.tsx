@@ -143,13 +143,16 @@ export const init = (async () => {
   
   // TODO: move this to moxi-edit, it should not be in moxi
   await loadFonts();
+
   const moxiProgressBar = new Entity();
+  
   const bitmapOverrides = { 
     fontSize: 32, 
     align: 'center',
     fill: 'black' 
    } as Partial<TextStyle>;
-  const barOptions = { 
+
+   const barOptions = { 
     backgroundColor: 'silver',
     color: 'green',
     barHeight: 55,
@@ -165,7 +168,6 @@ export const init = (async () => {
   
   scene.addChild(moxiProgressBar);
   scene.init(); // Initialize the scene to ensure all entities are ready for updates and rendering
-
   engine.start();
 });
 

@@ -8,6 +8,14 @@ export interface PrepareArgs {
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
 }
 
+export interface PrepMoxyResult {
+  scene: Scene;
+  engine: Engine;
+  PIXIAssets: AssetLoader['PIXIAssets'];
+  renderer: PIXI.Renderer;
+  loadAssets: AssetLoader['loadAssets'];
+}
+
 export const defaultRenderOptions = { width: 1280, height: 720, backgroundColor: 0x1099bb } as Partial<PIXI.AutoDetectOptions>;
 
 export async function prepMoxi({ hostElement, renderOptions = defaultRenderOptions } = {} as PrepareArgs) {
@@ -20,6 +28,7 @@ export async function prepMoxi({ hostElement, renderOptions = defaultRenderOptio
     scene,
     engine,
     PIXIAssets,
+    renderer,
     loadAssets
   };
 }

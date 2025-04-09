@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { EditorRoot } from './components/editor-root';
+import { EditorRoot } from './page/editor-root';
 
 (window as any).appLoaded = true;
 

@@ -27,24 +27,24 @@ export class RenderManager {
   }
 
   onResize = () => {
-    const { renderer, htmlRoot: root } = this;
-    const canvas = renderer.canvas;
-    const h = root.clientHeight;
-    const w = root.clientWidth;
+    // const { renderer, htmlRoot: root } = this;
+    // const canvas = renderer.canvas;
+    // const h = root.clientHeight;
+    // const w = root.clientWidth;
     
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    canvas.width = w;
-    canvas.height = h;
-    renderer.resize(w, h);
+    // canvas.style.width = w + 'px';
+    // canvas.style.height = h + 'px';
+    // canvas.width = w;
+    // canvas.height = h;
+    // renderer.resize(w, h);
 
-    if (this.fitToWindow) {
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      canvas.width = w;
-      canvas.height = h;
-      renderer.resize(w, h);
-    }
+    // if (this.fitToWindow) {
+    //   canvas.style.width = w + 'px';
+    //   canvas.style.height = h + 'px';
+    //   canvas.width = w;
+    //   canvas.height = h;
+    //   renderer.resize(w, h);
+    // }
 
   };
 }

@@ -7,6 +7,7 @@ import { FileSpec } from '../types';
 import { getHostHtml } from '../library/host-html';
 import { CompilerOptions } from 'typescript';
 import { requireIntercept } from '../library/require-intercept';
+import { trueDebounce } from '../library/debounce';
 
 export interface Code4UIProps {
   extraLibsPlugin?: (d: languages.typescript.LanguageServiceDefaults) => void;
@@ -72,7 +73,10 @@ export const Code4Editor = ({
     if(!editorCompilerOptions) return;
     const { iframeCode } = transpileTypescript(codeText, editorCompilerOptions);
     const srcDoc = getHostHtml({ code: iframeCode });
-    iframeRef.srcdoc = srcDoc;
+    iframeRef.srcdoc = '';
+    trueDebounce(() => {
+      iframeRef.srcdoc = srcDoc;
+    }, 500);
     if (onCodeChange) {
       onCodeChange(file, codeText);
     }
@@ -86,7 +90,9 @@ export const Code4Editor = ({
       language="typescript"
       value={codeText}
       onChange={(value) => {
-        setCodeText(value);
+        trueDebounce(() => {
+          setCodeText(value);
+        }, 1000);
       }}
       options={{ automaticLayout: true }}
       onMount={(editor, monaco) => {

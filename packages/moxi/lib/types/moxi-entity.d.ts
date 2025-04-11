@@ -18,7 +18,7 @@ export declare class MoxiEntity<T> implements MoxiEntityClass<T> {
     update(deltaTime: number): void;
     init(renderer: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]): void;
     addBehavior(behavior: Behavior<T>): void;
-    getBehavior<T>(name: string): T;
+    getBehavior<B extends Behavior<T>>(name: string): B | undefined;
 }
 export declare function asEntity<T extends PIXI.Container>(entity: T, behaviors?: MoxiBehaviors<T>): AsEntity<T>;
 export {};

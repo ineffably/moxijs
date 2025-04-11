@@ -93,7 +93,6 @@ export class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
        (height / 3) - barHeight / 2
     );
     
-    console.log('ProgressBar initialized with options:', this.options);
   }
 
   update(entity: PIXI.Sprite, deltaTime: number) {

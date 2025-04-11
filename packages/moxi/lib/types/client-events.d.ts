@@ -10,14 +10,14 @@ export declare class ClientEvents {
     lastMouseDown: MouseEvent;
     lastMouseUp: MouseEvent;
     keyDownEvent: KeyboardEvent;
-    keyUpEvent: any;
-    keydown: any;
+    keyUpEvent: KeyboardEvent;
+    keydown: Record<string, KeyboardEvent>;
     wheelOffets: Point;
     movePosition: Point;
     lastMovePosition: Point;
     moveDelta: Point;
     static instance: ClientEvents;
     constructor({ initWheelOffset, onAnyEvent }?: ClientEventsArgs);
-    isKeyDown(key: string): any;
+    isKeyDown(key: string): boolean;
     isKeyUp(key: string): boolean;
 }

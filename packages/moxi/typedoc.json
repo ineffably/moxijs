@@ -1,0 +1,28 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs",
+  "name": "Moxi",
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "includeVersion": true,
+  "theme": "default",
+  "plugin": ["typedoc-plugin-markdown"],
+  "hideGenerator": true,
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Core",
+    "Entities",
+    "Behaviors",
+    "Utils"
+  ],
+  "sort": [
+    "source-order",
+    "alphabetical"
+  ],
+  "searchInComments": true,
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  }
+} 

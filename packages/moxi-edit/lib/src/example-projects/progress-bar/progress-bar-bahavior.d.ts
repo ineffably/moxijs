@@ -18,7 +18,7 @@ export interface TextStyle {
     maxWidth?: number;
 }
 export declare const defaultProgressBarOptions: ProgressBarOptions;
-export declare class ProgressBarBehavior extends Behavior {
+export declare class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
     options: ProgressBarOptions;
     graphics: PIXI.Graphics;
     backgroundBar: PIXI.Graphics;
@@ -28,6 +28,6 @@ export declare class ProgressBarBehavior extends Behavior {
     value: number;
     constructor(options?: ProgressBarOptions);
     setValue(value: number): void;
-    init(renderer: PIXI.Renderer<HTMLCanvasElement>): void;
-    update(deltaTime: number): void;
+    init(entity: PIXI.Sprite, renderer: PIXI.Renderer<HTMLCanvasElement>): void;
+    update(entity: PIXI.Sprite, deltaTime: number): void;
 }

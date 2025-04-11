@@ -14,7 +14,7 @@ import clientEvents from '!raw-loader!../../../moxi/lib/types/client-events.d.ts
 // @ts-ignore
 import engine from '!raw-loader!../../../moxi/lib/types/engine.d.ts';
 // @ts-ignore
-import entity from '!raw-loader!../../../moxi/lib/types/entity.d.ts';
+import entity from '!raw-loader!../../../moxi/lib/types/moxi-entity.d.ts';
 // @ts-ignore
 import index from '!raw-loader!../../../moxi/lib/types/index.d.ts';
 // @ts-ignore

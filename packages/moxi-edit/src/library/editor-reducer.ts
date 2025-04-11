@@ -2,7 +2,6 @@ import { putLocalData } from './local-data';
 import { EditorState, ReducerActions } from '../types/editor-types';
 
 const persistState = (state: EditorState) => {
-  // console.log('==> PersistState:', state);
   const { activeProject } = state;
   putLocalData('moxi-editor', { activeProject });
   return state;

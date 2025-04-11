@@ -1,24 +1,15 @@
-import { Entity } from './entity';
+import { PIXI } from '.';
 
-export abstract class Behavior {
-  entity: Entity;
+export abstract class Behavior<T> {
   active: boolean = true;
   
-  constructor(entity?: Entity) {
-    if(entity){
-      this.entity = entity;
-    }
+  init(entity?: T, renderer?: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]) {
+    // Implement in subclass
   }
 
-  setEntity(entity: Entity) {
-    this.entity = entity;
-  }
-
-  init(...args) {}
-
-  update(deltaTime: number, entity?: Entity) {
+  update(entity?: T, deltaTime?: number) {
     // Implement in subclass
   }
 }
 
-export class InstancedBehavior extends Behavior {}
+export class InstancedBehavior<T> extends Behavior<T> {}

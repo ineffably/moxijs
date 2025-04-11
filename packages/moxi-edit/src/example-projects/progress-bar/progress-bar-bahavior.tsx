@@ -36,7 +36,7 @@ export const defaultProgressBarOptions: ProgressBarOptions = {
   }
 };
 
-export class ProgressBarBehavior extends Behavior {
+export class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
   graphics: PIXI.Graphics;
   backgroundBar: PIXI.Graphics; // the background bar
   forgroundBar: PIXI.Graphics; // the actual bar that will be drawn
@@ -60,9 +60,8 @@ export class ProgressBarBehavior extends Behavior {
     this.value = value;
   }
 
-  init(renderer: PIXI.Renderer<HTMLCanvasElement>) {
+  init(entity: PIXI.Sprite, renderer: PIXI.Renderer<HTMLCanvasElement>) {
     const { width, height } = renderer.view.canvas;
-    const { entity } = this; // get the entity this behavior is attached to
     const { backgroundColor, color, barWidth, barHeight, barPadding, bitmapText } = this.options;
     const padding = new Point(barPadding.x, barPadding.y);
 
@@ -97,7 +96,7 @@ export class ProgressBarBehavior extends Behavior {
     console.log('ProgressBar initialized with options:', this.options);
   }
 
-  update(deltaTime: number) {
+  update(entity: PIXI.Sprite, deltaTime: number) {
     const {
       max,
       barWidth,

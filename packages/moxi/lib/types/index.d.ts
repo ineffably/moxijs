@@ -1,7 +1,6 @@
 import * as utils from './utils';
 import PIXI, { Point } from 'pixi.js';
 import { RenderManager } from './render-manager';
-import { Entity } from './entity';
 import { Scene } from './scene';
 import { Engine } from './engine';
 import { ClientEvents } from './client-events';
@@ -9,6 +8,7 @@ import { AssetLoader } from './asset-loader';
 import { Behavior } from './bahavior';
 import { defaultRenderOptions, prepMoxi } from './prepare';
 import { loadFonts } from './font-loader';
+import { asEntity, MoxiEntity } from './moxi-entity';
 export type Asset = {
     src: string;
     alias?: string;
@@ -42,7 +42,8 @@ declare const exportedObjects: {
     utils: typeof utils;
     PIXI: typeof PIXI;
     RenderManager: typeof RenderManager;
-    Entity: typeof Entity;
+    asEntity: typeof asEntity;
+    MoxiEntity: typeof MoxiEntity;
     Scene: typeof Scene;
     Engine: typeof Engine;
     ClientEvents: typeof ClientEvents;
@@ -52,4 +53,4 @@ declare const exportedObjects: {
     prepMoxi: typeof prepMoxi;
 };
 export default exportedObjects;
-export { loadFonts, utils, PIXI, RenderManager, Entity, Scene, Engine, ClientEvents, AssetLoader, Behavior, defaultRenderOptions, prepMoxi };
+export { loadFonts, utils, PIXI, RenderManager, asEntity, Scene, Engine, ClientEvents, AssetLoader, Behavior, defaultRenderOptions, prepMoxi };

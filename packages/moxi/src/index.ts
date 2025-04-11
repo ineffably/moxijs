@@ -1,8 +1,6 @@
 import * as utils from './utils';
 import PIXI, { Point } from 'pixi.js';
-
 import { RenderManager } from './render-manager';
-import { Entity } from './entity';
 import { Scene } from './scene';
 import { Engine } from './engine';
 import { ClientEvents } from './client-events';
@@ -10,6 +8,8 @@ import { AssetLoader } from './asset-loader';
 import { Behavior } from './bahavior';
 import { defaultRenderOptions, prepMoxi } from './prepare';
 import { loadFonts } from './font-loader';
+import { asEntity, MoxiEntity } from './moxi-entity';
+
 export type Asset = { src: string, alias?: string };
 
 export interface OnEvent {
@@ -39,7 +39,8 @@ const exportedObjects = {
   utils,
   PIXI,
   RenderManager,
-  Entity,
+  asEntity,
+  MoxiEntity,
   Scene,
   Engine,
   ClientEvents,
@@ -56,7 +57,7 @@ export {
   utils,
   PIXI,
   RenderManager,
-  Entity,
+  asEntity,
   Scene,
   Engine,
   ClientEvents,

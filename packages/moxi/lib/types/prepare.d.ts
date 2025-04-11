@@ -1,4 +1,4 @@
-import { AssetLoader, PIXI } from '.';
+import { AssetLoader, Camera, PIXI } from '.';
 import { Engine } from './engine';
 import { Scene } from './scene';
 export interface PrepareArgs {
@@ -19,4 +19,5 @@ export declare function prepMoxi({ hostElement, renderOptions }?: PrepareArgs): 
     PIXIAssets: PIXI.AssetsClass;
     renderer: PIXI.Renderer<HTMLCanvasElement>;
     loadAssets: (assets: import(".").Asset[]) => Promise<AssetLoader>;
+    camera: Camera;
 }>;

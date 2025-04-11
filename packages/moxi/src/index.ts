@@ -9,6 +9,7 @@ import { Behavior } from './bahavior';
 import { defaultRenderOptions, prepMoxi } from './prepare';
 import { loadFonts } from './font-loader';
 import { asEntity, MoxiEntity } from './moxi-entity';
+import { Camera, CameraBehavior } from './camera';
 
 export type Asset = { src: string, alias?: string };
 
@@ -47,7 +48,9 @@ const exportedObjects = {
   AssetLoader,
   Behavior,
   defaultRenderOptions,
-  prepMoxi
+  prepMoxi,
+  Camera,
+  CameraBehavior
 };
 
 export default exportedObjects;
@@ -64,6 +67,7 @@ export {
   AssetLoader,
   Behavior,
   defaultRenderOptions,
-  prepMoxi
+  prepMoxi,
+  Camera
 };
 

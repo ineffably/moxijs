@@ -2,10 +2,7 @@ import PIXI from 'pixi.js';
 import { AsEntity } from './moxi-entity';
 
 function isMoxiEntity(entity: any): entity is AsEntity<any> {
-  if(entity?.moxiEntity) {
-    return true;
-  }
-  return false;
+  return Boolean(entity?.moxiEntity);
 }
 
 export class Scene extends PIXI.Container {

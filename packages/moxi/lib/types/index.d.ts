@@ -9,6 +9,7 @@ import { Behavior } from './bahavior';
 import { defaultRenderOptions, prepMoxi } from './prepare';
 import { loadFonts } from './font-loader';
 import { asEntity, MoxiEntity } from './moxi-entity';
+import { Camera, CameraBehavior } from './camera';
 export type Asset = {
     src: string;
     alias?: string;
@@ -51,6 +52,8 @@ declare const exportedObjects: {
     Behavior: typeof Behavior;
     defaultRenderOptions: Partial<PIXI.AutoDetectOptions>;
     prepMoxi: typeof prepMoxi;
+    Camera: typeof Camera;
+    CameraBehavior: typeof CameraBehavior;
 };
 export default exportedObjects;
-export { loadFonts, utils, PIXI, RenderManager, asEntity, Scene, Engine, ClientEvents, AssetLoader, Behavior, defaultRenderOptions, prepMoxi };
+export { loadFonts, utils, PIXI, RenderManager, asEntity, Scene, Engine, ClientEvents, AssetLoader, Behavior, defaultRenderOptions, prepMoxi, Camera };

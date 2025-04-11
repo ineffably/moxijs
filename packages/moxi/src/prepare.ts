@@ -1,4 +1,4 @@
-import { AssetLoader, PIXI } from '.';
+import { AssetLoader, Camera, PIXI } from '.';
 import { Engine } from './engine';
 import { RenderManager } from './render-manager';
 import { Scene } from './scene';
@@ -23,13 +23,15 @@ export async function prepMoxi({ hostElement, renderOptions = defaultRenderOptio
   const scene = new Scene(renderer);
   const engine = new Engine(scene);
   const { PIXIAssets, loadAssets } = new AssetLoader();
+  const camera = new Camera(scene, renderer);
 
   return {
     scene,
     engine,
     PIXIAssets,
     renderer,
-    loadAssets
+    loadAssets,
+    camera
   };
 }
 

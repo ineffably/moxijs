@@ -13,19 +13,17 @@ export const loadFonts = async () => {
   // using fontfaceobserver allows us ensure the font is loaded before using configuration for bitmap fonts.
   const fontKenfutureThin = new FontFaceObserver('kenfuture-thin');
 
-
-  return new Promise((resolve, reject) => {
+  // PIXI.BitmapFont.from will create a bitmap font from a font-face and TextStyle configuration
+  // Using a Bitmapfont allows for better performance when rapidly changing rendered text.
+  return new Promise((resolve) => {
     fontKenfutureThin.load().then(() => {
-      // PIXI.BitmapFont.from will create a bitmap font from a font-face and TextStyle configuration
-      // Using a Bitmapfont allows for better performance when rapidly changing rendered text.
       BitmapFont.install({
         name: 'kenfuture-thin',
         style: {
           fontFamily: 'kenfuture-thin'
         }
       });
-      
-      resolve({ });
+      resolve({ fontKenfutureThin });
     });
   });
 }

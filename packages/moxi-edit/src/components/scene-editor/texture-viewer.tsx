@@ -12,4 +12,5 @@ export const TextureViewer = ({ assets }: {assets: Texture[]}) => {
     })}
     </div>
   </div>;
-}
+};
+

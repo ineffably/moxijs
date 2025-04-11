@@ -1,4 +1,4 @@
-import { Behavior, Entity, loadFonts, prepMoxi } from 'moxi';
+import { Behavior, asEntity, loadFonts, prepMoxi } from 'moxi';
 import PIXI, { Point, BitmapText } from 'pixi.js';
 
 export interface ProgressBarOptions {
@@ -36,7 +36,7 @@ export const defaultProgressBarOptions: ProgressBarOptions = {
   }
 };
 
-export class ProgressBarBehavior extends Behavior {
+export class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
   graphics: PIXI.Graphics;
   backgroundBar: PIXI.Graphics; // the background bar
   forgroundBar: PIXI.Graphics; // the actual bar that will be drawn
@@ -60,9 +60,8 @@ export class ProgressBarBehavior extends Behavior {
     this.value = value;
   }
 
-  init(renderer: PIXI.Renderer<HTMLCanvasElement>) {
+  init(entity: PIXI.Sprite, renderer: PIXI.Renderer<HTMLCanvasElement>) {
     const { width, height } = renderer.view.canvas;
-    const { entity } = this; // get the entity this behavior is attached to
     const { backgroundColor, color, barWidth, barHeight, barPadding, bitmapText } = this.options;
     const padding = new Point(barPadding.x, barPadding.y);
 
@@ -97,10 +96,9 @@ export class ProgressBarBehavior extends Behavior {
        (height / 3) - barHeight / 2
     );
     
-    console.log('ProgressBar initialized with options:', this.options);
   }
 
-  update(deltaTime: number) {
+  update(entity: PIXI.Sprite, deltaTime: number) {
     const {
       max,
       barWidth,
@@ -109,6 +107,7 @@ export class ProgressBarBehavior extends Behavior {
       backgroundColor,
       barPadding
     } = this.options;
+
     const padding = new Point(barPadding.x, barPadding.y);
 
     const paddedWidth = (barWidth - padding.x * 2);
@@ -144,8 +143,8 @@ export const init = (async () => {
   // TODO: move this to moxi-edit, it should not be in moxi
   await loadFonts();
 
-  const moxiProgressBar = new Entity();
-  
+  const moxiProgressBar = asEntity<PIXI.Container>(new PIXI.Container());
+    
   const bitmapOverrides = { 
     fontSize: 32, 
     align: 'center',
@@ -162,7 +161,7 @@ export const init = (async () => {
     }
   } as ProgressBarOptions;
   
-  moxiProgressBar.addBehavior(
+  moxiProgressBar.moxiEntity.addBehavior(
     new ProgressBarBehavior({...defaultProgressBarOptions, ...barOptions } as ProgressBarOptions)
   );
   

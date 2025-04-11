@@ -7,7 +7,7 @@ import { EditorState, MoxiProjectSchema } from '../types/editor-types';
 import { getLocalData } from '../library/local-data';
 import { Route, Router } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
-import { ProjectPlayer } from '../components/project-player';
+import { ProjectPlayer } from './project-player';
 import { project } from '../example-projects/progress-bar'; // Change this to any example project you want to use as a default for the editor root.
 
 import '@ant-design/v5-patch-for-react-19';

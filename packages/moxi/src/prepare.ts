@@ -8,7 +8,7 @@ export interface PrepareArgs {
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
 }
 
-export interface PrepMoxyResult {
+export interface PrepMoxiResult {
   scene: Scene;
   engine: Engine;
   PIXIAssets: AssetLoader['PIXIAssets'];

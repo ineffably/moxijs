@@ -16,7 +16,6 @@
     "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=code-4\"",
     "editor": "npm run local --workspace=moxi-edit",
     "local": "npm run editor"
-
   },
   "keywords": [],
   "author": "",

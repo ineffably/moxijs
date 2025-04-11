@@ -1,11 +1,8 @@
-import { Entity } from './entity';
-export declare abstract class Behavior {
-    entity: Entity;
+import { PIXI } from '.';
+export declare abstract class Behavior<T> {
     active: boolean;
-    constructor(entity?: Entity);
-    setEntity(entity: Entity): void;
-    init(...args: any[]): void;
-    update(deltaTime: number, entity?: Entity): void;
+    init(entity?: T, renderer?: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]): void;
+    update(entity?: T, deltaTime?: number): void;
 }
-export declare class InstancedBehavior extends Behavior {
+export declare class InstancedBehavior<T> extends Behavior<T> {
 }

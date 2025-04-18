@@ -67,8 +67,8 @@ no written mvp, no docs yet, it's very fluid
 ## Project Structure
 
 - **packages/moxi**: Core engine with Entity-Component System
-- **packages/moxi-edit**: Real-time editor for building and testing Moxi applications
-- **packages/moxi-behaviors**: (Coming soon) Collection of behaviors for common game mechanics
+- **packages/code-4**: In-browser light weight code editor with easy abilty to add external libs
+- **packages/moxi-edit**: Project and scene editor for building and testing MOXI based experiences
 
 ## Development Status
 
@@ -77,9 +77,12 @@ This project is in active prototype development. The API may change significantl
 ## Getting Started
 
 1. Clone the repository
-2. Install dependencies: `npm install`
-3. Build the packages: `npm run build:clean`
-4. Run the editor: `npm run editor`
+1. Install dependencies: `npm install`
+1. Build the packages: `npm run build:clean`
+1. Watch the core deps: `npm run watch`
+1. Run the editor: `npm run editor`
+1. Open browser to https://localhost:8788/
+1. Play, code, explore.
 
 ## License
 

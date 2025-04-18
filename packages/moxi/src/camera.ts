@@ -53,28 +53,43 @@ export class CameraBehavior extends Behavior<PIXI.Container> {
     const { speed } = this;
     const deltaSpeed = Math.min(deltaTime * speed, 1);
 
-    // Update desired position if camera has a target
-    if (this.target) {
-      const pos = this.target.position;
-      entity.desiredPosition.set(pos.x - this.renderer.width / 2, pos.y - this.renderer.height / 2)
-    }
-
-    // Interpolate scale values
+    // Interpolate scale values first
     if (entity.desiredScale !== entity.scale) {
       entity.scale.x = lerp(entity.scale.x, entity.desiredScale.x, deltaSpeed);
       entity.scale.y = lerp(entity.scale.y, entity.desiredScale.y, deltaSpeed);
     }
+    
+    // Update desired position if camera has a target
+    if (this.target) {
+      // In a PIXI.js camera system, we need to position the camera (scene)
+      // so that the target appears centered in the viewport
+      
+      // Get the center of the viewport in screen coordinates
+      const screenCenterX = this.renderer.width / 2;
+      const screenCenterY = this.renderer.height / 2;
+      
+      // Calculate where the scene should be positioned
+      // The formula is: -(targetPosition * scale) + screenCenter
+      // This ensures the target is at the center of the screen
+      const desiredX = -(this.target.position.x * entity.scale.x) + screenCenterX;
+      const desiredY = -(this.target.position.y * entity.scale.y) + screenCenterY;
+      
+      // Set desired position for the scene (using negative values for camera coordinates)
+      entity.desiredPosition.set(-desiredX, -desiredY);
+    }
 
     // Interpolate position values
     if (entity.desiredPosition !== entity.position) {
-      // TODO: create a virtual keyhole that allows the camera to settle in a position
       entity.position.x = lerp(entity.position.x, entity.desiredPosition.x, deltaSpeed);
       entity.position.y = lerp(entity.position.y, entity.desiredPosition.y, deltaSpeed);
     }
     
     // Apply camera transformations to the scene
-    entity.scene.scale.set(entity.desiredScale.x, entity.desiredScale.y);
-    entity.scene.position.set(-entity.desiredPosition.x, -entity.desiredPosition.y);  
+    // In PIXI, the "camera" effect is created by transforming the scene in the opposite direction
+    entity.scene.scale.set(entity.scale.x, entity.scale.y);
+    
+    // Position the scene at the negative of the camera position to create camera movement effect
+    entity.scene.position.set(-entity.position.x, -entity.position.y);
   }
 }
 

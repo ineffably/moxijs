@@ -4,11 +4,10 @@ export const requireIntercept = (userRequireMap = {}) => (moduleName) => {
     // TODO: handle CSS and other modules
     return '';
   }
-  console.log('moduleName', moduleName);
+  
   const reference = (({ ...userRequireMap })[moduleName]);
   if (!reference) {
     console.error(`module for ${moduleName} was not found`);
-    console.log(userRequireMap)
     return null;
   }
 

@@ -1,11 +1,9 @@
-
 import { prepMoxi, asEntity } from 'moxi';
 import PIXI from 'pixi.js';
 
-
 export const init = (async () => {
   const root = document.getElementById('app');
-  const { scene, engine, PIXIAssets, loadAssets } = await prepMoxi({ hostElement: root });
+  const { scene, engine, loadAssets, PIXIAssets } = await prepMoxi({ hostElement: root });
   scene.renderer.background.color = 'green';
 
   const assetList = [
@@ -14,6 +12,7 @@ export const init = (async () => {
   
   await loadAssets(assetList);
 
+  // Get the asset using the getAsset utility function
   const texture = PIXIAssets.get('character');
   const characterSprite = new PIXI.Sprite({ texture });
   characterSprite.eventMode = 'none';

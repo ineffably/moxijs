@@ -1,10 +1,9 @@
-import { prepMoxi, asEntity } from 'moxi';
-import PIXI, { TextureSource } from 'pixi.js';
-import { asTextureFrames } from './texture-frames';
+import { prepMoxi, asEntity, asTextureFrames } from 'moxi';
+import PIXI, { TextureSource } from 'pixi.js';  
 
 export const init = (async () => {
   const root = document.getElementById('app');
-  const { scene, engine, PIXIAssets, loadAssets, camera } = await prepMoxi({ hostElement: root });
+  const { scene, engine, loadAssets, camera, PIXIAssets } = await prepMoxi({ hostElement: root });
   scene.renderer.background.color = 'green';
   scene.renderer.view.antialias = true;
 
@@ -15,30 +14,30 @@ export const init = (async () => {
   
   await loadAssets(assetList);
 
-  camera.desiredScale.set(8, 8);
+  camera.desiredScale.set(4);
   
-  // Get the character sheet texture
+  // Get the character sheet texture using the getAsset utility
   const baseTexture = PIXIAssets.get<TextureSource>('character_sheet');
   const grassSheet = PIXIAssets.get<TextureSource>('simple_grass_sheet');
   baseTexture.source.style.scaleMode = 'nearest';
   grassSheet.source.style.scaleMode = 'nearest';
   
-  const characterFrames = asTextureFrames(baseTexture, { 
-    frameWidth: 48, 
+  const characterFrames = asTextureFrames(PIXI, baseTexture, { 
+    frameWidth: 48,   
     frameHeight: 48, 
     columns: 4, 
       rows: 4 
   });
 
-  const grassFrames = asTextureFrames(grassSheet, {
+  const grassFrames = asTextureFrames(PIXI, grassSheet, {
     frameWidth: 16, 
     frameHeight: 16, 
     columns: 6, 
     rows: 5 
   });
-
   
-  const grassCorner = PIXI.Sprite.from(grassFrames[29]);
+  // Create sprite directly with the texture instead of using Sprite.from()
+  const grassCorner = new PIXI.Sprite(grassFrames[29]);
   grassCorner.scale.set(1);
   scene.addChild(asEntity(grassCorner));
   
@@ -51,4 +50,3 @@ export const init = (async () => {
 if((window as any).moxiedit) {
   init();
 }
-

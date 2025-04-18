@@ -16,7 +16,7 @@ export class RenderManager {
   constructor(htmlRoot: HTMLElement, renderer: PIXI.Renderer) {
     this.htmlRoot = htmlRoot;
     this.renderer = renderer;
-    // console.log('canvas', this.renderer.canvas);
+
     htmlRoot.appendChild(this.renderer.canvas);
     window.addEventListener('resize', () => this.onResize());
     this.onResize();

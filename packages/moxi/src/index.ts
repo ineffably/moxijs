@@ -10,6 +10,7 @@ import { defaultRenderOptions, prepMoxi } from './prepare';
 import { loadFonts } from './font-loader';
 import { asEntity, MoxiEntity } from './moxi-entity';
 import { Camera, CameraBehavior } from './camera';
+import { asTextureFrames, AsTextureFramesOptions } from './texture-frames';
 
 export type Asset = { src: string, alias?: string };
 
@@ -35,39 +36,46 @@ export type ClientEventsType = {
   wheelDelta?: { yValue: 0 | number, xValue: 0 | number, xLast: number, yLast: number }
 }
 
+// Re-export types
+export { AsTextureFramesOptions };
+
 const exportedObjects = {
-  loadFonts,
-  utils,
-  PIXI,
-  RenderManager,
-  asEntity,
-  MoxiEntity,
-  Scene,
-  Engine,
-  ClientEvents,
   AssetLoader,
+  asEntity,
+  asTextureFrames,
   Behavior,
-  defaultRenderOptions,
-  prepMoxi,
   Camera,
-  CameraBehavior
+  CameraBehavior,
+  ClientEvents,
+  defaultRenderOptions,
+  Engine,
+  loadFonts,
+  MoxiEntity,
+  PIXI,
+  prepMoxi,
+  RenderManager,
+  Scene,
+  utils
 };
 
 export default exportedObjects;
 
 export {
-  loadFonts,
-  utils,
-  PIXI,
-  RenderManager,
-  asEntity,
-  Scene,
-  Engine,
-  ClientEvents,
   AssetLoader,
+  asEntity, 
+  asTextureFrames,
   Behavior,
+  Camera,
+  CameraBehavior,
+  ClientEvents,
   defaultRenderOptions,
+  Engine,
+  loadFonts,
+  MoxiEntity,
+  PIXI,
   prepMoxi,
-  Camera
+  RenderManager,
+  Scene,
+  utils
 };
 

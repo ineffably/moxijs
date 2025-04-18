@@ -1,6 +1,6 @@
-import PIXI, { TextureSource } from 'pixi.js';
+import PIXI, { type TextureSource } from 'pixi.js';
 
-interface AsTextureFramesOptions {
+export interface AsTextureFramesOptions {
   frameWidth: number;
   frameHeight: number;
   columns: number;

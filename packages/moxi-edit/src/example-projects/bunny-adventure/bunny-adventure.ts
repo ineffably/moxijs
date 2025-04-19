@@ -148,7 +148,9 @@ export const init = (async () => {
 
   // Make camera follow the player
   // TODO: getBehavior needs to be more convenient
-  camera.moxiEntity.getBehavior<CameraBehavior>('CameraBehavior').target = bunny;
+  const cameraBehavior = camera.moxiEntity.getBehavior<CameraBehavior>('CameraBehavior');
+  console.log('cameraBehavior', cameraBehavior);
+  cameraBehavior.target = bunny;
 
   // Initialize and start
   scene.init();

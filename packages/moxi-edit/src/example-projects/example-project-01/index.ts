@@ -2,8 +2,8 @@
 import exampleProject01Example from '!raw-loader!./example-project-01';
 
 export const project = {
-  name: 'Template Project',
-  description: 'This is a template project for creating new projects in moxi-edit.',
+  name: 'Example Project 01',
+  description: 'This is an example project 01 for moxi-edit.',
   files: {
     'index.ts': {
       name: 'index.ts',

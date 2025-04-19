@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const outDir = 'lib';  
 
 module.exports = (env, argv) => {
@@ -16,6 +17,9 @@ module.exports = (env, argv) => {
       library: { name: 'code4', type: 'umd' }
     },
     externals: {
+      'typescript': 'typescript',
+      'react': 'React',
+      'react-dom': 'ReactDOM',
       react: {
         root: 'React',
         commonjs2: 'react',
@@ -51,6 +55,17 @@ module.exports = (env, argv) => {
       new MonacoWebpackPlugin({
         languages: ['javascript', 'typescript', 'json', 'css', 'html']
       }),
+      new BundleStatsWebpackPlugin({
+        stats: {
+          assets: true, 
+          chunks: true,
+          modules: true,
+          timings: true,
+          version: true,
+          warnings: true,
+          colors: true, 
+        }
+      })
     ]
   })
 }

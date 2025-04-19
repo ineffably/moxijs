@@ -12,7 +12,7 @@ import { project } from '../example-projects/progress-bar'; // Change this to an
 
 import '@ant-design/v5-patch-for-react-19';
 import 'antd/dist/reset.css';
-
+import './editor-root.css';
 const { Title } = Typography;
 
 const testProject = project as MoxiProjectSchema;
@@ -65,8 +65,9 @@ export const EditorRoot = () => {
     >
       <ConfigProvider
         theme={{
-          algorithm: [theme.defaultAlgorithm],
+          // algorithm: [theme.defaultAlgorithm],
           // algorithm: [theme.darkAlgorithm, theme.compactAlgorithm],
+          algorithm: [theme.darkAlgorithm],
         }}
       >
         <Router hook={useHashLocation}>

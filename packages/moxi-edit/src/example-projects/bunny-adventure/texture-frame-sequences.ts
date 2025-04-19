@@ -2,7 +2,7 @@ import PIXI from 'pixi.js';
 
 export interface SequenceInfo {
   frames: number[];
-  speed: number;
+  animationSpeed: number;
 }
 
 // export type PIXITextureSource = PIXI.Texture<PIXI.TextureSource<any>>;
@@ -16,10 +16,10 @@ export class TextureFrameSequences {
     this.sequences = sequences;
   }
 
-  addSequence(name: string, numbers: number[], speed: number = 1) {
+  addSequence(name: string, numbers: number[], animationSpeed: number = 1) {
     this.sequences[name] = {
       frames: numbers,
-      speed: speed
+      animationSpeed
     };
   }
 

@@ -1,6 +1,6 @@
 import { prepMoxi, asEntity, CameraBehavior, asTextureFrames } from 'moxi';
 import PIXI from 'pixi.js';
-import { MovementBehavior } from './movement-behavior';
+import { PlayerMovementBehavior } from './player-movement-behavior';
 import { createTileGrid, getTextureRange } from './grid-generator';
 import { TextureFrameSequences } from './texture-frame-sequences';
 import { SequenceInfo } from './texture-frame-sequences';
@@ -94,17 +94,17 @@ export const init = (async () => {
   const animationSpeed = 12;
 
   const frameSequences: Record<string, SequenceInfo> = {
-    idleDown: { frames: [0, 1], speed: animationSpeed },
-    walkDown: { frames: [2, 3], speed: animationSpeed },
+    idleDown: { frames: [0, 1], animationSpeed: animationSpeed },
+    walkDown: { frames: [2, 3], animationSpeed: animationSpeed },
 
-    idleUp: { frames: [4, 6], speed: animationSpeed },
-    walkUp: { frames: [6, 7], speed: animationSpeed },
+    idleUp: { frames: [4, 6], animationSpeed: animationSpeed },
+    walkUp: { frames: [6, 7], animationSpeed: animationSpeed },
 
-    idleLeft: { frames: [8, 9], speed: animationSpeed },
-    walkLeft: { frames: [10, 11], speed: animationSpeed },
+    idleLeft: { frames: [8, 9], animationSpeed: animationSpeed },
+    walkLeft: { frames: [10, 11], animationSpeed: animationSpeed },
 
-    idleRight: { frames: [12, 13], speed: animationSpeed },
-    walkRight: { frames: [14, 15], speed: animationSpeed }
+    idleRight: { frames: [12, 13], animationSpeed: animationSpeed },
+    walkRight: { frames: [14, 15], animationSpeed: animationSpeed }
   };
 
   // Get the last 12 frames of grassFrames for variety
@@ -133,7 +133,7 @@ export const init = (async () => {
   const bunnyEntity = asEntity<PIXI.AnimatedSprite>(bunny);
 
   // Create and initialize the movement behavior with custom options
-  const movementBehavior = new MovementBehavior({
+  const movementBehavior = new PlayerMovementBehavior({
     speed: 2.5,
   }, textureFrameSequences);
 

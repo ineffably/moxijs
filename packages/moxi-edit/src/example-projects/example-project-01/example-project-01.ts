@@ -1,5 +1,5 @@
 import { prepMoxi, asEntity, asTextureFrames } from 'moxi';
-import PIXI, { TextureSource } from 'pixi.js';  
+import PIXI from 'pixi.js';  
 
 export const init = (async () => {
   const root = document.getElementById('app');
@@ -17,8 +17,8 @@ export const init = (async () => {
   camera.desiredScale.set(4);
   
   // Get the character sheet texture using the getAsset utility
-  const baseTexture = PIXIAssets.get<TextureSource>('character_sheet');
-  const grassSheet = PIXIAssets.get<TextureSource>('simple_grass_sheet');
+  const baseTexture = PIXIAssets.get<PIXI.TextureSource>('character_sheet');
+  const grassSheet = PIXIAssets.get<PIXI.TextureSource>('simple_grass_sheet');
   baseTexture.source.style.scaleMode = 'nearest';
   grassSheet.source.style.scaleMode = 'nearest';
   

@@ -1,4 +1,4 @@
-import PIXI, { Ticker } from 'pixi.js';
+import PIXI from 'pixi.js';
 import { Scene } from './scene';
 export declare class Engine {
     ticker: PIXI.Ticker;
@@ -9,6 +9,6 @@ export declare class Engine {
     constructor(stage?: Scene);
     start(): this;
     stop(): this;
-    gameLoop: (tikerTime: Ticker) => void;
+    gameLoop: (tikerTime: PIXI.Ticker) => void;
     loadStage(stage: Scene): this;
 }

@@ -1,7 +1,7 @@
 import { prepMoxi } from 'moxi';
 import { useEffect, useRef, useState } from 'react';
 import spaceAssets from '../../../assets/space-assets.json';
-import type { Texture } from 'pixi.js';
+import PIXI from 'pixi.js';
 import { EditorLayout } from './editor-layout';
 
 import './scene-editor.css';
@@ -17,7 +17,7 @@ export const SceneEditor = () => {
   const sceneRef = useRef(null);
   const [scene, setScene] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [textures, setTextures] = useState<Texture[]>([]);
+  const [textures, setTextures] = useState<PIXI.Texture[]>([]);
 
   useEffect(() => {
     (async () => {

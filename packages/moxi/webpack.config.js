@@ -1,16 +1,13 @@
 const webpack = require('webpack');
 const path = require('path');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const outDir = 'lib';
-// const DtsBundleWebpack = require('dts-bundle-webpack');
-// const rootDir = path.resolve(__dirname);
 
 module.exports = (env, argv) => {
   const { mode = 'development' } = argv;
-  const devtool = mode === 'production' ? false : 'inline-source-map';
 
-  return {
+  const config = {
     mode,
-    devtool,
     entry: './src/index.ts',
     output: {
       path: path.join(__dirname, outDir),
@@ -37,13 +34,23 @@ module.exports = (env, argv) => {
       extensions: ['.tsx', '.ts', '.js']
     },
     plugins: [
-      // new DtsBundleWebpack({ options: {
-      //   name: 'moxi',
-      //   main: path.resolve(rootDir, '/lib/types/**/*.d.ts'),
-      //   out: path.resolve(rootDir, '/lib/moxi.d.ts'),
-      //   removeSource: true,
-      //   outputAsModuleFolder: true
-      // } })
+      new BundleStatsWebpackPlugin({
+        stats: {
+          assets: true, 
+          chunks: true,
+          modules: true,
+          timings: true,
+          version: true,
+          warnings: true,
+          colors: true, 
+        }
+      })
     ]
   }
+
+  if (mode === 'development') {
+    config.devtool = 'inline-source-map';
+  }
+
+  return config;
 }

@@ -1,4 +1,4 @@
-import { AssetLoader, Camera, PIXI } from '.';
+import { AssetLoader, Camera, CameraBehavior, PIXI } from '.';
 import { Engine } from './engine';
 import { RenderManager } from './render-manager';
 import { Scene } from './scene';

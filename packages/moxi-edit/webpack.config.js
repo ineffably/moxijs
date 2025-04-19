@@ -1,17 +1,15 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
+
 const outDir = 'lib';
 
 module.exports = (env, argv) => {
   const { mode = 'development' } = argv;
-  const devtool = mode === 'production' ? false : 'inline-source-map';
 
-  return ({
+  const config = {
     mode,
-    devtool,
     entry: './src/index.ts',
     output: {
       path: path.join(__dirname, outDir),
@@ -29,7 +27,6 @@ module.exports = (env, argv) => {
       },
     },
     module: {
-      noParse: [require.resolve("typescript/lib/typescript.js")],
       rules: [
         {
           test: /\.tsx?|.ts?$/,
@@ -43,12 +40,27 @@ module.exports = (env, argv) => {
       ],
     },
     resolve: {
-      plugins: [new TsconfigPathsPlugin({/* options: see below */ })],
       extensions: ['.tsx', '.ts', '.js']
     },
     plugins: [
-      // new MonacoWebpackPlugin(),
       new HtmlWebpackPlugin({ template: path.join(__dirname, './index.html') }),
+      new BundleStatsWebpackPlugin({
+        stats: {
+          assets: true, 
+          chunks: true,
+          modules: true,
+          timings: true,
+          version: true,
+          warnings: true,
+          colors: true, 
+        }
+      })
     ]
-  })
+  }
+
+  if (mode === 'development') {
+    config.devtool = 'inline-source-map';
+  }
+
+  return config;
 }

@@ -1,4 +1,4 @@
-import type { Texture } from 'pixi.js';
+import PIXI from 'pixi.js';
 export declare const TextureViewer: ({ assets }: {
-    assets: Texture[];
+    assets: PIXI.Texture[];
 }) => import("react/jsx-runtime").JSX.Element;

@@ -1,5 +1,5 @@
 import * as utils from './utils';
-import PIXI, { Point } from 'pixi.js';
+import PIXI from 'pixi.js';
 import { RenderManager } from './render-manager';
 import { Scene } from './scene';
 import { Engine } from './engine';
@@ -20,7 +20,7 @@ export interface OnEvent {
     eventType: string;
 }
 export interface ClientEventsArgs {
-    initWheelOffset?: Point;
+    initWheelOffset?: PIXI.Point;
     onAnyEvent?: (ev: OnEvent) => void;
 }
 export type ClientEventsType = {

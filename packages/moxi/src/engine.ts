@@ -1,4 +1,4 @@
-import PIXI, { Ticker } from 'pixi.js';
+import PIXI from 'pixi.js';
 import { Scene } from './scene';
 
 /**
@@ -90,7 +90,7 @@ export class Engine {
    * @param tikerTime - Ticker information including delta time
    * @private
    */
-  gameLoop = (tikerTime: Ticker) => {
+  gameLoop = (tikerTime: PIXI.Ticker) => {
     if (this.root) {
       const { deltaTime } = tikerTime;
       this.root.update(deltaTime);

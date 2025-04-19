@@ -1,6 +1,6 @@
-import type { Texture } from 'pixi.js';
+import PIXI from 'pixi.js';
 
-export const TextureViewer = ({ assets }: {assets: Texture[]}) => {
+export const TextureViewer = ({ assets }: {assets: PIXI.Texture[]}) => {
 
   return <div className="texture-viewer">
     <h1>Texture Viewer</h1>

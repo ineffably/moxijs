@@ -47,7 +47,7 @@ const HomePage = () => {
           <Button 
             block 
             size="large" 
-            onClick={() => navigate('/example/texture-test')}
+            onClick={() => navigate('/example/moxi-progress-bar')}
             type="primary"
           >
             Examples Player

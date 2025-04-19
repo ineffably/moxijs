@@ -1,5 +1,5 @@
-import type PIXI from 'pixi.js';
-import type { TextureSource } from 'pixi.js';
+import PIXI from 'pixi.js';
+
 
 /**
  * Options for creating texture frames from a spritesheet
@@ -45,11 +45,11 @@ const defaultOptions: AsTextureFramesOptions = {
  */
 export function asTextureFrames(
   PIXI,
-  textureSource: TextureSource, 
+  textureSource: PIXI.TextureSource, 
   options: AsTextureFramesOptions = defaultOptions,
-): PIXI.Texture[] {
+): PIXI.Texture<PIXI.TextureSource<any>>[] {
   const { frameWidth, frameHeight, columns, rows } = options;
-  const frames: PIXI.Texture[] = [];
+  const frames: PIXI.Texture<PIXI.TextureSource<any>>[] = [];
 
   // Ensure we're working with a validated texture source
   if (!textureSource) {
@@ -66,11 +66,11 @@ export function asTextureFrames(
       const frametexture = new PIXI.Texture({
         source: textureSource,
         frame: frame,
-      });
+      }) as PIXI.Texture<PIXI.TextureSource<any>>;
       
       frames.push(frametexture);
     }
   }
   
-  return frames;
+  return frames as PIXI.Texture<PIXI.TextureSource<any>>[];
 }

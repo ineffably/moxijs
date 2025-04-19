@@ -1,31 +1,45 @@
 import { Behavior } from 'moxi';
 import PIXI from 'pixi.js';
+import { TextureFrameSequences } from './texture-frame-sequences';
 export declare const DIRECTION: {
-    readonly DOWN: 0;
-    readonly UP: 1;
-    readonly LEFT: 2;
-    readonly RIGHT: 3;
+    readonly DOWN: "down";
+    readonly UP: "up";
+    readonly LEFT: "left";
+    readonly RIGHT: "right";
 };
 export type Direction = typeof DIRECTION[keyof typeof DIRECTION];
+export declare const ANIMATION_STATE: {
+    readonly IDLE: "idle";
+    readonly WALK: "walk";
+};
+export type AnimationState = typeof ANIMATION_STATE[keyof typeof ANIMATION_STATE];
 export interface MovementOptions {
     speed: number;
-    animationSpeed: number;
-    framesPerDirection: number;
     allowDiagonal?: boolean;
 }
 export declare const DEFAULT_MOVEMENT_OPTIONS: MovementOptions;
 export declare class MovementBehavior extends Behavior<PIXI.AnimatedSprite> {
     private clientEvents;
     private direction;
+    private state;
     private moving;
     private animationTimer;
-    private textures;
+    private frameIndex;
     private options;
-    constructor(options?: Partial<MovementOptions>);
-    init(entity: PIXI.AnimatedSprite, renderer: PIXI.Renderer<HTMLCanvasElement>, textures: PIXI.Texture[]): void;
+    private frameSequences;
+    private currentSequenceName;
+    private velocity;
+    constructor(options: Partial<MovementOptions>, frameSequences: TextureFrameSequences);
+    init(entity: PIXI.AnimatedSprite, renderer: PIXI.Renderer<HTMLCanvasElement>): void;
+    private getSequenceKey;
+    private setAnimationState;
+    private getDirectionFromVelocity;
+    private normalizeVelocity;
     update(entity: PIXI.AnimatedSprite, deltaTime: number): void;
     getDirection(): Direction;
+    getAnimationState(): AnimationState;
     isMoving(): boolean;
+    getVelocity(): PIXI.Point;
     private updateAnimation;
     private updateTexture;
 }

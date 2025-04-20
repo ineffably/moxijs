@@ -12,7 +12,7 @@
     "build": "npm run build --workspaces --if-present",
     "build:clean": "npm run build:clean --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
-    "build:prod": "npm run build:prod --workspaces --if-present",
+    "build:dev": "npm run build:dev --workspaces --if-present",
     "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=code-4\"",
     "editor": "npm run local --workspace=moxi-edit",
     "local": "npm run editor"

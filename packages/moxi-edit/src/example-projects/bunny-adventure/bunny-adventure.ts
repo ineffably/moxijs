@@ -91,20 +91,21 @@ export const init = (async () => {
     rows: 5
   });
 
-  const animationSpeed = 12;
+  const walkAnimationSpeed = 12;
+  const idleAnimationSpeed = walkAnimationSpeed + 10;
 
   const frameSequences: Record<string, SequenceInfo> = {
-    idleDown: { frames: [0, 1], animationSpeed: animationSpeed },
-    walkDown: { frames: [2, 3], animationSpeed: animationSpeed },
+    idleDown: { frames: [0, 1], animationSpeed: idleAnimationSpeed },
+    walkDown: { frames: [2, 3], animationSpeed: walkAnimationSpeed },
 
-    idleUp: { frames: [4, 6], animationSpeed: animationSpeed },
-    walkUp: { frames: [6, 7], animationSpeed: animationSpeed },
+    idleUp: { frames: [4, 5], animationSpeed: idleAnimationSpeed },
+    walkUp: { frames: [6, 7], animationSpeed: walkAnimationSpeed },
 
-    idleLeft: { frames: [8, 9], animationSpeed: animationSpeed },
-    walkLeft: { frames: [10, 11], animationSpeed: animationSpeed },
+    idleLeft: { frames: [8, 9], animationSpeed: idleAnimationSpeed },
+    walkLeft: { frames: [10, 11], animationSpeed: walkAnimationSpeed },
 
-    idleRight: { frames: [12, 13], animationSpeed: animationSpeed },
-    walkRight: { frames: [14, 15], animationSpeed: animationSpeed }
+    idleRight: { frames: [12, 13], animationSpeed: idleAnimationSpeed },
+    walkRight: { frames: [14, 15], animationSpeed: walkAnimationSpeed }
   };
 
   // Get the last 12 frames of grassFrames for variety
@@ -134,7 +135,7 @@ export const init = (async () => {
 
   // Create and initialize the movement behavior with custom options
   const movementBehavior = new PlayerMovementBehavior({
-    speed: 2.5,
+    speed: 1.5,
   }, textureFrameSequences);
 
   // Initialize the behavior with the sprite and textures
@@ -148,8 +149,9 @@ export const init = (async () => {
 
   // Make camera follow the player
   // TODO: getBehavior needs to be more convenient
+  // TODO: prod builds: camera behavior is missing or getBahavior does not work.
   const cameraBehavior = camera.moxiEntity.getBehavior<CameraBehavior>('CameraBehavior');
-  console.log('cameraBehavior', cameraBehavior);
+
   cameraBehavior.target = bunny;
 
   // Initialize and start

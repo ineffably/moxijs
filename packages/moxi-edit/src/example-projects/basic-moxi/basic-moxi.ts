@@ -1,15 +1,28 @@
 
-import { Engine, RenderManager, Scene, AssetLoader, prepMoxi, Behavior, asEntity } from 'moxi';
+import { utils, prepMoxi, Behavior, asEntity } from 'moxi';
+const { rad2deg } = utils;
+
 import PIXI from 'pixi.js';
+
+class RotationLabel extends Behavior<PIXI.BitmapText> {
+  targetEntity: PIXI.Sprite = null;
+
+  constructor(targetEntity: PIXI.Sprite) {
+    super();
+    this.targetEntity = targetEntity;
+  }
+
+  update(entity: PIXI.BitmapText) {
+    entity.text = `${(Math.round(rad2deg(this.targetEntity.rotation)) + 90) % 360}`;
+  }
+}
 
 class CharacterBehavior extends Behavior<PIXI.Sprite> {
   update(entity: PIXI.Sprite, deltaTime: number) {
-    super.update(entity, deltaTime);
     entity.rotation += deltaTime * 0.1;
   }
 
   init(entity: PIXI.Sprite, renderer: PIXI.Renderer<HTMLCanvasElement>) {
-    super.init(entity, renderer);
     entity.label = 'roboto';
     const { width, height } = renderer.view.canvas;
     entity.anchor.set(0.5);
@@ -21,22 +34,38 @@ class CharacterBehavior extends Behavior<PIXI.Sprite> {
 export const init = (async () => {
   const root = document.getElementById('app');
   const { scene, engine, PIXIAssets, loadAssets } = await prepMoxi({ hostElement: root });
-  scene.renderer.background.color = 'green';
+  const { renderer } = scene;
+  renderer.background.color = 'green';
 
   const assetList = [
     { src: './assets/character_robot_idle.png', alias: 'character' }
   ];
   
   await loadAssets(assetList);
+  
+  const labelText = new PIXI.BitmapText({
+    text: `${0}`,
+    style: {
+      fontFamily: 'kenfuture-thin', 
+      fontSize: 32, 
+      fontStyle: 'normal', 
+      fill: 'white',
+    }
+  });
 
   const texture = PIXIAssets.get('character');
   const characterSprite = new PIXI.Sprite({ texture });
   characterSprite.eventMode = 'none';
-  
+
+  const label = asEntity(labelText);
+  label.position.set( renderer.view.canvas.width / 2, 50);
+  label.moxiEntity.addBehavior(new RotationLabel(characterSprite));
+
   const character = asEntity<PIXI.Sprite>(characterSprite);
   character.moxiEntity.addBehavior(new CharacterBehavior());
   
   scene.addChild(character);
+  scene.addChild(label);
   scene.init();
   engine.start();
 });

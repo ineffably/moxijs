@@ -1,8 +1,8 @@
 import { Point } from 'pixi.js';
 import { Behavior, PIXI } from '.';
-import { Scene } from './scene';
-import { AsEntity } from './moxi-entity';
-import { MoxiBehaviors, MoxiEntity } from './moxi-entity';
+import { Scene } from './core/scene';
+import { AsEntity } from './core/moxi-entity';
+import { MoxiBehaviors, MoxiEntity } from './core/moxi-entity';
 export declare class CameraBehavior extends Behavior<PIXI.Container> {
     speed: number;
     target: PIXI.Container;

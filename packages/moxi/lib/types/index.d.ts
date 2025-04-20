@@ -1,16 +1,17 @@
-import * as utils from './utils';
+import * as utils from './library/utils';
 import PIXI from 'pixi.js';
-import { RenderManager } from './render-manager';
-import { Scene } from './scene';
-import { Engine } from './engine';
-import { ClientEvents } from './client-events';
-import { AssetLoader } from './asset-loader';
-import { Behavior } from './bahavior';
-import { defaultRenderOptions, prepMoxi } from './prepare';
-import { loadFonts } from './font-loader';
-import { asEntity, MoxiEntity } from './moxi-entity';
-import { Camera, CameraBehavior } from './camera';
-import { asTextureFrames, AsTextureFramesOptions } from './texture-frames';
+import { RenderManager } from './core/render-manager';
+import { Scene } from './core/scene';
+import { Engine } from './core/engine';
+import { ClientEvents } from './library/client-events';
+import { AssetLoader } from './core/asset-loader';
+import { Behavior } from './core/bahavior';
+import { defaultRenderOptions, prepMoxi } from './library/prepare';
+import { loadFonts } from './library/font-loader';
+import { asEntity, MoxiEntity } from './core/moxi-entity';
+import { Camera, CameraBehavior } from './library/camera';
+import { asTextureFrames, AsTextureFramesOptions } from './library/texture-frames';
+import { SceneGraph } from './library/debug-pack';
 export type Asset = {
     src: string;
     alias?: string;
@@ -59,4 +60,4 @@ declare const exportedObjects: {
     utils: typeof utils;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, defaultRenderOptions, Engine, loadFonts, MoxiEntity, PIXI, prepMoxi, RenderManager, Scene, utils };
+export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, defaultRenderOptions, Engine, loadFonts, MoxiEntity, PIXI, prepMoxi, RenderManager, Scene, SceneGraph, utils };

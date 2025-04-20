@@ -1,6 +1,6 @@
 import { AssetLoader, Camera, PIXI } from '.';
-import { Engine } from './engine';
-import { Scene } from './scene';
+import { Engine } from './core/engine';
+import { Scene } from './core/scene';
 export interface PrepareArgs {
     hostElement: HTMLElement;
     renderOptions?: Partial<PIXI.AutoDetectOptions>;

@@ -143,37 +143,43 @@ export class PlayerMovementBehavior extends Behavior<PIXI.AnimatedSprite> {
    * @param deltaTime - Time elapsed since last update
    */
   update(entity: PIXI.AnimatedSprite, deltaTime: number) {
-    const { speed } = this.options;
+    const { 
+      options, 
+      clientEvents, 
+      frameSequences, 
+      velocity
+    } = this;
+    const { speed } = options;
     
     // Reset velocity vector
     this.velocity.set(0, 0);
     
     // Calculate movement based on key presses
-    if (this.clientEvents.isKeyDown('ArrowUp')) {
-      this.velocity.y -= 1;
+    if (clientEvents.isKeyDown('ArrowUp')) {
+      velocity.y -= 1;
     }
-    if (this.clientEvents.isKeyDown('ArrowDown')) {
-      this.velocity.y += 1;
+    if (clientEvents.isKeyDown('ArrowDown')) {
+      velocity.y += 1;
     }
-    if (this.clientEvents.isKeyDown('ArrowLeft')) {
-      this.velocity.x -= 1;
+    if (clientEvents.isKeyDown('ArrowLeft')) {
+      velocity.x -= 1;
     }
-    if (this.clientEvents.isKeyDown('ArrowRight')) {
-      this.velocity.x += 1;
+    if (clientEvents.isKeyDown('ArrowRight')) {
+      velocity.x += 1;
     }
     
     // Normalize velocity to maintain constant speed in all directions
-    this.normalizeVelocity(this.velocity, speed);
+    this.normalizeVelocity(velocity, speed);
     
     // Apply movement
-    entity.x += this.velocity.x;
-    entity.y += this.velocity.y;
+    entity.x += velocity.x;
+    entity.y += velocity.y;
     
     // Determine if we're moving
-    const isMoving = this.velocity.x !== 0 || this.velocity.y !== 0;
+    const isMoving = velocity.x !== 0 || velocity.y !== 0;
     
     // Get dominant direction
-    const newDirection = this.getDirectionFromVelocity(this.velocity);
+    const newDirection = this.getDirectionFromVelocity(velocity);
     
     // Update animation state if movement state changed
     const newState = isMoving ? ANIMATION_STATE.WALK : ANIMATION_STATE.IDLE;
@@ -183,7 +189,7 @@ export class PlayerMovementBehavior extends Behavior<PIXI.AnimatedSprite> {
     }
     
     // Handle animation timing
-    const sequence = this.frameSequences.getSequence(this.currentSequenceName);
+    const sequence = frameSequences.getSequence(this.currentSequenceName);
     if (sequence && sequence.frames.length > 0) {
       this.animationTimer += deltaTime;
       const animSpeed = sequence.animationSpeed;

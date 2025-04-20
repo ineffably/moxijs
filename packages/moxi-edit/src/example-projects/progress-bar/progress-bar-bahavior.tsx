@@ -53,7 +53,6 @@ export class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
     
     // You can initialize options here
     this.options = options || {};
-    
   }
 
   setValue(value: number) {
@@ -75,7 +74,6 @@ export class ProgressBarBehavior extends Behavior<PIXI.Sprite> {
     this.forgroundBar = new PIXI.Graphics(); 
     this.forgroundBar.fill(color);
     this.forgroundBar.rect(padding.x, padding.y, 0, barHeight - padding.y);
-    
     this.bitmapText = new BitmapText({ text: (this.value + ''), style: bitmapText });
     this.bitmapText.position.set((barWidth / 2) - (this.bitmapText.width / 2), (barHeight / 2) - (this.bitmapText.height / 2));
 

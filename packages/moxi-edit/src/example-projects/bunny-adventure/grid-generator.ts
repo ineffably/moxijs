@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import PIXI from 'pixi.js';
 
 /**
  * Configuration options for grid generation

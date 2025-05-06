@@ -2,10 +2,9 @@ import { MoxiProjectSchema } from '../../types/editor-types';
 // @ts-ignore
 import characterState from '!raw-loader!./character-state-example'; 
 
-
 export const project = {
   name: 'Character States',
-  description: 'Test character behaviors and states',
+  description: 'Simple character animation example',
   files: {
     'index.ts': {
       name: 'index.ts',

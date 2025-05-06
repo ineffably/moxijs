@@ -12,6 +12,7 @@ import { asEntity, MoxiEntity } from './core/moxi-entity';
 import { Camera, CameraBehavior } from './library/camera';
 import { asTextureFrames, AsTextureFramesOptions } from './library/texture-frames';
 import { SceneGraph } from './library/debug-pack';
+import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 export type Asset = {
     src: string;
     alias?: string;
@@ -40,7 +41,7 @@ export type ClientEventsType = {
         yLast: number;
     };
 };
-export { AsTextureFramesOptions };
+export { AsTextureFramesOptions, SequenceInfo };
 declare const exportedObjects: {
     AssetLoader: typeof AssetLoader;
     asEntity: typeof asEntity;
@@ -57,7 +58,8 @@ declare const exportedObjects: {
     prepMoxi: typeof prepMoxi;
     RenderManager: typeof RenderManager;
     Scene: typeof Scene;
+    TextureFrameSequences: typeof TextureFrameSequences;
     utils: typeof utils;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, defaultRenderOptions, Engine, loadFonts, MoxiEntity, PIXI, prepMoxi, RenderManager, Scene, SceneGraph, utils };
+export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, defaultRenderOptions, Engine, loadFonts, MoxiEntity, PIXI, prepMoxi, RenderManager, Scene, SceneGraph, TextureFrameSequences, utils };

@@ -1,6 +1,5 @@
-import { Behavior } from 'moxi';
+import { Behavior, TextureFrameSequences } from 'moxi';
 import PIXI from 'pixi.js';
-import { TextureFrameSequences } from './texture-frame-sequences';
 export declare const DIRECTION: {
     readonly DOWN: "down";
     readonly UP: "up";

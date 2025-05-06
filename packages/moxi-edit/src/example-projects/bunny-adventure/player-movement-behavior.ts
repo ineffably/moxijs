@@ -1,6 +1,5 @@
-import { Behavior, ClientEvents } from 'moxi';
+import { Behavior, ClientEvents, TextureFrameSequences } from 'moxi';
 import PIXI from 'pixi.js';
-import { TextureFrameSequences } from './texture-frame-sequences';
 
 // Define animation directions
 export const DIRECTION = {

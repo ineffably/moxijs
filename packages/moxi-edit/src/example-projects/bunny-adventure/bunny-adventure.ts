@@ -1,10 +1,7 @@
-import { prepMoxi, asEntity, CameraBehavior, asTextureFrames } from 'moxi';
+import { prepMoxi, asEntity, CameraBehavior, asTextureFrames, TextureFrameSequences, SequenceInfo } from 'moxi';
 import PIXI from 'pixi.js';
 import { PlayerMovementBehavior } from './player-movement-behavior';
 import { createTileGrid, getTextureRange } from './grid-generator';
-import { TextureFrameSequences } from './texture-frame-sequences';
-import { SequenceInfo } from './texture-frame-sequences';
-
 
 export const init = (async () => {
   const root = document.getElementById('app');

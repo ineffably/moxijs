@@ -1,5 +1,4 @@
-import PIXI from 'pixi.js';
-import { Point } from 'pixi.js';
+import PIXI, { Point } from 'pixi.js';
 import { Behavior } from '../core/bahavior';
 import { Scene } from '../core/scene';
 import { AsEntity, MoxiBehaviors, MoxiEntity } from '../core/moxi-entity';

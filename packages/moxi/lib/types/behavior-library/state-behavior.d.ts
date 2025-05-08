@@ -1,4 +1,4 @@
-import { Behavior } from 'moxi';
+import { Behavior } from '../core/bahavior';
 import { Container, Renderer } from 'pixi.js';
 export declare class StateBehavior extends Behavior<Container> {
     private _entity;

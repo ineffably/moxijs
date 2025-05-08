@@ -1,4 +1,6 @@
-import { AssetLoader, Camera, PIXI } from '..';
+import PIXI from 'pixi.js';
+import { AssetLoader } from '../core/asset-loader';
+import { Camera } from '../library/camera';
 import { Engine } from '../core/engine';
 import { Scene } from '../core/scene';
 export interface PrepareArgs {

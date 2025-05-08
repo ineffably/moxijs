@@ -1,5 +1,4 @@
 import * as utils from './library/utils';
-import PIXI from 'pixi.js';
 import { RenderManager } from './core/render-manager';
 import { Scene } from './core/scene';
 import { Engine } from './core/engine';
@@ -10,9 +9,14 @@ import { defaultRenderOptions, prepMoxi } from './library/prepare';
 import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
 import { Camera, CameraBehavior } from './library/camera';
-import { asTextureFrames, AsTextureFramesOptions } from './library/texture-frames';
+import { asTextureFrames } from './library/texture-frames';
 import { SceneGraph } from './library/debug-pack';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
+import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
+import { StateMachine } from './behavior-library/state-machine';
+import { StateBehavior } from './behavior-library/state-behavior';
+export type { StateChangeEvent } from './behavior-library/state-machine';
+export type { AsTextureFramesOptions } from './library/texture-frames';
 export type Asset = {
     src: string;
     alias?: string;
@@ -22,7 +26,7 @@ export interface OnEvent {
     eventType: string;
 }
 export interface ClientEventsArgs {
-    initWheelOffset?: PIXI.Point;
+    initWheelOffset?: any;
     onAnyEvent?: (ev: OnEvent) => void;
 }
 export type ClientEventsType = {
@@ -41,7 +45,7 @@ export type ClientEventsType = {
         yLast: number;
     };
 };
-export { AsTextureFramesOptions, SequenceInfo };
+export { SequenceInfo, ResizeHandlerOptions };
 declare const exportedObjects: {
     AssetLoader: typeof AssetLoader;
     asEntity: typeof asEntity;
@@ -50,16 +54,19 @@ declare const exportedObjects: {
     Camera: typeof Camera;
     CameraBehavior: typeof CameraBehavior;
     ClientEvents: typeof ClientEvents;
-    defaultRenderOptions: Partial<PIXI.AutoDetectOptions>;
+    createResizeHandler: typeof createResizeHandler;
+    defaultRenderOptions: Partial<import("pixi.js").AutoDetectOptions>;
     Engine: typeof Engine;
     loadFonts: () => Promise<unknown>;
     MoxiEntity: typeof MoxiEntity;
-    PIXI: typeof PIXI;
     prepMoxi: typeof prepMoxi;
     RenderManager: typeof RenderManager;
     Scene: typeof Scene;
+    setupResponsiveCanvas: typeof setupResponsiveCanvas;
     TextureFrameSequences: typeof TextureFrameSequences;
     utils: typeof utils;
+    StateMachine: typeof StateMachine;
+    StateBehavior: typeof StateBehavior;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, defaultRenderOptions, Engine, loadFonts, MoxiEntity, PIXI, prepMoxi, RenderManager, Scene, SceneGraph, TextureFrameSequences, utils };
+export { AssetLoader, asEntity, asTextureFrames, Behavior, Camera, CameraBehavior, ClientEvents, createResizeHandler, defaultRenderOptions, Engine, loadFonts, MoxiEntity, prepMoxi, RenderManager, Scene, SceneGraph, setupResponsiveCanvas, TextureFrameSequences, utils, StateMachine, StateBehavior };

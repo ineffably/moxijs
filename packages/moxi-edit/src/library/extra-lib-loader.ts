@@ -6,25 +6,25 @@
 // and if that's the best way it's future chads problem. 
 
 // @ts-ignore
-import assetLoader from '!raw-loader!../../../moxi/lib/types/asset-loader.d';
+import assetLoader from '!raw-loader!../../../moxi/lib/types/core/asset-loader.d.ts';
 // @ts-ignore
-import behavior from '!raw-loader!../../../moxi/lib/types/bahavior.d.ts';
+import behavior from '!raw-loader!../../../moxi/lib/types/core/bahavior.d.ts';
 // @ts-ignore
-import clientEvents from '!raw-loader!../../../moxi/lib/types/client-events.d.ts';
+import clientEvents from '!raw-loader!../../../moxi/lib/types/library/client-events.d.ts';
 // @ts-ignore
-import engine from '!raw-loader!../../../moxi/lib/types/engine.d.ts';
+import engine from '!raw-loader!../../../moxi/lib/types/core/engine.d.ts';
 // @ts-ignore
-import entity from '!raw-loader!../../../moxi/lib/types/moxi-entity.d.ts';
+import entity from '!raw-loader!../../../moxi/lib/types/core/moxi-entity.d.ts';
 // @ts-ignore
 import index from '!raw-loader!../../../moxi/lib/types/index.d.ts';
 // @ts-ignore
-import prepare from '!raw-loader!../../../moxi/lib/types/prepare.d.ts';
+import prepare from '!raw-loader!../../../moxi/lib/types/library/prepare.d.ts';
 // @ts-ignore
-import renderManager from '!raw-loader!../../../moxi/lib/types/render-manager.d';
+import renderManager from '!raw-loader!../../../moxi/lib/types/core/render-manager.d.ts';
 // @ts-ignore
-import scene from '!raw-loader!../../../moxi/lib/types/scene.d.ts';
+import scene from '!raw-loader!../../../moxi/lib/types/core/scene.d.ts';
 // @ts-ignore
-import utils from '!raw-loader!../../../moxi/lib/types/utils.d';
+import utils from '!raw-loader!../../../moxi/lib/types/library/utils.d.ts';
 
 // @ts-ignore
 import pixidef from '!raw-loader!../../../../node_modules/pixi.js/dist/pixi.js.d.ts';

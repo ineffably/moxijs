@@ -1,4 +1,4 @@
-import { PIXI } from '..';
+import PIXI from 'pixi.js';
 export declare abstract class Behavior<T> {
     active: boolean;
     init(entity?: T, renderer?: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]): void;

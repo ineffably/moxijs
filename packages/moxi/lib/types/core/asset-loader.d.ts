@@ -1,4 +1,5 @@
-import { Asset, PIXI } from '..';
+import PIXI from 'pixi.js';
+import { Asset } from '..';
 export declare class AssetLoader {
     PIXIAssets: PIXI.AssetsClass;
     textures: any[];

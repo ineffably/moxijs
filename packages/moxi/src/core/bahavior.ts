@@ -1,4 +1,4 @@
-import { PIXI } from '..';
+import PIXI from 'pixi.js';
 
 /**
  * Base abstract class for all behaviors in the Moxi engine.

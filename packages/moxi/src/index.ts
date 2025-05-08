@@ -1,5 +1,4 @@
 import * as utils from './library/utils';
-import PIXI from 'pixi.js';
 import { RenderManager } from './core/render-manager';
 import { Scene } from './core/scene';
 import { Engine } from './core/engine';
@@ -10,9 +9,14 @@ import { defaultRenderOptions, prepMoxi } from './library/prepare';
 import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
 import { Camera, CameraBehavior } from './library/camera';
-import { asTextureFrames, AsTextureFramesOptions } from './library/texture-frames';
+import { asTextureFrames } from './library/texture-frames';
 import { SceneGraph } from './library/debug-pack';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
+import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
+import { StateMachine } from './behavior-library/state-machine';
+import { StateBehavior } from './behavior-library/state-behavior';
+export type { StateChangeEvent } from './behavior-library/state-machine';
+export type { AsTextureFramesOptions } from './library/texture-frames';
 
 export type Asset = { src: string, alias?: string };
 
@@ -22,7 +26,7 @@ export interface OnEvent {
 }
 
 export interface ClientEventsArgs {
-  initWheelOffset?: PIXI.Point;
+  initWheelOffset?: any;
   onAnyEvent?: (ev: OnEvent) => void;
 }
 
@@ -39,7 +43,10 @@ export type ClientEventsType = {
 }
 
 // Re-export types
-export { AsTextureFramesOptions, SequenceInfo };
+export { 
+  SequenceInfo, 
+  ResizeHandlerOptions 
+};
 
 const exportedObjects = {
   AssetLoader,
@@ -49,16 +56,19 @@ const exportedObjects = {
   Camera,
   CameraBehavior,
   ClientEvents,
+  createResizeHandler,
   defaultRenderOptions,
   Engine,
   loadFonts,
   MoxiEntity,
-  PIXI,
   prepMoxi,
   RenderManager,
   Scene,
+  setupResponsiveCanvas,
   TextureFrameSequences,
-  utils
+  utils,
+  StateMachine,
+  StateBehavior
 };
 
 export default exportedObjects;
@@ -71,16 +81,19 @@ export {
   Camera,
   CameraBehavior,
   ClientEvents,
+  createResizeHandler,
   defaultRenderOptions,
   Engine,
   loadFonts,
   MoxiEntity,
-  PIXI,
   prepMoxi,
   RenderManager,
   Scene,
   SceneGraph,
+  setupResponsiveCanvas,
   TextureFrameSequences,
-  utils
+  utils,
+  StateMachine,
+  StateBehavior
 };
 

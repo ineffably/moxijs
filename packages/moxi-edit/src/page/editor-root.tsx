@@ -1,14 +1,14 @@
 import { StateProvider } from './state-provider';
-import { BasicEditor } from '../components/code-editor/basic-editor';
+import { BasicEditorDisabled } from '../components/code-editor/basic-editor';
 import { SceneEditor } from '../components/scene-editor';
 
 import { ConfigProvider, theme, Card, Space, Button, Typography } from 'antd';
 import { EditorState, MoxiProjectSchema } from '../types/editor-types';
 import { getLocalData } from '../library/local-data';
-import { Route, Router, Link } from 'wouter';
+import { Route, Router } from 'wouter';
 import { useHashLocation } from 'wouter/use-hash-location';
 import { ProjectPlayer } from './project-player';
-import { project } from '../example-projects/progress-bar'; // Change this to any example project you want to use as a default for the editor root.
+import { project } from '../../example-projects/progress-bar'; // Change this to any example project you want to use as a default for the editor root.
 
 import '@ant-design/v5-patch-for-react-19';
 import 'antd/dist/reset.css';
@@ -75,7 +75,7 @@ export const EditorRoot = () => {
             <HomePage />
           </Route>
           <Route path="/editor">
-            <BasicEditor />
+            <BasicEditorDisabled />
           </Route>
           <Route path="/editscene">
             <SceneEditor />

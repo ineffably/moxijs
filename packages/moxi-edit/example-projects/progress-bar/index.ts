@@ -1,7 +1,8 @@
-import { MoxiProjectSchema } from '../../types/editor-types';
-// @ts-ignore
+import { MoxiProjectSchema } from '../../src/types/editor-types';
+
+// @ts-expect-error raw-loader 
 import progressBarExample from '!raw-loader!./progress-bar-example';
-// @ts-ignore
+// @ts-expect-error raw-loader 
 import progressBarBehavior from '!raw-loader!./progress-bar-bahavior';
 
 // TODO: code4 needs multi-file support for projects tp have access to virtual file imports

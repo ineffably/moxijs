@@ -1,4 +1,4 @@
-import { MoxiProjectSchema } from '../../types/editor-types';
+import { MoxiProjectSchema } from '../../src/types/editor-types';
 // @ts-ignore
 import characterState from '!raw-loader!./character-state-example'; 
 

@@ -1,11 +1,11 @@
 import { Button, Dropdown, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import { init as basicPixiOnlyInit } from '../example-projects/basic-pixi-only/basic-pixi-only';
-import { init as basicReactPixiInit } from '../example-projects/basic-moxi/basic-moxi';
-import { init as moxiProgressBar } from '../example-projects/progress-bar/progress-bar-example';
-import { init as exampleProject01Init } from '../example-projects/example-project-01/example-project-01';
-import { init as bunnyAdventureInit } from '../example-projects/bunny-adventure/bunny-adventure';
+import { init as basicPixiOnlyInit } from '../../example-projects/basic-pixi-only/basic-pixi-only';
+import { init as basicReactPixiInit } from '../../example-projects/basic-moxi/basic-moxi';
+import { init as moxiProgressBar } from '../../example-projects/progress-bar/progress-bar-example';
+import { init as exampleProject01Init } from '../../example-projects/example-project-01/example-project-01';
+import { init as bunnyAdventureInit } from '../../example-projects/bunny-adventure/bunny-adventure';
 import { useLocation } from 'wouter';
 
 export type AvailableExamples = 'basic-moxi' | 'basic-pixi-only'

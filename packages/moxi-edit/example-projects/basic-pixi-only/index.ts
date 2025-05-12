@@ -1,5 +1,6 @@
-import { MoxiProjectSchema } from '../../types/editor-types';
-// @ts-ignore
+import { MoxiProjectSchema } from '../../src/types/editor-types';
+
+// @ts-expect-error raw-loader 
 import basicPixiOnly from '!raw-loader!./basic-pixi-only';
 
 export const project = {

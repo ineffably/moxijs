@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import moxi from 'moxi';
 import PIXI from 'pixi.js';
-import { Layout, Menu, Splitter, Tabs } from 'antd';
+import { Card, Layout, Menu, Splitter, Tabs, Typography } from 'antd';
 import { RcTabsProps } from 'antd/dist/antd';
 import { Code4Editor } from 'code-4';
 import { extraLibLoader } from '../../library/extra-lib-loader';
 import { EditorContext } from '../../page/state-provider';
-import { examplesLibrary } from '../../example-projects';
+import { examplesLibrary } from '../../../example-projects';
 import { ItemType, MenuItemType } from 'antd/es/menu/interface';
 import './basic-editor.css';
 
@@ -20,8 +20,18 @@ const requireMap = {
   'pixi.js': PIXI
 };
 
-interface BasicEditorProps {
-  project?: string;
+
+export const BasicEditorDisabled = () => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
+      <Card
+        title={<Typography.Title level={3}>Moxi Editor</Typography.Title>}
+        style={{ width: 500, maxWidth: '100%' }}
+      >
+        The Code Editor is "down for maintenance" as efforts are focused elsewhere. Please use the examples player and the moxi api directly.
+      </Card>
+    </div>
+   );
 }
 
 export const BasicEditor = () => {

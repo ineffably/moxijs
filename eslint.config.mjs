@@ -15,7 +15,8 @@ export default defineConfig([
   ]),
   {
     files: [
-      'packages/**/src/**/*.{ts,tsx}'
+      'packages/**/src/**/*.{ts,tsx}',
+      'packages/**/example-projects/**/*.{ts,tsx}',
     ],
     rules: {
       semi: 'warn',

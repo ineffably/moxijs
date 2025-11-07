@@ -27,28 +27,26 @@ export class RenderManager {
   }
 
   onResize = () => {
-    // TODO: revisit this resizing logic and create an options model
-    // for adapting the sizes of the canvas to the window.
+    const { renderer, htmlRoot: root } = this;
+    const canvas = renderer.canvas;
     
-    // const { renderer, htmlRoot: root } = this;
-    // const canvas = renderer.canvas;
-    // const h = root.clientHeight;
-    // const w = root.clientWidth;
+    // Get the parent dimensions
+    const parentWidth = root.clientWidth;
+    const parentHeight = root.clientHeight;
     
-    // canvas.style.width = w + 'px';
-    // canvas.style.height = h + 'px';
-    // canvas.width = w;
-    // canvas.height = h;
-    // renderer.resize(w, h);
-
-    // if (this.fitToWindow) {
-    //   canvas.style.width = w + 'px';
-    //   canvas.style.height = h + 'px';
-    //   canvas.width = w;
-    //   canvas.height = h;
-    //   renderer.resize(w, h);
-    // }
-
+    // Get the canvas's intended dimensions
+    const canvasWidth = renderer.width;
+    const canvasHeight = renderer.height;
+    
+    // Calculate the scale to fit while maintaining aspect ratio
+    const scale = Math.min(
+      parentWidth / canvasWidth,
+      parentHeight / canvasHeight
+    );
+    
+    // Set CSS dimensions to scale the canvas
+    canvas.style.width = `${Math.floor(canvasWidth * scale)}px`;
+    canvas.style.height = `${Math.floor(canvasHeight * scale)}px`;
   };
 }
 

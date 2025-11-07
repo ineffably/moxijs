@@ -1,0 +1,5575 @@
+{
+  "frames": {
+    "spaceAstronauts_001.png": {
+      "frame": {
+        "x": 998,
+        "y": 847,
+        "w": 34,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 34,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_002.png": {
+      "frame": {
+        "x": 919,
+        "y": 142,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_003.png": {
+      "frame": {
+        "x": 824,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_004.png": {
+      "frame": {
+        "x": 392,
+        "y": 632,
+        "w": 34,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 34,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_005.png": {
+      "frame": {
+        "x": 997,
+        "y": 985,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_006.png": {
+      "frame": {
+        "x": 824,
+        "y": 44,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_007.png": {
+      "frame": {
+        "x": 998,
+        "y": 1073,
+        "w": 34,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 34,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_008.png": {
+      "frame": {
+        "x": 952,
+        "y": 696,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_009.png": {
+      "frame": {
+        "x": 822,
+        "y": 372,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_010.png": {
+      "frame": {
+        "x": 1064,
+        "y": 667,
+        "w": 31,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 31,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 31,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_011.png": {
+      "frame": {
+        "x": 989,
+        "y": 696,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_012.png": {
+      "frame": {
+        "x": 822,
+        "y": 276,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_013.png": {
+      "frame": {
+        "x": 1064,
+        "y": 1052,
+        "w": 31,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 31,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 31,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_014.png": {
+      "frame": {
+        "x": 991,
+        "y": 796,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_015.png": {
+      "frame": {
+        "x": 824,
+        "y": 88,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_016.png": {
+      "frame": {
+        "x": 998,
+        "y": 507,
+        "w": 31,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 31,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 31,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_017.png": {
+      "frame": {
+        "x": 998,
+        "y": 1029,
+        "w": 37,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 44
+      }
+    },
+    "spaceAstronauts_018.png": {
+      "frame": {
+        "x": 824,
+        "y": 941,
+        "w": 50,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 44
+      }
+    },
+    "spaceBuilding_001.png": {
+      "frame": {
+        "x": 917,
+        "y": 531,
+        "w": 42,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 42
+      }
+    },
+    "spaceBuilding_002.png": {
+      "frame": {
+        "x": 909,
+        "y": 745,
+        "w": 42,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 84
+      }
+    },
+    "spaceBuilding_003.png": {
+      "frame": {
+        "x": 872,
+        "y": 1031,
+        "w": 46,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 46,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 46,
+        "h": 46
+      }
+    },
+    "spaceBuilding_004.png": {
+      "frame": {
+        "x": 1064,
+        "y": 789,
+        "w": 28,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 28,
+        "h": 28
+      }
+    },
+    "spaceBuilding_005.png": {
+      "frame": {
+        "x": 917,
+        "y": 405,
+        "w": 42,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 84
+      }
+    },
+    "spaceBuilding_006.png": {
+      "frame": {
+        "x": 872,
+        "y": 985,
+        "w": 46,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 46,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 46,
+        "h": 46
+      }
+    },
+    "spaceBuilding_007.png": {
+      "frame": {
+        "x": 667,
+        "y": 148,
+        "w": 84,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 84,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 84,
+        "h": 84
+      }
+    },
+    "spaceBuilding_008.png": {
+      "frame": {
+        "x": 1064,
+        "y": 817,
+        "w": 28,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 28,
+        "h": 28
+      }
+    },
+    "spaceBuilding_009.png": {
+      "frame": {
+        "x": 674,
+        "y": 1020,
+        "w": 84,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 84,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 84,
+        "h": 84
+      }
+    },
+    "spaceBuilding_010.png": {
+      "frame": {
+        "x": 0,
+        "y": 1111,
+        "w": 102,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 102,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 102,
+        "h": 14
+      }
+    },
+    "spaceBuilding_011.png": {
+      "frame": {
+        "x": 383,
+        "y": 780,
+        "w": 42,
+        "h": 50
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 50
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 50
+      }
+    },
+    "spaceBuilding_012.png": {
+      "frame": {
+        "x": 802,
+        "y": 884,
+        "w": 55,
+        "h": 57
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 55,
+        "h": 57
+      },
+      "sourceSize": {
+        "w": 55,
+        "h": 57
+      }
+    },
+    "spaceBuilding_013.png": {
+      "frame": {
+        "x": 818,
+        "y": 1046,
+        "w": 54,
+        "h": 55
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 54,
+        "h": 55
+      },
+      "sourceSize": {
+        "w": 54,
+        "h": 55
+      }
+    },
+    "spaceBuilding_014.png": {
+      "frame": {
+        "x": 215,
+        "y": 780,
+        "w": 168,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 168,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 168,
+        "h": 40
+      }
+    },
+    "spaceBuilding_015.png": {
+      "frame": {
+        "x": 276,
+        "y": 151,
+        "w": 168,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 168,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 168,
+        "h": 40
+      }
+    },
+    "spaceBuilding_016.png": {
+      "frame": {
+        "x": 586,
+        "y": 1020,
+        "w": 88,
+        "h": 88
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 88,
+        "h": 88
+      },
+      "sourceSize": {
+        "w": 88,
+        "h": 88
+      }
+    },
+    "spaceBuilding_017.png": {
+      "frame": {
+        "x": 758,
+        "y": 961,
+        "w": 66,
+        "h": 85
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 66,
+        "h": 85
+      },
+      "sourceSize": {
+        "w": 66,
+        "h": 85
+      }
+    },
+    "spaceBuilding_018.png": {
+      "frame": {
+        "x": 905,
+        "y": 829,
+        "w": 42,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 42
+      }
+    },
+    "spaceBuilding_019.png": {
+      "frame": {
+        "x": 1095,
+        "y": 202,
+        "w": 17,
+        "h": 38
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 38
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 38
+      }
+    },
+    "spaceBuilding_020.png": {
+      "frame": {
+        "x": 802,
+        "y": 829,
+        "w": 55,
+        "h": 55
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 55,
+        "h": 55
+      },
+      "sourceSize": {
+        "w": 55,
+        "h": 55
+      }
+    },
+    "spaceBuilding_021.png": {
+      "frame": {
+        "x": 1066,
+        "y": 325,
+        "w": 27,
+        "h": 41
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 27,
+        "h": 41
+      },
+      "sourceSize": {
+        "w": 27,
+        "h": 41
+      }
+    },
+    "spaceBuilding_022.png": {
+      "frame": {
+        "x": 1067,
+        "y": 989,
+        "w": 26,
+        "h": 41
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 41
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 41
+      }
+    },
+    "spaceBuilding_023.png": {
+      "frame": {
+        "x": 276,
+        "y": 191,
+        "w": 165,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 165,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 165,
+        "h": 66
+      }
+    },
+    "spaceBuilding_024.png": {
+      "frame": {
+        "x": 276,
+        "y": 257,
+        "w": 165,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 165,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 165,
+        "h": 66
+      }
+    },
+    "spaceBuilding_025.png": {
+      "frame": {
+        "x": 917,
+        "y": 489,
+        "w": 42,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 42
+      }
+    },
+    "spaceEffects_001.png": {
+      "frame": {
+        "x": 537,
+        "y": 299,
+        "w": 14,
+        "h": 23
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 23
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 23
+      }
+    },
+    "spaceEffects_002.png": {
+      "frame": {
+        "x": 549,
+        "y": 322,
+        "w": 13,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 13,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 13,
+        "h": 30
+      }
+    },
+    "spaceEffects_003.png": {
+      "frame": {
+        "x": 377,
+        "y": 374,
+        "w": 14,
+        "h": 25
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 25
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 25
+      }
+    },
+    "spaceEffects_004.png": {
+      "frame": {
+        "x": 549,
+        "y": 352,
+        "w": 13,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 13,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 13,
+        "h": 32
+      }
+    },
+    "spaceEffects_005.png": {
+      "frame": {
+        "x": 1125,
+        "y": 927,
+        "w": 6,
+        "h": 126
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 126
+      },
+      "sourceSize": {
+        "w": 6,
+        "h": 126
+      }
+    },
+    "spaceEffects_006.png": {
+      "frame": {
+        "x": 1113,
+        "y": 927,
+        "w": 12,
+        "h": 126
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 126
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 126
+      }
+    },
+    "spaceEffects_007.png": {
+      "frame": {
+        "x": 1113,
+        "y": 458,
+        "w": 16,
+        "h": 126
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 126
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 126
+      }
+    },
+    "spaceEffects_008.png": {
+      "frame": {
+        "x": 282,
+        "y": 1113,
+        "w": 21,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 21,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 21,
+        "h": 21
+      }
+    },
+    "spaceEffects_009.png": {
+      "frame": {
+        "x": 477,
+        "y": 299,
+        "w": 28,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 28,
+        "h": 24
+      }
+    },
+    "spaceEffects_010.png": {
+      "frame": {
+        "x": 822,
+        "y": 617,
+        "w": 30,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 28
+      }
+    },
+    "spaceEffects_011.png": {
+      "frame": {
+        "x": 1066,
+        "y": 450,
+        "w": 26,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 26
+      }
+    },
+    "spaceEffects_012.png": {
+      "frame": {
+        "x": 919,
+        "y": 942,
+        "w": 32,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 32
+      }
+    },
+    "spaceEffects_013.png": {
+      "frame": {
+        "x": 872,
+        "y": 581,
+        "w": 37,
+        "h": 36
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 36
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 36
+      }
+    },
+    "spaceEffects_014.png": {
+      "frame": {
+        "x": 959,
+        "y": 1013,
+        "w": 35,
+        "h": 36
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 35,
+        "h": 36
+      },
+      "sourceSize": {
+        "w": 35,
+        "h": 36
+      }
+    },
+    "spaceEffects_015.png": {
+      "frame": {
+        "x": 874,
+        "y": 194,
+        "w": 44,
+        "h": 50
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 50
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 50
+      }
+    },
+    "spaceEffects_016.png": {
+      "frame": {
+        "x": 822,
+        "y": 320,
+        "w": 50,
+        "h": 52
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 52
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 52
+      }
+    },
+    "spaceEffects_017.png": {
+      "frame": {
+        "x": 377,
+        "y": 323,
+        "w": 14,
+        "h": 23
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 23
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 23
+      }
+    },
+    "spaceEffects_018.png": {
+      "frame": {
+        "x": 549,
+        "y": 384,
+        "w": 13,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 13,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 13,
+        "h": 30
+      }
+    },
+    "spaceMeteors_001.png": {
+      "frame": {
+        "x": 0,
+        "y": 621,
+        "w": 215,
+        "h": 211
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 215,
+        "h": 211
+      },
+      "sourceSize": {
+        "w": 215,
+        "h": 211
+      }
+    },
+    "spaceMeteors_002.png": {
+      "frame": {
+        "x": 214,
+        "y": 832,
+        "w": 212,
+        "h": 218
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 212,
+        "h": 218
+      },
+      "sourceSize": {
+        "w": 212,
+        "h": 218
+      }
+    },
+    "spaceMeteors_003.png": {
+      "frame": {
+        "x": 0,
+        "y": 832,
+        "w": 214,
+        "h": 227
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 214,
+        "h": 227
+      },
+      "sourceSize": {
+        "w": 214,
+        "h": 227
+      }
+    },
+    "spaceMeteors_004.png": {
+      "frame": {
+        "x": 0,
+        "y": 400,
+        "w": 220,
+        "h": 221
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 220,
+        "h": 221
+      },
+      "sourceSize": {
+        "w": 220,
+        "h": 221
+      }
+    },
+    "spaceMissiles_001.png": {
+      "frame": {
+        "x": 1093,
+        "y": 995,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceMissiles_002.png": {
+      "frame": {
+        "x": 1092,
+        "y": 116,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceMissiles_003.png": {
+      "frame": {
+        "x": 1095,
+        "y": 1030,
+        "w": 18,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 18,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 18,
+        "h": 51
+      }
+    },
+    "spaceMissiles_004.png": {
+      "frame": {
+        "x": 1095,
+        "y": 844,
+        "w": 18,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 18,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 18,
+        "h": 51
+      }
+    },
+    "spaceMissiles_005.png": {
+      "frame": {
+        "x": 1095,
+        "y": 151,
+        "w": 18,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 18,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 18,
+        "h": 51
+      }
+    },
+    "spaceMissiles_006.png": {
+      "frame": {
+        "x": 1093,
+        "y": 711,
+        "w": 19,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 19,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 19,
+        "h": 40
+      }
+    },
+    "spaceMissiles_007.png": {
+      "frame": {
+        "x": 1094,
+        "y": 493,
+        "w": 19,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 19,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 19,
+        "h": 40
+      }
+    },
+    "spaceMissiles_008.png": {
+      "frame": {
+        "x": 1094,
+        "y": 533,
+        "w": 19,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 19,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 19,
+        "h": 40
+      }
+    },
+    "spaceMissiles_009.png": {
+      "frame": {
+        "x": 1113,
+        "y": 294,
+        "w": 12,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 48
+      }
+    },
+    "spaceMissiles_010.png": {
+      "frame": {
+        "x": 1112,
+        "y": 246,
+        "w": 12,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 48
+      }
+    },
+    "spaceMissiles_011.png": {
+      "frame": {
+        "x": 549,
+        "y": 533,
+        "w": 12,
+        "h": 48
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 48
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 48
+      }
+    },
+    "spaceMissiles_012.png": {
+      "frame": {
+        "x": 505,
+        "y": 299,
+        "w": 16,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 22
+      }
+    },
+    "spaceMissiles_013.png": {
+      "frame": {
+        "x": 521,
+        "y": 299,
+        "w": 16,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 22
+      }
+    },
+    "spaceMissiles_014.png": {
+      "frame": {
+        "x": 156,
+        "y": 1111,
+        "w": 16,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 22
+      }
+    },
+    "spaceMissiles_015.png": {
+      "frame": {
+        "x": 549,
+        "y": 461,
+        "w": 12,
+        "h": 25
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 25
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 25
+      }
+    },
+    "spaceMissiles_016.png": {
+      "frame": {
+        "x": 574,
+        "y": 1020,
+        "w": 12,
+        "h": 25
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 25
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 25
+      }
+    },
+    "spaceMissiles_017.png": {
+      "frame": {
+        "x": 562,
+        "y": 1020,
+        "w": 12,
+        "h": 25
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 25
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 25
+      }
+    },
+    "spaceMissiles_018.png": {
+      "frame": {
+        "x": 1092,
+        "y": 46,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceMissiles_019.png": {
+      "frame": {
+        "x": 1092,
+        "y": 81,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceMissiles_020.png": {
+      "frame": {
+        "x": 1093,
+        "y": 325,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceMissiles_021.png": {
+      "frame": {
+        "x": 1092,
+        "y": 412,
+        "w": 22,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 22,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 22,
+        "h": 46
+      }
+    },
+    "spaceMissiles_022.png": {
+      "frame": {
+        "x": 1092,
+        "y": 366,
+        "w": 22,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 22,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 22,
+        "h": 46
+      }
+    },
+    "spaceMissiles_023.png": {
+      "frame": {
+        "x": 1092,
+        "y": 0,
+        "w": 22,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 22,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 22,
+        "h": 46
+      }
+    },
+    "spaceMissiles_024.png": {
+      "frame": {
+        "x": 549,
+        "y": 414,
+        "w": 12,
+        "h": 47
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 47
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 47
+      }
+    },
+    "spaceMissiles_025.png": {
+      "frame": {
+        "x": 549,
+        "y": 581,
+        "w": 12,
+        "h": 47
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 47
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 47
+      }
+    },
+    "spaceMissiles_026.png": {
+      "frame": {
+        "x": 549,
+        "y": 486,
+        "w": 12,
+        "h": 47
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 47
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 47
+      }
+    },
+    "spaceMissiles_027.png": {
+      "frame": {
+        "x": 1124,
+        "y": 844,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceMissiles_028.png": {
+      "frame": {
+        "x": 854,
+        "y": 1101,
+        "w": 18,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 18,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 18,
+        "h": 33
+      }
+    },
+    "spaceMissiles_029.png": {
+      "frame": {
+        "x": 1112,
+        "y": 696,
+        "w": 16,
+        "h": 49
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 49
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 49
+      }
+    },
+    "spaceMissiles_030.png": {
+      "frame": {
+        "x": 1095,
+        "y": 240,
+        "w": 17,
+        "h": 38
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 38
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 38
+      }
+    },
+    "spaceMissiles_031.png": {
+      "frame": {
+        "x": 1114,
+        "y": 342,
+        "w": 10,
+        "h": 46
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 46
+      },
+      "sourceSize": {
+        "w": 10,
+        "h": 46
+      }
+    },
+    "spaceMissiles_032.png": {
+      "frame": {
+        "x": 324,
+        "y": 1113,
+        "w": 14,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 20
+      }
+    },
+    "spaceMissiles_033.png": {
+      "frame": {
+        "x": 551,
+        "y": 299,
+        "w": 10,
+        "h": 23
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 23
+      },
+      "sourceSize": {
+        "w": 10,
+        "h": 23
+      }
+    },
+    "spaceMissiles_034.png": {
+      "frame": {
+        "x": 1095,
+        "y": 663,
+        "w": 18,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 18,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 18,
+        "h": 33
+      }
+    },
+    "spaceMissiles_035.png": {
+      "frame": {
+        "x": 1092,
+        "y": 800,
+        "w": 20,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 44
+      }
+    },
+    "spaceMissiles_036.png": {
+      "frame": {
+        "x": 1114,
+        "y": 388,
+        "w": 10,
+        "h": 45
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 45
+      },
+      "sourceSize": {
+        "w": 10,
+        "h": 45
+      }
+    },
+    "spaceMissiles_037.png": {
+      "frame": {
+        "x": 1113,
+        "y": 642,
+        "w": 11,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 11,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 11,
+        "h": 35
+      }
+    },
+    "spaceMissiles_038.png": {
+      "frame": {
+        "x": 1113,
+        "y": 830,
+        "w": 11,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 11,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 11,
+        "h": 35
+      }
+    },
+    "spaceMissiles_039.png": {
+      "frame": {
+        "x": 1113,
+        "y": 142,
+        "w": 11,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 11,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 11,
+        "h": 35
+      }
+    },
+    "spaceMissiles_040.png": {
+      "frame": {
+        "x": 1092,
+        "y": 458,
+        "w": 20,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 35
+      }
+    },
+    "spaceParts_001.png": {
+      "frame": {
+        "x": 959,
+        "y": 276,
+        "w": 39,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 39,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 39,
+        "h": 71
+      }
+    },
+    "spaceParts_002.png": {
+      "frame": {
+        "x": 919,
+        "y": 71,
+        "w": 41,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 41,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 41,
+        "h": 71
+      }
+    },
+    "spaceParts_003.png": {
+      "frame": {
+        "x": 961,
+        "y": 197,
+        "w": 37,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 72
+      }
+    },
+    "spaceParts_004.png": {
+      "frame": {
+        "x": 1066,
+        "y": 0,
+        "w": 26,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 84
+      }
+    },
+    "spaceParts_005.png": {
+      "frame": {
+        "x": 1028,
+        "y": 768,
+        "w": 36,
+        "h": 79
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 79
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 79
+      }
+    },
+    "spaceParts_006.png": {
+      "frame": {
+        "x": 909,
+        "y": 581,
+        "w": 43,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 43,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 43,
+        "h": 82
+      }
+    },
+    "spaceParts_007.png": {
+      "frame": {
+        "x": 1034,
+        "y": 415,
+        "w": 32,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 86
+      }
+    },
+    "spaceParts_008.png": {
+      "frame": {
+        "x": 872,
+        "y": 427,
+        "w": 45,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 77
+      }
+    },
+    "spaceParts_009.png": {
+      "frame": {
+        "x": 1028,
+        "y": 692,
+        "w": 36,
+        "h": 76
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 76
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 76
+      }
+    },
+    "spaceParts_010.png": {
+      "frame": {
+        "x": 960,
+        "y": 63,
+        "w": 38,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 71
+      }
+    },
+    "spaceParts_011.png": {
+      "frame": {
+        "x": 960,
+        "y": 842,
+        "w": 38,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 71
+      }
+    },
+    "spaceParts_012.png": {
+      "frame": {
+        "x": 861,
+        "y": 749,
+        "w": 48,
+        "h": 70
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 70
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 70
+      }
+    },
+    "spaceParts_013.png": {
+      "frame": {
+        "x": 861,
+        "y": 679,
+        "w": 48,
+        "h": 70
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 70
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 70
+      }
+    },
+    "spaceParts_014.png": {
+      "frame": {
+        "x": 822,
+        "y": 416,
+        "w": 50,
+        "h": 67
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 67
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 67
+      }
+    },
+    "spaceParts_015.png": {
+      "frame": {
+        "x": 822,
+        "y": 483,
+        "w": 50,
+        "h": 67
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 67
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 67
+      }
+    },
+    "spaceParts_016.png": {
+      "frame": {
+        "x": 959,
+        "y": 347,
+        "w": 39,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 39,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 39,
+        "h": 71
+      }
+    },
+    "spaceParts_017.png": {
+      "frame": {
+        "x": 387,
+        "y": 688,
+        "w": 39,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 39,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 39,
+        "h": 71
+      }
+    },
+    "spaceParts_018.png": {
+      "frame": {
+        "x": 919,
+        "y": 0,
+        "w": 41,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 41,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 41,
+        "h": 71
+      }
+    },
+    "spaceParts_019.png": {
+      "frame": {
+        "x": 919,
+        "y": 871,
+        "w": 41,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 41,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 41,
+        "h": 71
+      }
+    },
+    "spaceParts_020.png": {
+      "frame": {
+        "x": 992,
+        "y": 564,
+        "w": 37,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 72
+      }
+    },
+    "spaceParts_021.png": {
+      "frame": {
+        "x": 997,
+        "y": 913,
+        "w": 37,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 72
+      }
+    },
+    "spaceParts_022.png": {
+      "frame": {
+        "x": 1066,
+        "y": 366,
+        "w": 26,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 84
+      }
+    },
+    "spaceParts_023.png": {
+      "frame": {
+        "x": 1069,
+        "y": 845,
+        "w": 26,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 84
+      }
+    },
+    "spaceParts_024.png": {
+      "frame": {
+        "x": 998,
+        "y": 428,
+        "w": 36,
+        "h": 79
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 79
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 79
+      }
+    },
+    "spaceParts_025.png": {
+      "frame": {
+        "x": 998,
+        "y": 349,
+        "w": 36,
+        "h": 79
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 79
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 79
+      }
+    },
+    "spaceParts_026.png": {
+      "frame": {
+        "x": 909,
+        "y": 663,
+        "w": 43,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 43,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 43,
+        "h": 82
+      }
+    },
+    "spaceParts_027.png": {
+      "frame": {
+        "x": 918,
+        "y": 194,
+        "w": 43,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 43,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 43,
+        "h": 82
+      }
+    },
+    "spaceParts_028.png": {
+      "frame": {
+        "x": 1034,
+        "y": 285,
+        "w": 32,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 86
+      }
+    },
+    "spaceParts_029.png": {
+      "frame": {
+        "x": 872,
+        "y": 504,
+        "w": 45,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 77
+      }
+    },
+    "spaceParts_030.png": {
+      "frame": {
+        "x": 874,
+        "y": 899,
+        "w": 45,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 77
+      }
+    },
+    "spaceParts_031.png": {
+      "frame": {
+        "x": 998,
+        "y": 197,
+        "w": 36,
+        "h": 76
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 76
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 76
+      }
+    },
+    "spaceParts_032.png": {
+      "frame": {
+        "x": 998,
+        "y": 273,
+        "w": 36,
+        "h": 76
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 76
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 76
+      }
+    },
+    "spaceParts_033.png": {
+      "frame": {
+        "x": 1034,
+        "y": 155,
+        "w": 32,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 86
+      }
+    },
+    "spaceParts_034.png": {
+      "frame": {
+        "x": 992,
+        "y": 636,
+        "w": 37,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 56
+      }
+    },
+    "spaceParts_035.png": {
+      "frame": {
+        "x": 1035,
+        "y": 989,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      }
+    },
+    "spaceParts_036.png": {
+      "frame": {
+        "x": 871,
+        "y": 132,
+        "w": 48,
+        "h": 62
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 62
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 62
+      }
+    },
+    "spaceParts_037.png": {
+      "frame": {
+        "x": 1034,
+        "y": 847,
+        "w": 35,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 35,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 35,
+        "h": 71
+      }
+    },
+    "spaceParts_038.png": {
+      "frame": {
+        "x": 952,
+        "y": 573,
+        "w": 40,
+        "h": 57
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 57
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 57
+      }
+    },
+    "spaceParts_039.png": {
+      "frame": {
+        "x": 960,
+        "y": 0,
+        "w": 38,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 63
+      }
+    },
+    "spaceParts_040.png": {
+      "frame": {
+        "x": 874,
+        "y": 0,
+        "w": 45,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 66
+      }
+    },
+    "spaceParts_041.png": {
+      "frame": {
+        "x": 802,
+        "y": 645,
+        "w": 59,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 59,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 59,
+        "h": 66
+      }
+    },
+    "spaceParts_042.png": {
+      "frame": {
+        "x": 822,
+        "y": 209,
+        "w": 52,
+        "h": 67
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 52,
+        "h": 67
+      },
+      "sourceSize": {
+        "w": 52,
+        "h": 67
+      }
+    },
+    "spaceParts_043.png": {
+      "frame": {
+        "x": 1034,
+        "y": 89,
+        "w": 34,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 34,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 66
+      }
+    },
+    "spaceParts_044.png": {
+      "frame": {
+        "x": 1064,
+        "y": 711,
+        "w": 29,
+        "h": 47
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 29,
+        "h": 47
+      },
+      "sourceSize": {
+        "w": 29,
+        "h": 47
+      }
+    },
+    "spaceParts_045.png": {
+      "frame": {
+        "x": 874,
+        "y": 66,
+        "w": 43,
+        "h": 62
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 43,
+        "h": 62
+      },
+      "sourceSize": {
+        "w": 43,
+        "h": 62
+      }
+    },
+    "spaceParts_046.png": {
+      "frame": {
+        "x": 952,
+        "y": 630,
+        "w": 40,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 66
+      }
+    },
+    "spaceParts_047.png": {
+      "frame": {
+        "x": 991,
+        "y": 740,
+        "w": 37,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 56
+      }
+    },
+    "spaceParts_048.png": {
+      "frame": {
+        "x": 999,
+        "y": 133,
+        "w": 32,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 63
+      }
+    },
+    "spaceParts_049.png": {
+      "frame": {
+        "x": 861,
+        "y": 617,
+        "w": 48,
+        "h": 62
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 62
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 62
+      }
+    },
+    "spaceParts_050.png": {
+      "frame": {
+        "x": 1034,
+        "y": 918,
+        "w": 35,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 35,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 35,
+        "h": 71
+      }
+    },
+    "spaceParts_051.png": {
+      "frame": {
+        "x": 958,
+        "y": 1056,
+        "w": 40,
+        "h": 57
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 57
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 57
+      }
+    },
+    "spaceParts_052.png": {
+      "frame": {
+        "x": 961,
+        "y": 134,
+        "w": 38,
+        "h": 63
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 63
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 63
+      }
+    },
+    "spaceParts_053.png": {
+      "frame": {
+        "x": 872,
+        "y": 361,
+        "w": 45,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 66
+      }
+    },
+    "spaceParts_054.png": {
+      "frame": {
+        "x": 857,
+        "y": 925,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    "spaceParts_055.png": {
+      "frame": {
+        "x": 802,
+        "y": 763,
+        "w": 59,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 59,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 59,
+        "h": 66
+      }
+    },
+    "spaceParts_056.png": {
+      "frame": {
+        "x": 819,
+        "y": 142,
+        "w": 52,
+        "h": 67
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 52,
+        "h": 67
+      },
+      "sourceSize": {
+        "w": 52,
+        "h": 67
+      }
+    },
+    "spaceParts_057.png": {
+      "frame": {
+        "x": 652,
+        "y": 148,
+        "w": 14,
+        "h": 29
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 29
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 29
+      }
+    },
+    "spaceParts_058.png": {
+      "frame": {
+        "x": 548,
+        "y": 1001,
+        "w": 14,
+        "h": 29
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 29
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 29
+      }
+    },
+    "spaceParts_059.png": {
+      "frame": {
+        "x": 1112,
+        "y": 800,
+        "w": 12,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 30
+      }
+    },
+    "spaceParts_060.png": {
+      "frame": {
+        "x": 742,
+        "y": 1104,
+        "w": 12,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 30
+      }
+    },
+    "spaceParts_061.png": {
+      "frame": {
+        "x": 1094,
+        "y": 604,
+        "w": 17,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 26
+      }
+    },
+    "spaceParts_062.png": {
+      "frame": {
+        "x": 857,
+        "y": 899,
+        "w": 17,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 26
+      }
+    },
+    "spaceParts_063.png": {
+      "frame": {
+        "x": 377,
+        "y": 346,
+        "w": 14,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 28
+      }
+    },
+    "spaceParts_064.png": {
+      "frame": {
+        "x": 905,
+        "y": 871,
+        "w": 14,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 28
+      }
+    },
+    "spaceParts_065.png": {
+      "frame": {
+        "x": 1068,
+        "y": 84,
+        "w": 24,
+        "h": 29
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 29
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 29
+      }
+    },
+    "spaceParts_066.png": {
+      "frame": {
+        "x": 1068,
+        "y": 113,
+        "w": 24,
+        "h": 29
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 29
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 29
+      }
+    },
+    "spaceParts_067.png": {
+      "frame": {
+        "x": 1090,
+        "y": 1096,
+        "w": 20,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 30
+      }
+    },
+    "spaceParts_068.png": {
+      "frame": {
+        "x": 1091,
+        "y": 633,
+        "w": 20,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 30
+      }
+    },
+    "spaceParts_069.png": {
+      "frame": {
+        "x": 1095,
+        "y": 895,
+        "w": 17,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 32
+      }
+    },
+    "spaceParts_070.png": {
+      "frame": {
+        "x": 1095,
+        "y": 278,
+        "w": 17,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 32
+      }
+    },
+    "spaceParts_071.png": {
+      "frame": {
+        "x": 1123,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_072.png": {
+      "frame": {
+        "x": 1124,
+        "y": 112,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_073.png": {
+      "frame": {
+        "x": 1124,
+        "y": 342,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_074.png": {
+      "frame": {
+        "x": 1116,
+        "y": 745,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_075.png": {
+      "frame": {
+        "x": 1124,
+        "y": 145,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_076.png": {
+      "frame": {
+        "x": 1124,
+        "y": 778,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_077.png": {
+      "frame": {
+        "x": 1114,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_078.png": {
+      "frame": {
+        "x": 1124,
+        "y": 811,
+        "w": 9,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 9,
+        "h": 33
+      }
+    },
+    "spaceParts_079.png": {
+      "frame": {
+        "x": 1065,
+        "y": 633,
+        "w": 26,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 26
+      }
+    },
+    "spaceParts_080.png": {
+      "frame": {
+        "x": 1064,
+        "y": 1096,
+        "w": 26,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 26,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 26,
+        "h": 26
+      }
+    },
+    "spaceParts_081.png": {
+      "frame": {
+        "x": 410,
+        "y": 759,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    "spaceParts_082.png": {
+      "frame": {
+        "x": 1066,
+        "y": 476,
+        "w": 17,
+        "h": 25
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 25
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 25
+      }
+    },
+    "spaceParts_083.png": {
+      "frame": {
+        "x": 387,
+        "y": 759,
+        "w": 23,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 23,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 23,
+        "h": 21
+      }
+    },
+    "spaceParts_084.png": {
+      "frame": {
+        "x": 303,
+        "y": 1113,
+        "w": 21,
+        "h": 18
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 21,
+        "h": 18
+      },
+      "sourceSize": {
+        "w": 21,
+        "h": 18
+      }
+    },
+    "spaceParts_085.png": {
+      "frame": {
+        "x": 1094,
+        "y": 573,
+        "w": 19,
+        "h": 31
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 19,
+        "h": 31
+      },
+      "sourceSize": {
+        "w": 19,
+        "h": 31
+      }
+    },
+    "spaceParts_086.png": {
+      "frame": {
+        "x": 1064,
+        "y": 758,
+        "w": 28,
+        "h": 31
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 31
+      },
+      "sourceSize": {
+        "w": 28,
+        "h": 31
+      }
+    },
+    "spaceParts_087.png": {
+      "frame": {
+        "x": 441,
+        "y": 299,
+        "w": 36,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 22
+      }
+    },
+    "spaceParts_088.png": {
+      "frame": {
+        "x": 172,
+        "y": 1099,
+        "w": 58,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 58,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 58,
+        "h": 28
+      }
+    },
+    "spaceParts_089.png": {
+      "frame": {
+        "x": 102,
+        "y": 1111,
+        "w": 54,
+        "h": 12
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 54,
+        "h": 12
+      },
+      "sourceSize": {
+        "w": 54,
+        "h": 12
+      }
+    },
+    "spaceParts_090.png": {
+      "frame": {
+        "x": 655,
+        "y": 1108,
+        "w": 47,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 47,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 47,
+        "h": 26
+      }
+    },
+    "spaceParts_091.png": {
+      "frame": {
+        "x": 282,
+        "y": 1099,
+        "w": 51,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 51,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 51,
+        "h": 14
+      }
+    },
+    "spaceParts_092.png": {
+      "frame": {
+        "x": 1112,
+        "y": 112,
+        "w": 11,
+        "h": 30
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 11,
+        "h": 30
+      },
+      "sourceSize": {
+        "w": 11,
+        "h": 30
+      }
+    },
+    "spaceParts_093.png": {
+      "frame": {
+        "x": 1111,
+        "y": 604,
+        "w": 16,
+        "h": 38
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 38
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 38
+      }
+    },
+    "spaceParts_094.png": {
+      "frame": {
+        "x": 1112,
+        "y": 895,
+        "w": 14,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 32
+      }
+    },
+    "spaceParts_095.png": {
+      "frame": {
+        "x": 1110,
+        "y": 1081,
+        "w": 16,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 42
+      }
+    },
+    "spaceParts_096.png": {
+      "frame": {
+        "x": 959,
+        "y": 942,
+        "w": 38,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 71
+      }
+    },
+    "spaceParts_097.png": {
+      "frame": {
+        "x": 857,
+        "y": 829,
+        "w": 48,
+        "h": 70
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 70
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 70
+      }
+    },
+    "spaceParts_098.png": {
+      "frame": {
+        "x": 822,
+        "y": 550,
+        "w": 50,
+        "h": 67
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 67
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 67
+      }
+    },
+    "spaceRocketParts_001.png": {
+      "frame": {
+        "x": 756,
+        "y": 0,
+        "w": 68,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 78
+      }
+    },
+    "spaceRocketParts_002.png": {
+      "frame": {
+        "x": 754,
+        "y": 368,
+        "w": 68,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 78
+      }
+    },
+    "spaceRocketParts_003.png": {
+      "frame": {
+        "x": 586,
+        "y": 1108,
+        "w": 69,
+        "h": 26
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 69,
+        "h": 26
+      },
+      "sourceSize": {
+        "w": 69,
+        "h": 26
+      }
+    },
+    "spaceRocketParts_004.png": {
+      "frame": {
+        "x": 754,
+        "y": 510,
+        "w": 68,
+        "h": 71
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 71
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 71
+      }
+    },
+    "spaceRocketParts_005.png": {
+      "frame": {
+        "x": 686,
+        "y": 596,
+        "w": 68,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 40
+      }
+    },
+    "spaceRocketParts_006.png": {
+      "frame": {
+        "x": 686,
+        "y": 450,
+        "w": 68,
+        "h": 73
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 73
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 73
+      }
+    },
+    "spaceRocketParts_007.png": {
+      "frame": {
+        "x": 686,
+        "y": 523,
+        "w": 68,
+        "h": 73
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 73
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 73
+      }
+    },
+    "spaceRocketParts_008.png": {
+      "frame": {
+        "x": 686,
+        "y": 345,
+        "w": 68,
+        "h": 41
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 41
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 41
+      }
+    },
+    "spaceRocketParts_009.png": {
+      "frame": {
+        "x": 686,
+        "y": 281,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_010.png": {
+      "frame": {
+        "x": 686,
+        "y": 386,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_011.png": {
+      "frame": {
+        "x": 667,
+        "y": 232,
+        "w": 82,
+        "h": 49
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 49
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 49
+      }
+    },
+    "spaceRocketParts_012.png": {
+      "frame": {
+        "x": 872,
+        "y": 1077,
+        "w": 44,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 44
+      }
+    },
+    "spaceRocketParts_013.png": {
+      "frame": {
+        "x": 919,
+        "y": 316,
+        "w": 38,
+        "h": 36
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 36
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 36
+      }
+    },
+    "spaceRocketParts_014.png": {
+      "frame": {
+        "x": 802,
+        "y": 711,
+        "w": 59,
+        "h": 52
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 59,
+        "h": 52
+      },
+      "sourceSize": {
+        "w": 59,
+        "h": 52
+      }
+    },
+    "spaceRocketParts_015.png": {
+      "frame": {
+        "x": 960,
+        "y": 913,
+        "w": 28,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 28,
+        "h": 28
+      }
+    },
+    "spaceRocketParts_016.png": {
+      "frame": {
+        "x": 754,
+        "y": 226,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_017.png": {
+      "frame": {
+        "x": 754,
+        "y": 446,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_018.png": {
+      "frame": {
+        "x": 756,
+        "y": 78,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_019.png": {
+      "frame": {
+        "x": 754,
+        "y": 581,
+        "w": 68,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 64
+      }
+    },
+    "spaceRocketParts_020.png": {
+      "frame": {
+        "x": 1066,
+        "y": 155,
+        "w": 29,
+        "h": 170
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 29,
+        "h": 170
+      },
+      "sourceSize": {
+        "w": 29,
+        "h": 170
+      }
+    },
+    "spaceRocketParts_021.png": {
+      "frame": {
+        "x": 1065,
+        "y": 501,
+        "w": 29,
+        "h": 132
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 29,
+        "h": 132
+      },
+      "sourceSize": {
+        "w": 29,
+        "h": 132
+      }
+    },
+    "spaceRocketParts_022.png": {
+      "frame": {
+        "x": 1029,
+        "y": 507,
+        "w": 36,
+        "h": 160
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 160
+      }
+    },
+    "spaceRocketParts_023.png": {
+      "frame": {
+        "x": 959,
+        "y": 418,
+        "w": 39,
+        "h": 146
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 39,
+        "h": 146
+      },
+      "sourceSize": {
+        "w": 39,
+        "h": 146
+      }
+    },
+    "spaceRocketParts_024.png": {
+      "frame": {
+        "x": 918,
+        "y": 976,
+        "w": 41,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 41,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 41,
+        "h": 80
+      }
+    },
+    "spaceRocketParts_025.png": {
+      "frame": {
+        "x": 951,
+        "y": 745,
+        "w": 40,
+        "h": 97
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 97
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 97
+      }
+    },
+    "spaceRocketParts_026.png": {
+      "frame": {
+        "x": 998,
+        "y": 0,
+        "w": 37,
+        "h": 89
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37,
+        "h": 89
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 89
+      }
+    },
+    "spaceRocketParts_027.png": {
+      "frame": {
+        "x": 872,
+        "y": 276,
+        "w": 47,
+        "h": 85
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 47,
+        "h": 85
+      },
+      "sourceSize": {
+        "w": 47,
+        "h": 85
+      }
+    },
+    "spaceRocketParts_028.png": {
+      "frame": {
+        "x": 1035,
+        "y": 0,
+        "w": 31,
+        "h": 83
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 31,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 31,
+        "h": 83
+      }
+    },
+    "spaceRocketParts_029.png": {
+      "frame": {
+        "x": 754,
+        "y": 290,
+        "w": 68,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 78
+      }
+    },
+    "spaceRocketParts_030.png": {
+      "frame": {
+        "x": 751,
+        "y": 148,
+        "w": 68,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 68,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 68,
+        "h": 78
+      }
+    },
+    "spaceRocketParts_031.png": {
+      "frame": {
+        "x": 684,
+        "y": 961,
+        "w": 74,
+        "h": 45
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 74,
+        "h": 45
+      },
+      "sourceSize": {
+        "w": 74,
+        "h": 45
+      }
+    },
+    "spaceRockets_001.png": {
+      "frame": {
+        "x": 562,
+        "y": 646,
+        "w": 122,
+        "h": 374
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 122,
+        "h": 374
+      },
+      "sourceSize": {
+        "w": 122,
+        "h": 374
+      }
+    },
+    "spaceRockets_002.png": {
+      "frame": {
+        "x": 392,
+        "y": 323,
+        "w": 157,
+        "h": 309
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 157,
+        "h": 309
+      },
+      "sourceSize": {
+        "w": 157,
+        "h": 309
+      }
+    },
+    "spaceRockets_003.png": {
+      "frame": {
+        "x": 684,
+        "y": 646,
+        "w": 118,
+        "h": 315
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 118,
+        "h": 315
+      },
+      "sourceSize": {
+        "w": 118,
+        "h": 315
+      }
+    },
+    "spaceRockets_004.png": {
+      "frame": {
+        "x": 426,
+        "y": 632,
+        "w": 136,
+        "h": 369
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 136,
+        "h": 369
+      },
+      "sourceSize": {
+        "w": 136,
+        "h": 369
+      }
+    },
+    "spaceShips_001.png": {
+      "frame": {
+        "x": 480,
+        "y": 1045,
+        "w": 106,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 106,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 106,
+        "h": 80
+      }
+    },
+    "spaceShips_002.png": {
+      "frame": {
+        "x": 276,
+        "y": 323,
+        "w": 101,
+        "h": 74
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 101,
+        "h": 74
+      },
+      "sourceSize": {
+        "w": 101,
+        "h": 74
+      }
+    },
+    "spaceShips_003.png": {
+      "frame": {
+        "x": 567,
+        "y": 191,
+        "w": 100,
+        "h": 94
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 94
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 94
+      }
+    },
+    "spaceShips_004.png": {
+      "frame": {
+        "x": 441,
+        "y": 191,
+        "w": 126,
+        "h": 108
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 126,
+        "h": 108
+      },
+      "sourceSize": {
+        "w": 126,
+        "h": 108
+      }
+    },
+    "spaceShips_005.png": {
+      "frame": {
+        "x": 344,
+        "y": 1050,
+        "w": 136,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 136,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 136,
+        "h": 84
+      }
+    },
+    "spaceShips_006.png": {
+      "frame": {
+        "x": 662,
+        "y": 0,
+        "w": 94,
+        "h": 148
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 94,
+        "h": 148
+      },
+      "sourceSize": {
+        "w": 94,
+        "h": 148
+      }
+    },
+    "spaceShips_007.png": {
+      "frame": {
+        "x": 276,
+        "y": 0,
+        "w": 172,
+        "h": 151
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 151
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 151
+      }
+    },
+    "spaceShips_008.png": {
+      "frame": {
+        "x": 562,
+        "y": 58,
+        "w": 100,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 100,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 82
+      }
+    },
+    "spaceShips_009.png": {
+      "frame": {
+        "x": 448,
+        "y": 58,
+        "w": 114,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 114,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 114,
+        "h": 82
+      }
+    },
+    "spaceStation_001.png": {
+      "frame": {
+        "x": 444,
+        "y": 151,
+        "w": 124,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 124,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 124,
+        "h": 40
+      }
+    },
+    "spaceStation_002.png": {
+      "frame": {
+        "x": 874,
+        "y": 244,
+        "w": 40,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 28
+      }
+    },
+    "spaceStation_003.png": {
+      "frame": {
+        "x": 702,
+        "y": 1104,
+        "w": 40,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 28
+      }
+    },
+    "spaceStation_004.png": {
+      "frame": {
+        "x": 814,
+        "y": 1101,
+        "w": 40,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 28
+      }
+    },
+    "spaceStation_005.png": {
+      "frame": {
+        "x": 917,
+        "y": 361,
+        "w": 42,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 44
+      }
+    },
+    "spaceStation_006.png": {
+      "frame": {
+        "x": 998,
+        "y": 89,
+        "w": 36,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 44
+      }
+    },
+    "spaceStation_007.png": {
+      "frame": {
+        "x": 1034,
+        "y": 241,
+        "w": 32,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 44
+      }
+    },
+    "spaceStation_008.png": {
+      "frame": {
+        "x": 1034,
+        "y": 371,
+        "w": 32,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 44
+      }
+    },
+    "spaceStation_009.png": {
+      "frame": {
+        "x": 1112,
+        "y": 202,
+        "w": 16,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 44
+      }
+    },
+    "spaceStation_010.png": {
+      "frame": {
+        "x": 1069,
+        "y": 929,
+        "w": 24,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 44
+      }
+    },
+    "spaceStation_011.png": {
+      "frame": {
+        "x": 824,
+        "y": 985,
+        "w": 48,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 44
+      }
+    },
+    "spaceStation_012.png": {
+      "frame": {
+        "x": 1032,
+        "y": 1073,
+        "w": 32,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 44
+      }
+    },
+    "spaceStation_013.png": {
+      "frame": {
+        "x": 758,
+        "y": 1084,
+        "w": 56,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 56,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 56,
+        "h": 44
+      }
+    },
+    "spaceStation_014.png": {
+      "frame": {
+        "x": 916,
+        "y": 1077,
+        "w": 42,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 44
+      }
+    },
+    "spaceStation_015.png": {
+      "frame": {
+        "x": 426,
+        "y": 1001,
+        "w": 122,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 122,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 122,
+        "h": 44
+      }
+    },
+    "spaceStation_016.png": {
+      "frame": {
+        "x": 919,
+        "y": 276,
+        "w": 40,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 40,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 40,
+        "h": 40
+      }
+    },
+    "spaceStation_017.png": {
+      "frame": {
+        "x": 572,
+        "y": 0,
+        "w": 82,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 82,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 44
+      }
+    },
+    "spaceStation_018.png": {
+      "frame": {
+        "x": 0,
+        "y": 1059,
+        "w": 172,
+        "h": 52
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 52
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 52
+      }
+    },
+    "spaceStation_019.png": {
+      "frame": {
+        "x": 215,
+        "y": 688,
+        "w": 172,
+        "h": 52
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 52
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 52
+      }
+    },
+    "spaceStation_020.png": {
+      "frame": {
+        "x": 562,
+        "y": 299,
+        "w": 124,
+        "h": 347
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 124,
+        "h": 347
+      },
+      "sourceSize": {
+        "w": 124,
+        "h": 347
+      }
+    },
+    "spaceStation_021.png": {
+      "frame": {
+        "x": 220,
+        "y": 400,
+        "w": 172,
+        "h": 288
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 288
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 288
+      }
+    },
+    "spaceStation_022.png": {
+      "frame": {
+        "x": 215,
+        "y": 740,
+        "w": 172,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 40
+      }
+    },
+    "spaceStation_023.png": {
+      "frame": {
+        "x": 172,
+        "y": 1059,
+        "w": 172,
+        "h": 40
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 172,
+        "h": 40
+      },
+      "sourceSize": {
+        "w": 172,
+        "h": 40
+      }
+    },
+    "spaceStation_024.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 276,
+        "h": 400
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 276,
+        "h": 400
+      },
+      "sourceSize": {
+        "w": 276,
+        "h": 400
+      }
+    },
+    "spaceStation_025.png": {
+      "frame": {
+        "x": 1112,
+        "y": 46,
+        "w": 16,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 66
+      }
+    },
+    "spaceStation_026.png": {
+      "frame": {
+        "x": 1092,
+        "y": 758,
+        "w": 24,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 24,
+        "h": 42
+      }
+    },
+    "spaceStation_027.png": {
+      "frame": {
+        "x": 1093,
+        "y": 929,
+        "w": 20,
+        "h": 66
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 20,
+        "h": 66
+      },
+      "sourceSize": {
+        "w": 20,
+        "h": 66
+      }
+    },
+    "spaceStation_028.png": {
+      "frame": {
+        "x": 448,
+        "y": 0,
+        "w": 124,
+        "h": 58
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 124,
+        "h": 58
+      },
+      "sourceSize": {
+        "w": 124,
+        "h": 58
+      }
+    },
+    "spaceStation_029.png": {
+      "frame": {
+        "x": 568,
+        "y": 148,
+        "w": 84,
+        "h": 36
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 84,
+        "h": 36
+      },
+      "sourceSize": {
+        "w": 84,
+        "h": 36
+      }
+    },
+    "spaceStation_030.png": {
+      "frame": {
+        "x": 230,
+        "y": 1099,
+        "w": 52,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 52,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 52,
+        "h": 34
+      }
+    },
+    "spaceStation_031.png": {
+      "frame": {
+        "x": 758,
+        "y": 1046,
+        "w": 60,
+        "h": 38
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 60,
+        "h": 38
+      },
+      "sourceSize": {
+        "w": 60,
+        "h": 38
+      }
+    }
+  },
+  "meta": {
+    "app": "Converted from XML",
+    "version": "1.0",
+    "image": "sprites.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1133,
+      "h": 1134
+    },
+    "scale": 1
+  }
+}

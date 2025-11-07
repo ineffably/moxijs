@@ -1,8 +1,8 @@
 import PIXI, { Point } from 'pixi.js';
-import { Logic } from '../core/logic';
-import { Scene } from '../core/scene';
-import { AsEntity, MoxiLogic, MoxiEntity } from '../core/moxi-entity';
-import { lerp } from './utils';
+import { Logic } from './logic';
+import { Scene } from './scene';
+import { AsEntity, MoxiLogic, MoxiEntity } from './moxi-entity';
+import { lerp } from '../library/utils';
 
 /**
  * Logic that handles camera movement, following targets, and smooth transitions.
@@ -24,7 +24,7 @@ export class CameraLogic extends Logic<PIXI.Container> {
   public target: PIXI.Container = null;
   
   /**
-   * The entity this behavior is attached to
+   * The entity this logic is attached to
    */
   entity: PIXI.Container<PIXI.ContainerChild>;
   
@@ -161,3 +161,4 @@ export class Camera extends PIXI.Container implements AsEntity<PIXI.Container> {
     this.scene.addChild(this);
   }
 }  
+

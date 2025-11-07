@@ -1,7 +1,7 @@
 import PIXI, { Point } from 'pixi.js';
-import { Logic } from '../core/logic';
-import { Scene } from '../core/scene';
-import { AsEntity, MoxiLogic, MoxiEntity } from '../core/moxi-entity';
+import { Logic } from './logic';
+import { Scene } from './scene';
+import { AsEntity, MoxiLogic, MoxiEntity } from './moxi-entity';
 export declare class CameraLogic extends Logic<PIXI.Container> {
     speed: number;
     target: PIXI.Container;

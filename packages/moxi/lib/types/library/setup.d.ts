@@ -1,6 +1,6 @@
 import PIXI from 'pixi.js';
 import { AssetLoader } from '../core/asset-loader';
-import { Camera } from './camera';
+import { Camera } from '../core/camera';
 import { Engine } from '../core/engine';
 import { Scene } from '../core/scene';
 export interface SetupMoxiArgs {

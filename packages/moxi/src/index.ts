@@ -2,20 +2,21 @@ import * as utils from './library/utils';
 import { RenderManager } from './core/render-manager';
 import { Scene } from './core/scene';
 import { Engine } from './core/engine';
+import { EventEmitter } from './core/event-system';
 import { ClientEvents } from './library/client-events';
 import { AssetLoader } from './core/asset-loader';
 import { Logic } from './core/logic';
 import { defaultRenderOptions, setupMoxi } from './library/setup';
 import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
-import { Camera, CameraLogic } from './library/camera';
+import { Camera, CameraLogic } from './core/camera';
 import { asTextureFrames } from './library/texture-frames';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
-import { StateMachine } from './logic/state-machine';
-import { StateLogic } from './logic/state-logic';
+import { StateMachine } from './library/state-machine';
+import { StateLogic } from './library/state-logic';
 
-export type { StateChangeEvent } from './logic/state-machine';
+export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 
 export type Asset = { src: string, alias?: string };
@@ -59,6 +60,7 @@ const exportedObjects = {
   createResizeHandler,
   defaultRenderOptions,
   Engine,
+  EventEmitter,
   loadFonts,
   MoxiEntity,
   setupMoxi,
@@ -84,6 +86,7 @@ export {
   createResizeHandler,
   defaultRenderOptions,
   Engine,
+  EventEmitter,
   loadFonts,
   MoxiEntity,
   setupMoxi,

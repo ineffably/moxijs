@@ -18,6 +18,13 @@ import PIXI from 'pixi.js';
  */
 export abstract class Logic<T> {
   /**
+   * The name of this logic component
+   * Used to identify and retrieve logic components
+   * Defaults to constructor name but should be set explicitly for production builds
+   */
+  name?: string;
+  
+  /**
    * Whether this logic is currently active and should be updated
    * @default true
    */

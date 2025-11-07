@@ -158,7 +158,9 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * ```
    */
   addLogic(logic: Logic<T>) {
-    this.logic[logic.constructor.name] = logic;
+    // Use explicit name if set, otherwise fall back to constructor name
+    const logicName = logic.name || logic.constructor.name;
+    this.logic[logicName] = logic;
   }
 
   /**

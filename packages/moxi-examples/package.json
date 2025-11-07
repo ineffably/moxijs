@@ -23,7 +23,7 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "moxi": "file:../moxi",
-    "pixi.js": "^8.6.6"
+    "moxi": "workspace:*",
+    "pixi.js": "^8.14.0"
   }
 }

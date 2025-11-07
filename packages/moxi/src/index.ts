@@ -15,9 +15,11 @@ import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-seq
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
+import { createTileGrid, getTextureRange } from './library/grid-generator';
 
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
+export type { GridOptions, CellPosition } from './library/grid-generator';
 
 export type Asset = { src: string, alias?: string };
 
@@ -58,9 +60,11 @@ const exportedObjects = {
   CameraLogic,
   ClientEvents,
   createResizeHandler,
+  createTileGrid,
   defaultRenderOptions,
   Engine,
   EventEmitter,
+  getTextureRange,
   loadFonts,
   MoxiEntity,
   setupMoxi,
@@ -84,9 +88,11 @@ export {
   CameraLogic,
   ClientEvents,
   createResizeHandler,
+  createTileGrid,
   defaultRenderOptions,
   Engine,
   EventEmitter,
+  getTextureRange,
   loadFonts,
   MoxiEntity,
   setupMoxi,

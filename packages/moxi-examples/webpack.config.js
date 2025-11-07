@@ -12,9 +12,13 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      // Use local moxi build
-      'moxi': path.resolve(__dirname, '../moxi/lib/index.js')
+      // Use local moxi source for development so webpack can properly handle externals
+      'moxi': path.resolve(__dirname, '../moxi/src/index.ts')
     }
+  },
+  externalsType: 'window',
+  externals: {
+    'pixi.js': 'PIXI'
   },
   module: {
     rules: [
@@ -28,7 +32,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
-      title: 'Moxi Examples'
+      title: 'Moxi Examples',
+      inject: 'body',
+      scriptLoading: 'blocking'
     })
   ],
   devServer: {

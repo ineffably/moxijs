@@ -15,8 +15,10 @@ import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-seq
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
+import { createTileGrid, getTextureRange } from './library/grid-generator';
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
+export type { GridOptions, CellPosition } from './library/grid-generator';
 export type Asset = {
     src: string;
     alias?: string;
@@ -55,9 +57,11 @@ declare const exportedObjects: {
     CameraLogic: typeof CameraLogic;
     ClientEvents: typeof ClientEvents;
     createResizeHandler: typeof createResizeHandler;
+    createTileGrid: typeof createTileGrid;
     defaultRenderOptions: Partial<import("pixi.js").AutoDetectOptions>;
     Engine: typeof Engine;
     EventEmitter: typeof EventEmitter;
+    getTextureRange: typeof getTextureRange;
     loadFonts: () => Promise<unknown>;
     MoxiEntity: typeof MoxiEntity;
     setupMoxi: typeof setupMoxi;
@@ -70,4 +74,4 @@ declare const exportedObjects: {
     StateLogic: typeof StateLogic;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, defaultRenderOptions, Engine, EventEmitter, loadFonts, MoxiEntity, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, utils, StateMachine, StateLogic };
+export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, utils, StateMachine, StateLogic };

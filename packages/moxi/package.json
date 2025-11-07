@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "rimraf ./lib && webpack --mode production",
     "clean": "rimraf ./lib",
     "build:dev:clean": "npm run clean && npm run build",
     "build:dev": "webpack --mode development",
@@ -26,6 +26,9 @@
     "typescript": "^5.9.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
+  },
+  "peerDependencies": {
+    "pixi.js": "^8.14.0"
   },
   "dependencies": {
     "fontfaceobserver": "^2.3.0"

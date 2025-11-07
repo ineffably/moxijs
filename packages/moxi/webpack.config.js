@@ -15,7 +15,12 @@ module.exports = (env, argv) => {
       library: { name: 'moxi', type: 'umd' }
     },
     externals: {
-      'PIXI': 'pixi.js'
+      'pixi.js': {
+        commonjs: 'pixi.js',
+        commonjs2: 'pixi.js',
+        amd: 'pixi.js',
+        root: 'PIXI'
+      }
     },
     module: {
       rules: [

@@ -1,8 +1,7 @@
-import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo } from 'moxi';
+import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
 import { PlayerMovementLogic } from '../utils/player-movement-logic';
-import { createTileGrid, getTextureRange } from '../utils/grid-generator';
 
 /**
  * Bunny Adventure Example

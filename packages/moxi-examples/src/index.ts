@@ -4,6 +4,8 @@
  */
 import { initBasicSprite } from './examples/01-basic-sprite';
 import { initRotatingSprite } from './examples/02-rotating-sprite';
+import { initPixiOnly } from './examples/03-pixi-only';
+import { initAnimatedCharacter } from './examples/04-animated-character';
 
 // Example registry
 interface Example {
@@ -22,6 +24,16 @@ const examples: Record<string, Example> = {
     name: '02 - Rotating Sprite',
     description: 'A sprite that rotates with a label showing the angle',
     init: initRotatingSprite
+  },
+  'pixi-only': {
+    name: '03 - PIXI.js Only',
+    description: 'Pure PIXI.js example without Moxi - rotating bunny grid',
+    init: initPixiOnly
+  },
+  'animated-character': {
+    name: '04 - Animated Character',
+    description: 'Sprite animation with camera following',
+    init: initAnimatedCharacter
   }
 };
 

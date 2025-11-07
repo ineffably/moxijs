@@ -8,4 +8,7 @@ node_modules
 # llm files
 .llm
 
+# playwright mcp screens shots
+.playwright-mcp
+
 

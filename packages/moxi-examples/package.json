@@ -1,13 +1,29 @@
 {
   "name": "moxi-examples",
   "version": "1.0.0",
-  "description": "",
+  "description": "Interactive examples for the Moxi game engine",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "webpack serve --mode development --open",
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "clean": "rimraf dist",
+    "local": "npm run dev"
   },
-  "keywords": [],
+  "keywords": ["moxi", "game-engine", "pixi", "examples"],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "html-webpack-plugin": "^5.6.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "dependencies": {
+    "moxi": "file:../moxi",
+    "pixi.js": "^8.6.6"
+  }
 }

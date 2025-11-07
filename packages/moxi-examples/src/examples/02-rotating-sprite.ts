@@ -1,0 +1,74 @@
+import { utils, setupMoxi, Logic, asEntity } from 'moxi';
+import { Sprite, BitmapText, Renderer } from 'pixi.js';
+import { ASSETS } from '../assets-config';
+
+const { rad2deg } = utils;
+
+class RotationLabel extends Logic<BitmapText> {
+  targetEntity: Sprite = null;
+
+  constructor(targetEntity: Sprite) {
+    super();
+    this.targetEntity = targetEntity;
+  }
+
+  update(entity: BitmapText) {
+    entity.text = `${(Math.round(rad2deg(this.targetEntity.rotation)) + 90) % 360}°`;
+  }
+}
+
+class CharacterLogic extends Logic<Sprite> {
+  update(entity: Sprite, deltaTime: number) {
+    entity.rotation += deltaTime * 0.1;
+  }
+
+  init(entity: Sprite, renderer: Renderer<HTMLCanvasElement>) {
+    const { width, height } = renderer.canvas;
+    entity.anchor.set(0.5);
+    entity.x = width / 2;
+    entity.y = height / 2;
+  }
+} 
+
+export async function initRotatingSprite() {
+  const root = document.getElementById('app');
+  if (!root) throw new Error('App element not found');
+
+  const { scene, engine, PIXIAssets, loadAssets } = await setupMoxi({ hostElement: root });
+  const { renderer } = scene;
+  renderer.background.color = 'green';
+
+  await loadAssets([
+    { src: ASSETS.ROBOT_IDLE, alias: 'character' },
+    { src: ASSETS.KENFUTURE_THIN_FONT, alias: 'kenfuture-thin' }
+  ]);
+  
+  const labelText = new BitmapText({
+    text: '0°',
+    style: {
+      fontFamily: 'kenfuture-thin', 
+      fontSize: 32, 
+      fontStyle: 'normal', 
+      fill: 'white',
+    }
+  });
+
+  const texture = PIXIAssets.get('character');
+  const characterSprite = new Sprite({ texture });
+  characterSprite.eventMode = 'none';
+
+  const label = asEntity(labelText);
+  label.position.set(renderer.canvas.width / 2, 50);
+  label.moxiEntity.addLogic(new RotationLabel(characterSprite));
+
+  const character = asEntity<Sprite>(characterSprite);
+  character.moxiEntity.addLogic(new CharacterLogic());
+  
+  scene.addChild(character);
+  scene.addChild(label);
+  scene.init();
+  engine.start();
+
+  console.log('✅ Rotating Sprite example loaded');
+}
+

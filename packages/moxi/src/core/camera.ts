@@ -12,6 +12,11 @@ import { lerp } from '../library/utils';
  */
 export class CameraLogic extends Logic<PIXI.Container> {
   /**
+   * Explicit name for the logic component (survives minification)
+   */
+  name = 'CameraLogic';
+  
+  /**
    * Speed at which the camera transitions to its target position and scale
    * @default 0.1
    */

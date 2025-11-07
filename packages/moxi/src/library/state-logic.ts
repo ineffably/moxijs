@@ -3,15 +3,10 @@ import { Container, Renderer } from 'pixi.js';
 
 export class StateLogic extends Logic<Container> {
   private _entity: Container;
-  private _name: string;
 
   constructor(name: string) {
     super();
-    this._name = name;
-  }
-
-  get name() {
-    return this._name;
+    this.name = name;
   }
 
   get entity() {

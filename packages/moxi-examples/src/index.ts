@@ -6,6 +6,8 @@ import { initBasicSprite } from './examples/01-basic-sprite';
 import { initRotatingSprite } from './examples/02-rotating-sprite';
 import { initPixiOnly } from './examples/03-pixi-only';
 import { initAnimatedCharacter } from './examples/04-animated-character';
+import { initProgressBar } from './examples/05-progress-bar';
+import { initBunnyAdventure } from './examples/06-bunny-adventure';
 
 // Example registry
 interface Example {
@@ -34,6 +36,16 @@ const examples: Record<string, Example> = {
     name: '04 - Animated Character',
     description: 'Sprite animation with camera following',
     init: initAnimatedCharacter
+  },
+  'progress-bar': {
+    name: '05 - Progress Bar',
+    description: 'Custom Logic component creating an animated progress bar',
+    init: initProgressBar
+  },
+  'bunny-adventure': {
+    name: '06 - Bunny Adventure',
+    description: 'Player movement with arrow keys, tile world, and camera',
+    init: initBunnyAdventure
   }
 };
 

@@ -3,6 +3,7 @@ import { Logic } from './logic';
 import { Scene } from './scene';
 import { AsEntity, MoxiLogic, MoxiEntity } from './moxi-entity';
 export declare class CameraLogic extends Logic<PIXI.Container> {
+    name: string;
     speed: number;
     target: PIXI.Container;
     entity: PIXI.Container<PIXI.ContainerChild>;

@@ -48,7 +48,7 @@ export async function initBunnyAdventure() {
     frameWidth: 16,
     frameHeight: 16,
     columns: 11,
-    rows: 11
+    rows: 7
   });
 
   const walkAnimationSpeed = 12;
@@ -68,8 +68,17 @@ export async function initBunnyAdventure() {
     walkRight: { frames: [14, 15], animationSpeed: walkAnimationSpeed }
   };
 
-  // Get a range of grass tiles for variety (use the first 12 frames)
-  const tileVariations = getTextureRange(grassFrames, 0, Math.min(12, grassFrames.length));
+  // Get color variant grass tiles and stone paths from rows 5-6, columns 0-5
+  // Row 5, cols 0-5: indices 55-60 (grass1-3, stonepath1-2, yellow flowers)
+  // Row 6, cols 0-5: indices 66-71 (grass4-6, stonepath3-4, yel flowers2)
+  const colorVariantTiles = getTextureRange(grassFrames, 55, 6);
+  const stonePathTiles = getTextureRange(grassFrames, 66, 6);
+  
+  // Combine tile pools for randomization
+  const tileVariations = [
+    ...colorVariantTiles,
+    ...stonePathTiles
+  ];
 
   const textureFrameSequences = new TextureFrameSequences(characterFrames, frameSequences);
 

@@ -4,18 +4,18 @@ import { Scene } from './core/scene';
 import { Engine } from './core/engine';
 import { ClientEvents } from './library/client-events';
 import { AssetLoader } from './core/asset-loader';
-import { Behavior } from './core/bahavior';
-import { defaultRenderOptions, prepMoxi } from './library/prepare';
+import { Logic } from './core/logic';
+import { defaultRenderOptions, setupMoxi } from './library/setup';
 import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
-import { Camera, CameraBehavior } from './library/camera';
+import { Camera, CameraLogic } from './library/camera';
 import { asTextureFrames } from './library/texture-frames';
-import { SceneGraph } from './library/debug-pack';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
-import { StateMachine } from './behavior-library/state-machine';
-import { StateBehavior } from './behavior-library/state-behavior';
-export type { StateChangeEvent } from './behavior-library/state-machine';
+import { StateMachine } from './logic/state-machine';
+import { StateLogic } from './logic/state-logic';
+
+export type { StateChangeEvent } from './logic/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 
 export type Asset = { src: string, alias?: string };
@@ -52,23 +52,23 @@ const exportedObjects = {
   AssetLoader,
   asEntity,
   asTextureFrames,
-  Behavior,
+  Logic,
   Camera,
-  CameraBehavior,
+  CameraLogic,
   ClientEvents,
   createResizeHandler,
   defaultRenderOptions,
   Engine,
   loadFonts,
   MoxiEntity,
-  prepMoxi,
+  setupMoxi,
   RenderManager,
   Scene,
   setupResponsiveCanvas,
   TextureFrameSequences,
   utils,
   StateMachine,
-  StateBehavior
+  StateLogic
 };
 
 export default exportedObjects;
@@ -77,23 +77,22 @@ export {
   AssetLoader,
   asEntity, 
   asTextureFrames,
-  Behavior,
+  Logic,
   Camera,
-  CameraBehavior,
+  CameraLogic,
   ClientEvents,
   createResizeHandler,
   defaultRenderOptions,
   Engine,
   loadFonts,
   MoxiEntity,
-  prepMoxi,
+  setupMoxi,
   RenderManager,
   Scene,
-  SceneGraph,
   setupResponsiveCanvas,
   TextureFrameSequences,
   utils,
   StateMachine,
-  StateBehavior
+  StateLogic
 };
 

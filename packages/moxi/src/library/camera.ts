@@ -1,16 +1,16 @@
 import PIXI, { Point } from 'pixi.js';
-import { Behavior } from '../core/bahavior';
+import { Logic } from '../core/logic';
 import { Scene } from '../core/scene';
-import { AsEntity, MoxiBehaviors, MoxiEntity } from '../core/moxi-entity';
+import { AsEntity, MoxiLogic, MoxiEntity } from '../core/moxi-entity';
 import { lerp } from './utils';
 
 /**
- * Behavior that handles camera movement, following targets, and smooth transitions.
+ * Logic that handles camera movement, following targets, and smooth transitions.
  * 
- * @category Behaviors
- * @implements {Behavior<PIXI.Container>}
+ * @category Logic
+ * @implements {Logic<PIXI.Container>}
  */
-export class CameraBehavior extends Behavior<PIXI.Container> {
+export class CameraLogic extends Logic<PIXI.Container> {
   /**
    * Speed at which the camera transitions to its target position and scale
    * @default 0.1
@@ -34,8 +34,8 @@ export class CameraBehavior extends Behavior<PIXI.Container> {
   renderer: PIXI.Renderer<HTMLCanvasElement>;
 
   /**
-   * Initialize the camera behavior
-   * @param entity - The container (camera) this behavior is attached to
+   * Initialize the camera logic
+   * @param entity - The container (camera) this logic is attached to
    * @param renderer - The PIXI renderer instance
    */
   init(entity: PIXI.Container, renderer: PIXI.Renderer) {
@@ -102,7 +102,7 @@ export class CameraBehavior extends Behavior<PIXI.Container> {
  * @example
  * ```typescript
  * // Make the camera follow a player entity
- * camera.moxiEntity.getBehavior<CameraBehavior>('CameraBehavior').target = player;
+ * camera.moxiEntity.getLogic<CameraLogic>('CameraLogic').target = player;
  * 
  * // Set the camera zoom level
  * camera.desiredScale.set(2, 2); // 2x zoom
@@ -146,18 +146,18 @@ export class Camera extends PIXI.Container implements AsEntity<PIXI.Container> {
    * Creates a new Camera instance
    * @param scene - The scene being viewed by this camera
    * @param renderer - The PIXI renderer
-   * @param behaviors - Additional behaviors to attach to this camera
+   * @param logic - Additional logic to attach to this camera
    */
-  constructor(scene: Scene, renderer: PIXI.Renderer, behaviors: MoxiBehaviors<PIXI.Container> = {}) {
+  constructor(scene: Scene, renderer: PIXI.Renderer, logic: MoxiLogic<PIXI.Container> = {}) {
     super();
     this.scene = scene;
     this.renderer = renderer;
 
-    // Initialize and attach the camera behavior
-    const cameraBehavior = new CameraBehavior();
-    cameraBehavior.init(this, renderer);
-    this.moxiEntity = new MoxiEntity<PIXI.Container>(this, behaviors);
-    this.moxiEntity.addBehavior(cameraBehavior);
+    // Initialize and attach the camera logic
+    const cameraLogic = new CameraLogic();
+    cameraLogic.init(this, renderer);
+    this.moxiEntity = new MoxiEntity<PIXI.Container>(this, logic);
+    this.moxiEntity.addLogic(cameraLogic);
     this.scene.addChild(this);
   }
 }  

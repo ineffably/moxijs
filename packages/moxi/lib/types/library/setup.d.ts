@@ -1,13 +1,13 @@
 import PIXI from 'pixi.js';
 import { AssetLoader } from '../core/asset-loader';
-import { Camera } from '../library/camera';
+import { Camera } from './camera';
 import { Engine } from '../core/engine';
 import { Scene } from '../core/scene';
-export interface PrepareArgs {
+export interface SetupMoxiArgs {
     hostElement: HTMLElement;
     renderOptions?: Partial<PIXI.AutoDetectOptions>;
 }
-export interface setupMoxiResult {
+export interface SetupMoxiResult {
     scene: Scene;
     engine: Engine;
     PIXIAssets: AssetLoader['PIXIAssets'];
@@ -15,7 +15,7 @@ export interface setupMoxiResult {
     loadAssets: AssetLoader['loadAssets'];
 }
 export declare const defaultRenderOptions: Partial<PIXI.AutoDetectOptions>;
-export declare function setupMoxi({ hostElement, renderOptions }?: PrepareArgs): Promise<{
+export declare function setupMoxi({ hostElement, renderOptions }?: SetupMoxiArgs): Promise<{
     scene: Scene;
     engine: Engine;
     PIXIAssets: PIXI.AssetsClass;

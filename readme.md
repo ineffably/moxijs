@@ -18,7 +18,7 @@ MOXI is a lightweight API and/or wrapper around [PIXIJS](https://pixijs.download
 ### Quick Example
 
 ```typescript
-import { prepMoxi, asEntity, Behavior } from 'moxi';
+import { setupMoxi, asEntity, Behavior } from 'moxi';
 import * as PIXI from 'pixi.js';
 
 // Define a behavior
@@ -32,7 +32,7 @@ class RotationBehavior extends Behavior<PIXI.Sprite> {
 
 async function start() {
   // Setup Moxi
-  const { scene, engine } = await prepMoxi({ 
+  const { scene, engine } = await setupMoxi({ 
     hostElement: document.getElementById('game')
   });
   

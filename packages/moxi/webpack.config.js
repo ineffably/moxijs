@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
-const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
+// const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const outDir = 'lib';
 
 module.exports = (env, argv) => {
@@ -34,17 +34,17 @@ module.exports = (env, argv) => {
       extensions: ['.tsx', '.ts', '.js']
     },
     plugins: [
-      new BundleStatsWebpackPlugin({
-        stats: {
-          assets: true, 
-          chunks: true,
-          modules: true,
-          timings: true,
-          version: true,
-          warnings: true,
-          colors: true, 
-        }
-      })
+      // new BundleStatsWebpackPlugin({
+      //   stats: {
+      //     assets: true, 
+      //     chunks: true,
+      //     modules: true,
+      //     timings: true,
+      //     version: true,
+      //     warnings: true,
+      //     colors: true, 
+      //   }
+      // })
     ]
   }
 

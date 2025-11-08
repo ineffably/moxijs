@@ -8,6 +8,7 @@ import { initPixiOnly } from './examples/03-pixi-only';
 import { initAnimatedCharacter } from './examples/04-animated-character';
 import { initProgressBar } from './examples/05-progress-bar';
 import { initBunnyAdventure } from './examples/06-bunny-adventure';
+import { initParallaxSpaceShooter } from './examples/07-parallax-space-shooter';
 
 // Example registry
 interface Example {
@@ -46,6 +47,11 @@ const examples: Record<string, Example> = {
     name: '06 - Bunny Adventure',
     description: 'Player movement with arrow keys, tile world, and camera',
     init: initBunnyAdventure
+  },
+  'parallax-space-shooter': {
+    name: '07 - Parallax Space Shooter',
+    description: 'Parallax scrolling with multiple background layers at different speeds',
+    init: initParallaxSpaceShooter
   }
 };
 

@@ -34,6 +34,7 @@ export const ASSETS = {
   SPACE_NEBULA_BLUE: '../assets/space-backgrounds/Nebula Blue.png',
   SPACE_NEBULA_RED: '../assets/space-backgrounds/Nebula Red.png',
   SPACE_STARS_SMALL: '../assets/space-backgrounds/Stars Small_1.png',
+  SPACE_STARS_SMALL_2: '../assets/space-backgrounds/Stars Small_2.png',
   SPACE_SHOOTER_SHEET: '../assets/space-sprite-sheets/space-shooter.png',
   SPACE_SHOOTER_JSON: '../assets/space-sprite-sheets/space-shooter.json',
   

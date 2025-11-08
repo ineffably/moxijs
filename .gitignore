@@ -11,4 +11,6 @@ node_modules
 # playwright mcp screens shots
 .playwright-mcp
 
+.claude
+
 

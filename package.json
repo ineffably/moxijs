@@ -13,12 +13,16 @@
     "clean": "npm run clean --workspaces --if-present",
     "build:dev": "npm run build:dev --workspaces --if-present",
     "watch": "concurrently \"npm run watch --workspace=moxi-examples\" \"npm run watch --workspace=moxi\"",
-    "examples": "npm run local --workspace=moxi-examples"
+    "examples": "npm run local --workspace=moxi-examples",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",

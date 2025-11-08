@@ -16,9 +16,13 @@ import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
+import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
+import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
+export type { ParallaxBackgroundOptions } from './library/parallax-background';
+export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
 export type Asset = {
     src: string;
     alias?: string;
@@ -64,14 +68,18 @@ declare const exportedObjects: {
     getTextureRange: typeof getTextureRange;
     loadFonts: () => Promise<unknown>;
     MoxiEntity: typeof MoxiEntity;
+    ParallaxBackground: typeof ParallaxBackground;
+    ParallaxBackgroundLogic: typeof ParallaxBackgroundLogic;
+    ParallaxLayer: typeof ParallaxLayer;
     setupMoxi: typeof setupMoxi;
     RenderManager: typeof RenderManager;
     Scene: typeof Scene;
     setupResponsiveCanvas: typeof setupResponsiveCanvas;
     TextureFrameSequences: typeof TextureFrameSequences;
+    TilingParallaxLayer: typeof TilingParallaxLayer;
     utils: typeof utils;
     StateMachine: typeof StateMachine;
     StateLogic: typeof StateLogic;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, utils, StateMachine, StateLogic };
+export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic };

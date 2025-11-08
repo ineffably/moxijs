@@ -16,10 +16,14 @@ import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
+import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
+import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
+export type { ParallaxBackgroundOptions } from './library/parallax-background';
+export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
 
 export type Asset = { src: string, alias?: string };
 
@@ -67,11 +71,15 @@ const exportedObjects = {
   getTextureRange,
   loadFonts,
   MoxiEntity,
+  ParallaxBackground,
+  ParallaxBackgroundLogic,
+  ParallaxLayer,
   setupMoxi,
   RenderManager,
   Scene,
   setupResponsiveCanvas,
   TextureFrameSequences,
+  TilingParallaxLayer,
   utils,
   StateMachine,
   StateLogic
@@ -81,7 +89,7 @@ export default exportedObjects;
 
 export {
   AssetLoader,
-  asEntity, 
+  asEntity,
   asTextureFrames,
   Logic,
   Camera,
@@ -95,11 +103,15 @@ export {
   getTextureRange,
   loadFonts,
   MoxiEntity,
+  ParallaxBackground,
+  ParallaxBackgroundLogic,
+  ParallaxLayer,
   setupMoxi,
   RenderManager,
   Scene,
   setupResponsiveCanvas,
   TextureFrameSequences,
+  TilingParallaxLayer,
   utils,
   StateMachine,
   StateLogic

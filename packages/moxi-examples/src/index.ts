@@ -9,6 +9,7 @@ import { initAnimatedCharacter } from './examples/04-animated-character';
 import { initProgressBar } from './examples/05-progress-bar';
 import { initBunnyAdventure } from './examples/06-bunny-adventure';
 import { initParallaxSpaceShooter } from './examples/07-parallax-space-shooter';
+import { initPhysicsBasic } from './examples/08-physics-basic';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -23,6 +24,7 @@ import animatedCharacterSource from './examples/04-animated-character.ts?raw';
 import progressBarSource from './examples/05-progress-bar.ts?raw';
 import bunnyAdventureSource from './examples/06-bunny-adventure.ts?raw';
 import parallaxSpaceShooterSource from './examples/07-parallax-space-shooter.ts?raw';
+import physicsBasicSource from './examples/08-physics-basic.ts?raw';
 
 // Example registry
 interface Example {
@@ -74,6 +76,12 @@ const examples: Record<string, Example> = {
     description: 'Parallax scrolling with multiple background layers at different speeds',
     init: initParallaxSpaceShooter,
     source: parallaxSpaceShooterSource
+  },
+  'physics-basic': {
+    name: '08 - Physics Basic',
+    description: 'Physics system with Planck.js - falling boxes, bouncing balls',
+    init: initPhysicsBasic,
+    source: physicsBasicSource
   }
 };
 

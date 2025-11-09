@@ -5564,7 +5564,7 @@
   "meta": {
     "app": "Converted from XML",
     "version": "1.0",
-    "image": "sprites.png",
+    "image": "spaceShooter2_spritesheet.png",
     "format": "RGBA8888",
     "size": {
       "w": 1133,

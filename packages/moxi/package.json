@@ -31,6 +31,7 @@
     "pixi.js": "^8.14.0"
   },
   "dependencies": {
-    "fontfaceobserver": "^2.3.0"
+    "fontfaceobserver": "^2.3.0",
+    "planck": "^1.4.2"
   }
 }

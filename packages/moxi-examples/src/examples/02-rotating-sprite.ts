@@ -40,15 +40,15 @@ export async function initRotatingSprite() {
 
   await loadAssets([
     { src: ASSETS.ROBOT_IDLE, alias: 'character' },
-    { src: ASSETS.KENFUTURE_THIN_FONT, alias: 'kenfuture-thin' }
+    { src: ASSETS.KENNEY_FUTURE_THIN_FONT, alias: 'kenney-future-thin' }
   ]);
   
   const labelText = new BitmapText({
     text: '0°',
     style: {
-      fontFamily: 'kenfuture-thin', 
-      fontSize: 32, 
-      fontStyle: 'normal', 
+      fontFamily: 'kenney-future-thin',
+      fontSize: 32,
+      fontStyle: 'normal',
       fill: 'white',
     }
   });

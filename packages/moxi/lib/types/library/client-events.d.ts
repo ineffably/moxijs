@@ -12,7 +12,7 @@ export declare class ClientEvents {
     keyDownEvent: KeyboardEvent;
     keyUpEvent: KeyboardEvent;
     keydown: Record<string, KeyboardEvent>;
-    wheelOffets: Point;
+    wheelOffsets: Point;
     movePosition: Point;
     lastMovePosition: Point;
     moveDelta: Point;

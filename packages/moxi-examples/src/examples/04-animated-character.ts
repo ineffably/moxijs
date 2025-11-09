@@ -8,7 +8,7 @@ import { ASSETS } from '../assets-config';
  */
 
 export async function initAnimatedCharacter() {
-  const root = document.getElementById('app');
+  const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
   // Get the Moxi setup

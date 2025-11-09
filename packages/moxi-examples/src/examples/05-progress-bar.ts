@@ -125,7 +125,7 @@ export class ProgressBarLogic extends Logic<PIXI.Sprite> {
 }
 
 export async function initProgressBar() {
-  const root = document.getElementById('app');
+  const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
   const { scene, engine, loadAssets } = await setupMoxi({ hostElement: root });

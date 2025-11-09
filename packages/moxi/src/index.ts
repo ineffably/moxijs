@@ -18,12 +18,37 @@ import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
+import {
+  PhysicsWorld,
+  PhysicsBodyLogic,
+  PhysicsDebugRenderer,
+  CollisionRegistry,
+  CollisionManager,
+  asPhysicsEntity,
+  hasPhysics,
+  getPhysicsBody,
+  createShapeFromSprite,
+  PhysicsMaterials,
+  applyMaterial
+} from './library/physics';
 
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
+export type {
+  BodyType,
+  SyncMode,
+  ShapeType,
+  CollisionTag,
+  ShapeConfig,
+  PhysicsWorldOptions,
+  PhysicsBodyOptions,
+  PhysicsDebugOptions,
+  CollisionEvent,
+  RaycastCallback
+} from './library/physics';
 
 export type Asset = { src: string, alias?: string };
 
@@ -82,7 +107,18 @@ const exportedObjects = {
   TilingParallaxLayer,
   utils,
   StateMachine,
-  StateLogic
+  StateLogic,
+  PhysicsWorld,
+  PhysicsBodyLogic,
+  PhysicsDebugRenderer,
+  CollisionRegistry,
+  CollisionManager,
+  asPhysicsEntity,
+  hasPhysics,
+  getPhysicsBody,
+  createShapeFromSprite,
+  PhysicsMaterials,
+  applyMaterial
 };
 
 export default exportedObjects;
@@ -114,6 +150,17 @@ export {
   TilingParallaxLayer,
   utils,
   StateMachine,
-  StateLogic
+  StateLogic,
+  PhysicsWorld,
+  PhysicsBodyLogic,
+  PhysicsDebugRenderer,
+  CollisionRegistry,
+  CollisionManager,
+  asPhysicsEntity,
+  hasPhysics,
+  getPhysicsBody,
+  createShapeFromSprite,
+  PhysicsMaterials,
+  applyMaterial
 };
 

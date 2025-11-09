@@ -37,6 +37,7 @@ export const ASSETS = {
   SPACE_STARS_SMALL_2: '../assets/space-backgrounds/Stars Small_2.png',
   SPACE_SHOOTER_SHEET: '../assets/space-sprite-sheets/space-shooter.png',
   SPACE_SHOOTER_JSON: '../assets/space-sprite-sheets/space-shooter.json',
+  SPACE_SHOOTER2_JSON: '../assets/space-sprite-sheets/spaceShooter2_spritesheet.json',
   
   // UI
   UI_BUTTONS: '../assets/ui-pack/png/blue_button00.png',

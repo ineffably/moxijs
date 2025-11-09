@@ -119,7 +119,7 @@ class CameraZoomLogic extends Logic<any> {
 class ShipMovementLogic extends Logic<PIXI.Sprite> {
   name = 'ShipMovementLogic';
   private clientEvents: ClientEvents;
-  private speed: number = 3;
+  private speed: number = 5; // Increased for more responsive feel
 
   init(entity: PIXI.Sprite, renderer: PIXI.Renderer) {
     this.clientEvents = new ClientEvents();

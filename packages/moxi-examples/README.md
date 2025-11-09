@@ -1,129 +1,128 @@
-# Moxi Examples
+# MOXI Examples
 
-Interactive examples showcasing the Moxi game engine capabilities.
+Working demos that show you what MOXI can do. Each example is self-contained and builds on the previous ones, so you can see how things actually work instead of just reading about it.
 
-## 🎯 Structure
+## Running the examples
+
+```bash
+npm install
+npm start
+```
+
+Open http://localhost:9000 and click through the examples in the sidebar. No page reloads needed - they switch live.
+
+## What's in here
+
+### 01 - Basic MOXI
+The absolute basics. Sets up MOXI, creates an entity, adds it to the scene. If this doesn't make sense, start here.
+
+### 02 - Camera System
+Camera that follows a target around. Shows bounds constraints and smooth following. Move the bunny with arrow keys.
+
+### 03 - Bunny Adventure
+Full tilemap platformer with animations. Multiple terrain types, character movement, proper collision. Uses the Sproutlands asset pack.
+
+### 04 - State Machines
+Character behavior using finite state machines. Idle, walking, jumping states with proper transitions.
+
+### 05 - Font Loading
+How to load custom fonts and use them in MOXI. Uses the Kenvector Future font.
+
+### 06 - Parallax Fantasy
+Multi-layer parallax scrolling with the Fantasy High Forest assets. Different layers scroll at different speeds for depth.
+
+### 07 - Parallax Space Shooter
+Top-down space shooter with parallax starfields. Mouse wheel zooms, arrow keys move the ship.
+
+### 08 - Physics Basic
+Physics simulation with Planck.js. Falling boxes, bouncing balls, static ground. Click to spawn more boxes. Press 'P' to see physics debug view.
+
+## Project layout
 
 ```
 moxi-examples/
 ├── src/
-│   ├── index.ts              # Main entry point with example selector
-│   ├── index.html            # HTML template with styling
-│   ├── assets-config.ts      # Centralized asset path configuration
-│   └── examples/             # Individual examples
-│       ├── 01-basic-sprite.ts
-│       ├── 02-rotating-sprite.ts
-│       └── 03-camera-follow.ts
-├── assets/                   # All game assets (preserved)
-├── webpack.config.js         # Webpack configuration
-├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies and scripts
-
+│   ├── index.ts              # Example selector and loader
+│   ├── index.html            # HTML template
+│   ├── assets-config.ts      # All asset paths in one place
+│   └── examples/             # Individual example files
+│       ├── 01-basic-moxi.ts
+│       ├── 02-camera-system.ts
+│       ├── 03-bunny-adventure.ts
+│       ├── 04-state-machines.ts
+│       ├── 05-font-loading.ts
+│       ├── 06-parallax-fantasy.ts
+│       ├── 07-parallax-space-shooter.ts
+│       └── 08-physics-basic.ts
+├── assets/                   # All the game assets
+├── webpack.config.js
+└── package.json
 ```
 
-## 🚀 Getting Started
+## Available assets
 
-### Install Dependencies
-```bash
-npm install
-```
+We've got a bunch of asset packs included:
 
-### Development Server
-```bash
-npm run dev
-```
-Open http://localhost:9000
+**Characters**
+- Robot sprite
+- Sproutlands characters, chicken, cow
+- Fantasy High Forest character with animations
 
-### Build for Production
+**Environments**
+- Sproutlands tilesets (grass, water, hills)
+- Fantasy forest backgrounds
+- Space backgrounds (nebulas, stars)
+
+**Objects**
+- Furniture, plants, tools
+- Space ships and meteors
+- Two complete UI packs
+
+All paths are in `assets-config.ts` so you don't have to hunt around for them.
+
+## Building for production
+
 ```bash
 npm run build
 ```
 
-## 📦 What's New
+Outputs to the `dist/` folder. Everything gets bundled and minified.
 
-### ✅ Completed
+## Adding your own example
 
-1. **Unified Build System**
-   - Single webpack bundle using local moxi build
-   - Hot reload development server
-   - Asset copying handled automatically
-
-2. **Simplified Structure**
-   - Centralized asset configuration (`assets-config.ts`)
-   - Clean example structure in `/src/examples/`
-   - No more complex loader logic
-
-3. **Interactive UI**
-   - Beautiful sidebar with example selector
-   - Live switching between examples
-   - No page reloads needed
-
-4. **New Examples**
-   - `01-basic-sprite` - Simplest possible example
-   - `02-rotating-sprite` - Adding logic to entities
-   - `03-camera-follow` - Camera system demo
-
-### 📋 TODO
-
-1. **Update Existing Examples**
-   - Migrate bunny-adventure with corrected asset paths
-   - Simplify character-state example
-   - Update progress-bar example
-
-2. **New Examples to Create**
-   - Space shooter using space-sprite-sheets
-   - Fantasy platformer using LegacyFantasy assets
-   - UI showcase using ui-pack assets
-   - Particle effects example
-   - State machine example
-
-3. **Asset Corrections**
-   - Current examples reference `./assets/sproutlands/` 
-   - Actual folder is `./assets/sprout-lands-basic/`
-   - All paths now corrected in `assets-config.ts`
-
-## 🎮 Available Assets
-
-### Characters
-- Robot (single sprite)
-- Sproutlands characters (spritesheet)
-- Fantasy High Forest character (multiple animations)
-- Chicken & Cow sprites
-
-### Environments
-- Grass, Water, Hills tilesets
-- Fantasy forest assets
-- Space backgrounds (nebulas, stars)
-
-### Objects
-- Furniture, Plants, Tools
-- Space ships (spritesheet with JSON)
-- UI elements (2 complete UI packs)
-
-## 🔧 Key Improvements
-
-1. **No More Boilerplate**
-   - Removed 50+ lines of resize handling per example
-   - Simplified asset loading
-   - Cleaner initialization
-
-2. **Better Organization**
-   - Assets centrally managed
-   - Examples self-contained
-   - TypeScript strict mode enabled
-
-3. **Modern Development**
-   - Webpack 5
-   - TypeScript 5
-   - PIXI.js 8
-   - Local moxi build integration
-
-## 📝 Next Steps
-
-Run `npm install` then `npm run dev` to see the examples in action!
-
-For adding new examples:
-1. Create a new file in `src/examples/`
-2. Export an `init` function
+1. Create a new file in `src/examples/` - call it whatever
+2. Export an async function called `init` + your example name:
+   ```typescript
+   export async function initYourExample() {
+     // Your code here
+   }
+   ```
 3. Add it to the registry in `src/index.ts`
+4. Refresh the page - it'll show up in the sidebar
 
+That's it. No webpack config changes, no build setup, just write code.
+
+## What this shows you
+
+These examples demonstrate:
+- Entity-Component System basics
+- Camera system with following and bounds
+- Tilemap generation and rendering
+- Sprite animation and frame sequences
+- State machines for game logic
+- Custom font loading
+- Multi-layer parallax scrolling
+- Physics simulation with collision detection
+- Input handling (keyboard, mouse, wheel)
+
+Each one is meant to be readable. If you see something confusing, that's probably a bug in the example, not you.
+
+## Stack
+
+- Webpack 5 for bundling
+- TypeScript 5 with strict mode
+- PixiJS 8 for rendering
+- Local moxi build (from `../moxi`)
+- Planck.js for physics (example 08)
+
+Hot reload works in dev mode, so you can edit examples and see changes immediately.

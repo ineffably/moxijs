@@ -31,7 +31,7 @@ class CharacterLogic extends Logic<Sprite> {
 } 
 
 export async function initRotatingSprite() {
-  const root = document.getElementById('app');
+  const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
   const { scene, engine, PIXIAssets, loadAssets } = await setupMoxi({ hostElement: root });

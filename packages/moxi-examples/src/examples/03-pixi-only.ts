@@ -6,7 +6,7 @@ import { Application, Assets, Container, Sprite } from 'pixi.js';
  */
 
 export async function initPixiOnly() {
-  const root = document.getElementById('app');
+  const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
   // Clear any existing content

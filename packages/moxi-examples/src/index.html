@@ -111,8 +111,7 @@
     #app {
       flex: 1;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
       background: #1a1a1a;
       position: relative;
       overflow: hidden;
@@ -139,6 +138,103 @@
       color: #999;
       font-size: 14px;
     }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #252526;
+      border-bottom: 1px solid #3a3a3a;
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #969696;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #cccccc;
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      border-bottom-color: #007acc; /* VS Code blue accent */
+    }
+
+    /* Canvas Container */
+    #canvas-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    /* When split view is active, resize canvas to 60% */
+    #app.split-view #canvas-container {
+      flex: 0 0 60%;
+      max-height: 60%;
+    }
+
+    #canvas-container canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Code Container */
+    #code-container {
+      background: #1e1e1e; /* VS Code dark background */
+      overflow: hidden; /* CodeMirror handles scrolling */
+      position: relative;
+      display: none;
+      flex: 0 0 40%;
+      border-top: 1px solid #3a3a3a;
+    }
+
+    /* Show code container in split view */
+    #app.split-view #code-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* CodeMirror will inject its own styles, we just need container styles */
+    #code-container .cm-editor {
+      height: 100%;
+      font-size: 14px;
+    }
+
+    /* Optional: Custom scrollbar for CodeMirror (VS Code style) */
+    #code-container .cm-scroller::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+
+    #code-container .cm-scroller::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+
+    #code-container .cm-scroller::-webkit-scrollbar-thumb {
+      background: #424242;
+      border: 3px solid #1e1e1e;
+      border-radius: 7px;
+    }
+
+    #code-container .cm-scroller::-webkit-scrollbar-thumb:hover {
+      background: #4e4e4e;
+    }
   </style>
 </head>
 <body>
@@ -151,7 +247,21 @@
       <!-- Example buttons will be injected here -->
     </div>
     <div id="app">
-      <div class="loading">Loading...</div>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="canvas">Canvas</button>
+        <button class="tab-btn" data-tab="code">Code</button>
+      </div>
+
+      <!-- Canvas Container - Always visible -->
+      <div id="canvas-container">
+        <div class="loading">Loading...</div>
+      </div>
+
+      <!-- Code Viewer Container - Shows in split view -->
+      <div id="code-container">
+        <!-- CodeMirror will mount here -->
+      </div>
     </div>
   </div>
 </body>

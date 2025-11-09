@@ -210,7 +210,7 @@ export class PhysicsWorld {
   /**
    * Enable debug renderer
    */
-  enableDebugRenderer(scene: any, options: PhysicsDebugOptions = {}): PhysicsDebugRenderer {
+  enableDebugRenderer(scene: PIXI.Container, options: PhysicsDebugOptions = {}): PhysicsDebugRenderer {
     // Clean up existing debug renderer if any
     if (this.debugRenderer) {
       this.disableDebugRenderer();

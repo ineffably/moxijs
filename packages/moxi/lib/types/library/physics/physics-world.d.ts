@@ -29,7 +29,7 @@ export declare class PhysicsWorld {
     toPixels(meters: number): number;
     toPhysicsPoint(point: PIXI.Point): planck.Vec2;
     toPixelsPoint(vec: planck.Vec2): PIXI.Point;
-    enableDebugRenderer(scene: any, options?: PhysicsDebugOptions): PhysicsDebugRenderer;
+    enableDebugRenderer(scene: PIXI.Container, options?: PhysicsDebugOptions): PhysicsDebugRenderer;
     disableDebugRenderer(): void;
     getDebugRenderer(): PhysicsDebugRenderer | undefined;
     getBodies(): planck.Body[];

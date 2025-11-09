@@ -3,7 +3,7 @@ import { Asset } from '..';
 
 export class AssetLoader {
   PIXIAssets: PIXI.AssetsClass = PIXI.Assets;
-  textures: any[] = [];
+  textures: PIXI.Texture[] = [];
 
   loadAssets = async (assets: Asset[]) => {
     const { PIXIAssets } = this;

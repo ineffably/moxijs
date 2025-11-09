@@ -5,6 +5,7 @@ import { Engine } from './core/engine';
 import { EventEmitter } from './core/event-system';
 import { ClientEvents } from './library/client-events';
 import { AssetLoader } from './core/asset-loader';
+import { Point } from 'pixi.js';
 import { Logic } from './core/logic';
 import { defaultRenderOptions, setupMoxi } from './library/setup';
 import { loadFonts } from './library/font-loader';
@@ -58,7 +59,7 @@ export interface OnEvent {
 }
 
 export interface ClientEventsArgs {
-  initWheelOffset?: any;
+  initWheelOffset?: Point;
   onAnyEvent?: (ev: OnEvent) => void;
 }
 

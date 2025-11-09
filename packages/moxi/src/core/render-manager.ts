@@ -11,7 +11,7 @@ export class RenderManager {
 
   htmlRoot: HTMLElement;
   renderer: PIXI.Renderer;
-  fitToWindow = false;;
+  fitToWindow = false;
 
   constructor(htmlRoot: HTMLElement, renderer: PIXI.Renderer) {
     this.htmlRoot = htmlRoot;

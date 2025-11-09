@@ -95,7 +95,7 @@ class CameraZoomLogic extends Logic<any> {
 
   update(entity: any, deltaTime: number) {
     // Get wheel delta from ClientEvents
-    const wheelDelta = this.clientEvents.wheelOffets.y;
+    const wheelDelta = this.clientEvents.wheelOffsets.y;
 
     if (wheelDelta !== 0) {
       // Zoom in (wheel up) or out (wheel down)
@@ -108,7 +108,7 @@ class CameraZoomLogic extends Logic<any> {
       entity.desiredScale.set(clampedZoom);
 
       // Reset wheel offsets after processing
-      this.clientEvents.wheelOffets.y = 0;
+      this.clientEvents.wheelOffsets.y = 0;
     }
   }
 }

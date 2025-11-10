@@ -12,6 +12,12 @@ export const ASSETS = {
   SPROUTLANDS_CHARACTER: '../assets/sprout-lands-basic/Characters/Basic Charakter Spritesheet.png',
   CHICKEN: '../assets/sprout-lands-basic/Characters/Free Chicken Sprites.png',
   COW: '../assets/sprout-lands-basic/Characters/Free Cow Sprites.png',
+
+  // Dinos
+  DINO_DOUX: '../assets/dino/doux.png',
+  DINO_MORT: '../assets/dino/mort.png',
+  DINO_TARD: '../assets/dino/tard.png',
+  DINO_VITA: '../assets/dino/vita.png',
   
   // Tiles
   GRASS_TILES: '../assets/sprout-lands-basic/Tilesets/Grass.png',
@@ -22,6 +28,7 @@ export const ASSETS = {
   FURNITURE: '../assets/sprout-lands-basic/Objects/Basic_Furniture.png',
   PLANTS: '../assets/sprout-lands-basic/Objects/Basic_Plants.png',
   TOOLS: '../assets/sprout-lands-basic/Objects/Basic_tools_and_meterials.png',
+  GRASS_BIOME_THINGS: '../assets/sprout-lands-basic/Objects/Basic_Grass_Biom_things.png',
   
   // Fantasy Theme
   FANTASY_CHARACTER_IDLE: '../assets/LegacyFantasy-HighForest/Character/Idle/Idle-Sheet.png',

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "Grass Biome Objects",
+    "name": "Grass Biome Things",
     "filename": "Basic_Grass_Biom_things.png",
     "tileSize": 16,
     "gridDimensions": {"columns": 9, "rows": 5}

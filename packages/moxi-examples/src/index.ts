@@ -10,6 +10,7 @@ import { initProgressBar } from './examples/05-progress-bar';
 import { initBunnyAdventure } from './examples/06-bunny-adventure';
 import { initParallaxSpaceShooter } from './examples/07-parallax-space-shooter';
 import { initPhysicsBasic } from './examples/08-physics-basic';
+import { initDinoAIBehaviors } from './examples/09-dino-ai-behaviors';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -25,6 +26,7 @@ import progressBarSource from './examples/05-progress-bar.ts?raw';
 import bunnyAdventureSource from './examples/06-bunny-adventure.ts?raw';
 import parallaxSpaceShooterSource from './examples/07-parallax-space-shooter.ts?raw';
 import physicsBasicSource from './examples/08-physics-basic.ts?raw';
+import dinoAIBehaviorsSource from './examples/09-dino-ai-behaviors.ts?raw';
 
 // Example registry
 interface Example {
@@ -82,6 +84,12 @@ const examples: Record<string, Example> = {
     description: 'Physics system with Planck.js - falling boxes, bouncing balls',
     init: initPhysicsBasic,
     source: physicsBasicSource
+  },
+  'dino-ai-behaviors': {
+    name: '09 - Dino AI Behaviors',
+    description: 'AI behaviors using FSM and Logic: Follow, Flee, Patrol, Wander',
+    init: initDinoAIBehaviors,
+    source: dinoAIBehaviorsSource
   }
 };
 

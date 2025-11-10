@@ -73,16 +73,9 @@ export class ParallaxLayer extends PIXI.Container implements AsEntity<PIXI.Conta
     const scrollX = (cameraPos.x + backgroundOffset.x) * this.scrollScale.x;
     const scrollY = (cameraPos.y + backgroundOffset.y) * this.scrollScale.y;
 
-    // Zoom compensation: adjust offset based on camera zoom to prevent displacement
-    // When zoom changes, layers at different scroll scales shift relative to the focal point
-    // This compensation keeps them anchored correctly
-    // Formula derived from: offset = (1 - scrollScale) * (1.0 + 1.0 / zoom)
-    const zoomCompensationX = (1 - this.scrollScale.x) * (1.0 / cameraScale.x);
-    const zoomCompensationY = (1 - this.scrollScale.y) * (1.0 / cameraScale.y);
-
-    // Apply to layer position with zoom compensation
-    this.position.x = -scrollX + this.scrollOffset.x * zoomCompensationX;
-    this.position.y = -scrollY + this.scrollOffset.y * zoomCompensationY;
+    // Apply to layer position
+    this.position.x = -scrollX + this.scrollOffset.x;
+    this.position.y = -scrollY + this.scrollOffset.y;
 
     // Handle mirroring/wrapping if enabled
     if (this.mirroring) {
@@ -188,6 +181,8 @@ export class TilingParallaxLayer extends ParallaxLayer {
   ): void {
     // Auto-detect dimensions on first update if not manually specified
     this.autoDetectDimensions();
+    // console.log('updateParallax', cameraScale);
+
 
     // Adjust TilingSprite size based on camera zoom to ensure full coverage
     // When zoomed out (scale < 1), we need a larger sprite to cover the viewport
@@ -208,25 +203,9 @@ export class TilingParallaxLayer extends ParallaxLayer {
     const scrollX = (cameraPos.x + backgroundOffset.x) * this.scrollScale.x;
     const scrollY = (cameraPos.y + backgroundOffset.y) * this.scrollScale.y;
 
-    // Zoom compensation offset to prevent displacement during zoom changes
-    // Derived from Godot formula: offset = viewport_center * (1 - scrollScale) * (1.0 + 1.0 / zoom)
-    // This keeps layers anchored to the correct position relative to the zoom focal point
-    const renderer = this.parent?.parent as any; // Get renderer from scene
-    if (renderer?.renderer) {
-      const viewportCenterX = renderer.renderer.width * 0.5;
-      const viewportCenterY = renderer.renderer.height * 0.5;
-
-      const zoomOffsetX = viewportCenterX * (1 - this.scrollScale.x) * (1.0 + 1.0 / cameraScale.x);
-      const zoomOffsetY = viewportCenterY * (1 - this.scrollScale.y) * (1.0 + 1.0 / cameraScale.y);
-
-      // Apply to tilePosition with zoom compensation
-      this.tilingSprite.tilePosition.x = -scrollX + this.scrollOffset.x + zoomOffsetX;
-      this.tilingSprite.tilePosition.y = -scrollY + this.scrollOffset.y + zoomOffsetY;
-    } else {
-      // Fallback without zoom compensation
-      this.tilingSprite.tilePosition.x = -scrollX + this.scrollOffset.x;
-      this.tilingSprite.tilePosition.y = -scrollY + this.scrollOffset.y;
-    }
+    // Apply to tilePosition
+    this.tilingSprite.tilePosition.x = -scrollX;
+    this.tilingSprite.tilePosition.y = -scrollY;
 
     // Layer container stays at origin (0, 0) since ParallaxBackground follows camera
     this.position.set(0, 0);

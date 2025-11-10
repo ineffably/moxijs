@@ -125,17 +125,24 @@ export class ParallaxBackgroundLogic extends Logic<ParallaxBackground> {
     const cameraPos = entity.getCameraPosition();
     const cameraScale = entity.getCameraScale();
 
-    // CRITICAL: Position the ParallaxBackground to cancel out the scene's camera transform
-    // Since ParallaxBackground is a child of scene, and scene is positioned at (-camera.x, -camera.y),
-    // we need to position ParallaxBackground at (camera.x, camera.y) to keep it centered on viewport
-    // Additionally, account for scene scale
+    // Position the ParallaxBackground to stay screen-aligned
+    // Since ParallaxBackground is a child of scene with pivot at viewport center,
+    // we need to counter-scale to keep layers at 1:1 screen scale
     const scene = entity.parent;
     if (scene) {
+      // Position to stay centered on viewport despite camera movement
+      // Account for scene scale since scene.position is scaled
       entity.position.x = cameraPos.x / scene.scale.x;
       entity.position.y = cameraPos.y / scene.scale.y;
+
+      // Counter-scale to cancel inherited scene scale
+      // This keeps TilingSprite sizing in screen-space coordinates
+      entity.scale.x = 1 / scene.scale.x;
+      entity.scale.y = 1 / scene.scale.y;
     } else {
       entity.position.x = cameraPos.x;
       entity.position.y = cameraPos.y;
+      entity.scale.set(1, 1);
     }
 
     // Update all child ParallaxLayers

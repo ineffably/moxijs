@@ -178,7 +178,7 @@ export async function initParallaxSpaceShooter() {
   });
 
   // Set space background color
-  scene.renderer.background.color = 0x000000; // Black space
+  scene.renderer.background.color = 0xFF69B4; // Hot pink (DEBUG)
 
   // Load space assets
   await loadAssets([

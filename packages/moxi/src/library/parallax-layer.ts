@@ -183,31 +183,31 @@ export class TilingParallaxLayer extends ParallaxLayer {
     this.autoDetectDimensions();
     // console.log('updateParallax', cameraScale);
 
+    // Get renderer dimensions to use as base size
+    const renderer = this.parent?.parent as any; // Get renderer from scene
+    if (renderer?.renderer) {
+      const baseWidth = renderer.renderer.width;
+      const baseHeight = renderer.renderer.height;
 
-    // Adjust TilingSprite size based on camera zoom to ensure full coverage
-    // When zoomed out (scale < 1), we need a larger sprite to cover the viewport
-    // When zoomed in (scale > 1), sprite can be smaller but we keep it at renderer size for simplicity
-    const baseWidth = this.tilingSprite.texture.width;
-    const baseHeight = this.tilingSprite.texture.height;
+      // ParallaxBackground counter-scales, so we're in screen-space
+      // Just set to renderer size - no zoom adjustment needed
+      this.tilingSprite.width = baseWidth;
+      this.tilingSprite.height = baseHeight;
 
-    // Only resize if we have valid base dimensions (after auto-detect)
-    if (baseWidth > 1 && baseHeight > 1) {
-      const scaleX = Math.max(0.1, cameraScale.x); // Clamp to avoid division by zero
-      const scaleY = Math.max(0.1, cameraScale.y);
-
-      this.tilingSprite.width = baseWidth / scaleX;
-      this.tilingSprite.height = baseHeight / scaleY;
+      // Keep sprite at origin
+      this.tilingSprite.pivot.set(0, 0);
+      this.tilingSprite.position.set(0, 0);
     }
 
     // Calculate effective scroll offset for tilePosition
     const scrollX = (cameraPos.x + backgroundOffset.x) * this.scrollScale.x;
     const scrollY = (cameraPos.y + backgroundOffset.y) * this.scrollScale.y;
 
-    // Apply to tilePosition
-    this.tilingSprite.tilePosition.x = -scrollX;
-    this.tilingSprite.tilePosition.y = -scrollY;
+    // Apply to tilePosition (with layer's own scrollOffset for positioning)
+    this.tilingSprite.tilePosition.x = -scrollX + this.scrollOffset.x;
+    this.tilingSprite.tilePosition.y = -scrollY + this.scrollOffset.y;
 
-    // Layer container stays at origin (0, 0) since ParallaxBackground follows camera
+    // Layer container stays at origin - scene pivot handles zoom anchoring
     this.position.set(0, 0);
   }
 

@@ -644,12 +644,553 @@ fontFamily: 'ExactFontName'
 
 ---
 
+## Text Behaviors with MOXI Logic
+
+MOXI's entity-component architecture provides an elegant way to encapsulate text animations and behaviors. By extending the `Logic<T>` class, you can create reusable components that update text in response to game state, time, or user input.
+
+### Core Concept: Logic Components
+
+The `Logic<T>` base class provides two key lifecycle methods:
+- `init(entity?, renderer?, ...args)`: Called once when entity is initialized
+- `update(entity?, deltaTime?)`: Called every frame with delta time in seconds
+
+**Basic Pattern:**
+```typescript
+import { Logic } from 'moxi';
+import { BitmapText } from 'pixi.js';
+
+class MyTextLogic extends Logic<BitmapText> {
+  private text: BitmapText;
+
+  constructor(text: BitmapText) {
+    super();
+    this.text = text;
+  }
+
+  update(entity?: BitmapText, deltaTime?: number): void {
+    if (!deltaTime) return;
+    // Update text behavior here
+  }
+}
+```
+
+### Pattern 1: Counter Logic
+
+Create an incrementing counter that updates text every frame:
+
+```typescript
+class CounterLogic extends Logic<PIXI.BitmapText> {
+  private currentValue = 0;
+  private incrementSpeed: number;
+  private text: PIXI.BitmapText;
+
+  constructor(text: PIXI.BitmapText, incrementSpeed: number) {
+    super();
+    this.text = text;
+    this.incrementSpeed = incrementSpeed;
+  }
+
+  update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+    if (!deltaTime) return;
+    this.currentValue += this.incrementSpeed;
+    this.text.text = this.currentValue.toString();
+  }
+}
+
+// Usage:
+const counter = new PIXI.BitmapText({
+  text: '0',
+  style: { fontFamily: 'MyFont', fontSize: 32 }
+});
+
+const counterEntity = asEntity(counter);
+counterEntity.moxiEntity.addLogic(new CounterLogic(counter, 1234));
+scene.addChild(counterEntity);
+
+// Update in game loop:
+engine.ticker.add((ticker) => {
+  const deltaTime = ticker.deltaTime / 60; // Convert to seconds
+  counterEntity.moxiEntity.update(deltaTime);
+});
+```
+
+**Key Insights:**
+- Store both the text reference and state (currentValue) in the Logic component
+- `deltaTime` is frame-independent time, but for frame-locked behavior (like counters), you can ignore it
+- Use BitmapText for frequently updating counters (better performance)
+
+### Pattern 2: FPS Counter Logic
+
+Calculate and display real-time performance metrics:
+
+```typescript
+class FPSCounterLogic extends Logic<PIXI.BitmapText> {
+  private text: PIXI.BitmapText;
+  private frameCount = 0;
+  private lastTime = 0;
+  private fps = 60;
+
+  constructor(text: PIXI.BitmapText) {
+    super();
+    this.text = text;
+  }
+
+  init(entity?: PIXI.BitmapText, renderer?: PIXI.Renderer, ...args: any[]): void {
+    // Initialize timestamp on first frame
+    this.lastTime = performance.now();
+  }
+
+  update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+    this.frameCount++;
+    const currentTime = performance.now();
+    const delta = currentTime - this.lastTime;
+
+    // Update FPS once per second
+    if (delta >= 1000) {
+      this.fps = Math.round((this.frameCount * 1000) / delta);
+      this.text.text = `FPS: ${this.fps}`;
+      this.frameCount = 0;
+      this.lastTime = currentTime;
+    }
+  }
+}
+
+// Usage:
+const fpsCounter = new PIXI.BitmapText({
+  text: 'FPS: 60',
+  style: { fontFamily: 'MyFont', fontSize: 24 }
+});
+fpsCounter.anchor.set(1, 0); // Top-right anchor
+fpsCounter.position.set(1260, 20);
+
+const fpsEntity = asEntity(fpsCounter);
+fpsEntity.moxiEntity.addLogic(new FPSCounterLogic(fpsCounter));
+```
+
+**Techniques:**
+- Use `performance.now()` for accurate timing
+- Calculate average FPS over a window (1 second) instead of per-frame
+- Initialize state in `init()` method when you need renderer context
+
+### Pattern 3: Animated Tint Logic
+
+Cycle through HSL colors for rainbow effects:
+
+```typescript
+class AnimatedTintLogic extends Logic<PIXI.Text> {
+  private hue = 0;
+  private text: PIXI.Text;
+
+  constructor(text: PIXI.Text) {
+    super();
+    this.text = text;
+  }
+
+  update(entity?: PIXI.Text, deltaTime?: number): void {
+    if (!deltaTime) return;
+    this.hue = (this.hue + 1) % 360;
+    this.text.tint = this.hslToHex(this.hue, 100, 50);
+  }
+
+  private hslToHex(h: number, s: number, l: number): number {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = (n: number) => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color);
+    };
+    return (f(0) << 16) | (f(8) << 8) | f(4);
+  }
+}
+
+// Usage:
+const animatedText = new PIXI.Text({
+  text: 'RAINBOW',
+  style: { fontSize: 36, fill: 0xffffff }
+});
+
+const animatedEntity = asEntity(animatedText);
+animatedEntity.moxiEntity.addLogic(new AnimatedTintLogic(animatedText));
+```
+
+**Techniques:**
+- Store animation state (hue) in the Logic component
+- Use `.tint` for efficient color changes (no texture regeneration)
+- Modulo operator (`%`) for smooth looping animations
+
+### Pattern 4: Fading Text Logic
+
+Create text that fades out over time with a trigger mechanism:
+
+```typescript
+class FadingTextLogic extends Logic<PIXI.BitmapText> {
+  private text: PIXI.BitmapText;
+  private lifetime = 0;
+  private maxLifetime = 0;
+  private fadeStartPercent = 0.5; // Start fading at 50% of lifetime
+
+  constructor(text: PIXI.BitmapText) {
+    super();
+    this.text = text;
+  }
+
+  /**
+   * Trigger a new fade cycle
+   */
+  trigger(maxLifetime: number) {
+    this.lifetime = 0;
+    this.maxLifetime = maxLifetime;
+    this.text.alpha = 1; // Reset to fully visible
+  }
+
+  update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+    if (!deltaTime || this.text.alpha === 0) return;
+
+    this.lifetime += deltaTime;
+    const fadeStart = this.maxLifetime * this.fadeStartPercent;
+
+    // Start fading after fadeStart threshold
+    if (this.lifetime > fadeStart) {
+      const fadeProgress = (this.lifetime - fadeStart) / (this.maxLifetime - fadeStart);
+      this.text.alpha = Math.max(0, 1 - fadeProgress);
+    }
+
+    // Fully fade out at max lifetime
+    if (this.lifetime >= this.maxLifetime) {
+      this.text.alpha = 0;
+    }
+  }
+}
+
+// Usage:
+const actionLabel = new PIXI.BitmapText({
+  text: 'CRITICAL!',
+  style: { fontFamily: 'MyFont', fontSize: 24 }
+});
+actionLabel.alpha = 0; // Start invisible
+
+const labelEntity = asEntity(actionLabel);
+const fadeLogic = new FadingTextLogic(actionLabel);
+labelEntity.moxiEntity.addLogic(fadeLogic);
+
+// Trigger fade when needed
+character.on('attack', () => {
+  actionLabel.text = 'ATTACK!';
+  fadeLogic.trigger(1.5); // Fade over 1.5 seconds
+});
+```
+
+**Techniques:**
+- Use `trigger()` method to restart animations
+- Track normalized progress with `fadeProgress` (0 to 1)
+- Early return when `alpha === 0` to skip unnecessary calculations
+- Configurable `fadeStartPercent` allows fade to start partway through lifetime
+
+### Pattern 5: Floating Damage Numbers
+
+Create floating numbers that move upward and fade out:
+
+```typescript
+class FloatingNumberLogic extends Logic<PIXI.BitmapText> {
+  private text: PIXI.BitmapText;
+  private velocity: { x: number; y: number };
+  private lifetime = 0;
+  private maxLifetime: number;
+  private fadeStart: number;
+  private isCritical: boolean;
+  private onDestroy?: () => void;
+
+  constructor(
+    text: PIXI.BitmapText,
+    velocity: { x: number; y: number },
+    maxLifetime: number,
+    isCritical: boolean,
+    onDestroy?: () => void
+  ) {
+    super();
+    this.text = text;
+    this.velocity = velocity;
+    this.maxLifetime = maxLifetime;
+    this.isCritical = isCritical;
+    this.fadeStart = maxLifetime * 0.3; // Start fading at 30% of lifetime
+    this.onDestroy = onDestroy;
+  }
+
+  update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+    if (!deltaTime) return;
+    this.lifetime += deltaTime;
+
+    // Update position
+    this.text.x += this.velocity.x;
+    this.text.y += this.velocity.y;
+
+    // Apply horizontal drag
+    this.velocity.x *= 0.95;
+
+    // Scale animation for critical hits
+    if (this.isCritical && this.lifetime < 0.2) {
+      const scaleProgress = this.lifetime / 0.2;
+      this.text.scale.set(0.5 + scaleProgress * 0.5);
+    }
+
+    // Fade out
+    if (this.lifetime > this.fadeStart) {
+      const fadeProgress = (this.lifetime - fadeStart) / (this.maxLifetime - this.fadeStart);
+      this.text.alpha = 1 - fadeProgress;
+    }
+
+    // Remove when expired
+    if (this.lifetime >= this.maxLifetime && this.onDestroy) {
+      this.onDestroy();
+    }
+  }
+}
+
+// Usage:
+function spawnDamageNumber(x: number, y: number, value: number, isCritical: boolean) {
+  const damageText = new PIXI.BitmapText({
+    text: isCritical ? `${value}!` : value.toString(),
+    style: {
+      fontFamily: 'MyFont',
+      fontSize: isCritical ? 48 : 32
+    }
+  });
+  damageText.tint = isCritical ? 0xffaa00 : 0xff4444;
+  damageText.position.set(x, y);
+  damageText.anchor.set(0.5);
+
+  if (isCritical) {
+    damageText.scale.set(0.5); // Will animate to 1.0
+  }
+
+  const entity = asEntity(damageText);
+  const velocity = {
+    x: (Math.random() - 0.5) * 2,
+    y: isCritical ? -3 : -2
+  };
+
+  entity.moxiEntity.addLogic(
+    new FloatingNumberLogic(
+      damageText,
+      velocity,
+      isCritical ? 1.0 : 0.8,
+      isCritical,
+      () => {
+        container.removeChild(entity);
+        entity.destroy();
+      }
+    )
+  );
+
+  entity.moxiEntity.init(renderer);
+  container.addChild(entity);
+}
+```
+
+**Techniques:**
+- Callback pattern with `onDestroy` for cleanup
+- Combine multiple effects: movement, fading, scaling
+- Apply physics-like behavior (drag with `velocity.x *= 0.95`)
+- Different behavior based on state (`isCritical`)
+
+### Pattern 6: Rainbow Digit Counter
+
+Update individual digit colors based on their value:
+
+```typescript
+class RainbowCounterLogic extends Logic<PIXI.Container> {
+  private currentValue = 0;
+  private incrementSpeed: number;
+  private container: PIXI.Container;
+  private digits: PIXI.BitmapText[] = [];
+
+  constructor(container: PIXI.Container, incrementSpeed: number) {
+    super();
+    this.container = container;
+    this.incrementSpeed = incrementSpeed;
+  }
+
+  update(entity?: PIXI.Container, deltaTime?: number): void {
+    if (!deltaTime) return;
+    this.currentValue += this.incrementSpeed;
+    this.updateDigits(this.currentValue);
+  }
+
+  private getRainbowColor(digit: number): number {
+    const rainbowColors = [
+      0xff0000, 0xff9900, 0xffff00, 0xaaff00, 0x00ff00,
+      0x00ffaa, 0x00ddff, 0x0088ff, 0xaa00ff, 0xff00ff
+    ];
+    return rainbowColors[digit] || 0xffffff;
+  }
+
+  private updateDigits(value: number): void {
+    const digitStrings = value.toString().split('');
+
+    // Remove excess digits if number shrinks
+    while (this.digits.length > digitStrings.length) {
+      const digit = this.digits.pop();
+      if (digit) this.container.removeChild(digit);
+    }
+
+    // Update or create digits
+    for (let i = 0; i < digitStrings.length; i++) {
+      const digitValue = parseInt(digitStrings[i]);
+
+      if (!this.digits[i]) {
+        // Create new digit
+        const digitText = new PIXI.BitmapText({
+          text: digitStrings[i],
+          style: { fontFamily: 'MyFont', fontSize: 64 }
+        });
+        this.digits.push(digitText);
+        this.container.addChild(digitText);
+      } else {
+        // Update existing digit
+        this.digits[i].text = digitStrings[i];
+      }
+
+      // Color based on digit value
+      this.digits[i].tint = this.getRainbowColor(digitValue);
+      this.digits[i].x = i * 45; // Spacing
+    }
+  }
+}
+```
+
+**Techniques:**
+- Dynamic digit creation/removal based on value
+- Array management for variable-length numbers
+- Reuse text objects instead of recreating
+- Separate color mapping logic into helper method
+
+### Best Practices for Text Logic Components
+
+#### 1. Store References, Not Entity Parameters
+
+**❌ Don't rely on optional entity parameter:**
+```typescript
+update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+  // BAD: entity parameter might be undefined
+  entity.text = 'value';
+}
+```
+
+**✅ Store reference in constructor:**
+```typescript
+class MyLogic extends Logic<PIXI.BitmapText> {
+  private text: PIXI.BitmapText;
+
+  constructor(text: PIXI.BitmapText) {
+    super();
+    this.text = text; // Store reliable reference
+  }
+
+  update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+    this.text.text = 'value'; // Always available
+  }
+}
+```
+
+#### 2. Use BitmapText for Frequently Updated Text
+
+Text that updates every frame should use BitmapText:
+```typescript
+// ✅ Good: BitmapText for frame-by-frame updates
+class CounterLogic extends Logic<PIXI.BitmapText> { /* ... */ }
+
+// ❌ Bad: Regular Text regenerates texture every frame
+class CounterLogic extends Logic<PIXI.Text> { /* slow! */ }
+```
+
+#### 3. Handle DeltaTime Correctly
+
+Understand when to use `deltaTime`:
+
+```typescript
+// Frame-independent movement (smooth at any FPS)
+this.text.x += this.velocity.x * deltaTime;
+
+// Frame-locked behavior (same at 60 FPS)
+this.currentValue += this.incrementSpeed; // No deltaTime
+```
+
+#### 4. Clean Up with Callbacks
+
+Use callbacks for self-destroying entities:
+
+```typescript
+constructor(text: PIXI.BitmapText, onComplete?: () => void) {
+  super();
+  this.onComplete = onComplete;
+}
+
+update(entity?: PIXI.BitmapText, deltaTime?: number): void {
+  if (this.shouldDestroy && this.onComplete) {
+    this.onComplete(); // Let parent handle cleanup
+  }
+}
+```
+
+#### 5. Initialize State in Constructor or init()
+
+**Use constructor** for simple state:
+```typescript
+constructor(text: PIXI.BitmapText) {
+  super();
+  this.text = text;
+  this.value = 0; // Simple initialization
+}
+```
+
+**Use init()** for renderer-dependent setup:
+```typescript
+init(entity?: PIXI.BitmapText, renderer?: PIXI.Renderer, ...args: any[]): void {
+  this.lastTime = performance.now(); // Timing initialization
+  // Access renderer if needed
+}
+```
+
+### Combining Multiple Logic Components
+
+You can add multiple Logic components to a single entity:
+
+```typescript
+const text = new PIXI.BitmapText({ text: 'Hello', style: { /* ... */ } });
+const entity = asEntity(text);
+
+// Add multiple behaviors
+entity.moxiEntity.addLogic(new FadingTextLogic(text));
+entity.moxiEntity.addLogic(new AnimatedTintLogic(text));
+entity.moxiEntity.addLogic(new FloatingNumberLogic(text, velocity, lifetime, false));
+
+// All Logic components update on each frame
+entity.moxiEntity.update(deltaTime);
+```
+
+**Note:** Be careful with conflicting behaviors (e.g., two Logic components both setting alpha).
+
+### Complete Working Example
+
+See `examples/10-text-rendering.ts` for a complete implementation featuring:
+- CounterLogic (line 17)
+- RainbowCounterLogic (line 38)
+- AnimatedTintLogic (line 97)
+- OdometerLogic (line 127)
+- FPSCounterLogic (line 236)
+- FadingTextLogic (line 268)
+- FloatingNumberLogic (line 308)
+
+---
+
 ## Resources
 
 - [PixiJS v8 Text Guide](https://pixijs.com/8.x/guides/components/scene-objects/text)
 - [PixiJS Examples - Text](https://pixijs.com/8.x/examples/text)
 - [BMFont Generator](https://www.angelcode.com/products/bmfont/)
 - [MSDF Bitmap Font Generator](https://github.com/soimy/msdf-bmfont-xml)
+- [MOXI Documentation](../../README.md)
 
 ---
 
@@ -658,7 +1199,8 @@ fontFamily: 'ExactFontName'
 - **Use Text** for UI elements with rich styling that don't update frequently
 - **Use BitmapText** for performance-critical text, counters, and large volumes
 - **Use HTMLText** for complex formatted content and markup
+- **Use MOXI Logic components** to encapsulate text behaviors and animations
 - **Always set resolution** appropriately to prevent blurriness in scaled scenes
 - **Profile your application** to identify text rendering bottlenecks
 
-Remember: The best method depends on your specific use case. Start with Text for prototyping, then optimize with BitmapText or HTMLText as needed.
+Remember: The best method depends on your specific use case. Start with Text for prototyping, optimize with BitmapText for performance, and use MOXI Logic to organize complex behaviors.

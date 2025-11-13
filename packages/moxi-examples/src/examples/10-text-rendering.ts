@@ -81,7 +81,7 @@ export async function initTextRendering() {
     bitmapCounter.text = currentValue.toString();
   });
 
-  // Multi-color counter - each digit has different shade of green
+  // Multi-color counter - each digit has different rainbow color (ROYGBP)
   const coloredCounterContainer = new PIXI.Container();
   coloredCounterContainer.position.set(100, 230);
   scene.addChild(coloredCounterContainer);
@@ -89,13 +89,22 @@ export async function initTextRendering() {
   let coloredValue = 0;
   const coloredDigits: PIXI.BitmapText[] = [];
 
-  // Function to get green shade based on digit value (0-9)
-  const getGreenShade = (digit: number): number => {
-    // Map 0-9 to green intensity range (0x002200 to 0x00ff00)
-    const minGreen = 0x22;
-    const maxGreen = 0xff;
-    const greenValue = Math.floor(minGreen + (digit / 9) * (maxGreen - minGreen));
-    return (greenValue << 8); // Shift to green channel
+  // Function to get rainbow color based on digit value (0-9)
+  // Maps digits to rainbow spectrum: Red → Orange → Yellow → Green → Blue → Purple
+  const getRainbowColor = (digit: number): number => {
+    const rainbowColors = [
+      0xff0000,  // 0 = Red
+      0xff9900,  // 1 = Orange (brighter)
+      0xffff00,  // 2 = Yellow
+      0xaaff00,  // 3 = Lime (more yellow, distinct from green)
+      0x00ff00,  // 4 = Green
+      0x00ffaa,  // 5 = Spring Green/Turquoise (more cyan, distinct from green)
+      0x00ddff,  // 6 = Cyan (bright)
+      0x0088ff,  // 7 = Sky Blue
+      0xaa00ff,  // 8 = Purple/Violet
+      0xff00ff   // 9 = Magenta
+    ];
+    return rainbowColors[digit] || 0xffffff;
   };
 
   // Update colored counter digits
@@ -129,7 +138,7 @@ export async function initTextRendering() {
       }
 
       // Set tint based on digit value
-      coloredDigits[i].tint = getGreenShade(digitValue);
+      coloredDigits[i].tint = getRainbowColor(digitValue);
 
       // Position digit
       coloredDigits[i].x = i * 45; // Space between digits
@@ -148,7 +157,7 @@ export async function initTextRendering() {
 
   let odometerValue = 0;
   const digitHeight = 64;
-  const odometerDigitSlots: { container: PIXI.Container; scrollContainer: PIXI.Container; currentY: number; targetY: number }[] = [];
+  const odometerDigitSlots: { container: PIXI.Container; scrollContainer: PIXI.Container; currentY: number; targetY: number; lastDigit: number }[] = [];
 
   // Create scrolling digit slot
   const createDigitSlot = (index: number) => {
@@ -165,9 +174,9 @@ export async function initTextRendering() {
     const scrollContainer = new PIXI.Container();
     scrollContainer.mask = mask;
 
-    // Render digits in NORMAL order (0,1,2...9) twice for seamless wrapping
-    // Position them BELOW the mask, scroll UP (negative y) to reveal them
-    // This makes numbers appear to move DOWN when counting UP
+    // Render digits in REVERSE order (0,1,2...9) twice for seamless wrapping
+    // Position them ABOVE the mask, scroll DOWN (positive y) to reveal them
+    // This makes numbers appear to move UP when counting UP
     for (let i = 0; i < 20; i++) {
       const displayDigit = i % 10; // 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9
       const digitText = new PIXI.BitmapText({
@@ -178,17 +187,19 @@ export async function initTextRendering() {
         }
       });
       digitText.tint = 0xff6600; // Orange
-      digitText.anchor.y = 0.5; // Center vertically only
-      digitText.x = 0;
-      digitText.y = i * digitHeight + digitHeight / 2; // Center in 64px slot
+      digitText.anchor.set(0.5, 0.5); // Center both horizontally and vertically
+      digitText.x = 22.5; // Center in 45px wide slot
+      digitText.y = -i * digitHeight + 29; // Adjusted up 3px from center (32 - 3 = 29)
       scrollContainer.addChild(digitText);
     }
 
     slotContainer.addChild(scrollContainer);
     odometerContainer.addChild(slotContainer);
 
-    return { container: slotContainer, scrollContainer, currentY: 0, targetY: 0 };
+    return { container: slotContainer, scrollContainer, currentY: 0, targetY: 0, lastDigit: 0 };
   };
+
+  let previousValue = 0;
 
   // Update odometer with scrolling animation
   const updateOdometer = (value: number) => {
@@ -199,36 +210,43 @@ export async function initTextRendering() {
       odometerDigitSlots.push(createDigitSlot(odometerDigitSlots.length));
     }
 
-    // Update each digit's target position
+    // Calculate how much the value changed
+    const delta = value - previousValue;
+    previousValue = value;
+
+    // Update each digit's scroll position
     for (let i = 0; i < digits.length; i++) {
       const digitValue = parseInt(digits[i]);
       const slot = odometerDigitSlots[i];
 
-      // Map digit value directly to position
-      let targetPos = digitValue;
-      const normalTargetY = -targetPos * digitHeight;
+      // Only update target when digit actually changes (prevents bouncing)
+      if (digitValue !== slot.lastDigit) {
+        const idealY = digitValue * digitHeight; // POSITIVE for reverse scroll
 
-      // RULE: Always scroll in one direction (more negative) when counting up
-      // If the target would cause backward scroll (less negative y), use second occurrence instead
-      // This handles wrapping (9→0) and skipped digits (8→0, 7→0, etc.) when counting fast
-      if (normalTargetY > slot.currentY) {
-        targetPos = digitValue + 10; // Use second occurrence for seamless forward scroll
+        // Check if we need to wrap (going forward would mean wrap backward)
+        if (idealY < slot.targetY) {
+          // Wrapped (9→0): scroll to position 10, then snap back
+          slot.targetY = (digitValue + 10) * digitHeight;
+        } else {
+          // Normal case: scroll forward to new digit
+          slot.targetY = idealY;
+        }
+
+        slot.lastDigit = digitValue;
       }
 
-      slot.targetY = -targetPos * digitHeight;
-
-      // Smooth scrolling animation
+      // Smooth scrolling animation with lerp
       const diff = slot.targetY - slot.currentY;
       if (Math.abs(diff) > 0.5) {
         slot.currentY += diff * 0.15;
       } else {
         slot.currentY = slot.targetY;
+      }
 
-        // If we reached position 10 (second 0), snap back to position 0 (first 0)
-        if (Math.abs(slot.currentY - (-10 * digitHeight)) < 1) {
-          slot.currentY = 0;
-          slot.targetY = 0;
-        }
+      // Snap back from position 10 to 0 after wrapping
+      if (slot.currentY >= (10 * digitHeight - 1)) {
+        slot.currentY -= 10 * digitHeight;
+        slot.targetY -= 10 * digitHeight;
       }
 
       slot.scrollContainer.y = slot.currentY;

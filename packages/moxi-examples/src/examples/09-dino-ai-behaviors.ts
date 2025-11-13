@@ -1,10 +1,10 @@
 import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange, Logic } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { PlayerMovementLogic } from '../utils/player-movement-logic';
+import { PlayerMovementLogic } from '../behavior-logic/player-movement-logic';
 import { DinoAIStateMachine } from '../utils/dino-ai-state-machine';
-import { DinoAnimationLogic } from '../utils/dino-animation-logic';
-import { HideLogic } from '../utils/hide-logic';
+import { DinoAnimationLogic } from '../behavior-logic/dino-animation-logic';
+import { HideLogic } from '../behavior-logic/hide-logic';
 
 /**
  * Dino AI Behaviors Example
@@ -260,8 +260,10 @@ export async function initDinoAIBehaviors() {
     style: {
       fontSize: 10,
       fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 }
-    }
+      stroke: { color: 0x000000, width: 2 },
+      padding: 4  // Prevent stroke from being cut off
+    },
+    resolution: 3  // Match camera scale for crisp text
   });
   douxLabel.anchor.set(0.5);
   douxLabel.position.set(0, -20);
@@ -298,8 +300,10 @@ export async function initDinoAIBehaviors() {
     style: {
       fontSize: 10,
       fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 }
-    }
+      stroke: { color: 0x000000, width: 2 },
+      padding: 4  // Prevent stroke from being cut off
+    },
+    resolution: 3  // Match camera scale for crisp text
   });
   mortLabel.anchor.set(0.5);
   mortLabel.position.set(0, -20);
@@ -318,6 +322,9 @@ export async function initDinoAIBehaviors() {
       } else {
         mortLabel.text = 'Idle';
       }
+
+      // Counter-flip label so it always faces forward
+      mortLabel.scale.x = Math.abs(mortLabel.scale.x) * Math.sign(dinoMort.scale.x);
 
       // Play sneak animation when seeking hide or hidden
       if (mortHideLogic.isSeekingHide() || mortHideLogic.isCurrentlyHidden()) {
@@ -366,8 +373,10 @@ export async function initDinoAIBehaviors() {
     style: {
       fontSize: 10,
       fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 }
-    }
+      stroke: { color: 0x000000, width: 2 },
+      padding: 4  // Prevent stroke from being cut off
+    },
+    resolution: 3  // Match camera scale for crisp text
   });
   tardLabel.anchor.set(0.5);
   tardLabel.position.set(0, -20);
@@ -402,8 +411,10 @@ export async function initDinoAIBehaviors() {
     style: {
       fontSize: 10,
       fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 }
-    }
+      stroke: { color: 0x000000, width: 2 },
+      padding: 4  // Prevent stroke from being cut off
+    },
+    resolution: 3  // Match camera scale for crisp text
   });
   vitaLabel.anchor.set(0.5);
   vitaLabel.position.set(0, -20);
@@ -421,22 +432,37 @@ export async function initDinoAIBehaviors() {
       if (douxState) {
         douxLabel.text = douxState;
       }
+      // Counter-flip label so it always faces forward
+      douxLabel.scale.x = Math.abs(douxLabel.scale.x) * Math.sign(dinoDoux.scale.x);
 
       // Update Tard label
       const tardState = tardAI.getCurrentState();
       if (tardState) {
         tardLabel.text = tardState;
       }
+      // Counter-flip label so it always faces forward
+      tardLabel.scale.x = Math.abs(tardLabel.scale.x) * Math.sign(dinoTard.scale.x);
 
       // Update Vita label
       const vitaState = vitaAI.getCurrentState();
       if (vitaState) {
         vitaLabel.text = vitaState;
       }
+      // Counter-flip label so it always faces forward
+      vitaLabel.scale.x = Math.abs(vitaLabel.scale.x) * Math.sign(dinoVita.scale.x);
     }
   })();
   labelUpdater.init(bunnyEntity, scene.renderer);
   bunnyEntity.moxiEntity.addLogic(labelUpdater);
+
+  // Create a stage container to hold both the scene and UI layer
+  const stage = new PIXI.Container();
+  stage.addChild(scene);
+
+  // Create UI layer for screen-space elements (rendered on top, not affected by camera)
+  const uiLayer = new PIXI.Container();
+  uiLayer.name = 'uiLayer';
+  stage.addChild(uiLayer);
 
   // Create HUD at the top of the screen (in screen space, not world space)
   const hud = new PIXI.Container();
@@ -468,25 +494,39 @@ export async function initDinoAIBehaviors() {
     hud.addChild(indicator);
 
     // Dino name
-    const nameText = new PIXI.Text(info.name, {
-      fontSize: 11,
-      fill: 0xffffff,
-      fontWeight: 'bold'
+    const nameText = new PIXI.Text({
+      text: info.name,
+      style: {
+        fontSize: 11,
+        fill: 0xffffff,
+        fontWeight: 'bold'
+      },
+      resolution: 2  // Higher resolution for HUD text
     });
     nameText.position.set(info.x + 18, 8);
     hud.addChild(nameText);
 
     // Behavior label
-    const behaviorText = new PIXI.Text(info.behavior, {
-      fontSize: 9,
-      fill: 0xcccccc
+    const behaviorText = new PIXI.Text({
+      text: info.behavior,
+      style: {
+        fontSize: 9,
+        fill: 0xcccccc
+      },
+      resolution: 2  // Higher resolution for HUD text
     });
     behaviorText.position.set(info.x + 18, 24);
     hud.addChild(behaviorText);
   });
 
-  // Add HUD directly to the stage (not the scene) so it stays in screen space
-  scene.renderer.lastObjectRendered.addChild(hud);
+  // Add HUD to the UI layer (stays fixed on screen)
+  uiLayer.addChild(hud);
+
+  // Modify the scene's draw method to render the stage instead
+  const originalDraw = scene.draw.bind(scene);
+  scene.draw = function(deltaTime: number) {
+    scene.renderer.render(stage);
+  };
 
   // Initialize and start
   scene.init();

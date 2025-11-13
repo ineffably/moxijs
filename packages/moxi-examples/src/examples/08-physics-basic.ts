@@ -10,6 +10,7 @@ import {
   getPhysicsBody
 } from 'moxi';
 import { Graphics, Point, Sprite, Assets } from 'pixi.js';
+import * as planck from 'planck';
 import { ASSETS } from '../assets-config';
 
 export async function initPhysicsBasic() {
@@ -138,37 +139,106 @@ export async function initPhysicsBasic() {
   meteorEntity.y = 100; // Higher up so it drops
   scene.addChild(meteorEntity);
 
-  // Mouse interaction - click to spawn boxes
+  // Mouse interaction - drag physics objects with MouseJoint
   const canvasElement = scene.renderer.canvas;
-  canvasElement.addEventListener('click', (e) => {
-    const rect = canvasElement.getBoundingClientRect();
 
-    // Convert from screen coordinates to canvas coordinates
-    // Account for canvas display size vs internal resolution
+  // Drag state
+  let mouseJoint: any = null; // planck.MouseJoint
+  let groundBody: any = null; // Static body for joint anchor
+  let mouseWorldPos: any = null; // Current mouse in world coords
+
+  // Helper to convert screen to world coords
+  const screenToWorld = (clientX: number, clientY: number) => {
+    const rect = canvasElement.getBoundingClientRect();
     const scaleX = scene.renderer.width / rect.width;
     const scaleY = scene.renderer.height / rect.height;
+    const pixelX = (clientX - rect.left) * scaleX;
+    const pixelY = (clientY - rect.top) * scaleY;
 
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    return physicsWorld!.toPhysicsPoint(new Point(pixelX, pixelY));
+  };
 
-    const box = new Graphics();
-    box.rect(-25, -25, 50, 50);
-    box.fill(colors[Math.floor(Math.random() * colors.length)]);
+  // Helper to find body under mouse (using AABB query)
+  const findBodyAtPoint = (worldPoint: any): any => {
+    let foundBody: any = null;
+    const aabb = planck.AABB(
+      planck.Vec2(worldPoint.x - 0.001, worldPoint.y - 0.001),
+      planck.Vec2(worldPoint.x + 0.001, worldPoint.y + 0.001)
+    );
 
-    // Graphics collision shape is auto-extracted!
-    const boxEntity = asPhysicsEntity(box, physicsWorld!, {
-      type: 'dynamic',
-      ...PhysicsMaterials.wood,
-      collisionTags: ['object'],
-      collidesWith: ['terrain', 'object']
+    physicsWorld!.world.queryAABB(aabb, (fixture: any) => {
+      const body = fixture.getBody();
+      if (body.isDynamic() && fixture.testPoint(worldPoint)) {
+        foundBody = body;
+        return false; // Stop searching
+      }
+      return true;
     });
 
-    boxEntity.x = x;
-    boxEntity.y = y;
-    scene.addChild(boxEntity);
+    return foundBody;
+  };
 
-    // Initialize the entity's logic (including physics) since scene is already running
-    boxEntity.moxiEntity.init(scene.renderer);
+  // Track mouse position
+  canvasElement.addEventListener('mousemove', (e) => {
+    mouseWorldPos = screenToWorld(e.clientX, e.clientY);
+
+    // Update joint target if dragging
+    if (mouseJoint && mouseWorldPos) {
+      mouseJoint.setTarget(mouseWorldPos);
+    }
+  });
+
+  // Mouse down - create MouseJoint
+  canvasElement.addEventListener('mousedown', (e) => {
+    const worldPoint = screenToWorld(e.clientX, e.clientY);
+    const body = findBodyAtPoint(worldPoint);
+
+    if (body) {
+      // Create ground body if not exists
+      if (!groundBody) {
+        groundBody = physicsWorld!.world.createBody();
+      }
+
+      // Create MouseJoint at exact click point
+      mouseJoint = physicsWorld!.world.createJoint(
+        planck.MouseJoint({
+          maxForce: 1000 * body.getMass(),
+          frequencyHz: 5,
+          dampingRatio: 0.7
+        }, groundBody, body, worldPoint)
+      );
+
+      body.setAwake(true);
+    }
+  });
+
+  // Mouse up - destroy joint or spawn box
+  canvasElement.addEventListener('mouseup', (e) => {
+    if (mouseJoint) {
+      // Clean up joint
+      physicsWorld!.world.destroyJoint(mouseJoint);
+      mouseJoint = null;
+    } else {
+      // Spawn a box
+      const worldPoint = screenToWorld(e.clientX, e.clientY);
+      const pixelPoint = physicsWorld!.toPixelsPoint(worldPoint);
+
+      const box = new Graphics();
+      box.rect(-25, -25, 50, 50);
+      box.fill(colors[Math.floor(Math.random() * colors.length)]);
+
+      const boxEntity = asPhysicsEntity(box, physicsWorld!, {
+        type: 'dynamic',
+        ...PhysicsMaterials.wood,
+        collisionTags: ['object'],
+        collidesWith: ['terrain', 'object']
+      });
+
+      boxEntity.x = pixelPoint.x;
+      boxEntity.y = pixelPoint.y;
+      scene.addChild(boxEntity);
+      boxEntity.moxiEntity.init(scene.renderer);
+    }
   });
 
   // Initialize and start
@@ -193,7 +263,8 @@ export async function initPhysicsBasic() {
   }
 
   console.log('✅ Physics demo loaded!');
-  console.log('   🖱️  Click anywhere to spawn boxes');
+  console.log('   🖱️  Click and drag to move objects');
+  console.log('   🖱️  Click empty space to spawn boxes');
   console.log('   ⌨️  Press P to toggle physics debug view');
   console.log('   📦 Watch the boxes, balls, and meteor interact with physics');
 }

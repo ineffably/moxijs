@@ -16,6 +16,8 @@ MOXI wraps PixiJS with an Entity-Component-System architecture. You get all the 
 
 Think of it like this: PixiJS handles the "draw stuff fast" part. MOXI handles the "organize your game logic so it doesn't turn into spaghetti" part.
 
+🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)** to see it in action.
+
 ## Why would I use this?
 
 - If you know PixiJS, you'll feel right at home with MOXI
@@ -295,7 +297,7 @@ initPhysics();
 
 ## Examples
 
-### 🎮 [**View Live Examples**](packages/moxi-examples/dist/)
+### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)
 
 Interactive examples with source code viewer - see MOXI in action right in your browser.
 

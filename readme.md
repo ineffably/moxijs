@@ -295,24 +295,36 @@ initPhysics();
 
 ## Examples
 
-Check out `packages/moxi-examples` for working demos:
+### 🎮 [**View Live Examples**](packages/moxi-examples/dist/)
 
-- **01-basic-moxi** - Entity-Component basics
-- **02-camera-system** - Camera follow and bounds
-- **03-bunny-adventure** - Tilemap platformer with animations
-- **04-state-machines** - Character state management
-- **05-font-loading** - Custom font integration
-- **06-parallax-fantasy** - Multi-layer parallax scrolling
-- **07-parallax-space-shooter** - Top-down shooter with parallax
-- **08-physics-basic** - Physics simulation with Planck.js
+Interactive examples with source code viewer - see MOXI in action right in your browser.
 
-Run them yourself:
+### All Examples
+
+Check out [`packages/moxi-examples`](packages/moxi-examples/) for working demos:
+
+- **01 - Basic Sprite** - The absolute basics with a single sprite
+- **02 - Rotating Sprite** - Animation and text rendering
+- **03 - PIXI.js Only** - Pure PixiJS example (no MOXI) for comparison
+- **04 - Animated Character** - Sprite sheets and camera following
+- **05 - Progress Bar** - Custom Logic components
+- **06 - Bunny Adventure** - Tilemap platformer with keyboard controls
+- **07 - Parallax Space Shooter** - Multi-layer parallax scrolling
+- **08 - Physics Basic** - Physics simulation with Planck.js
+- **09 - Dino AI Behaviors** - AI systems with state machines (Follow, Flee, Patrol, Wander)
+- **10 - Text Rendering** - Comprehensive text showcase (BitmapText, counters, floating damage numbers)
+
+**📚 [Full Examples Documentation](packages/moxi-examples/README.md)** | **📖 [Text Rendering Guide](packages/moxi-examples/guides/text-rendering.md)**
+
+### Run Locally
 
 ```bash
 cd packages/moxi-examples
 npm install
 npm start
 ```
+
+Open http://localhost:9000 for live examples with hot reload.
 
 ---
 
@@ -365,31 +377,6 @@ npm start
 
 ---
 
-## Project layout
-
-```
-moxi/
-├── packages/
-│   ├── moxi/              # The main engine
-│   │   ├── src/
-│   │   │   ├── core/      # Engine, Scene, Entity, Camera
-│   │   │   ├── library/   # Physics, Parallax, State, Utils
-│   │   │   └── index.ts   # Public API
-│   │   └── package.json
-│   │
-│   ├── moxi-examples/     # Working examples
-│   │   ├── src/examples/
-│   │   └── assets/
-│   │
-│   ├── moxi-edit/         # Visual editor (experimental)
-│   └── code-4/            # In-browser code editor
-│
-├── README.md
-└── package.json
-```
-
----
-
 ## Development
 
 ### Building from source
@@ -436,12 +423,7 @@ Things I'm thinking about adding:
 
 ## Contributing
 
-This is still a prototype, but if you want to contribute, go for it. Found a bug? Open an issue. Got an idea? Open a PR. Just know that things are still moving around a bit.
-
-1. Fork it
-2. Make a branch
-3. Do your thing
-4. Submit a PR
+Prototype stage - not ready for contributions yet.
 
 ---
 

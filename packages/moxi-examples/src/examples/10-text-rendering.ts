@@ -399,15 +399,221 @@ export async function initTextRendering() {
     animatedText.tint = hslToHex(hue, 100, 50);
   });
 
+  // ===== DAMAGE / HEAL NUMBERS =====
+  const damageLabel = new PIXI.Text({
+    text: 'Damage/Heal Numbers (Click Character):',
+    style: {
+      fontSize: 24,
+      fill: 0xaaaaaa
+    },
+    resolution: 2
+  });
+  damageLabel.position.set(800, 100);
+  scene.addChild(damageLabel);
+
+  // Create simple character
+  const character = new PIXI.Graphics();
+  character.circle(0, 0, 40);
+  character.fill(0x4a90e2); // Blue character
+  character.stroke({ color: 0xffffff, width: 3 });
+  character.position.set(1000, 280);
+  character.eventMode = 'static';
+  character.cursor = 'pointer';
+  scene.addChild(character);
+
+  // Action label below character
+  const actionLabel = new PIXI.BitmapText({
+    text: '',
+    style: {
+      fontFamily: 'KenneyBlocks',
+      fontSize: 24
+    }
+  });
+  actionLabel.anchor.set(0.5);
+  actionLabel.position.set(1000, 340); // Below character
+  actionLabel.alpha = 0; // Start invisible
+  scene.addChild(actionLabel);
+
+  // Track action label fade
+  let actionLabelLifetime = 0;
+  let actionLabelMaxLifetime = 0;
+
+  // Container for floating damage numbers
+  const floatingNumbersContainer = new PIXI.Container();
+  scene.addChild(floatingNumbersContainer);
+
+  // Track active floating numbers
+  interface FloatingNumber {
+    text: PIXI.BitmapText;
+    velocity: { x: number; y: number };
+    lifetime: number;
+    maxLifetime: number;
+  }
+  const activeFloatingNumbers: FloatingNumber[] = [];
+
+  // Spawn a damage/heal number
+  const spawnFloatingNumber = (x: number, y: number, value: number, type: 'damage' | 'critical' | 'heal' | 'miss') => {
+    let color = 0xff0000; // Default red
+    let fontSize = 32;
+    let displayText = value.toString();
+    let actionText = '';
+
+    switch (type) {
+      case 'damage':
+        color = 0xff4444; // Red
+        fontSize = 32;
+        actionText = 'Attack!';
+        break;
+      case 'critical':
+        color = 0xffaa00; // Orange
+        fontSize = 48;
+        displayText = value.toString() + '!';
+        actionText = 'CRITICAL!';
+        break;
+      case 'heal':
+        color = 0x44ff44; // Green
+        fontSize = 32;
+        displayText = '+' + value.toString();
+        actionText = 'Heal!';
+        break;
+      case 'miss':
+        color = 0x888888; // Gray
+        fontSize = 28;
+        displayText = 'MISS';
+        actionText = 'Dodge!';
+        break;
+    }
+
+    // Update action label
+    actionLabel.text = actionText;
+    actionLabel.tint = color;
+    actionLabel.alpha = 1;
+    actionLabelLifetime = 0;
+    actionLabelMaxLifetime = type === 'critical' ? 1.8 : 1.5; // Longer lifetime for slower fade
+
+    const floatingText = new PIXI.BitmapText({
+      text: displayText,
+      style: {
+        fontFamily: 'KenneyBlocks',
+        fontSize: fontSize
+      }
+    });
+    floatingText.tint = color;
+    floatingText.anchor.set(0.5);
+    floatingText.position.set(x + (Math.random() - 0.5) * 40, y); // Random horizontal offset
+
+    // Add scaling animation for critical hits
+    if (type === 'critical') {
+      floatingText.scale.set(0.5);
+    }
+
+    floatingNumbersContainer.addChild(floatingText);
+
+    activeFloatingNumbers.push({
+      text: floatingText,
+      velocity: {
+        x: (Math.random() - 0.5) * 2,
+        y: type === 'critical' ? -3 : -2 // Criticals float faster
+      },
+      lifetime: 0,
+      maxLifetime: type === 'critical' ? 1.0 : 0.8 // Shorter lifetime
+    });
+  };
+
+  // Click character to spawn random damage numbers
+  character.on('pointerdown', () => {
+    const randomType = Math.random();
+    if (randomType < 0.1) {
+      spawnFloatingNumber(1000, 280, 0, 'miss');
+    } else if (randomType < 0.3) {
+      const critValue = Math.floor(Math.random() * 500) + 200;
+      spawnFloatingNumber(1000, 280, critValue, 'critical');
+    } else if (randomType < 0.6) {
+      const damageValue = Math.floor(Math.random() * 100) + 20;
+      spawnFloatingNumber(1000, 280, damageValue, 'damage');
+    } else {
+      const healValue = Math.floor(Math.random() * 80) + 10;
+      spawnFloatingNumber(1000, 280, healValue, 'heal');
+    }
+  });
+
+  // Auto-spawn numbers periodically for demo
+  let autoSpawnTimer = 0;
+  const autoSpawnInterval = 1.5; // seconds
+
+  // Update floating numbers
+  engine.ticker.add((ticker) => {
+    const deltaTime = ticker.deltaTime / 60; // Convert to seconds
+
+    // Auto-spawn
+    autoSpawnTimer += deltaTime;
+    if (autoSpawnTimer >= autoSpawnInterval) {
+      autoSpawnTimer = 0;
+      const randomType = Math.random();
+      if (randomType < 0.15) {
+        const critValue = Math.floor(Math.random() * 300) + 150;
+        spawnFloatingNumber(1000, 280, critValue, 'critical');
+      } else if (randomType < 0.5) {
+        const damageValue = Math.floor(Math.random() * 80) + 15;
+        spawnFloatingNumber(1000, 280, damageValue, 'damage');
+      } else if (randomType < 0.85) {
+        const healValue = Math.floor(Math.random() * 60) + 10;
+        spawnFloatingNumber(1000, 280, healValue, 'heal');
+      } else {
+        spawnFloatingNumber(1000, 280, 0, 'miss');
+      }
+    }
+
+    // Update action label fade (slower fade)
+    if (actionLabel.alpha > 0) {
+      actionLabelLifetime += deltaTime;
+      const fadeStart = actionLabelMaxLifetime * 0.5; // Start fading halfway through
+      if (actionLabelLifetime > fadeStart) {
+        const fadeProgress = (actionLabelLifetime - fadeStart) / (actionLabelMaxLifetime - fadeStart);
+        actionLabel.alpha = 1 - fadeProgress;
+      }
+      if (actionLabelLifetime >= actionLabelMaxLifetime) {
+        actionLabel.alpha = 0;
+      }
+    }
+
+    // Update all floating numbers
+    for (let i = activeFloatingNumbers.length - 1; i >= 0; i--) {
+      const floater = activeFloatingNumbers[i];
+      floater.lifetime += deltaTime;
+
+      // Update position
+      floater.text.x += floater.velocity.x;
+      floater.text.y += floater.velocity.y;
+
+      // Slow down horizontal movement
+      floater.velocity.x *= 0.95;
+
+      // Scale up critical hits at start
+      if (floater.text.style.fontSize === 48 && floater.lifetime < 0.2) {
+        const scaleProgress = floater.lifetime / 0.2;
+        floater.text.scale.set(0.5 + scaleProgress * 0.5);
+      }
+
+      // Fade out (start early for more visible fade)
+      const fadeStart = floater.maxLifetime * 0.3;
+      if (floater.lifetime > fadeStart) {
+        const fadeProgress = (floater.lifetime - fadeStart) / (floater.maxLifetime - fadeStart);
+        floater.text.alpha = 1 - fadeProgress;
+      }
+
+      // Remove if expired
+      if (floater.lifetime >= floater.maxLifetime) {
+        floatingNumbersContainer.removeChild(floater.text);
+        floater.text.destroy();
+        activeFloatingNumbers.splice(i, 1);
+      }
+    }
+  });
+
   // Initialize and start
   scene.init();
   engine.start();
-
-  console.log('✅ Text Rendering example loaded!');
-  console.log('   🔢 BitmapText counter (high performance)');
-  console.log('   ⚡ Live FPS counter');
-  console.log('   ✨ Rich text styles: gradients, shadows, strokes');
-  console.log('   🎨 Animated color-changing text');
 }
 
 /**

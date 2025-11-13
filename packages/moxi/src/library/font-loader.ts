@@ -26,4 +26,4 @@ export const loadFonts = async () => {
       resolve({ fontKenfutureThin });
     });
   });
-}
+};

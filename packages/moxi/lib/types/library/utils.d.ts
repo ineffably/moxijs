@@ -1,8 +1,12 @@
+import { Point } from 'pixi.js';
+export declare const createPoint: (x?: number, y?: number) => Point;
+export declare const ZERO_POINT: () => Point;
+export declare const ONE_POINT: () => Point;
 export declare const uc: (s?: string) => string;
 export declare const lc: (s?: string) => string;
 export declare const padRight: (val?: string, length?: number, padWith?: string) => string;
 export declare const pr: (val?: string, length?: number, padWith?: string) => string;
-export declare const getRandomInt: (max: any, min?: number) => number;
+export declare const getRandomInt: (min: number, max: number) => number;
 export declare const roundTo: (places: any, value: any) => number;
 export declare const lerp: (begin: any, end: any, mag: any) => number;
 export declare function metersToPixels(m: number): number;

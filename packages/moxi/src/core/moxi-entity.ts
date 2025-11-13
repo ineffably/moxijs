@@ -1,5 +1,5 @@
 import PIXI from 'pixi.js';
-import { Behavior } from './bahavior';
+import { Logic } from './logic';
 
 /**
  * Interface defining the contract for the MoxiEntity class.
@@ -9,11 +9,11 @@ import { Behavior } from './bahavior';
  * @template T - The type of entity being managed
  */
 interface MoxiEntityClass<T> {
-  behaviors: MoxiBehaviors<T>;
+  logic: MoxiLogic<T>;
   update: (delta: number, entity: T) => void;
   init: (...args: any[]) => void;
-  addBehavior: (behavior: Behavior<T>) => void;
-  getBehavior: (name: string) => Behavior<T> | undefined;
+  addLogic: (logic: Logic<T>) => void;
+  getLogic: (name: string) => Logic<T> | undefined;
 }
 
 /**
@@ -30,7 +30,7 @@ interface MoxiEntityClass<T> {
  * const entitySprite = asEntity(sprite);
  * 
  * // Now it has a moxiEntity property
- * entitySprite.moxiEntity.addBehavior(new MovementBehavior());
+ * entitySprite.moxiEntity.addLogic(new MovementLogic());
  * ```
  */
 export type AsEntity<T> = PIXI.Container & {
@@ -38,21 +38,21 @@ export type AsEntity<T> = PIXI.Container & {
 };
 
 /**
- * Type definition for a collection of behaviors mapped by name.
- * Used to store and retrieve behaviors attached to entities.
+ * Type definition for a collection of logic components mapped by name.
+ * Used to store and retrieve logic attached to entities.
  * 
  * @category Entities
- * @template T - The type of entity these behaviors can be applied to
+ * @template T - The type of entity these logic components can be applied to
  */
-export type MoxiBehaviors<T> = Record<string, Behavior<T>>;
+export type MoxiLogic<T> = Record<string, Logic<T>>;
 
 /**
- * The core entity management class that handles component-based behavior.
- * MoxiEntity connects entities with their behaviors and manages the behavior lifecycle.
+ * The core entity management class that handles component-based logic.
+ * MoxiEntity connects entities with their logic components and manages the logic lifecycle.
  * 
  * This class implements the Entity-Component-System pattern, where:
  * - The entity is the object being controlled (like a PIXI.Sprite)
- * - Behaviors are the components that add functionality
+ * - Logic components add functionality
  * - This class provides the system to manage those components
  * 
  * @category Entities
@@ -64,22 +64,22 @@ export type MoxiBehaviors<T> = Record<string, Behavior<T>>;
  * const sprite = new PIXI.Sprite(texture);
  * const entity = new MoxiEntity(sprite);
  * 
- * // Add behaviors
- * entity.addBehavior(new MovementBehavior());
- * entity.addBehavior(new AnimationBehavior());
+ * // Add logic
+ * entity.addLogic(new MovementLogic());
+ * entity.addLogic(new AnimationLogic());
  * 
- * // Initialize all behaviors
+ * // Initialize all logic
  * entity.init(renderer);
  * 
- * // Update all behaviors (usually called within the game loop)
+ * // Update all logic (usually called within the game loop)
  * entity.update(deltaTime);
  * ```
  */
 export class MoxiEntity<T> implements MoxiEntityClass<T> {
   /**
-   * Collection of behaviors attached to this entity
+   * Collection of logic components attached to this entity
    */
-  behaviors: MoxiBehaviors<T> = {};
+  logic: MoxiLogic<T> = {};
   
   /**
    * Reference to the actual entity being managed
@@ -90,15 +90,15 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * Creates a new MoxiEntity
    * 
    * @param entity - The entity to manage
-   * @param behaviors - Optional map of initial behaviors to attach
+   * @param logic - Optional map of initial logic to attach
    */
-  constructor(entity: T, behaviors: MoxiBehaviors<T> = {}) {
-    this.behaviors = behaviors;
+  constructor(entity: T, logic: MoxiLogic<T> = {}) {
+    this.logic = logic;
     this.entity = entity;
   }
 
   /**
-   * Updates all active behaviors attached to this entity
+   * Updates all active logic components attached to this entity
    * Typically called each frame during the game loop
    * 
    * @param deltaTime - Time in seconds since the last update
@@ -112,21 +112,21 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * ```
    */
   update(deltaTime: number) { 
-    for (const className in this.behaviors) {
-      const behavior = this.behaviors[className];
-      if(behavior.update && this.entity && behavior.active){
-        behavior.update(this.entity, deltaTime); 
+    for (const className in this.logic) {
+      const logicComponent = this.logic[className];
+      if(logicComponent.update && this.entity && logicComponent.active){
+        logicComponent.update(this.entity, deltaTime); 
       }
     }
     // TODO: update children?
   }
   
   /**
-   * Initializes all behaviors attached to this entity
+   * Initializes all logic components attached to this entity
    * Typically called once when the entity is first created or added to the scene
    * 
    * @param renderer - The PIXI renderer instance
-   * @param args - Additional arguments to pass to each behavior's init method
+   * @param args - Additional arguments to pass to each logic component's init method
    * 
    * @example
    * ```typescript
@@ -136,51 +136,53 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * ```
    */
   init(renderer: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]) {
-    for (const className in this.behaviors) {
-      const behavior = this.behaviors[className];
-      if(behavior.init && this.entity){
-        behavior.init(this.entity, renderer, ...args);
+    for (const className in this.logic) {
+      const logicComponent = this.logic[className];
+      if(logicComponent.init && this.entity){
+        logicComponent.init(this.entity, renderer, ...args);
       }
     }
   } 
 
   /**
-   * Adds a behavior to this entity
+   * Adds a logic component to this entity
    * 
-   * @param behavior - The behavior to add
+   * @param logic - The logic component to add
    * 
    * @example
    * ```typescript
-   * // Create and add a behavior
-   * const movementBehavior = new MovementBehavior();
-   * movementBehavior.speed = 5;
-   * entitySprite.moxiEntity.addBehavior(movementBehavior);
+   * // Create and add logic
+   * const movementLogic = new MovementLogic();
+   * movementLogic.speed = 5;
+   * entitySprite.moxiEntity.addLogic(movementLogic);
    * ```
    */
-  addBehavior(behavior: Behavior<T>) {
-    this.behaviors[behavior.constructor.name] = behavior;
+  addLogic(logic: Logic<T>) {
+    // Use explicit name if set, otherwise fall back to constructor name
+    const logicName = logic.name || logic.constructor.name;
+    this.logic[logicName] = logic;
   }
 
   /**
-   * Retrieves a behavior by name
-   * Useful for accessing and configuring specific behaviors
+   * Retrieves a logic component by name
+   * Useful for accessing and configuring specific logic components
    * 
-   * @template B - The type of behavior to return
-   * @param name - The name of the behavior to retrieve (usually the class name)
-   * @returns The behavior instance, or undefined if not found
+   * @template L - The type of logic to return
+   * @param name - The name of the logic to retrieve (usually the class name)
+   * @returns The logic instance, or undefined if not found
    * 
    * @example
    * ```typescript
-   * // Get and configure a behavior
-   * const movement = entitySprite.moxiEntity.getBehavior<MovementBehavior>('MovementBehavior');
+   * // Get and configure logic
+   * const movement = entitySprite.moxiEntity.getLogic<MovementLogic>('MovementLogic');
    * if (movement) {
    *   movement.speed = 10;
    *   movement.direction = 'right';
    * }
    * ```
    */
-  getBehavior<B extends Behavior<T>>(name: string): B | undefined {
-    return this.behaviors[name] as B | undefined;
+  getLogic<L extends Logic<T>>(name: string): L | undefined {
+    return this.logic[name] as L | undefined;
   }
 }
 
@@ -191,7 +193,7 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
  * @category Entities
  * @template T - The type of container being converted
  * @param entity - The PIXI Container to convert
- * @param behaviors - Optional initial behaviors to attach
+ * @param logic - Optional initial logic to attach
  * @returns The enhanced container as an AsEntity
  * 
  * @example
@@ -201,23 +203,23 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
  * const entitySprite = asEntity(sprite);
  * scene.addChild(entitySprite);
  * 
- * // With initial behaviors
+ * // With initial logic
  * const player = asEntity(
  *   new PIXI.Sprite(playerTexture),
  *   {
- *     'PlayerMovement': new PlayerMovementBehavior(),
- *     'Health': new HealthBehavior(100)
+ *     'PlayerMovement': new PlayerMovementLogic(),
+ *     'Health': new HealthLogic(100)
  *   }
  * );
  * ```
  */
-export function asEntity<T extends PIXI.Container>(entity: T, behaviors: MoxiBehaviors<T> = {}): AsEntity<T> {
+export function asEntity<T extends PIXI.Container>(entity: T, logic: MoxiLogic<T> = {}): AsEntity<T> {
   const target = entity;
   
   // pixi patch: it's throwing an error on interactive events if isInteractive() doesn't exist.
   target.isInteractive = () => false; 
 
-  (target as unknown as AsEntity<T>).moxiEntity = new MoxiEntity<T>(target, behaviors);
+  (target as unknown as AsEntity<T>).moxiEntity = new MoxiEntity<T>(target, logic);
   return entity as unknown as AsEntity<T>;
 }
 

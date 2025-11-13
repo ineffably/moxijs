@@ -1,24 +1,24 @@
 import PIXI from 'pixi.js';
-import { Behavior } from './bahavior';
+import { Logic } from './logic';
 interface MoxiEntityClass<T> {
-    behaviors: MoxiBehaviors<T>;
+    logic: MoxiLogic<T>;
     update: (delta: number, entity: T) => void;
     init: (...args: any[]) => void;
-    addBehavior: (behavior: Behavior<T>) => void;
-    getBehavior: (name: string) => Behavior<T> | undefined;
+    addLogic: (logic: Logic<T>) => void;
+    getLogic: (name: string) => Logic<T> | undefined;
 }
 export type AsEntity<T> = PIXI.Container & {
     moxiEntity: MoxiEntity<T>;
 };
-export type MoxiBehaviors<T> = Record<string, Behavior<T>>;
+export type MoxiLogic<T> = Record<string, Logic<T>>;
 export declare class MoxiEntity<T> implements MoxiEntityClass<T> {
-    behaviors: MoxiBehaviors<T>;
+    logic: MoxiLogic<T>;
     entity: T;
-    constructor(entity: T, behaviors?: MoxiBehaviors<T>);
+    constructor(entity: T, logic?: MoxiLogic<T>);
     update(deltaTime: number): void;
     init(renderer: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]): void;
-    addBehavior(behavior: Behavior<T>): void;
-    getBehavior<B extends Behavior<T>>(name: string): B | undefined;
+    addLogic(logic: Logic<T>): void;
+    getLogic<L extends Logic<T>>(name: string): L | undefined;
 }
-export declare function asEntity<T extends PIXI.Container>(entity: T, behaviors?: MoxiBehaviors<T>): AsEntity<T>;
+export declare function asEntity<T extends PIXI.Container>(entity: T, logic?: MoxiLogic<T>): AsEntity<T>;
 export {};

@@ -53,6 +53,7 @@ export const ASSETS = {
   // Fonts
   KENNEY_FUTURE_THIN_FONT: '../assets/ui-pack-scifi/font/kenney-future-thin.ttf',
   KENNEY_FUTURE_FONT: '../assets/ui-pack-scifi/font/kenney-future.ttf',
+  KENNEY_BLOCKS_FONT: '../assets/custom-fonts/kenney-blocks.ttf',
   PIXEL_FONT_SPROUTLANDS: '../assets/sprout-lands-ui-basic/fonts/pixelFont-7-8x14-sproutLands.ttf'
 } as const;
 

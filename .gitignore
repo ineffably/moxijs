@@ -5,3 +5,12 @@ node_modules
 # I want the build output for github pages support
 # lib
 
+# llm files
+.llm
+
+# playwright mcp screens shots
+.playwright-mcp
+
+.claude
+
+

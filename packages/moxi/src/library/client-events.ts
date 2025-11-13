@@ -67,7 +67,7 @@ export class ClientEvents {
   /**
    * Accumulated wheel offset values
    */
-  wheelOffets: Point;
+  wheelOffsets: Point;
   
   /**
    * Current mouse position
@@ -102,7 +102,7 @@ export class ClientEvents {
     if (ClientEvents.instance) {
       return ClientEvents.instance;
     }
-    this.wheelOffets = initWheelOffset;
+    this.wheelOffsets = initWheelOffset;
     this.keydown = {} as Record<string, KeyboardEvent>;
     this.movePosition = new Point();
 
@@ -112,10 +112,10 @@ export class ClientEvents {
 
     // Register wheel event listener
     document.addEventListener('wheel', (event) => {
-      const wheelDelta = this.wheelOffets || new Point();
+      const wheelDelta = this.wheelOffsets || new Point();
       const xValue = wheelDelta.x + event.deltaX;
       const yValue = wheelDelta.y + event.deltaY;
-      this.wheelOffets = new Point(xValue, yValue);
+      this.wheelOffsets = new Point(xValue, yValue);
       anyEvent({ eventType: 'wheel', event });
     });
 

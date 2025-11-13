@@ -4,27 +4,29 @@
   "description": "",
   "private": true,
   "workspaces": [
-    "packages/code-4",
     "packages/moxi",
-    "packages/moxi-edit"
+    "packages/moxi-examples"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "build:clean": "npm run build:clean --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "build:dev": "npm run build:dev --workspaces --if-present",
-    "watch": "concurrently \"npm run watch --workspace=moxi\" \"npm run watch --workspace=code-4\"",
-    "editor": "npm run local --workspace=moxi-edit",
-    "local": "npm run editor"
+    "watch": "concurrently \"npm run watch --workspace=moxi-examples\" \"npm run watch --workspace=moxi\"",
+    "examples": "npm run local --workspace=moxi-examples",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "eslint": "^9.22.0",
-    "eslint-plugin-react": "^7.37.4",
-    "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.26.1"
+    "@playwright/test": "^1.48.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "rimraf": "^6.1.0",
+    "typescript-eslint": "^8.46.3"
   }
 }

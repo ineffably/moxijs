@@ -1,8 +1,8 @@
 import PIXI from 'pixi.js';
 import { AsEntity } from './moxi-entity';
 
-function isMoxiEntity(entity: any): entity is AsEntity<any> {
-  return Boolean(entity?.moxiEntity);
+function isMoxiEntity<T extends PIXI.Container>(entity: unknown): entity is AsEntity<T> {
+  return entity != null && typeof entity === 'object' && 'moxiEntity' in entity;
 }
 
 export class Scene extends PIXI.Container {
@@ -14,7 +14,7 @@ export class Scene extends PIXI.Container {
   }
 
   init() {
-    this.children.forEach((child: any) => {
+    this.children.forEach((child) => {
       if (isMoxiEntity(child)) {
         child.moxiEntity.init(this.renderer);
       }
@@ -23,7 +23,7 @@ export class Scene extends PIXI.Container {
 
 
   update(deltaTime: number) {
-    this.children.forEach((child: any) => { 
+    this.children.forEach((child) => {
       if (isMoxiEntity(child)) {
         child.moxiEntity.update(deltaTime);
       }

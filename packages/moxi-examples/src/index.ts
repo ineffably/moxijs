@@ -12,6 +12,8 @@ import { initParallaxSpaceShooter } from './examples/07-parallax-space-shooter';
 import { initPhysicsBasic } from './examples/08-physics-basic';
 import { initDinoAIBehaviors } from './examples/09-dino-ai-behaviors';
 import { initTextRendering } from './examples/10-text-rendering';
+import { initUIShowcase } from './examples/14-ui-showcase';
+import { initFontRenderingComparison } from './examples/12-font-rendering-comparison';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -29,6 +31,8 @@ import parallaxSpaceShooterSource from './examples/07-parallax-space-shooter.ts?
 import physicsBasicSource from './examples/08-physics-basic.ts?raw';
 import dinoAIBehaviorsSource from './examples/09-dino-ai-behaviors.ts?raw';
 import textRenderingSource from './examples/10-text-rendering.ts?raw';
+import uiShowcaseSource from './examples/14-ui-showcase.ts?raw';
+import fontRenderingComparisonSource from './examples/12-font-rendering-comparison.ts?raw';
 
 // Example registry
 interface Example {
@@ -98,6 +102,18 @@ const examples: Record<string, Example> = {
     description: 'Mechanical scrolling counter, BitmapText, and text styles',
     init: initTextRendering,
     source: textRenderingSource
+  },
+  'ui-showcase': {
+    name: '11 - UI Showcase',
+    description: 'Tabbed interface showcasing all UI components',
+    init: initUIShowcase,
+    source: uiShowcaseSource
+  },
+  'font-rendering-comparison': {
+    name: '12 - Font Rendering Comparison',
+    description: 'Side-by-side comparison of Text, BitmapText, and HTMLText',
+    init: initFontRenderingComparison,
+    source: fontRenderingComparisonSource
   }
 };
 

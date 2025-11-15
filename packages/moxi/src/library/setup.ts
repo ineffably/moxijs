@@ -23,9 +23,12 @@ export interface SetupMoxiResult {
 }
 
 export const defaultRenderOptions = {
-  width: 1280, 
-  height: 720, 
-  backgroundColor: 0x1099bb 
+  width: 1280,
+  height: 720,
+  backgroundColor: 0x1099bb,
+  resolution: window.devicePixelRatio || 1,
+  autoDensity: true,
+  antialias: true
 } as Partial<PIXI.AutoDetectOptions>;
 
 export async function setupMoxi({ hostElement, renderOptions = defaultRenderOptions, physics } = {} as SetupMoxiArgs) {

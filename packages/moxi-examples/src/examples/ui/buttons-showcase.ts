@@ -661,6 +661,61 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
   // Add columns row to main container
   mainContainer.addChild(columnsRow);
 
+  // Set up tab focus navigation
+  // Since buttons now default to tabIndex = 0, we need to set explicit order
+  // Left column, top to bottom, left to right
+  let tabIndex = 0;
+
+  // Section 1: Basic Buttons (4 buttons)
+  primaryBtn.tabIndex = tabIndex++;
+  secondaryBtn.tabIndex = tabIndex++;
+  successBtn.tabIndex = tabIndex++;
+  dangerBtn.tabIndex = tabIndex++;
+
+  // Section 2: Rounded Buttons (3 buttons)
+  roundedBtn1.tabIndex = tabIndex++;
+  roundedBtn2.tabIndex = tabIndex++;
+  roundedBtn3.tabIndex = tabIndex++;
+
+  // Section 3: Size Variations (3 buttons)
+  smallBtn.tabIndex = tabIndex++;
+  mediumBtn.tabIndex = tabIndex++;
+  largeBtn.tabIndex = tabIndex++;
+
+  // Section 6: 9-Slice Square Buttons (3 buttons)
+  greyBtn.tabIndex = tabIndex++;
+  beigeBtn.tabIndex = tabIndex++;
+  brownBtn.tabIndex = tabIndex++;
+
+  // Right column, top to bottom, left to right
+  // Section 4: Modern Color Schemes (3 buttons)
+  modernBtn1.tabIndex = tabIndex++;
+  modernBtn2.tabIndex = tabIndex++;
+  modernBtn3.tabIndex = tabIndex++;
+
+  // Section 5: Sprite-based Buttons - Row 1 (3 buttons)
+  blueBtn.tabIndex = tabIndex++;
+  greenBtn.tabIndex = tabIndex++;
+  redBtn.tabIndex = tabIndex++;
+
+  // Section 5: Sprite-based Buttons - Row 2 (2 buttons)
+  yellowBtn.tabIndex = tabIndex++;
+  whiteBtn.tabIndex = tabIndex++;
+
+  // Section 5: Sprite-based Buttons - Row 3 (3 buttons)
+  smallSpriteBtn.tabIndex = tabIndex++;
+  mediumSpriteBtn.tabIndex = tabIndex++;
+  largeSpriteBtn.tabIndex = tabIndex++;
+
+  // Section 7: Square Icon Buttons (4 buttons)
+  iconBtn1.tabIndex = tabIndex++;
+  iconBtn2.tabIndex = tabIndex++;
+  iconBtn3.tabIndex = tabIndex++;
+  iconBtn4.tabIndex = tabIndex++;
+
+  // Note: Focus manager is now created and managed at the top level (ui-showcase.ts)
+  // It will auto-discover and register all focusable components when the tab is activated
+
   return mainContainer;
 }
 

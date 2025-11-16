@@ -16,6 +16,7 @@ import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-seq
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { EdgeInsets } from './ui/core/edge-insets';
 import { UIComponent } from './ui/core/ui-component';
+import { UIFocusManager } from './ui/core/ui-focus-manager';
 import { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from './ui/layout/flex-container';
 import { UIBox } from './ui/components/ui-box';
 import { UILabel } from './ui/components/ui-label';
@@ -23,6 +24,8 @@ import { UIPanel } from './ui/components/ui-panel';
 import { UIButton, ButtonState } from './ui/components/ui-button';
 import { UISelect } from './ui/components/ui-select';
 import { UITextInput } from './ui/components/ui-text-input';
+import { UITextArea } from './ui/components/ui-textarea';
+import { UIScrollContainer } from './ui/components/ui-scroll-container';
 import { UITabs } from './ui/components/ui-tabs';
 import { UILayer } from './ui/UILayer';
 import { UIScaleMode } from './ui/UIScaleMode';
@@ -155,6 +158,7 @@ declare const exportedObjects: {
     applyMaterial: typeof applyMaterial;
     EdgeInsets: typeof EdgeInsets;
     UIComponent: typeof UIComponent;
+    UIFocusManager: typeof UIFocusManager;
     FlexContainer: typeof FlexContainer;
     FlexDirection: typeof FlexDirection;
     FlexJustify: typeof FlexJustify;
@@ -166,9 +170,11 @@ declare const exportedObjects: {
     ButtonState: typeof ButtonState;
     UISelect: typeof UISelect;
     UITextInput: typeof UITextInput;
+    UITextArea: typeof UITextArea;
+    UIScrollContainer: typeof UIScrollContainer;
     UITabs: typeof UITabs;
     UILayer: typeof UILayer;
     UIScaleMode: typeof UIScaleMode;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITabs, UILayer, UIScaleMode };
+export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode };

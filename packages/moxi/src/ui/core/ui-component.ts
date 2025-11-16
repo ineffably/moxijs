@@ -19,6 +19,11 @@ export abstract class UIComponent {
   protected boxModel: BoxModel;
 
   /**
+   * Focus ring for visual focus indication
+   */
+  protected focusRing?: PIXI.Graphics;
+
+  /**
    * The computed layout after measurement and positioning
    */
   protected computedLayout: ComputedLayout;
@@ -43,6 +48,16 @@ export abstract class UIComponent {
    */
   protected layoutDirty: boolean = true;
 
+  /**
+   * Tab index for focus order (-1 means not focusable by tab)
+   */
+  public tabIndex: number = -1;
+
+  /**
+   * Internal focus state
+   */
+  protected focused: boolean = false;
+
   constructor(boxModel?: Partial<BoxModel>) {
     this.container = new PIXI.Container();
     this.boxModel = createDefaultBoxModel(boxModel);
@@ -56,6 +71,78 @@ export abstract class UIComponent {
       contentWidth: 0,
       contentHeight: 0
     };
+
+    // Create focus ring (initially hidden)
+    this.createFocusRing();
+  }
+
+  /**
+   * Creates the focus ring graphics
+   */
+  private createFocusRing(): void {
+    this.focusRing = new PIXI.Graphics();
+    this.focusRing.visible = false;
+    // Add as first child so it renders behind content
+    this.container.addChildAt(this.focusRing, 0);
+  }
+
+  /**
+   * Updates the focus ring appearance based on component size
+   */
+  protected updateFocusRing(): void {
+    if (!this.focusRing) return;
+
+    this.focusRing.clear();
+
+    const width = this.computedLayout.width;
+    const height = this.computedLayout.height;
+
+    if (width <= 0 || height <= 0) return;
+
+    // Animated pulsing effect with dashed outline
+    const offset = 4;
+    const strokeWidth = 3;
+
+    // Draw outer glow
+    this.focusRing.roundRect(
+      -offset - 2,
+      -offset - 2,
+      width + (offset + 2) * 2,
+      height + (offset + 2) * 2,
+      8
+    );
+    this.focusRing.stroke({
+      color: 0x00d9ff,
+      width: strokeWidth + 2,
+      alpha: 0.3
+    });
+
+    // Draw main focus ring
+    this.focusRing.roundRect(
+      -offset,
+      -offset,
+      width + offset * 2,
+      height + offset * 2,
+      8
+    );
+    this.focusRing.stroke({
+      color: 0x00d9ff,
+      width: strokeWidth
+    });
+
+    // Draw inner highlight
+    this.focusRing.roundRect(
+      -offset + strokeWidth,
+      -offset + strokeWidth,
+      width + (offset - strokeWidth) * 2,
+      height + (offset - strokeWidth) * 2,
+      6
+    );
+    this.focusRing.stroke({
+      color: 0xffffff,
+      width: 1,
+      alpha: 0.6
+    });
   }
 
   /**
@@ -106,6 +193,19 @@ export abstract class UIComponent {
   }
 
   /**
+   * Gets the global bounds of this component (position relative to stage)
+   */
+  public getGlobalBounds(): { x: number; y: number; width: number; height: number } {
+    const globalPos = this.container.getGlobalPosition();
+    return {
+      x: globalPos.x,
+      y: globalPos.y,
+      width: this.computedLayout.width,
+      height: this.computedLayout.height
+    };
+  }
+
+  /**
    * Sets the position of this component
    */
   public setPosition(x: number, y: number): void {
@@ -128,6 +228,74 @@ export abstract class UIComponent {
   public hide(): void {
     this.visible = false;
     this.container.visible = false;
+  }
+
+  /**
+   * Whether this component can receive focus
+   */
+  public canFocus(): boolean {
+    return this.enabled && this.visible && this.tabIndex >= 0;
+  }
+
+  /**
+   * Whether this component is currently focused
+   */
+  public isFocused(): boolean {
+    return this.focused;
+  }
+
+  /**
+   * Called when component receives focus
+   * Override in subclasses to customize focus behavior
+   */
+  public onFocus(): void {
+    this.focused = true;
+    this.showFocusRing();
+    this.scrollIntoView();
+  }
+
+  /**
+   * Shows the focus ring
+   */
+  protected showFocusRing(): void {
+    if (this.focusRing) {
+      this.updateFocusRing();
+      this.focusRing.visible = true;
+    }
+  }
+
+  /**
+   * Scrolls this component into view if it's inside a scroll container
+   */
+  private scrollIntoView(): void {
+    // Walk up the parent chain to find a scroll container
+    let currentParent = this.parent;
+    while (currentParent) {
+      // Check if parent has scrollToComponent method (duck typing for UIScrollContainer)
+      if ('scrollToComponent' in currentParent && typeof (currentParent as any).scrollToComponent === 'function') {
+        (currentParent as any).scrollToComponent(this);
+        break;
+      }
+      currentParent = currentParent.parent;
+    }
+  }
+
+  /**
+   * Called when component loses focus
+   * Override in subclasses to customize blur behavior
+   */
+  public onBlur(): void {
+    this.focused = false;
+    this.hideFocusRing();
+  }
+
+  /**
+   * Hides the focus ring
+   */
+  protected hideFocusRing(): void {
+    if (this.focusRing) {
+      this.focusRing.visible = false;
+    }
   }
 
   /**

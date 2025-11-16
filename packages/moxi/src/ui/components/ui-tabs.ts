@@ -141,6 +141,14 @@ export class UITabs extends UIComponent {
     tabBarBg.fill({ color: this.tabBarBackgroundColor });
     this.tabBar.addChild(tabBarBg);
 
+    // Add bottom border line for line type
+    if (this.type === 'line') {
+      const borderLine = new PIXI.Graphics();
+      borderLine.rect(0, this.tabBarHeight - 2, this.width, 2);
+      borderLine.fill({ color: 0x3d3d54, alpha: 0.5 });
+      this.tabBar.addChild(borderLine);
+    }
+
     // Position tab bar
     if (this.tabPosition === 'bottom') {
       this.tabBar.y = this.height - this.tabBarHeight;
@@ -151,9 +159,9 @@ export class UITabs extends UIComponent {
     }
 
     // Create tabs
-    let xOffset = 0;
-    const tabPadding = 20;
-    const tabGap = 4;
+    let xOffset = 8; // Start with some left padding
+    const tabPadding = 24;
+    const tabGap = 8;
 
     for (const item of this.items) {
       if (item.disabled) continue;
@@ -162,10 +170,12 @@ export class UITabs extends UIComponent {
       tabContainer.x = xOffset;
 
       // Tab label
+      const isActive = this.activeKey === item.key;
       const label = new UILabel({
         text: item.label,
-        fontSize: 14,
-        color: this.activeKey === item.key ? this.activeTextColor : this.textColor
+        fontSize: 15,
+        fontWeight: isActive ? 'bold' : 'normal',
+        color: isActive ? this.activeTextColor : this.textColor
       });
 
       // Measure label to determine tab width
@@ -174,15 +184,18 @@ export class UITabs extends UIComponent {
       const labelBounds = label.container.getLocalBounds();
       const tabWidth = labelBounds.width + (tabPadding * 2);
 
-      // Tab background (for card type)
+      // Tab background
       let bg: PIXI.Graphics;
       if (this.type === 'card') {
         bg = new PIXI.Graphics();
-        bg.roundRect(0, 0, tabWidth, this.tabBarHeight, 4);
-        bg.fill({ color: this.activeKey === item.key ? this.activeTabColor : this.inactiveTabColor });
+        bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
+        bg.fill({ color: isActive ? this.activeTabColor : this.inactiveTabColor });
+        // Add border for card type
+        bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
+        bg.stroke({ color: isActive ? this.activeTabColor : 0x4d4d64, width: 2 });
         tabContainer.addChild(bg);
       } else {
-        // For line type, use transparent background
+        // For line type, NO background or border - just transparent hit area
         bg = new PIXI.Graphics();
         bg.rect(0, 0, tabWidth, this.tabBarHeight);
         bg.fill({ color: 0x000000, alpha: 0 });
@@ -208,11 +221,13 @@ export class UITabs extends UIComponent {
         if (this.activeKey !== tabKey) {
           if (this.type === 'card') {
             bg.clear();
-            bg.roundRect(0, 0, tabWidth, this.tabBarHeight, 4);
-            bg.fill({ color: this.activeTabColor, alpha: 0.7 });
+            bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
+            bg.fill({ color: this.activeTabColor, alpha: 0.5 });
+            bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
+            bg.stroke({ color: this.activeTabColor, width: 2 });
           } else {
+            // For line type, just change text color on hover
             label.setColor(this.activeTextColor);
-            label.container.alpha = 0.7;
           }
         }
       });
@@ -221,11 +236,13 @@ export class UITabs extends UIComponent {
         if (this.activeKey !== tabKey) {
           if (this.type === 'card') {
             bg.clear();
-            bg.roundRect(0, 0, tabWidth, this.tabBarHeight, 4);
+            bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
             bg.fill({ color: this.inactiveTabColor });
+            bg.roundRect(0, 0, tabWidth, this.tabBarHeight - 2, 6);
+            bg.stroke({ color: 0x4d4d64, width: 2 });
           } else {
+            // Restore muted text color
             label.setColor(this.textColor);
-            label.container.alpha = 1;
           }
         }
       });
@@ -258,7 +275,8 @@ export class UITabs extends UIComponent {
     const indicatorHeight = 3;
     const indicatorY = this.tabBarHeight - indicatorHeight;
 
-    this.activeIndicator.rect(tabX, indicatorY, tabWidth, indicatorHeight);
+    // Draw indicator at the very bottom, spanning most of the tab width
+    this.activeIndicator.roundRect(tabX + 8, indicatorY, tabWidth - 16, indicatorHeight, 1.5);
     this.activeIndicator.fill({ color: this.activeTabColor });
   }
 
@@ -278,12 +296,19 @@ export class UITabs extends UIComponent {
     // Update tab styles
     this.tabButtons.forEach((tab, key) => {
       const isActive = key === this.activeKey;
+      const tabBounds = tab.bg.getLocalBounds();
 
       if (this.type === 'card') {
-        const tabBounds = tab.bg.getLocalBounds();
         tab.bg.clear();
-        tab.bg.roundRect(0, 0, tabBounds.width, this.tabBarHeight, 4);
+        tab.bg.roundRect(0, 0, tabBounds.width, this.tabBarHeight - 2, 6);
         tab.bg.fill({ color: isActive ? this.activeTabColor : this.inactiveTabColor });
+        tab.bg.roundRect(0, 0, tabBounds.width, this.tabBarHeight - 2, 6);
+        tab.bg.stroke({ color: isActive ? this.activeTabColor : 0x4d4d64, width: 2 });
+      } else {
+        // For line type, keep transparent background
+        tab.bg.clear();
+        tab.bg.rect(0, 0, tabBounds.width, this.tabBarHeight);
+        tab.bg.fill({ color: 0x000000, alpha: 0 });
       }
 
       tab.label.setColor(isActive ? this.activeTextColor : this.textColor);

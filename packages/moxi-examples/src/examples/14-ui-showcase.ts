@@ -3,9 +3,11 @@ import {
   UITabs,
   TabItem,
   UILayer,
-  UIScaleMode
+  UIScaleMode,
+  UIFocusManager
 } from 'moxi';
 import { createButtonsShowcase } from './ui/buttons-showcase';
+import { createTextInputsShowcase } from './ui/text-inputs-showcase';
 
 /**
  * Example 14: UI Showcase - Buttons
@@ -30,12 +32,20 @@ export async function initUIShowcase() {
     }
   });
 
+  // Create a single focus manager for all tabs
+  const focusManager = new UIFocusManager();
+
   // Create tab items
   const tabItems: TabItem[] = [
     {
       key: 'buttons',
       label: 'Buttons',
       content: await createButtonsShowcase()
+    },
+    {
+      key: 'text-inputs',
+      label: 'Text Inputs',
+      content: await createTextInputsShowcase()
     }
   ];
 
@@ -49,11 +59,27 @@ export async function initUIShowcase() {
     hashPrefix: 'ui-showcase',
     onChange: (key) => {
       console.log('Active tab changed to:', key);
+
+      // Re-register the active tab's content with the focus manager
+      const activeTab = tabItems.find(item => item.key === key);
+      if (activeTab) {
+        focusManager.clear();
+        focusManager.registerContainer(activeTab.content);
+        console.log(`📋 Re-registered ${focusManager.getFocusableComponents().length} focusable components`);
+      }
     }
   });
 
   // Layout the tabs
   tabs.layout(1600, 900);
+
+  // Register the initial tab's content with the focus manager
+  const initialTab = tabItems.find(item => item.key === tabs.getActiveKey());
+  if (initialTab) {
+    focusManager.registerContainer(initialTab.content);
+    console.log(`💡 Tab Focus Navigation enabled! Press Tab to navigate.`);
+    console.log(`📋 Found ${focusManager.getFocusableComponents().length} focusable components`);
+  }
 
   // Create UI layer with scale mode
   const uiLayer = new UILayer({

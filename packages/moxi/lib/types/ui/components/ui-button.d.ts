@@ -37,6 +37,7 @@ export declare class UIButton extends UIComponent {
     private bitmapLabel?;
     private labelCenterX;
     private labelCenterY;
+    private keydownHandler?;
     constructor(props?: UIButtonProps, boxModel?: Partial<BoxModel>);
     private createBitmapLabel;
     private setupInteractivity;
@@ -53,4 +54,5 @@ export declare class UIButton extends UIComponent {
     setLabel(text: string): void;
     setEnabled(enabled: boolean): void;
     getState(): ButtonState;
+    destroy(): void;
 }

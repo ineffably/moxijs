@@ -1,0 +1,57 @@
+import { UIComponent } from '../core/ui-component';
+import { BoxModel, MeasuredSize } from '../core/box-model';
+import { EdgeInsets } from '../core/edge-insets';
+export interface UIScrollContainerProps {
+    width: number;
+    height: number;
+    backgroundColor?: number;
+    borderRadius?: number;
+    scrollbarWidth?: number;
+    scrollbarTrackColor?: number;
+    scrollbarThumbColor?: number;
+    scrollbarThumbHoverColor?: number;
+    scrollbarAutoHide?: boolean;
+    padding?: EdgeInsets;
+}
+export declare class UIScrollContainer extends UIComponent {
+    private props;
+    private background;
+    private contentContainer;
+    private contentMask;
+    private scrollbarTrack;
+    private scrollbarThumb;
+    children: UIComponent[];
+    private scrollY;
+    private maxScrollY;
+    private contentHeight;
+    private isDragging;
+    private dragStartY;
+    private dragStartScrollY;
+    private isHoveringThumb;
+    constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>);
+    private updateBackground;
+    private updateMask;
+    private setupInteractivity;
+    private handleWheel;
+    private handleThumbPointerDown;
+    private handleTrackPointerDown;
+    private handleGlobalPointerMove;
+    private handleGlobalPointerUp;
+    private updateContentPosition;
+    private getThumbHeight;
+    private getThumbY;
+    private updateScrollbar;
+    private updateContentBounds;
+    addChild(child: UIComponent): void;
+    removeChild(child: UIComponent): void;
+    scrollTo(y: number): void;
+    scrollToTop(): void;
+    scrollToBottom(): void;
+    getScrollY(): number;
+    getMaxScrollY(): number;
+    scrollToComponent(component: UIComponent): void;
+    measure(): MeasuredSize;
+    layout(availableWidth: number, availableHeight: number): void;
+    protected render(): void;
+    destroy(): void;
+}

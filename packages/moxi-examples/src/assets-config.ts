@@ -55,7 +55,20 @@ export const ASSETS = {
   KENNEY_FUTURE_FONT: '../assets/ui-pack-scifi/font/kenney-future.ttf',
   KENNEY_FUTURE_NARROW_FONT: '../assets/custom-fonts/kenney-future-narrow.ttf',
   KENNEY_BLOCKS_FONT: '../assets/custom-fonts/kenney-blocks.ttf',
-  PIXEL_FONT_SPROUTLANDS: '../assets/sprout-lands-ui-basic/fonts/pixelFont-7-8x14-sproutLands.ttf'
+  KENNEY_BOLD_FONT: '../assets/custom-fonts/kenney-bold.ttf',
+  KENVECTOR_FUTURE_FONT: '../assets/custom-fonts/kenvector_future.ttf',
+  KENVECTOR_FUTURE_THIN_FONT: '../assets/custom-fonts/kenvector_future_thin.ttf',
+  PIXEL_FONT_SPROUTLANDS: '../assets/sprout-lands-ui-basic/fonts/pixelFont-7-8x14-sproutLands.ttf',
+
+  // UI Pack Space
+  UIPACK_SPACE_SHEET: '../assets/ui-pack-scifi/spritesheet/uipackSpace_sheet.png',
+  UIPACK_SPACE_JSON: '../assets/ui-pack-scifi/spritesheet/uipackSpace_sheet.json',
+
+  // Square Buttons (Sprout Lands UI)
+  SQUARE_BUTTONS_JSON: '../assets/sprout-lands-ui-basic/Sprite sheets/buttons/square-buttons-sheet.json',
+
+  // Emoji Spritesheet
+  EMOJI_SPRITESHEET_JSON: '../assets/sprout-lands-ui-basic/emojis-free/emoji-spritesheet.json'
 } as const;
 
 export type AssetKey = keyof typeof ASSETS;

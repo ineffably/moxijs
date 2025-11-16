@@ -2,8 +2,13 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UILabel } from './ui-label';
-import { UIPanel } from './ui-panel';
 import { EdgeInsets } from '../core/edge-insets';
+import {
+  ButtonBackgroundStrategy,
+  SolidColorBackgroundStrategy,
+  SpriteBackgroundStrategy,
+  SpriteBackgroundConfig
+} from './button-background-strategy';
 
 /**
  * Button visual states
@@ -17,6 +22,9 @@ export enum ButtonState {
   Disabled = 'disabled'
 }
 
+// Re-export SpriteBackgroundConfig for convenience
+export type { SpriteBackgroundConfig } from './button-background-strategy';
+
 /**
  * Props for configuring a UIButton
  *
@@ -29,16 +37,22 @@ export interface UIButtonProps {
   width?: number;
   /** Button height */
   height?: number;
-  /** Background color */
+  /** Background color (only used if spriteBackground is not provided) */
   backgroundColor?: number;
+  /** Sprite-based background configuration */
+  spriteBackground?: SpriteBackgroundConfig;
   /** Text color */
   textColor?: number;
   /** Font size */
   fontSize?: number;
-  /** Border radius */
+  /** Border radius (only used with backgroundColor) */
   borderRadius?: number;
   /** Padding inside button */
   padding?: EdgeInsets;
+  /** Use BitmapText instead of regular text */
+  useBitmapText?: boolean;
+  /** BitmapText font family (required if useBitmapText is true) */
+  bitmapFontFamily?: string;
   /** Click callback */
   onClick?: () => void;
   /** Hover callback */
@@ -66,19 +80,16 @@ export interface UIButtonProps {
  * ```
  */
 export class UIButton extends UIComponent {
-  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover'>>;
+  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily'>>;
+  private useBitmapText: boolean;
+  private bitmapFontFamily?: string;
   private onClick?: () => void;
   private onHover?: () => void;
 
   private state: ButtonState = ButtonState.Normal;
-  private background: UIPanel;
+  private backgroundStrategy: ButtonBackgroundStrategy;
   private label?: UILabel;
-
-  // Original colors for state transitions
-  private normalColor: number;
-  private hoverColor: number;
-  private pressedColor: number;
-  private disabledColor: number;
+  private bitmapLabel?: PIXI.BitmapText;
 
   // Cached label center position
   private labelCenterX: number = 0;
@@ -99,39 +110,50 @@ export class UIButton extends UIComponent {
       enabled: props.enabled ?? true
     };
 
+    this.useBitmapText = props.useBitmapText ?? false;
+    this.bitmapFontFamily = props.bitmapFontFamily;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
-
-    // Calculate state colors (darken for hover/press, desaturate for disabled)
-    this.normalColor = this.props.backgroundColor;
-    this.hoverColor = this.darkenColor(this.normalColor, 0.9);
-    this.pressedColor = this.darkenColor(this.normalColor, 0.8);
-    this.disabledColor = 0x888888;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
     this.boxModel.height = this.props.height;
 
-    // Create background panel
-    this.background = new UIPanel({
-      backgroundColor: this.normalColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
-    this.container.addChild(this.background.container);
+    // Create background strategy based on configuration
+    if (props.spriteBackground) {
+      this.backgroundStrategy = new SpriteBackgroundStrategy(
+        props.spriteBackground,
+        this.props.width,
+        this.props.height
+      );
+    } else {
+      this.backgroundStrategy = new SolidColorBackgroundStrategy(
+        this.props.backgroundColor,
+        this.props.width,
+        this.props.height,
+        this.props.borderRadius
+      );
+    }
+
+    // Create and add background
+    const backgroundContainer = this.backgroundStrategy.create(this.props.width, this.props.height);
+    this.container.addChild(backgroundContainer);
 
     // Create label if text provided
     if (this.props.label) {
-      this.label = new UILabel({
-        text: this.props.label,
-        fontSize: this.props.fontSize,
-        color: this.props.textColor,
-        align: 'center'
-      }, {
-        padding: EdgeInsets.zero()
-      });
-      this.container.addChild(this.label.container);
+      if (this.useBitmapText && this.bitmapFontFamily) {
+        this.createBitmapLabel();
+      } else {
+        this.label = new UILabel({
+          text: this.props.label,
+          fontSize: this.props.fontSize,
+          color: this.props.textColor,
+          align: 'center'
+        }, {
+          padding: EdgeInsets.zero()
+        });
+        this.container.addChild(this.label.container);
+      }
     }
 
     // Setup interactivity
@@ -141,6 +163,24 @@ export class UIButton extends UIComponent {
     if (!this.props.enabled) {
       this.setState(ButtonState.Disabled);
     }
+  }
+
+  /**
+   * Creates a BitmapText label
+   */
+  private createBitmapLabel(): void {
+    if (!this.bitmapFontFamily) return;
+
+    this.bitmapLabel = new PIXI.BitmapText({
+      text: this.props.label,
+      style: {
+        fontFamily: this.bitmapFontFamily,
+        fontSize: this.props.fontSize,
+        fill: this.props.textColor
+      }
+    });
+
+    this.container.addChild(this.bitmapLabel);
   }
 
   /**
@@ -201,42 +241,26 @@ export class UIButton extends UIComponent {
    * Updates visuals based on current state
    */
   private updateVisuals(): void {
-    let color: number;
-    let yOffset = 0;
+    // Update background using strategy
+    this.backgroundStrategy.updateState(this.state);
 
-    switch (this.state) {
-      case ButtonState.Normal:
-        color = this.normalColor;
-        break;
-      case ButtonState.Hover:
-        color = this.hoverColor;
-        break;
-      case ButtonState.Pressed:
-        color = this.pressedColor;
-        yOffset = 2; // Depth effect
-        break;
-      case ButtonState.Disabled:
-        color = this.disabledColor;
-        this.container.cursor = 'default';
-        break;
+    // Calculate depth offset for pressed state
+    const yOffset = this.state === ButtonState.Pressed ? 2 : 0;
+
+    // Update cursor for disabled state
+    if (this.state === ButtonState.Disabled) {
+      this.container.cursor = 'default';
+    } else {
+      this.container.cursor = 'pointer';
     }
 
-    this.background.setBackgroundColor(color);
-
-    // Apply depth offset while maintaining centered position
+    // Apply depth offset to label
     if (this.label) {
       this.label.setPosition(this.labelCenterX, this.labelCenterY + yOffset);
+    } else if (this.bitmapLabel) {
+      this.bitmapLabel.x = this.labelCenterX;
+      this.bitmapLabel.y = this.labelCenterY + yOffset;
     }
-  }
-
-  /**
-   * Darkens a color by a factor
-   */
-  private darkenColor(color: number, factor: number): number {
-    const r = ((color >> 16) & 0xff) * factor;
-    const g = ((color >> 8) & 0xff) * factor;
-    const b = (color & 0xff) * factor;
-    return ((r << 16) | (g << 8) | b) >>> 0;
   }
 
   /**
@@ -258,8 +282,8 @@ export class UIButton extends UIComponent {
     this.computedLayout.width = measured.width;
     this.computedLayout.height = measured.height;
 
-    // Layout background
-    this.background.layout(measured.width, measured.height);
+    // Get actual background height from strategy
+    const actualHeight = this.backgroundStrategy.getActualHeight();
 
     // Layout and center label
     if (this.label) {
@@ -268,8 +292,14 @@ export class UIButton extends UIComponent {
       // Center the label and cache the position
       const labelLayout = this.label.getLayout();
       this.labelCenterX = (measured.width - labelLayout.width) / 2;
-      this.labelCenterY = (measured.height - labelLayout.height) / 2;
+      this.labelCenterY = (actualHeight - labelLayout.height) / 2;
       this.label.setPosition(this.labelCenterX, this.labelCenterY);
+    } else if (this.bitmapLabel) {
+      // Center the bitmap text using actual background height
+      this.labelCenterX = (measured.width - this.bitmapLabel.width) / 2;
+      this.labelCenterY = (actualHeight - this.bitmapLabel.height) / 2;
+      this.bitmapLabel.x = this.labelCenterX;
+      this.bitmapLabel.y = this.labelCenterY;
     }
 
     this.layoutDirty = false;
@@ -289,6 +319,9 @@ export class UIButton extends UIComponent {
   setLabel(text: string): void {
     if (this.label) {
       this.label.setText(text);
+      this.markLayoutDirty();
+    } else if (this.bitmapLabel) {
+      this.bitmapLabel.text = text;
       this.markLayoutDirty();
     }
   }

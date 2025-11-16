@@ -1,16 +1,15 @@
 /**
  * Example 12: Font Rendering Comparison
  *
- * Side-by-side comparison of all three text rendering methods in PixiJS v8:
+ * Side-by-side comparison of the two main text rendering methods in PixiJS v8:
  * - Text: Rich styling with gradients, shadows, and strokes
  * - BitmapText: High performance for frequently updated text
- * - HTMLText: Complex markup and formatting
  *
  * This demo helps developers choose the right method for their use case.
  */
 import { setupMoxi, Logic, asEntity } from 'moxi';
 import * as PIXI from 'pixi.js';
-import { Assets, BitmapText, Text, HTMLText } from 'pixi.js';
+import { Assets, BitmapText, Text } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
 export async function initFontRenderingComparison() {
@@ -22,12 +21,23 @@ export async function initFontRenderingComparison() {
     renderOptions: {
       width: 1600,
       height: 900,
-      backgroundColor: 0x1a1a2e
+      backgroundColor: 0x0a0a0a,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
+      antialias: false,
+      roundPixels: true
     }
   });
 
   // Load fonts
-  await Assets.load([ASSETS.KENNEY_BLOCKS_FONT, ASSETS.KENNEY_FUTURE_FONT]);
+  await Assets.load([
+    ASSETS.KENNEY_BLOCKS_FONT,
+    ASSETS.KENNEY_FUTURE_FONT,
+    ASSETS.KENNEY_FUTURE_NARROW_FONT,
+    ASSETS.KENNEY_BOLD_FONT,
+    ASSETS.KENVECTOR_FUTURE_FONT,
+    ASSETS.KENVECTOR_FUTURE_THIN_FONT
+  ]);
 
   // Generate bitmap fonts from TTF
   PIXI.BitmapFont.install({
@@ -48,19 +58,55 @@ export async function initFontRenderingComparison() {
     }
   });
 
+  PIXI.BitmapFont.install({
+    name: 'KenneyFutureNarrow',
+    style: {
+      fontFamily: 'Kenney Future Narrow',
+      fontSize: 24,
+      fill: 0xffffff
+    }
+  });
+
+  PIXI.BitmapFont.install({
+    name: 'KenneyBold',
+    style: {
+      fontFamily: 'Kenney Bold',
+      fontSize: 24,
+      fill: 0xffffff
+    }
+  });
+
+  PIXI.BitmapFont.install({
+    name: 'KenvectorFuture',
+    style: {
+      fontFamily: 'Kenvector Future',
+      fontSize: 24,
+      fill: 0xffffff
+    }
+  });
+
+  PIXI.BitmapFont.install({
+    name: 'KenvectorFutureThin',
+    style: {
+      fontFamily: 'Kenvector Future Thin',
+      fontSize: 24,
+      fill: 0xffffff
+    }
+  });
+
   // Create three columns for comparison
-  const columnWidth = 480;
-  const columnX = [50, 570, 1090];
+  const columnWidths = [420, 420, 640];
+  const columnX = [50, 500, 950];
   const startY = 20;
 
   // ===== COLUMN 1: Text =====
-  createTextColumn(scene, columnX[0], startY, columnWidth);
+  createTextColumn(scene, columnX[0], startY, columnWidths[0]);
 
   // ===== COLUMN 2: BitmapText =====
-  createBitmapTextColumn(scene, engine, columnX[1], startY, columnWidth);
+  createBitmapTextColumn(scene, engine, columnX[1], startY, columnWidths[1]);
 
-  // ===== COLUMN 3: HTMLText =====
-  createHTMLTextColumn(scene, columnX[2], startY, columnWidth);
+  // ===== COLUMN 3: Font Samples =====
+  createFontSamplesColumn(scene, columnX[2], startY, columnWidths[2]);
 
   // Initialize and start
   scene.init();
@@ -81,7 +127,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const headerText = new Text({
     text: 'Text',
     style: {
-      fontSize: 28,
+      fontSize: 26,
       fill: 0xffffff,
       fontWeight: 'bold'
     },
@@ -104,7 +150,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const basic = new Text({
     text: 'Basic Text',
     style: {
-      fontSize: 24,
+      fontSize: 26,
       fill: 0xffffff
     },
     resolution: 2
@@ -117,7 +163,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const styled = new Text({
     text: 'Bold & Styled',
     style: {
-      fontSize: 24,
+      fontSize: 26,
       fill: 0xff6b35,
       fontWeight: 'bold',
       fontStyle: 'italic'
@@ -129,7 +175,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   currentY += 50;
 
   // Example 3: Gradient Text
-  const gradientFill = new PIXI.FillGradient(0, 0, 0, 28 * 1.7);
+  const gradientFill = new PIXI.FillGradient(0, 0, 0, 30 * 1.7);
   gradientFill.addColorStop(0, 0xff00ff);
   gradientFill.addColorStop(0.5, 0x00ffff);
   gradientFill.addColorStop(1, 0xffff00);
@@ -137,7 +183,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const gradient = new Text({
     text: 'Gradient Fill',
     style: {
-      fontSize: 28,
+      fontSize: 30,
       fill: gradientFill
     },
     resolution: 2
@@ -150,7 +196,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const stroke = new Text({
     text: 'Outlined Text',
     style: {
-      fontSize: 28,
+      fontSize: 30,
       fill: 0xffffff,
       stroke: { color: 0x000000, width: 4 }
     },
@@ -164,7 +210,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const shadow = new Text({
     text: 'Drop Shadow',
     style: {
-      fontSize: 28,
+      fontSize: 30,
       fill: 0xffffff,
       dropShadow: {
         alpha: 0.8,
@@ -184,7 +230,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const wordWrap = new Text({
     text: 'This text demonstrates word wrapping with a maximum width constraint. Perfect for dialogue boxes!',
     style: {
-      fontSize: 16,
+      fontSize: 18,
       fill: 0xeeeeee,
       wordWrap: true,
       wordWrapWidth: width - 40
@@ -199,7 +245,7 @@ function createTextColumn(scene: PIXI.Container, x: number, y: number, width: nu
   const prosLabel = new Text({
     text: '✅ Rich styling\n✅ Gradients & effects\n✅ Easy to use\n\n❌ Slower performance\n❌ Texture per text',
     style: {
-      fontSize: 14,
+      fontSize: 16,
       fill: 0xcccccc,
       lineHeight: 20
     },
@@ -222,7 +268,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: 'BitmapText',
     style: {
       fontFamily: 'KenneyFuture',
-      fontSize: 28
+      fontSize: 26
     }
   });
   headerText.anchor.set(0.5, 0.5);
@@ -244,7 +290,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: 'Fast BitmapText',
     style: {
       fontFamily: 'KenneyBlocks',
-      fontSize: 28
+      fontSize: 30
     }
   });
   basic.position.set(x + 20, currentY);
@@ -256,7 +302,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: 'Color Tinted',
     style: {
       fontFamily: 'KenneyBlocks',
-      fontSize: 28
+      fontSize: 30
     }
   });
   tinted.tint = 0xff6b35;
@@ -269,7 +315,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: 'Live Counter (60 FPS):',
     style: {
       fontFamily: 'KenneyFuture',
-      fontSize: 16
+      fontSize: 18
     }
   });
   counterLabel.position.set(x + 20, currentY);
@@ -279,7 +325,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: '0',
     style: {
       fontFamily: 'KenneyBlocks',
-      fontSize: 32
+      fontSize: 34
     }
   });
   counter.tint = 0xffff00;
@@ -309,7 +355,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     text: 'Multiple instances (100):',
     style: {
       fontFamily: 'KenneyFuture',
-      fontSize: 16
+      fontSize: 18
     }
   });
   multiLabel.position.set(x + 20, currentY);
@@ -325,7 +371,7 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
       text: (i % 10).toString(),
       style: {
         fontFamily: 'KenneyBlocks',
-        fontSize: 12
+        fontSize: 14
       }
     });
     item.tint = [0xff0000, 0xff9900, 0xffff00, 0x00ff00, 0x00ffff,
@@ -333,33 +379,33 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
     item.position.set((i % 20) * 18, Math.floor(i / 20) * 20);
     container.addChild(item);
   }
-  currentY += 100;
+  currentY += 120;
 
   // Pros/Cons label
   const prosLabel = new BitmapText({
     text: '✅ Very fast updates\n✅ Low memory\n✅ Many instances\n✅ Best for mobile\n\n❌ Limited styling\n❌ Requires font prep',
     style: {
       fontFamily: 'KenneyFuture',
-      fontSize: 14
+      fontSize: 16
     }
   });
   prosLabel.position.set(x + 20, currentY);
   scene.addChild(prosLabel);
 }
 
-// ===== COLUMN 3: HTMLText =====
-function createHTMLTextColumn(scene: PIXI.Container, x: number, y: number, width: number) {
+// ===== COLUMN 3: Font Samples =====
+function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, width: number) {
   // Header
   const header = new PIXI.Graphics();
   header.rect(0, 0, width, 50);
-  header.fill({ color: 0xe74c3c });
+  header.fill({ color: 0x9b59b6 });
   header.position.set(x, y);
   scene.addChild(header);
 
   const headerText = new Text({
-    text: 'HTMLText',
+    text: 'Font Samples',
     style: {
-      fontSize: 28,
+      fontSize: 26,
       fill: 0xffffff,
       fontWeight: 'bold'
     },
@@ -372,82 +418,49 @@ function createHTMLTextColumn(scene: PIXI.Container, x: number, y: number, width
   // Background panel
   const panel = new PIXI.Graphics();
   panel.rect(0, 0, width, 825);
-  panel.fill({ color: 0xc0392b });
+  panel.fill({ color: 0x8e44ad });
   panel.alpha = 0.3;
   panel.position.set(x, y + 55);
   scene.addChild(panel);
 
   let currentY = y + 75;
 
-  // Example 1: Formatted Text
-  const formatted = new HTMLText({
-    text: '<b>Bold</b> and <i>italic</i> text with <span style="color: #ffff00;">colors</span>',
-    style: {
-      fontSize: 18,
-      fill: 0xffffff
-    }
-  });
-  formatted.position.set(x + 20, currentY);
-  scene.addChild(formatted);
-  currentY += 60;
+  // Font showcase section
+  const fontSamples = [
+    { name: 'Kenney Blocks', fontFamily: 'KenneyBlocks', size: 20, lineHeight: 25 },
+    { name: 'Kenney Bold', fontFamily: 'KenneyBold', size: 20, lineHeight: 32 },
+    { name: 'Kenney Future Narrow', fontFamily: 'KenneyFutureNarrow', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future', fontFamily: 'KenvectorFuture', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future Thin', fontFamily: 'KenvectorFutureThin', size: 20, lineHeight: 25 }
+  ];
 
-  // Example 2: Headers
-  const headers = new HTMLText({
-    text: '<h2>Chapter Title</h2><p>Story text goes here.</p>',
-    style: {
-      fontSize: 16,
-      fill: 0xffffff
-    }
-  });
-  headers.position.set(x + 20, currentY);
-  scene.addChild(headers);
-  currentY += 90;
+  const sampleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=';
 
-  // Example 3: Lists
-  const list = new HTMLText({
-    text: `
-      <h3>Quest Objectives:</h3>
-      <ul>
-        <li>Find the magic sword</li>
-        <li>Defeat the dragon</li>
-        <li>Save the princess</li>
-      </ul>
-    `,
-    style: {
-      fontSize: 14,
-      fill: 0xffffff
-    }
-  });
-  list.position.set(x + 20, currentY);
-  scene.addChild(list);
-  currentY += 140;
+  fontSamples.forEach(font => {
+    // Font name label
+    const fontNameLabel = new BitmapText({
+      text: font.name + ':',
+      style: {
+        fontFamily: 'KenneyFuture',
+        fontSize: 18
+      }
+    });
+    fontNameLabel.position.set(x + 20, currentY);
+    scene.addChild(fontNameLabel);
+    currentY += 25;
 
-  // Example 4: Complex Formatting
-  const complex = new HTMLText({
-    text: `
-      <p><b>Hero:</b> "What happened?"</p>
-      <p><i>The old wizard sighs...</i></p>
-      <p><span style="color: #ff6b35;">Wizard:</span> "Long ago..."</p>
-    `,
-    style: {
-      fontSize: 14,
-      fill: 0xeeeeee
-    }
+    // Character sample
+    const sample = new BitmapText({
+      text: sampleChars,
+      style: {
+        fontFamily: font.fontFamily,
+        fontSize: font.size,
+        lineHeight: font.lineHeight
+      }
+    });
+    sample.position.set(x + 20, currentY);
+    scene.addChild(sample);
+    currentY += 100;
   });
-  complex.position.set(x + 20, currentY);
-  scene.addChild(complex);
-  currentY += 100;
-
-  // Pros/Cons label
-  const prosLabel = new Text({
-    text: '✅ HTML markup\n✅ Complex layout\n✅ Rich formatting\n\n❌ Slower rendering\n❌ High memory\n❌ Not for updates',
-    style: {
-      fontSize: 14,
-      fill: 0xffffff,
-      lineHeight: 20
-    },
-    resolution: 2
-  });
-  prosLabel.position.set(x + 20, currentY);
-  scene.addChild(prosLabel);
 }
+

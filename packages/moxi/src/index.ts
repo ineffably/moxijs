@@ -24,6 +24,8 @@ import { UIButton, ButtonState } from './ui/components/ui-button';
 import { UISelect, SelectOption } from './ui/components/ui-select';
 import { UITextInput } from './ui/components/ui-text-input';
 import { UITabs, TabItem } from './ui/components/ui-tabs';
+import { UILayer } from './ui/UILayer';
+import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
@@ -65,10 +67,11 @@ export type { FlexContainerProps } from './ui/layout/flex-container';
 export type { UIBoxProps } from './ui/components/ui-box';
 export type { UILabelProps, TextAlign } from './ui/components/ui-label';
 export type { UIPanelProps, NineSliceConfig } from './ui/components/ui-panel';
-export type { UIButtonProps } from './ui/components/ui-button';
+export type { UIButtonProps, SpriteBackgroundConfig } from './ui/components/ui-button';
 export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
+export type { UILayerOptions } from './ui/UILayer';
 
 export type Asset = { src: string, alias?: string };
 
@@ -152,7 +155,9 @@ const exportedObjects = {
   ButtonState,
   UISelect,
   UITextInput,
-  UITabs
+  UITabs,
+  UILayer,
+  UIScaleMode
 };
 
 export default exportedObjects;
@@ -209,6 +214,8 @@ export {
   ButtonState,
   UISelect,
   UITextInput,
-  UITabs
+  UITabs,
+  UILayer,
+  UIScaleMode
 };
 

@@ -222,7 +222,8 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
 // Get example key from URL hash
 function getExampleFromHash(): string | null {
   const hash = window.location.hash.slice(1); // Remove the '#'
-  return hash && examples[hash] ? hash : null;
+  const exampleKey = hash.split('/')[0]; // Take first segment before any slash (for sub-paths like ui-showcase/basics)
+  return exampleKey && examples[exampleKey] ? exampleKey : null;
 }
 
 // Initialize UI

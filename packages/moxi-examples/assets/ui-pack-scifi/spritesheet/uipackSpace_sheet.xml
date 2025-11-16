@@ -1,4 +1,4 @@
-<TextureAtlas imagePath="sheet.png">
+<TextureAtlas imagePath="uipackSpace_sheet.png">
 	<SubTexture name="barHorizontal_blue_left.png" x="400" y="78" width="6" height="26"/>
 	<SubTexture name="barHorizontal_blue_mid.png" x="388" y="420" width="16" height="26"/>
 	<SubTexture name="barHorizontal_blue_right.png" x="400" y="0" width="6" height="26"/>

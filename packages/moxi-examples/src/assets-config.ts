@@ -9,7 +9,9 @@
 export const ASSETS = {
   // Characters
   ROBOT_IDLE: '../assets/character_robot_idle.png',
+  ROBOT_IDLE_JSON: '../assets/character_robot_idle.json',
   SPROUTLANDS_CHARACTER: '../assets/sprout-lands-basic/Characters/Basic Charakter Spritesheet.png',
+  SPROUTLANDS_CHARACTER_JSON: '../assets/sprout-lands-basic/Characters/Basic Charakter Spritesheet.json',
   CHICKEN: '../assets/sprout-lands-basic/Characters/Free Chicken Sprites.png',
   COW: '../assets/sprout-lands-basic/Characters/Free Cow Sprites.png',
 

@@ -2,15 +2,14 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIPanel } from './ui-panel';
-import { EdgeInsets } from '../core/edge-insets';
 import { UIFocusManager } from '../core/ui-focus-manager';
 
 /**
- * Props for configuring a UITextInput
+ * Props for configuring a UITextArea
  *
  * @category UI
  */
-export interface UITextInputProps {
+export interface UITextAreaProps {
   /** Current value (controlled) */
   value?: string;
   /** Default value (uncontrolled) */
@@ -21,11 +20,11 @@ export interface UITextInputProps {
   placeholder?: string;
   /** Maximum character length */
   maxLength?: number;
-  /** Width of the input */
+  /** Width of the textarea */
   width?: number;
-  /** Height of the input */
+  /** Height of the textarea */
   height?: number;
-  /** Whether the input is disabled */
+  /** Whether the textarea is disabled */
   disabled?: boolean;
   /** Background color */
   backgroundColor?: number;
@@ -37,27 +36,31 @@ export interface UITextInputProps {
   borderRadius?: number;
   /** Font size */
   fontSize?: number;
-  /** Input type for validation */
-  type?: 'text' | 'number';
+  /** Line height multiplier (e.g., 1.5 means 1.5x the font size) */
+  lineHeight?: number;
+  /** Number of visible rows */
+  rows?: number;
 }
 
 /**
- * A text input component following Ant Design patterns
- * Supports both controlled and uncontrolled modes
+ * A multi-line text area component
+ * Supports word wrapping and scrolling
  *
  * @category UI
  *
  * @example
  * ```typescript
- * const input = new UITextInput({
- *   placeholder: 'Enter your name...',
- *   onChange: (value) => console.log('Input:', value),
- *   maxLength: 50
+ * const textarea = new UITextArea({
+ *   placeholder: 'Enter your message...',
+ *   onChange: (value) => console.log('Message:', value),
+ *   width: 400,
+ *   height: 120,
+ *   rows: 4
  * });
  * ```
  */
-export class UITextInput extends UIComponent {
-  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue'>>;
+export class UITextArea extends UIComponent {
+  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue'>>;
   private onChange?: (value: string) => void;
 
   private currentValue: string;
@@ -68,21 +71,24 @@ export class UITextInput extends UIComponent {
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
 
-  constructor(props: UITextInputProps, boxModel?: Partial<BoxModel>) {
+  constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
+    const defaultHeight = (props.rows ?? 4) * (props.fontSize ?? 14) * (props.lineHeight ?? 1.5) + 24;
 
     this.props = {
       placeholder: props.placeholder ?? '',
-      maxLength: props.maxLength ?? 100,
-      width: props.width ?? 200,
-      height: props.height ?? 36,
+      maxLength: props.maxLength ?? 1000,
+      width: props.width ?? 400,
+      height: props.height ?? defaultHeight,
       disabled: props.disabled ?? false,
       backgroundColor: props.backgroundColor ?? 0xffffff,
       textColor: props.textColor ?? 0x000000,
       placeholderColor: props.placeholderColor ?? 0x999999,
       borderRadius: props.borderRadius ?? 4,
       fontSize: props.fontSize ?? 14,
-      type: props.type ?? 'text'
+      lineHeight: props.lineHeight ?? 1.5,
+      rows: props.rows ?? 4
     };
 
     this.onChange = props.onChange;
@@ -101,18 +107,21 @@ export class UITextInput extends UIComponent {
     });
     this.container.addChild(this.background.container);
 
-    // Create text display
+    // Create text display with word wrapping
     this.textDisplay = new PIXI.Text({
       text: this.getDisplayText(),
       style: {
         fontFamily: 'Arial',
         fontSize: this.props.fontSize,
         fill: this.currentValue ? this.props.textColor : this.props.placeholderColor,
-        align: 'left'
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: this.props.width - 24,
+        lineHeight: this.props.fontSize * this.props.lineHeight
       },
       resolution: window.devicePixelRatio || 2
     });
-    this.textDisplay.position.set(12, (this.props.height - this.props.fontSize) / 2);
+    this.textDisplay.position.set(12, 12);
     this.container.addChild(this.textDisplay);
 
     // Create cursor
@@ -144,7 +153,7 @@ export class UITextInput extends UIComponent {
     // Click to focus
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
 
-    // Listen for global click to blur
+    // Listen for global keyboard events
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
@@ -165,7 +174,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Called when input receives focus (override from base class)
+   * Called when textarea receives focus (override from base class)
    */
   override onFocus(): void {
     if (this.focused) return;
@@ -186,7 +195,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Called when input loses focus (override from base class)
+   * Called when textarea loses focus (override from base class)
    */
   override onBlur(): void {
     if (!this.focused) return;
@@ -207,14 +216,24 @@ export class UITextInput extends UIComponent {
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
-    // Stop event from propagating
-    e.preventDefault();
-    e.stopPropagation();
+    // Don't prevent default for Tab (allow tab navigation)
+    if (e.key !== 'Tab') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     const key = e.key;
 
+    // Enter adds new line in textarea
     if (key === 'Enter') {
-      this.onBlur();
+      if (this.currentValue.length < this.props.maxLength) {
+        this.currentValue =
+          this.currentValue.substring(0, this.cursorPosition) +
+          '\n' +
+          this.currentValue.substring(this.cursorPosition);
+        this.cursorPosition++;
+        this.updateText();
+      }
       return;
     }
 
@@ -260,25 +279,37 @@ export class UITextInput extends UIComponent {
       return;
     }
 
+    if (key === 'ArrowUp') {
+      // Move cursor up one line
+      this.moveCursorVertically(-1);
+      return;
+    }
+
+    if (key === 'ArrowDown') {
+      // Move cursor down one line
+      this.moveCursorVertically(1);
+      return;
+    }
+
     if (key === 'Home') {
-      this.cursorPosition = 0;
+      // Move to start of current line
+      const lineStart = this.currentValue.lastIndexOf('\n', this.cursorPosition - 1) + 1;
+      this.cursorPosition = lineStart;
       this.updateCursor();
       return;
     }
 
     if (key === 'End') {
-      this.cursorPosition = this.currentValue.length;
+      // Move to end of current line
+      let lineEnd = this.currentValue.indexOf('\n', this.cursorPosition);
+      if (lineEnd === -1) lineEnd = this.currentValue.length;
+      this.cursorPosition = lineEnd;
       this.updateCursor();
       return;
     }
 
     // Handle character input
     if (key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      // Type validation
-      if (this.props.type === 'number' && !/[0-9.-]/.test(key)) {
-        return;
-      }
-
       // Check max length
       if (this.currentValue.length >= this.props.maxLength) {
         return;
@@ -295,6 +326,40 @@ export class UITextInput extends UIComponent {
   }
 
   /**
+   * Moves cursor vertically by the specified number of lines
+   */
+  private moveCursorVertically(direction: number): void {
+    const lines = this.currentValue.split('\n');
+    let currentLine = 0;
+    let positionInLine = 0;
+    let charCount = 0;
+
+    // Find current line and position
+    for (let i = 0; i < lines.length; i++) {
+      if (charCount + lines[i].length >= this.cursorPosition) {
+        currentLine = i;
+        positionInLine = this.cursorPosition - charCount;
+        break;
+      }
+      charCount += lines[i].length + 1; // +1 for newline
+    }
+
+    // Move to target line
+    const targetLine = Math.max(0, Math.min(lines.length - 1, currentLine + direction));
+    if (targetLine === currentLine) return;
+
+    // Calculate new cursor position
+    let newPosition = 0;
+    for (let i = 0; i < targetLine; i++) {
+      newPosition += lines[i].length + 1;
+    }
+    newPosition += Math.min(positionInLine, lines[targetLine].length);
+
+    this.cursorPosition = newPosition;
+    this.updateCursor();
+  }
+
+  /**
    * Updates the text display and triggers onChange
    */
   private updateText(): void {
@@ -308,22 +373,41 @@ export class UITextInput extends UIComponent {
    * Updates cursor position visually
    */
   private updateCursor(): void {
-    // Measure text up to cursor position by creating a temporary text object
+    // Get text metrics up to cursor position
     const textUpToCursor = this.currentValue.substring(0, this.cursorPosition);
+
+    // Create temporary text to measure
     const tempText = new PIXI.Text({
       text: textUpToCursor,
+      style: {
+        ...this.textDisplay.style,
+        wordWrap: true,
+        wordWrapWidth: this.props.width - 24
+      }
+    });
+
+    // Get the bounds to find cursor position
+    const metrics = tempText.getLocalBounds();
+
+    // For multi-line, we need to find the last line position
+    const lines = textUpToCursor.split('\n');
+    const lastLine = lines[lines.length - 1];
+
+    const lastLineText = new PIXI.Text({
+      text: lastLine,
       style: this.textDisplay.style
     });
 
-    const cursorX = 12 + tempText.width;
-    const cursorY = (this.props.height - this.props.fontSize) / 2;
+    const cursorX = 12 + lastLineText.width;
+    const cursorY = 12 + (lines.length - 1) * (this.props.fontSize * this.props.lineHeight);
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
     this.cursor.fill({ color: this.props.textColor });
 
-    // Clean up temp text
+    // Clean up temp objects
     tempText.destroy();
+    lastLineText.destroy();
   }
 
   /**
@@ -360,7 +444,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Measures the size needed for this input
+   * Measures the size needed for this textarea
    */
   measure(): MeasuredSize {
     return {
@@ -370,7 +454,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Performs layout for this input
+   * Performs layout for this textarea
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
@@ -386,7 +470,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Renders the input
+   * Renders the textarea
    */
   protected render(): void {
     // Rendering handled by background, text, and cursor

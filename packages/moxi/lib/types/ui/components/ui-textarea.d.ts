@@ -1,6 +1,6 @@
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
-export interface UITextInputProps {
+export interface UITextAreaProps {
     value?: string;
     defaultValue?: string;
     onChange?: (value: string) => void;
@@ -14,9 +14,10 @@ export interface UITextInputProps {
     placeholderColor?: number;
     borderRadius?: number;
     fontSize?: number;
-    type?: 'text' | 'number';
+    lineHeight?: number;
+    rows?: number;
 }
-export declare class UITextInput extends UIComponent {
+export declare class UITextArea extends UIComponent {
     private props;
     private onChange?;
     private currentValue;
@@ -26,13 +27,14 @@ export declare class UITextInput extends UIComponent {
     private cursorPosition;
     private cursorBlinkInterval?;
     private cursorVisible;
-    constructor(props: UITextInputProps, boxModel?: Partial<BoxModel>);
+    constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>);
     private getDisplayText;
     private setupInteractivity;
     private handlePointerDown;
     onFocus(): void;
     onBlur(): void;
     private handleKeyDown;
+    private moveCursorVertically;
     private updateText;
     private updateCursor;
     private startCursorBlink;

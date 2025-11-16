@@ -3,6 +3,7 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UILabel } from './ui-label';
 import { EdgeInsets } from '../core/edge-insets';
+import { UIFocusManager } from '../core/ui-focus-manager';
 import {
   ButtonBackgroundStrategy,
   SolidColorBackgroundStrategy,
@@ -95,6 +96,9 @@ export class UIButton extends UIComponent {
   private labelCenterX: number = 0;
   private labelCenterY: number = 0;
 
+  // Keyboard handler for cleanup
+  private keydownHandler?: (e: KeyboardEvent) => void;
+
   constructor(props: UIButtonProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
@@ -118,6 +122,9 @@ export class UIButton extends UIComponent {
     // Set box model dimensions
     this.boxModel.width = this.props.width;
     this.boxModel.height = this.props.height;
+
+    // Make buttons focusable by default
+    this.tabIndex = 0;
 
     // Create background strategy based on configuration
     if (props.spriteBackground) {
@@ -195,6 +202,31 @@ export class UIButton extends UIComponent {
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
     this.container.on('pointerup', this.handlePointerUp.bind(this));
     this.container.on('pointerupoutside', this.handlePointerUpOutside.bind(this));
+
+    // Handle keyboard interaction when focused
+    if (typeof window !== 'undefined') {
+      this.keydownHandler = (e: KeyboardEvent) => {
+        if (this.isFocused() && this.props.enabled) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+
+            // Show pressed state
+            this.setState(ButtonState.Pressed);
+
+            // Trigger click
+            this.onClick?.();
+
+            // Return to hover state after a short delay (simulating button release)
+            setTimeout(() => {
+              if (this.props.enabled) {
+                this.setState(ButtonState.Normal);
+              }
+            }, 100);
+          }
+        }
+      };
+      window.addEventListener('keydown', this.keydownHandler);
+    }
   }
 
   private handlePointerOver(): void {
@@ -211,8 +243,29 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerDown(): void {
+    console.log('🔵 Button handlePointerDown called');
+    console.log('  - enabled:', this.props.enabled);
+    console.log('  - canFocus:', this.canFocus());
+    console.log('  - tabIndex:', this.tabIndex);
+
     if (this.props.enabled) {
       this.setState(ButtonState.Pressed);
+
+      // Request focus through the focus manager
+      if (this.canFocus()) {
+        const focusManager = UIFocusManager.getInstance();
+        console.log('  - focusManager:', focusManager);
+        if (focusManager) {
+          console.log('  - Calling requestFocus');
+          focusManager.requestFocus(this);
+        } else {
+          console.log('  - No focus manager, calling onFocus directly');
+          // Fallback if no focus manager
+          this.onFocus();
+        }
+      } else {
+        console.log('  - canFocus returned false, NOT focusing');
+      }
     }
   }
 
@@ -340,4 +393,15 @@ export class UIButton extends UIComponent {
   getState(): ButtonState {
     return this.state;
   }
+
+  /**
+   * Cleanup when destroying the button
+   */
+  destroy(): void {
+    if (typeof window !== 'undefined' && this.keydownHandler) {
+      window.removeEventListener('keydown', this.keydownHandler);
+    }
+    super.destroy();
+  }
+
 }

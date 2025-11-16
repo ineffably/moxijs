@@ -10,6 +10,7 @@
 export { EdgeInsets } from './core/edge-insets';
 export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBoxModel } from './core/box-model';
 export { UIComponent } from './core/ui-component';
+export { UIFocusManager, Focusable } from './core/ui-focus-manager';
 
 // Layout
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
@@ -21,4 +22,6 @@ export { UIPanel, UIPanelProps, NineSliceConfig } from './components/ui-panel';
 export { UIButton, UIButtonProps, ButtonState } from './components/ui-button';
 export { UISelect, UISelectProps, SelectOption } from './components/ui-select';
 export { UITextInput, UITextInputProps } from './components/ui-text-input';
+export { UITextArea, UITextAreaProps } from './components/ui-textarea';
+export { UIScrollContainer, UIScrollContainerProps } from './components/ui-scroll-container';
 export { UITabs, UITabsProps, TabItem } from './components/ui-tabs';

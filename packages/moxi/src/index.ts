@@ -16,6 +16,7 @@ import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-seq
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { EdgeInsets } from './ui/core/edge-insets';
 import { UIComponent } from './ui/core/ui-component';
+import { UIFocusManager } from './ui/core/ui-focus-manager';
 import { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from './ui/layout/flex-container';
 import { UIBox } from './ui/components/ui-box';
 import { UILabel } from './ui/components/ui-label';
@@ -23,6 +24,8 @@ import { UIPanel } from './ui/components/ui-panel';
 import { UIButton, ButtonState } from './ui/components/ui-button';
 import { UISelect, SelectOption } from './ui/components/ui-select';
 import { UITextInput } from './ui/components/ui-text-input';
+import { UITextArea } from './ui/components/ui-textarea';
+import { UIScrollContainer } from './ui/components/ui-scroll-container';
 import { UITabs, TabItem } from './ui/components/ui-tabs';
 import { UILayer } from './ui/UILayer';
 import { UIScaleMode } from './ui/UIScaleMode';
@@ -144,6 +147,7 @@ const exportedObjects = {
   applyMaterial,
   EdgeInsets,
   UIComponent,
+  UIFocusManager,
   FlexContainer,
   FlexDirection,
   FlexJustify,
@@ -155,6 +159,8 @@ const exportedObjects = {
   ButtonState,
   UISelect,
   UITextInput,
+  UITextArea,
+  UIScrollContainer,
   UITabs,
   UILayer,
   UIScaleMode
@@ -203,6 +209,7 @@ export {
   applyMaterial,
   EdgeInsets,
   UIComponent,
+  UIFocusManager,
   FlexContainer,
   FlexDirection,
   FlexJustify,
@@ -214,6 +221,8 @@ export {
   ButtonState,
   UISelect,
   UITextInput,
+  UITextArea,
+  UIScrollContainer,
   UITabs,
   UILayer,
   UIScaleMode

@@ -1,4 +1,4 @@
-import { setupMoxi, asEntity } from 'moxi';
+import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
@@ -13,13 +13,21 @@ export async function initAnimatedCharacter() {
   if (!root) throw new Error('App element not found');
 
   // Get the Moxi setup
-  const { scene, engine, PIXIAssets } = await setupMoxi({
+  const { scene, engine, PIXIAssets, loadAssets, camera } = await setupMoxi({
     hostElement: root
   });
 
-  scene.renderer.background.color = 0x3a4466; // Dark blue background
+  scene.renderer.background.color = 0x88c070; // Gameboy-inspired green
 
-  // Load bunny character spritesheet with JSON definition
+  // Set up camera - zoom in to see pixel art better
+  camera.desiredScale.set(3);
+
+  // Load bunny character spritesheet with JSON definition and grass tiles
+  await loadAssets([
+    { src: ASSETS.GRASS_TILES, alias: 'grass_sheet' },
+    { src: ASSETS.KENNEY_BLOCKS_FONT, alias: 'kenney_blocks' }
+  ]);
+
   await PIXI.Assets.load({
     alias: 'bunny',
     src: ASSETS.SPROUTLANDS_CHARACTER_JSON,
@@ -28,8 +36,43 @@ export async function initAnimatedCharacter() {
     }
   });
 
-  // Get the spritesheet
+  // Get the spritesheet and grass tiles
   const sheet = PIXIAssets.get<PIXI.Spritesheet>('bunny');
+  const grassSheet = PIXIAssets.get<PIXI.TextureSource>('grass_sheet');
+
+  // Set scale mode to nearest neighbor for pixel art
+  grassSheet.source.scaleMode = 'nearest';
+
+  // Create grass texture frames
+  const grassFrames = asTextureFrames(PIXI, grassSheet, {
+    frameWidth: 16,
+    frameHeight: 16,
+    columns: 11,
+    rows: 7
+  });
+
+  // Get color variant grass tiles and stone paths
+  const colorVariantTiles = getTextureRange(grassFrames, 55, 6);
+  const stonePathTiles = getTextureRange(grassFrames, 66, 6);
+
+  // Combine tile pools for randomization
+  const tileVariations = [
+    ...colorVariantTiles,
+    ...stonePathTiles
+  ];
+
+  // Create a background container with the grass tiles
+  const backgroundContainer = createTileGrid({
+    width: 100,
+    height: 60,
+    cellWidth: 16,
+    cellHeight: 16,
+    centered: true
+  }, tileVariations);
+
+  // Convert background container to a Moxi entity and add to scene
+  const backgroundEntity = asEntity(backgroundContainer);
+  scene.addChild(backgroundEntity);
 
   // Animation names - these match the "animations" section in the JSON
   // Top row: all idle animations, Bottom row: all walk animations
@@ -43,8 +86,9 @@ export async function initAnimatedCharacter() {
   ];
 
   // Layout: 4 columns x 2 rows
-  const totalWidth = scene.renderer.width;
-  const totalHeight = scene.renderer.height;
+  // Since camera is zoomed in 3x, we need to work in world coordinates (not screen pixels)
+  const totalWidth = scene.renderer.width / camera.desiredScale.x;
+  const totalHeight = scene.renderer.height / camera.desiredScale.y;
   const cols = 4;
   const rows = 2;
   const spacingX = totalWidth / (cols + 1); // Space between columns
@@ -58,27 +102,40 @@ export async function initAnimatedCharacter() {
     const x = spacingX * (col + 1);
     const y = spacingY * (row + 1);
 
-    // Create label
-    const label = new PIXI.Text({
+    // Create label background (light yellow rectangle with dark green border)
+    const labelBg = new PIXI.Graphics();
+    const labelText = new PIXI.BitmapText({
       text: displayNames[index],
       style: {
-        fontFamily: 'Arial',
-        fontSize: 20,
-        fill: 0xffffff,
-        align: 'center'
+        fontFamily: 'Kenney Blocks',
+        fontSize: 10, // Increased by 2 pixels
+        fill: 0x3d6b1f // Lighter green color
       }
     });
-    label.anchor.set(0.5);
-    label.x = x;
-    label.y = y - 80; // Position above character
-    scene.addChild(asEntity(label));
+    labelText.anchor.set(0.5);
+
+    // Draw background rectangle based on text bounds
+    const padding = 2;
+    const bgWidth = labelText.width + padding * 2;
+    const bgHeight = labelText.height + padding * 2;
+    labelBg.rect(-bgWidth / 2, -bgHeight / 2, bgWidth, bgHeight);
+    labelBg.fill({ color: 0xFFF4A3 }); // Light yellow
+    labelBg.stroke({ color: 0x2d5016, width: 1 }); // Dark green border
+
+    // Create container for background + text
+    const labelContainer = new PIXI.Container();
+    labelContainer.addChild(labelBg);
+    labelContainer.addChild(labelText);
+    labelContainer.x = x;
+    labelContainer.y = y - 30; // Closer to character in world coordinates (80 / 3)
+    scene.addChild(asEntity(labelContainer));
 
     // Create animated sprite from spritesheet animation
     const character = new PIXI.AnimatedSprite(sheet.animations[animName]);
     character.anchor.set(0.5);
     character.x = x;
     character.y = y;
-    character.scale.set(3); // Scale up for visibility
+    character.scale.set(1); // Camera handles the zoom
     character.animationSpeed = 0.05; // Slowed down by half (0.1 * 1/2)
     character.play();
 

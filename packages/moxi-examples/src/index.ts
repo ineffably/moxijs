@@ -61,17 +61,17 @@ const examples: Record<string, Example> = {
     init: initPixiOnly,
     source: pixiOnlySource
   },
-  'animated-character': {
-    name: '04 - Animated Character',
-    description: 'Sprite animation with camera following',
-    init: initAnimatedCharacter,
-    source: animatedCharacterSource
-  },
   'progress-bar': {
-    name: '05 - Progress Bar',
+    name: '04 - Progress Bar',
     description: 'Custom Logic component creating an animated progress bar',
     init: initProgressBar,
     source: progressBarSource
+  },
+  'animated-character': {
+    name: '05 - Animated Character',
+    description: 'Sprite animation with camera following',
+    init: initAnimatedCharacter,
+    source: animatedCharacterSource
   },
   'bunny-adventure': {
     name: '06 - Bunny Adventure',

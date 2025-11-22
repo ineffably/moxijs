@@ -1,6 +1,10 @@
 # npm module cache
 node_modules
 
+
+test-results
+playwright-report
+
 # build output
 # I want the build output for github pages support
 # lib
@@ -13,4 +17,9 @@ node_modules
 
 .claude
 
+CLAUDE.MD
 
+screenshots
+
+.DS_Store
+**/.DS_Store

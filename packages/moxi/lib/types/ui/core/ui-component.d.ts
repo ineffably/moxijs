@@ -1,0 +1,40 @@
+import PIXI from 'pixi.js';
+import { BoxModel, ComputedLayout, MeasuredSize } from './box-model';
+export declare abstract class UIComponent {
+    container: PIXI.Container;
+    protected boxModel: BoxModel;
+    protected focusRing?: PIXI.Graphics;
+    protected computedLayout: ComputedLayout;
+    parent?: UIComponent;
+    visible: boolean;
+    enabled: boolean;
+    protected layoutDirty: boolean;
+    tabIndex: number;
+    protected focused: boolean;
+    constructor(boxModel?: Partial<BoxModel>);
+    private createFocusRing;
+    protected updateFocusRing(): void;
+    abstract measure(): MeasuredSize;
+    abstract layout(availableWidth: number, availableHeight: number): void;
+    protected abstract render(): void;
+    markLayoutDirty(): void;
+    getLayout(): ComputedLayout;
+    getBoxModel(): BoxModel;
+    getGlobalBounds(): {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+    setPosition(x: number, y: number): void;
+    show(): void;
+    hide(): void;
+    canFocus(): boolean;
+    isFocused(): boolean;
+    onFocus(): void;
+    protected showFocusRing(): void;
+    private scrollIntoView;
+    onBlur(): void;
+    protected hideFocusRing(): void;
+    destroy(): void;
+}

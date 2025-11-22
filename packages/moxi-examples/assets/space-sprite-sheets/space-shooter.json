@@ -18,7 +18,8 @@
       "sourceSize": {
         "w": 43,
         "h": 31
-      }
+      },
+      "description": "Laser beam"
     },
     "beam1.png": {
       "frame": {
@@ -38,7 +39,8 @@
       "sourceSize": {
         "w": 40,
         "h": 20
-      }
+      },
+      "description": "Laser beam"
     },
     "beam2.png": {
       "frame": {
@@ -58,7 +60,8 @@
       "sourceSize": {
         "w": 38,
         "h": 31
-      }
+      },
+      "description": "Laser beam"
     },
     "beam3.png": {
       "frame": {
@@ -78,7 +81,8 @@
       "sourceSize": {
         "w": 29,
         "h": 29
-      }
+      },
+      "description": "Laser beam"
     },
     "beam4.png": {
       "frame": {
@@ -98,7 +102,8 @@
       "sourceSize": {
         "w": 41,
         "h": 17
-      }
+      },
+      "description": "Laser beam"
     },
     "beam5.png": {
       "frame": {
@@ -118,7 +123,8 @@
       "sourceSize": {
         "w": 40,
         "h": 25
-      }
+      },
+      "description": "Laser beam"
     },
     "beam6.png": {
       "frame": {
@@ -138,7 +144,8 @@
       "sourceSize": {
         "w": 43,
         "h": 23
-      }
+      },
+      "description": "Laser beam"
     },
     "beamLong1.png": {
       "frame": {
@@ -158,7 +165,8 @@
       "sourceSize": {
         "w": 15,
         "h": 67
-      }
+      },
+      "description": "Laser beam"
     },
     "beamLong2.png": {
       "frame": {
@@ -178,7 +186,8 @@
       "sourceSize": {
         "w": 25,
         "h": 64
-      }
+      },
+      "description": "Laser beam"
     },
     "bold_silver.png": {
       "frame": {
@@ -198,7 +207,8 @@
       "sourceSize": {
         "w": 19,
         "h": 30
-      }
+      },
+      "description": "Silver bold font character"
     },
     "bolt_bronze.png": {
       "frame": {
@@ -218,7 +228,8 @@
       "sourceSize": {
         "w": 19,
         "h": 30
-      }
+      },
+      "description": "Bolt projectile"
     },
     "bolt_gold.png": {
       "frame": {
@@ -238,7 +249,8 @@
       "sourceSize": {
         "w": 19,
         "h": 30
-      }
+      },
+      "description": "Bolt projectile"
     },
     "buttonBlue.png": {
       "frame": {
@@ -258,7 +270,8 @@
       "sourceSize": {
         "w": 222,
         "h": 39
-      }
+      },
+      "description": "UI Button"
     },
     "buttonGreen.png": {
       "frame": {
@@ -278,7 +291,8 @@
       "sourceSize": {
         "w": 222,
         "h": 39
-      }
+      },
+      "description": "UI Button"
     },
     "buttonRed.png": {
       "frame": {
@@ -298,7 +312,8 @@
       "sourceSize": {
         "w": 222,
         "h": 39
-      }
+      },
+      "description": "UI Button"
     },
     "buttonYellow.png": {
       "frame": {
@@ -318,7 +333,8 @@
       "sourceSize": {
         "w": 222,
         "h": 39
-      }
+      },
+      "description": "UI Button"
     },
     "cockpitBlue_0.png": {
       "frame": {
@@ -338,7 +354,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_1.png": {
       "frame": {
@@ -358,7 +375,8 @@
       "sourceSize": {
         "w": 40,
         "h": 40
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_2.png": {
       "frame": {
@@ -378,7 +396,8 @@
       "sourceSize": {
         "w": 42,
         "h": 56
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_3.png": {
       "frame": {
@@ -398,7 +417,8 @@
       "sourceSize": {
         "w": 60,
         "h": 61
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_4.png": {
       "frame": {
@@ -418,7 +438,8 @@
       "sourceSize": {
         "w": 47,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_5.png": {
       "frame": {
@@ -438,7 +459,8 @@
       "sourceSize": {
         "w": 48,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_6.png": {
       "frame": {
@@ -458,7 +480,8 @@
       "sourceSize": {
         "w": 42,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitBlue_7.png": {
       "frame": {
@@ -478,7 +501,8 @@
       "sourceSize": {
         "w": 41,
         "h": 71
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_0.png": {
       "frame": {
@@ -498,7 +522,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_1.png": {
       "frame": {
@@ -518,7 +543,8 @@
       "sourceSize": {
         "w": 40,
         "h": 40
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_2.png": {
       "frame": {
@@ -538,7 +564,8 @@
       "sourceSize": {
         "w": 42,
         "h": 56
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_3.png": {
       "frame": {
@@ -558,7 +585,8 @@
       "sourceSize": {
         "w": 60,
         "h": 61
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_4.png": {
       "frame": {
@@ -578,7 +606,8 @@
       "sourceSize": {
         "w": 47,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_5.png": {
       "frame": {
@@ -598,7 +627,8 @@
       "sourceSize": {
         "w": 42,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_6.png": {
       "frame": {
@@ -618,7 +648,8 @@
       "sourceSize": {
         "w": 41,
         "h": 71
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitGreen_7.png": {
       "frame": {
@@ -638,7 +669,8 @@
       "sourceSize": {
         "w": 48,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_0.png": {
       "frame": {
@@ -658,7 +690,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_1.png": {
       "frame": {
@@ -678,7 +711,8 @@
       "sourceSize": {
         "w": 40,
         "h": 40
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_2.png": {
       "frame": {
@@ -698,7 +732,8 @@
       "sourceSize": {
         "w": 42,
         "h": 56
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_3.png": {
       "frame": {
@@ -718,7 +753,8 @@
       "sourceSize": {
         "w": 60,
         "h": 61
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_4.png": {
       "frame": {
@@ -738,7 +774,8 @@
       "sourceSize": {
         "w": 47,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_5.png": {
       "frame": {
@@ -758,7 +795,8 @@
       "sourceSize": {
         "w": 48,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_6.png": {
       "frame": {
@@ -778,7 +816,8 @@
       "sourceSize": {
         "w": 42,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitRed_7.png": {
       "frame": {
@@ -798,7 +837,8 @@
       "sourceSize": {
         "w": 41,
         "h": 71
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_0.png": {
       "frame": {
@@ -818,7 +858,8 @@
       "sourceSize": {
         "w": 40,
         "h": 40
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_1.png": {
       "frame": {
@@ -838,7 +879,8 @@
       "sourceSize": {
         "w": 60,
         "h": 61
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_2.png": {
       "frame": {
@@ -858,7 +900,8 @@
       "sourceSize": {
         "w": 47,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_3.png": {
       "frame": {
@@ -878,7 +921,8 @@
       "sourceSize": {
         "w": 48,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_4.png": {
       "frame": {
@@ -898,7 +942,8 @@
       "sourceSize": {
         "w": 42,
         "h": 67
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_5.png": {
       "frame": {
@@ -918,7 +963,8 @@
       "sourceSize": {
         "w": 41,
         "h": 71
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_6.png": {
       "frame": {
@@ -938,7 +984,8 @@
       "sourceSize": {
         "w": 42,
         "h": 56
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cockpitYellow_7.png": {
       "frame": {
@@ -958,7 +1005,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship cockpit"
     },
     "cursor.png": {
       "frame": {
@@ -978,7 +1026,8 @@
       "sourceSize": {
         "w": 30,
         "h": 33
-      }
+      },
+      "description": "UI Cursor"
     },
     "enemyBlack1.png": {
       "frame": {
@@ -998,7 +1047,8 @@
       "sourceSize": {
         "w": 93,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlack2.png": {
       "frame": {
@@ -1018,7 +1068,8 @@
       "sourceSize": {
         "w": 104,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlack3.png": {
       "frame": {
@@ -1038,7 +1089,8 @@
       "sourceSize": {
         "w": 103,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlack4.png": {
       "frame": {
@@ -1058,7 +1110,8 @@
       "sourceSize": {
         "w": 82,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlack5.png": {
       "frame": {
@@ -1078,7 +1131,8 @@
       "sourceSize": {
         "w": 97,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlue1.png": {
       "frame": {
@@ -1098,7 +1152,8 @@
       "sourceSize": {
         "w": 93,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlue2.png": {
       "frame": {
@@ -1118,7 +1173,8 @@
       "sourceSize": {
         "w": 104,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlue3.png": {
       "frame": {
@@ -1138,7 +1194,8 @@
       "sourceSize": {
         "w": 103,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlue4.png": {
       "frame": {
@@ -1158,7 +1215,8 @@
       "sourceSize": {
         "w": 82,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyBlue5.png": {
       "frame": {
@@ -1178,7 +1236,8 @@
       "sourceSize": {
         "w": 97,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyGreen1.png": {
       "frame": {
@@ -1198,7 +1257,8 @@
       "sourceSize": {
         "w": 93,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyGreen2.png": {
       "frame": {
@@ -1218,7 +1278,8 @@
       "sourceSize": {
         "w": 104,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyGreen3.png": {
       "frame": {
@@ -1238,7 +1299,8 @@
       "sourceSize": {
         "w": 103,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyGreen4.png": {
       "frame": {
@@ -1258,7 +1320,8 @@
       "sourceSize": {
         "w": 82,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyGreen5.png": {
       "frame": {
@@ -1278,7 +1341,8 @@
       "sourceSize": {
         "w": 97,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyRed1.png": {
       "frame": {
@@ -1298,7 +1362,8 @@
       "sourceSize": {
         "w": 93,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyRed2.png": {
       "frame": {
@@ -1318,7 +1383,8 @@
       "sourceSize": {
         "w": 104,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyRed3.png": {
       "frame": {
@@ -1338,7 +1404,8 @@
       "sourceSize": {
         "w": 103,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyRed4.png": {
       "frame": {
@@ -1358,7 +1425,8 @@
       "sourceSize": {
         "w": 82,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "enemyRed5.png": {
       "frame": {
@@ -1378,7 +1446,8 @@
       "sourceSize": {
         "w": 97,
         "h": 84
-      }
+      },
+      "description": "Enemy ship"
     },
     "engine1.png": {
       "frame": {
@@ -1398,7 +1467,8 @@
       "sourceSize": {
         "w": 38,
         "h": 23
-      }
+      },
+      "description": "Ship engine"
     },
     "engine2.png": {
       "frame": {
@@ -1418,7 +1488,8 @@
       "sourceSize": {
         "w": 42,
         "h": 28
-      }
+      },
+      "description": "Ship engine"
     },
     "engine3.png": {
       "frame": {
@@ -1438,7 +1509,8 @@
       "sourceSize": {
         "w": 27,
         "h": 22
-      }
+      },
+      "description": "Ship engine"
     },
     "engine4.png": {
       "frame": {
@@ -1458,7 +1530,8 @@
       "sourceSize": {
         "w": 49,
         "h": 45
-      }
+      },
+      "description": "Ship engine"
     },
     "engine5.png": {
       "frame": {
@@ -1478,7 +1551,8 @@
       "sourceSize": {
         "w": 44,
         "h": 24
-      }
+      },
+      "description": "Ship engine"
     },
     "fire00.png": {
       "frame": {
@@ -1498,7 +1572,8 @@
       "sourceSize": {
         "w": 16,
         "h": 40
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire01.png": {
       "frame": {
@@ -1518,7 +1593,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire02.png": {
       "frame": {
@@ -1538,7 +1614,8 @@
       "sourceSize": {
         "w": 14,
         "h": 32
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire03.png": {
       "frame": {
@@ -1558,7 +1635,8 @@
       "sourceSize": {
         "w": 14,
         "h": 34
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire04.png": {
       "frame": {
@@ -1578,7 +1656,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire05.png": {
       "frame": {
@@ -1598,7 +1677,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire06.png": {
       "frame": {
@@ -1618,7 +1698,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire07.png": {
       "frame": {
@@ -1638,7 +1719,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire08.png": {
       "frame": {
@@ -1658,7 +1740,8 @@
       "sourceSize": {
         "w": 16,
         "h": 40
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire09.png": {
       "frame": {
@@ -1678,7 +1761,8 @@
       "sourceSize": {
         "w": 16,
         "h": 40
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire10.png": {
       "frame": {
@@ -1698,7 +1782,8 @@
       "sourceSize": {
         "w": 16,
         "h": 40
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire11.png": {
       "frame": {
@@ -1718,7 +1803,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire12.png": {
       "frame": {
@@ -1738,7 +1824,8 @@
       "sourceSize": {
         "w": 14,
         "h": 32
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire13.png": {
       "frame": {
@@ -1758,7 +1845,8 @@
       "sourceSize": {
         "w": 14,
         "h": 34
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire14.png": {
       "frame": {
@@ -1778,7 +1866,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire15.png": {
       "frame": {
@@ -1798,7 +1887,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire16.png": {
       "frame": {
@@ -1818,7 +1908,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire17.png": {
       "frame": {
@@ -1838,7 +1929,8 @@
       "sourceSize": {
         "w": 14,
         "h": 31
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire18.png": {
       "frame": {
@@ -1858,7 +1950,8 @@
       "sourceSize": {
         "w": 16,
         "h": 41
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "fire19.png": {
       "frame": {
@@ -1878,7 +1971,8 @@
       "sourceSize": {
         "w": 16,
         "h": 41
-      }
+      },
+      "description": "Engine exhaust fire"
     },
     "gun00.png": {
       "frame": {
@@ -1898,7 +1992,8 @@
       "sourceSize": {
         "w": 16,
         "h": 36
-      }
+      },
+      "description": "Ship gun"
     },
     "gun01.png": {
       "frame": {
@@ -1918,7 +2013,8 @@
       "sourceSize": {
         "w": 17,
         "h": 33
-      }
+      },
+      "description": "Ship gun"
     },
     "gun02.png": {
       "frame": {
@@ -1938,7 +2034,8 @@
       "sourceSize": {
         "w": 14,
         "h": 36
-      }
+      },
+      "description": "Ship gun"
     },
     "gun03.png": {
       "frame": {
@@ -1958,7 +2055,8 @@
       "sourceSize": {
         "w": 20,
         "h": 41
-      }
+      },
+      "description": "Ship gun"
     },
     "gun04.png": {
       "frame": {
@@ -1978,7 +2076,8 @@
       "sourceSize": {
         "w": 16,
         "h": 41
-      }
+      },
+      "description": "Ship gun"
     },
     "gun05.png": {
       "frame": {
@@ -1998,7 +2097,8 @@
       "sourceSize": {
         "w": 21,
         "h": 41
-      }
+      },
+      "description": "Ship gun"
     },
     "gun06.png": {
       "frame": {
@@ -2018,7 +2118,8 @@
       "sourceSize": {
         "w": 17,
         "h": 38
-      }
+      },
+      "description": "Ship gun"
     },
     "gun07.png": {
       "frame": {
@@ -2038,7 +2139,8 @@
       "sourceSize": {
         "w": 14,
         "h": 41
-      }
+      },
+      "description": "Ship gun"
     },
     "gun08.png": {
       "frame": {
@@ -2058,7 +2160,8 @@
       "sourceSize": {
         "w": 10,
         "h": 47
-      }
+      },
+      "description": "Ship gun"
     },
     "gun09.png": {
       "frame": {
@@ -2078,7 +2181,8 @@
       "sourceSize": {
         "w": 20,
         "h": 52
-      }
+      },
+      "description": "Ship gun"
     },
     "gun10.png": {
       "frame": {
@@ -2098,7 +2202,8 @@
       "sourceSize": {
         "w": 20,
         "h": 52
-      }
+      },
+      "description": "Ship gun"
     },
     "laserBlue01.png": {
       "frame": {
@@ -2118,7 +2223,8 @@
       "sourceSize": {
         "w": 9,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue02.png": {
       "frame": {
@@ -2138,7 +2244,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue03.png": {
       "frame": {
@@ -2158,7 +2265,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue04.png": {
       "frame": {
@@ -2178,7 +2286,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue05.png": {
       "frame": {
@@ -2198,7 +2307,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue06.png": {
       "frame": {
@@ -2218,7 +2328,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue07.png": {
       "frame": {
@@ -2238,7 +2349,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue08.png": {
       "frame": {
@@ -2258,7 +2370,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue09.png": {
       "frame": {
@@ -2278,7 +2391,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue10.png": {
       "frame": {
@@ -2298,7 +2412,8 @@
       "sourceSize": {
         "w": 37,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue11.png": {
       "frame": {
@@ -2318,7 +2433,8 @@
       "sourceSize": {
         "w": 38,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue12.png": {
       "frame": {
@@ -2338,7 +2454,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue13.png": {
       "frame": {
@@ -2358,7 +2475,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue14.png": {
       "frame": {
@@ -2378,7 +2496,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue15.png": {
       "frame": {
@@ -2398,7 +2517,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserBlue16.png": {
       "frame": {
@@ -2418,7 +2538,8 @@
       "sourceSize": {
         "w": 13,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen01.png": {
       "frame": {
@@ -2438,7 +2559,8 @@
       "sourceSize": {
         "w": 37,
         "h": 38
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen02.png": {
       "frame": {
@@ -2458,7 +2580,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen03.png": {
       "frame": {
@@ -2478,7 +2601,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen04.png": {
       "frame": {
@@ -2498,7 +2622,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen05.png": {
       "frame": {
@@ -2518,7 +2643,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen06.png": {
       "frame": {
@@ -2538,7 +2664,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen07.png": {
       "frame": {
@@ -2558,7 +2685,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen08.png": {
       "frame": {
@@ -2578,7 +2706,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen09.png": {
       "frame": {
@@ -2598,7 +2727,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen10.png": {
       "frame": {
@@ -2618,7 +2748,8 @@
       "sourceSize": {
         "w": 13,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen11.png": {
       "frame": {
@@ -2638,7 +2769,8 @@
       "sourceSize": {
         "w": 9,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen12.png": {
       "frame": {
@@ -2658,7 +2790,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen13.png": {
       "frame": {
@@ -2678,7 +2811,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen14.png": {
       "frame": {
@@ -2698,7 +2832,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen15.png": {
       "frame": {
@@ -2718,7 +2853,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserGreen16.png": {
       "frame": {
@@ -2738,7 +2874,8 @@
       "sourceSize": {
         "w": 37,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed01.png": {
       "frame": {
@@ -2758,7 +2895,8 @@
       "sourceSize": {
         "w": 9,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed02.png": {
       "frame": {
@@ -2778,7 +2916,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed03.png": {
       "frame": {
@@ -2798,7 +2937,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed04.png": {
       "frame": {
@@ -2818,7 +2958,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed05.png": {
       "frame": {
@@ -2838,7 +2979,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed06.png": {
       "frame": {
@@ -2858,7 +3000,8 @@
       "sourceSize": {
         "w": 13,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed07.png": {
       "frame": {
@@ -2878,7 +3021,8 @@
       "sourceSize": {
         "w": 9,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed08.png": {
       "frame": {
@@ -2898,7 +3042,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed09.png": {
       "frame": {
@@ -2918,7 +3063,8 @@
       "sourceSize": {
         "w": 48,
         "h": 46
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed10.png": {
       "frame": {
@@ -2938,7 +3084,8 @@
       "sourceSize": {
         "w": 37,
         "h": 36
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed11.png": {
       "frame": {
@@ -2958,7 +3105,8 @@
       "sourceSize": {
         "w": 37,
         "h": 37
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed12.png": {
       "frame": {
@@ -2978,7 +3126,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed13.png": {
       "frame": {
@@ -2998,7 +3147,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed14.png": {
       "frame": {
@@ -3018,7 +3168,8 @@
       "sourceSize": {
         "w": 13,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed15.png": {
       "frame": {
@@ -3038,7 +3189,8 @@
       "sourceSize": {
         "w": 9,
         "h": 57
-      }
+      },
+      "description": "Laser projectile"
     },
     "laserRed16.png": {
       "frame": {
@@ -3058,7 +3210,8 @@
       "sourceSize": {
         "w": 13,
         "h": 54
-      }
+      },
+      "description": "Laser projectile"
     },
     "meteorBrown_big1.png": {
       "frame": {
@@ -3078,7 +3231,8 @@
       "sourceSize": {
         "w": 101,
         "h": 84
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_big2.png": {
       "frame": {
@@ -3098,7 +3252,8 @@
       "sourceSize": {
         "w": 120,
         "h": 98
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_big3.png": {
       "frame": {
@@ -3118,7 +3273,8 @@
       "sourceSize": {
         "w": 89,
         "h": 82
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_big4.png": {
       "frame": {
@@ -3138,7 +3294,8 @@
       "sourceSize": {
         "w": 98,
         "h": 96
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_med1.png": {
       "frame": {
@@ -3158,7 +3315,8 @@
       "sourceSize": {
         "w": 43,
         "h": 43
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_med3.png": {
       "frame": {
@@ -3178,7 +3336,8 @@
       "sourceSize": {
         "w": 45,
         "h": 40
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_small1.png": {
       "frame": {
@@ -3198,7 +3357,8 @@
       "sourceSize": {
         "w": 28,
         "h": 28
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_small2.png": {
       "frame": {
@@ -3218,7 +3378,8 @@
       "sourceSize": {
         "w": 29,
         "h": 26
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_tiny1.png": {
       "frame": {
@@ -3238,7 +3399,8 @@
       "sourceSize": {
         "w": 18,
         "h": 18
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorBrown_tiny2.png": {
       "frame": {
@@ -3258,7 +3420,8 @@
       "sourceSize": {
         "w": 16,
         "h": 15
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_big1.png": {
       "frame": {
@@ -3278,7 +3441,8 @@
       "sourceSize": {
         "w": 101,
         "h": 84
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_big2.png": {
       "frame": {
@@ -3298,7 +3462,8 @@
       "sourceSize": {
         "w": 120,
         "h": 98
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_big3.png": {
       "frame": {
@@ -3318,7 +3483,8 @@
       "sourceSize": {
         "w": 89,
         "h": 82
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_big4.png": {
       "frame": {
@@ -3338,7 +3504,8 @@
       "sourceSize": {
         "w": 98,
         "h": 96
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_med1.png": {
       "frame": {
@@ -3358,7 +3525,8 @@
       "sourceSize": {
         "w": 43,
         "h": 43
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_med2.png": {
       "frame": {
@@ -3378,7 +3546,8 @@
       "sourceSize": {
         "w": 45,
         "h": 40
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_small1.png": {
       "frame": {
@@ -3398,7 +3567,8 @@
       "sourceSize": {
         "w": 28,
         "h": 28
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_small2.png": {
       "frame": {
@@ -3418,7 +3588,8 @@
       "sourceSize": {
         "w": 29,
         "h": 26
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_tiny1.png": {
       "frame": {
@@ -3438,7 +3609,8 @@
       "sourceSize": {
         "w": 18,
         "h": 18
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "meteorGrey_tiny2.png": {
       "frame": {
@@ -3458,7 +3630,8 @@
       "sourceSize": {
         "w": 16,
         "h": 15
-      }
+      },
+      "description": "Meteor obstacle"
     },
     "numeral0.png": {
       "frame": {
@@ -3478,7 +3651,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral1.png": {
       "frame": {
@@ -3498,7 +3672,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral2.png": {
       "frame": {
@@ -3518,7 +3693,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral3.png": {
       "frame": {
@@ -3538,7 +3714,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral4.png": {
       "frame": {
@@ -3558,7 +3735,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral5.png": {
       "frame": {
@@ -3578,7 +3756,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral6.png": {
       "frame": {
@@ -3598,7 +3777,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral7.png": {
       "frame": {
@@ -3618,7 +3798,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral8.png": {
       "frame": {
@@ -3638,7 +3819,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeral9.png": {
       "frame": {
@@ -3658,7 +3840,8 @@
       "sourceSize": {
         "w": 19,
         "h": 19
-      }
+      },
+      "description": "Number digit"
     },
     "numeralX.png": {
       "frame": {
@@ -3678,7 +3861,8 @@
       "sourceSize": {
         "w": 17,
         "h": 17
-      }
+      },
+      "description": "Number digit"
     },
     "pill_blue.png": {
       "frame": {
@@ -3698,7 +3882,8 @@
       "sourceSize": {
         "w": 22,
         "h": 21
-      }
+      },
+      "description": "Powerup pill"
     },
     "pill_green.png": {
       "frame": {
@@ -3718,7 +3903,8 @@
       "sourceSize": {
         "w": 22,
         "h": 21
-      }
+      },
+      "description": "Powerup pill"
     },
     "pill_red.png": {
       "frame": {
@@ -3738,7 +3924,8 @@
       "sourceSize": {
         "w": 22,
         "h": 21
-      }
+      },
+      "description": "Powerup pill"
     },
     "pill_yellow.png": {
       "frame": {
@@ -3758,7 +3945,8 @@
       "sourceSize": {
         "w": 22,
         "h": 21
-      }
+      },
+      "description": "Powerup pill"
     },
     "playerLife1_blue.png": {
       "frame": {
@@ -3778,7 +3966,8 @@
       "sourceSize": {
         "w": 33,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife1_green.png": {
       "frame": {
@@ -3798,7 +3987,8 @@
       "sourceSize": {
         "w": 33,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife1_orange.png": {
       "frame": {
@@ -3818,7 +4008,8 @@
       "sourceSize": {
         "w": 33,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife1_red.png": {
       "frame": {
@@ -3838,7 +4029,8 @@
       "sourceSize": {
         "w": 33,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife2_blue.png": {
       "frame": {
@@ -3858,7 +4050,8 @@
       "sourceSize": {
         "w": 37,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife2_green.png": {
       "frame": {
@@ -3878,7 +4071,8 @@
       "sourceSize": {
         "w": 37,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife2_orange.png": {
       "frame": {
@@ -3898,7 +4092,8 @@
       "sourceSize": {
         "w": 37,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife2_red.png": {
       "frame": {
@@ -3918,7 +4113,8 @@
       "sourceSize": {
         "w": 37,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife3_blue.png": {
       "frame": {
@@ -3938,7 +4134,8 @@
       "sourceSize": {
         "w": 32,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife3_green.png": {
       "frame": {
@@ -3958,7 +4155,8 @@
       "sourceSize": {
         "w": 32,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife3_orange.png": {
       "frame": {
@@ -3978,7 +4176,8 @@
       "sourceSize": {
         "w": 32,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerLife3_red.png": {
       "frame": {
@@ -3998,7 +4197,8 @@
       "sourceSize": {
         "w": 32,
         "h": 26
-      }
+      },
+      "description": "Player life icon"
     },
     "playerShip1_blue.png": {
       "frame": {
@@ -4018,7 +4218,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_damage1.png": {
       "frame": {
@@ -4038,7 +4239,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_damage2.png": {
       "frame": {
@@ -4058,7 +4260,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_damage3.png": {
       "frame": {
@@ -4078,7 +4281,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_green.png": {
       "frame": {
@@ -4098,7 +4302,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_orange.png": {
       "frame": {
@@ -4118,7 +4323,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip1_red.png": {
       "frame": {
@@ -4138,7 +4344,8 @@
       "sourceSize": {
         "w": 99,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_blue.png": {
       "frame": {
@@ -4158,7 +4365,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_damage1.png": {
       "frame": {
@@ -4178,7 +4386,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_damage2.png": {
       "frame": {
@@ -4198,7 +4407,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_damage3.png": {
       "frame": {
@@ -4218,7 +4428,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_green.png": {
       "frame": {
@@ -4238,7 +4449,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_orange.png": {
       "frame": {
@@ -4258,7 +4470,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip2_red.png": {
       "frame": {
@@ -4278,7 +4491,8 @@
       "sourceSize": {
         "w": 112,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_blue.png": {
       "frame": {
@@ -4298,7 +4512,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_damage1.png": {
       "frame": {
@@ -4318,7 +4533,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_damage2.png": {
       "frame": {
@@ -4338,7 +4554,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_damage3.png": {
       "frame": {
@@ -4358,7 +4575,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_green.png": {
       "frame": {
@@ -4378,7 +4596,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_orange.png": {
       "frame": {
@@ -4398,7 +4617,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "playerShip3_red.png": {
       "frame": {
@@ -4418,7 +4638,8 @@
       "sourceSize": {
         "w": 98,
         "h": 75
-      }
+      },
+      "description": "Player ship"
     },
     "powerupBlue.png": {
       "frame": {
@@ -4438,7 +4659,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupBlue_bolt.png": {
       "frame": {
@@ -4458,7 +4680,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupBlue_shield.png": {
       "frame": {
@@ -4478,7 +4701,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupBlue_star.png": {
       "frame": {
@@ -4498,7 +4722,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupGreen.png": {
       "frame": {
@@ -4518,7 +4743,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupGreen_bolt.png": {
       "frame": {
@@ -4538,7 +4764,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupGreen_shield.png": {
       "frame": {
@@ -4558,7 +4785,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupGreen_star.png": {
       "frame": {
@@ -4578,7 +4806,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupRed.png": {
       "frame": {
@@ -4598,7 +4827,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupRed_bolt.png": {
       "frame": {
@@ -4618,7 +4848,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupRed_shield.png": {
       "frame": {
@@ -4638,7 +4869,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupRed_star.png": {
       "frame": {
@@ -4658,7 +4890,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupYellow.png": {
       "frame": {
@@ -4678,7 +4911,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupYellow_bolt.png": {
       "frame": {
@@ -4698,7 +4932,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupYellow_shield.png": {
       "frame": {
@@ -4718,7 +4953,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "powerupYellow_star.png": {
       "frame": {
@@ -4738,7 +4974,8 @@
       "sourceSize": {
         "w": 34,
         "h": 33
-      }
+      },
+      "description": "Powerup item"
     },
     "scratch1.png": {
       "frame": {
@@ -4758,7 +4995,8 @@
       "sourceSize": {
         "w": 21,
         "h": 16
-      }
+      },
+      "description": "Damage scratch effect"
     },
     "scratch2.png": {
       "frame": {
@@ -4778,7 +5016,8 @@
       "sourceSize": {
         "w": 21,
         "h": 16
-      }
+      },
+      "description": "Damage scratch effect"
     },
     "scratch3.png": {
       "frame": {
@@ -4798,7 +5037,8 @@
       "sourceSize": {
         "w": 16,
         "h": 12
-      }
+      },
+      "description": "Damage scratch effect"
     },
     "shield1.png": {
       "frame": {
@@ -4818,7 +5058,8 @@
       "sourceSize": {
         "w": 133,
         "h": 108
-      }
+      },
+      "description": "Shield effect"
     },
     "shield2.png": {
       "frame": {
@@ -4838,7 +5079,8 @@
       "sourceSize": {
         "w": 143,
         "h": 119
-      }
+      },
+      "description": "Shield effect"
     },
     "shield3.png": {
       "frame": {
@@ -4858,7 +5100,8 @@
       "sourceSize": {
         "w": 144,
         "h": 137
-      }
+      },
+      "description": "Shield effect"
     },
     "shield_bronze.png": {
       "frame": {
@@ -4878,7 +5121,8 @@
       "sourceSize": {
         "w": 30,
         "h": 30
-      }
+      },
+      "description": "Shield effect"
     },
     "shield_gold.png": {
       "frame": {
@@ -4898,7 +5142,8 @@
       "sourceSize": {
         "w": 30,
         "h": 30
-      }
+      },
+      "description": "Shield effect"
     },
     "shield_silver.png": {
       "frame": {
@@ -4918,7 +5163,8 @@
       "sourceSize": {
         "w": 30,
         "h": 30
-      }
+      },
+      "description": "Shield effect"
     },
     "speed.png": {
       "frame": {
@@ -4938,7 +5184,8 @@
       "sourceSize": {
         "w": 7,
         "h": 108
-      }
+      },
+      "description": "Speed powerup icon"
     },
     "star1.png": {
       "frame": {
@@ -4958,7 +5205,8 @@
       "sourceSize": {
         "w": 25,
         "h": 24
-      }
+      },
+      "description": "Star background element"
     },
     "star2.png": {
       "frame": {
@@ -4978,7 +5226,8 @@
       "sourceSize": {
         "w": 25,
         "h": 24
-      }
+      },
+      "description": "Star background element"
     },
     "star3.png": {
       "frame": {
@@ -4998,7 +5247,8 @@
       "sourceSize": {
         "w": 24,
         "h": 24
-      }
+      },
+      "description": "Star background element"
     },
     "star_bronze.png": {
       "frame": {
@@ -5018,7 +5268,8 @@
       "sourceSize": {
         "w": 31,
         "h": 30
-      }
+      },
+      "description": "Star background element"
     },
     "star_gold.png": {
       "frame": {
@@ -5038,7 +5289,8 @@
       "sourceSize": {
         "w": 31,
         "h": 30
-      }
+      },
+      "description": "Star background element"
     },
     "star_silver.png": {
       "frame": {
@@ -5058,7 +5310,8 @@
       "sourceSize": {
         "w": 31,
         "h": 30
-      }
+      },
+      "description": "Star background element"
     },
     "things_bronze.png": {
       "frame": {
@@ -5078,7 +5331,8 @@
       "sourceSize": {
         "w": 32,
         "h": 32
-      }
+      },
+      "description": "Miscellaneous item"
     },
     "things_gold.png": {
       "frame": {
@@ -5098,7 +5352,8 @@
       "sourceSize": {
         "w": 32,
         "h": 32
-      }
+      },
+      "description": "Miscellaneous item"
     },
     "things_silver.png": {
       "frame": {
@@ -5118,7 +5373,8 @@
       "sourceSize": {
         "w": 32,
         "h": 32
-      }
+      },
+      "description": "Miscellaneous item"
     },
     "turretBase_big.png": {
       "frame": {
@@ -5138,7 +5394,8 @@
       "sourceSize": {
         "w": 41,
         "h": 41
-      }
+      },
+      "description": "Turret base"
     },
     "turretBase_small.png": {
       "frame": {
@@ -5158,7 +5415,8 @@
       "sourceSize": {
         "w": 26,
         "h": 26
-      }
+      },
+      "description": "Turret base"
     },
     "ufoBlue.png": {
       "frame": {
@@ -5178,7 +5436,8 @@
       "sourceSize": {
         "w": 91,
         "h": 91
-      }
+      },
+      "description": "UFO enemy"
     },
     "ufoGreen.png": {
       "frame": {
@@ -5198,7 +5457,8 @@
       "sourceSize": {
         "w": 91,
         "h": 91
-      }
+      },
+      "description": "UFO enemy"
     },
     "ufoRed.png": {
       "frame": {
@@ -5218,7 +5478,8 @@
       "sourceSize": {
         "w": 91,
         "h": 91
-      }
+      },
+      "description": "UFO enemy"
     },
     "ufoYellow.png": {
       "frame": {
@@ -5238,7 +5499,8 @@
       "sourceSize": {
         "w": 91,
         "h": 91
-      }
+      },
+      "description": "UFO enemy"
     },
     "wingBlue_0.png": {
       "frame": {
@@ -5258,7 +5520,8 @@
       "sourceSize": {
         "w": 45,
         "h": 78
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_1.png": {
       "frame": {
@@ -5278,7 +5541,8 @@
       "sourceSize": {
         "w": 37,
         "h": 72
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_2.png": {
       "frame": {
@@ -5298,7 +5562,8 @@
       "sourceSize": {
         "w": 26,
         "h": 84
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_3.png": {
       "frame": {
@@ -5318,7 +5583,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_4.png": {
       "frame": {
@@ -5338,7 +5604,8 @@
       "sourceSize": {
         "w": 42,
         "h": 80
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_5.png": {
       "frame": {
@@ -5358,7 +5625,8 @@
       "sourceSize": {
         "w": 51,
         "h": 69
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_6.png": {
       "frame": {
@@ -5378,7 +5646,8 @@
       "sourceSize": {
         "w": 42,
         "h": 74
-      }
+      },
+      "description": "Ship wing"
     },
     "wingBlue_7.png": {
       "frame": {
@@ -5398,7 +5667,8 @@
       "sourceSize": {
         "w": 43,
         "h": 83
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_0.png": {
       "frame": {
@@ -5418,7 +5688,8 @@
       "sourceSize": {
         "w": 45,
         "h": 78
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_1.png": {
       "frame": {
@@ -5438,7 +5709,8 @@
       "sourceSize": {
         "w": 37,
         "h": 72
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_2.png": {
       "frame": {
@@ -5458,7 +5730,8 @@
       "sourceSize": {
         "w": 26,
         "h": 84
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_3.png": {
       "frame": {
@@ -5478,7 +5751,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_4.png": {
       "frame": {
@@ -5498,7 +5772,8 @@
       "sourceSize": {
         "w": 42,
         "h": 80
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_5.png": {
       "frame": {
@@ -5518,7 +5793,8 @@
       "sourceSize": {
         "w": 51,
         "h": 69
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_6.png": {
       "frame": {
@@ -5538,7 +5814,8 @@
       "sourceSize": {
         "w": 42,
         "h": 74
-      }
+      },
+      "description": "Ship wing"
     },
     "wingGreen_7.png": {
       "frame": {
@@ -5558,7 +5835,8 @@
       "sourceSize": {
         "w": 43,
         "h": 83
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_0.png": {
       "frame": {
@@ -5578,7 +5856,8 @@
       "sourceSize": {
         "w": 26,
         "h": 84
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_1.png": {
       "frame": {
@@ -5598,7 +5877,8 @@
       "sourceSize": {
         "w": 37,
         "h": 72
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_2.png": {
       "frame": {
@@ -5618,7 +5898,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_3.png": {
       "frame": {
@@ -5638,7 +5919,8 @@
       "sourceSize": {
         "w": 42,
         "h": 80
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_4.png": {
       "frame": {
@@ -5658,7 +5940,8 @@
       "sourceSize": {
         "w": 51,
         "h": 69
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_5.png": {
       "frame": {
@@ -5678,7 +5961,8 @@
       "sourceSize": {
         "w": 42,
         "h": 74
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_6.png": {
       "frame": {
@@ -5698,7 +5982,8 @@
       "sourceSize": {
         "w": 43,
         "h": 83
-      }
+      },
+      "description": "Ship wing"
     },
     "wingRed_7.png": {
       "frame": {
@@ -5718,7 +6003,8 @@
       "sourceSize": {
         "w": 45,
         "h": 78
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_0.png": {
       "frame": {
@@ -5738,7 +6024,8 @@
       "sourceSize": {
         "w": 45,
         "h": 78
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_1.png": {
       "frame": {
@@ -5758,7 +6045,8 @@
       "sourceSize": {
         "w": 37,
         "h": 72
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_2.png": {
       "frame": {
@@ -5778,7 +6066,8 @@
       "sourceSize": {
         "w": 26,
         "h": 84
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_3.png": {
       "frame": {
@@ -5798,7 +6087,8 @@
       "sourceSize": {
         "w": 51,
         "h": 75
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_4.png": {
       "frame": {
@@ -5818,7 +6108,8 @@
       "sourceSize": {
         "w": 42,
         "h": 80
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_5.png": {
       "frame": {
@@ -5838,7 +6129,8 @@
       "sourceSize": {
         "w": 51,
         "h": 69
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_6.png": {
       "frame": {
@@ -5858,7 +6150,8 @@
       "sourceSize": {
         "w": 42,
         "h": 74
-      }
+      },
+      "description": "Ship wing"
     },
     "wingYellow_7.png": {
       "frame": {
@@ -5878,7 +6171,8 @@
       "sourceSize": {
         "w": 43,
         "h": 83
-      }
+      },
+      "description": "Ship wing"
     }
   },
   "meta": {

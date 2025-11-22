@@ -16,6 +16,7 @@ import { initUIShowcase } from './examples/14-ui-showcase';
 import { initFontRenderingComparison } from './examples/12-font-rendering-comparison';
 import { initParticleEmitterSandbox } from './examples/15-particle-emitter-sandbox';
 import { initSpriteLibrary } from './examples/16-sprite-library';
+import { initSpriteEditor } from './examples/17-sprite-editor';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -37,6 +38,7 @@ import uiShowcaseSource from './examples/14-ui-showcase.ts?raw';
 import fontRenderingComparisonSource from './examples/12-font-rendering-comparison.ts?raw';
 import particleEmitterSandboxSource from './examples/15-particle-emitter-sandbox.ts?raw';
 import spriteLibrarySource from './examples/16-sprite-library.ts?raw';
+import spriteEditorSource from './examples/17-sprite-editor.ts?raw';
 
 // Example registry
 interface Example {
@@ -131,6 +133,12 @@ const examples: Record<string, Example> = {
     init: initSpriteLibrary,
     source: spriteLibrarySource
   }
+  // 'sprite-editor': {
+  //   name: '17 - Sprite Editor',
+  //   description: 'Edit and manipulate sprites',
+  //   init: initSpriteEditor,
+  //   source: spriteEditorSource
+  // }
 };
 
 let currentExample: string | null = null;

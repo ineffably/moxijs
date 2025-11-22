@@ -34,9 +34,15 @@ export async function initRotatingSprite() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
-  const { scene, engine, PIXIAssets, loadAssets } = await setupMoxi({ hostElement: root });
+  const { scene, engine, PIXIAssets, loadAssets } = await setupMoxi({ 
+    hostElement: root,
+    renderOptions: {
+      width: 1280,
+      height: 720,
+      backgroundColor: 0x00ffff // cyan
+    }
+  });
   const { renderer } = scene;
-  renderer.background.color = 'green';
 
   await loadAssets([
     { src: ASSETS.ROBOT_IDLE, alias: 'character' },
@@ -49,7 +55,7 @@ export async function initRotatingSprite() {
       fontFamily: 'kenney-future-thin',
       fontSize: 32,
       fontStyle: 'normal',
-      fill: 'white',
+      fill: 0x000000, // black
     }
   });
 

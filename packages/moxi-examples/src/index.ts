@@ -15,6 +15,7 @@ import { initTextRendering } from './examples/10-text-rendering';
 import { initUIShowcase } from './examples/14-ui-showcase';
 import { initFontRenderingComparison } from './examples/12-font-rendering-comparison';
 import { initParticleEmitterSandbox } from './examples/15-particle-emitter-sandbox';
+import { initSpriteLibrary } from './examples/16-sprite-library';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -35,6 +36,7 @@ import textRenderingSource from './examples/10-text-rendering.ts?raw';
 import uiShowcaseSource from './examples/14-ui-showcase.ts?raw';
 import fontRenderingComparisonSource from './examples/12-font-rendering-comparison.ts?raw';
 import particleEmitterSandboxSource from './examples/15-particle-emitter-sandbox.ts?raw';
+import spriteLibrarySource from './examples/16-sprite-library.ts?raw';
 
 // Example registry
 interface Example {
@@ -46,8 +48,8 @@ interface Example {
 
 const examples: Record<string, Example> = {
   'basic-sprite': {
-    name: '01 - Basic Sprite',
-    description: 'The simplest example - displays a single sprite',
+    name: '01 - Sprites!',
+    description: 'Moxi sprite entities with a pooling example',
     init: initBasicSprite,
     source: basicSpriteSource
   },
@@ -122,6 +124,12 @@ const examples: Record<string, Example> = {
     description: 'Advanced particle system with presets, color gradients, and export/import',
     init: initParticleEmitterSandbox,
     source: particleEmitterSandboxSource
+  },
+  'sprite-library': {
+    name: '16 - Sprite Library',
+    description: 'Browse all available sprites and textures loaded in the examples app',
+    init: initSpriteLibrary,
+    source: spriteLibrarySource
   }
 };
 

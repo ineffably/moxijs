@@ -4,10 +4,12 @@
     "outDir": "./lib",
     "declarationDir": "./lib/types",
     "declaration": true,
-    "composite": false
+    "composite": false,
+    "types": ["node", "jest"]
   },
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./tests/**/*"
   ],
   "exclude": [
     "./lib/**/*"

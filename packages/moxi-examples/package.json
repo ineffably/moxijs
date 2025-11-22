@@ -9,7 +9,6 @@
     "watch": "webpack --mode development --watch",
     "clean": "rimraf dist",
     "local": "npm run dev",
-    "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:screenshots": "playwright test tests/ui-screenshots.spec.ts",
     "test:headed": "playwright test --headed"

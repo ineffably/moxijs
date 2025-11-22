@@ -14,9 +14,9 @@
     "build:dev": "npm run build:dev --workspaces --if-present",
     "watch": "concurrently \"npm run watch --workspace=moxi-examples\" \"npm run watch --workspace=moxi\"",
     "examples": "npm run local --workspace=moxi-examples",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed"
+    "test": "npm run test --workspace=moxi",
+    "test:watch": "npm run test:watch --workspace=moxi",
+    "test:ci": "npm run test:ci --workspace=moxi"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,10 @@
 # npm module cache
 node_modules
 
+
+test-results
+playwright-report
+
 # build output
 # I want the build output for github pages support
 # lib

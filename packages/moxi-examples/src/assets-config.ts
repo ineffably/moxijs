@@ -61,6 +61,16 @@ export const ASSETS = {
   KENVECTOR_FUTURE_FONT: '../assets/custom-fonts/kenvector_future.ttf',
   KENVECTOR_FUTURE_THIN_FONT: '../assets/custom-fonts/kenvector_future_thin.ttf',
   PIXEL_FONT_SPROUTLANDS: '../assets/sprout-lands-ui-basic/fonts/pixelFont-7-8x14-sproutLands.ttf',
+  PIXEL_OPERATOR8_FONT: '../assets/custom-fonts/pixel_operator/PixelOperator8.ttf',
+  PIXEL_OPERATOR8_BOLD_FONT: '../assets/custom-fonts/pixel_operator/PixelOperator8-Bold.ttf',
+  PIXEL_OPERATOR_FONT: '../assets/custom-fonts/pixel_operator/PixelOperator.ttf',
+  PIXEL_OPERATOR_BOLD_FONT: '../assets/custom-fonts/pixel_operator/PixelOperator-Bold.ttf',
+  MINECRAFT_FONT: '../assets/custom-fonts/minecraft.ttf',
+  DOGICA_PIXEL_FONT: '../assets/custom-fonts/dogicapixel.ttf',
+  DOGICA_PIXEL_BOLD_FONT: '../assets/custom-fonts/dogicapixelbold.ttf',
+  RETRO_GAMING_FONT: '../assets/custom-fonts/Retro Gaming.ttf',
+  VHS_GOTHIC_FONT: '../assets/custom-fonts/vhs-gothic.ttf',
+  RAINYHEARTS_FONT: '../assets/custom-fonts/rainyhearts.ttf',
 
   // UI Pack Space
   UIPACK_SPACE_SHEET: '../assets/ui-pack-scifi/spritesheet/uipackSpace_sheet.png',

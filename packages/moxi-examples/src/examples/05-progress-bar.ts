@@ -1,5 +1,6 @@
 import { Logic, asEntity, setupMoxi } from 'moxi';
 import * as PIXI from 'pixi.js';
+import { Assets, BitmapFont } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
 /**
@@ -16,7 +17,10 @@ export interface ProgressBarOptions {
   backgroundColor?: string | number;
   barPadding?: PIXI.Point;
   value?: number;
-  bitmapText?: Partial<PIXI.TextStyle>;
+  bitmapText?: {
+    fontFamily?: string;
+    fontSize?: number;
+  };
 }
 
 export const defaultProgressBarOptions: ProgressBarOptions = {
@@ -28,14 +32,12 @@ export const defaultProgressBarOptions: ProgressBarOptions = {
   backgroundColor: 0x555555,
   barPadding: new PIXI.Point(5, 5),
   bitmapText: {
-    fontFamily: 'kenney-future-thin',
-    fontSize: 32,
-    fontStyle: 'normal',
-    fill: 'black',
+    fontFamily: 'PixelOperator8',
+    fontSize: 32
   }
 };
 
-export class ProgressBarLogic extends Logic<PIXI.Sprite> {
+export class ProgressBarLogic extends Logic<PIXI.Container> {
   backgroundBar: PIXI.Graphics;
   forgroundBar: PIXI.Graphics;
   bitmapText: PIXI.BitmapText;
@@ -71,7 +73,7 @@ export class ProgressBarLogic extends Logic<PIXI.Sprite> {
     }
   }
 
-  init(entity: PIXI.Sprite, renderer: PIXI.Renderer<HTMLCanvasElement>) {
+  init(entity: PIXI.Container, renderer: PIXI.Renderer<HTMLCanvasElement>) {
     const { width, height } = renderer.canvas;
     const { backgroundColor, color, barWidth, barHeight, barPadding, bitmapText } = this.options;
     const padding = new PIXI.Point(barPadding.x, barPadding.y);
@@ -87,9 +89,12 @@ export class ProgressBarLogic extends Logic<PIXI.Sprite> {
     this.forgroundBar.fill(color);
     
     this.bitmapText = new PIXI.BitmapText({
-      text: `%${this.value}`,
-      style: bitmapText
-    } as PIXI.TextOptions);
+      text: `${this.value}%`,
+      style: {
+        fontFamily: bitmapText?.fontFamily || 'PixelOperator8',
+        fontSize: bitmapText?.fontSize || 32
+      }
+    });
     
     this.bitmapText.position.set(
       (barWidth / 2) - (this.bitmapText.width / 2), 
@@ -107,7 +112,7 @@ export class ProgressBarLogic extends Logic<PIXI.Sprite> {
     // Position will be set externally in initProgressBar
   }
 
-  update(entity: PIXI.Sprite, deltaTime: number) {
+  update(entity: PIXI.Container, deltaTime: number) {
     const { max, barWidth, barHeight, color, backgroundColor, barPadding } = this.options;
     const padding = new PIXI.Point(barPadding.x, barPadding.y);
 
@@ -145,6 +150,34 @@ export class ProgressBarLogic extends Logic<PIXI.Sprite> {
   }
 }
 
+// Logic to keep progress bars centered on screen resize
+class CenterBarsLogic extends Logic<PIXI.Container> {
+  private bars: PIXI.Container[];
+  private barWidth: number;
+  private spacing: number;
+  private renderer: PIXI.Renderer<HTMLCanvasElement>;
+
+  constructor(bars: PIXI.Container[], barWidth: number, spacing: number, renderer: PIXI.Renderer<HTMLCanvasElement>) {
+    super();
+    this.bars = bars;
+    this.barWidth = barWidth;
+    this.spacing = spacing;
+    this.renderer = renderer;
+  }
+
+  update(entity: PIXI.Container, deltaTime: number) {
+    const width = this.renderer.width;
+    const height = this.renderer.height;
+    const startY = (height / 2) - (this.spacing * 1.5); // Center all 3 bars vertically
+
+    // Update positions to keep bars centered
+    this.bars.forEach((bar, index) => {
+      bar.x = (width / 2) - (this.barWidth / 2);
+      bar.y = startY + (index * this.spacing);
+    });
+  }
+}
+
 export async function initProgressBar() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
@@ -152,9 +185,17 @@ export async function initProgressBar() {
   const { scene, engine, loadAssets } = await setupMoxi({ hostElement: root });
 
   // Load the font for the percentage text
-  await loadAssets([
-    { src: ASSETS.KENNEY_FUTURE_THIN_FONT, alias: 'kenney-future-thin' }
-  ]);
+  await Assets.load(ASSETS.PIXEL_OPERATOR8_FONT);
+
+  // Install bitmap font
+  BitmapFont.install({
+    name: 'PixelOperator8',
+    style: {
+      fontFamily: 'PixelOperator8',
+      fontSize: 32,
+      fill: 0x000000
+    }
+  });
 
   const { width, height } = scene.renderer.canvas;
   const barWidth = 400;
@@ -172,15 +213,14 @@ export async function initProgressBar() {
     barWidth,
     barHeight,
     bitmapText: {
-      ...defaultProgressBarOptions.bitmapText,
-      fontSize: 32,
-      align: 'center',
-      fill: 'black'
+      fontFamily: 'PixelOperator8',
+      fontSize: 32
     }
   }, undefined, false); // No next bar, doesn't auto-increment
   progressBar3.moxiEntity.addLogic(bar3Logic);
   progressBar3.position.set((width / 2) - (barWidth / 2), startY + (spacing * 2));
   scene.addChild(progressBar3);
+  progressBar3.moxiEntity.init(scene.renderer);
 
   // Bar 2 (cyan) - static counter, accumulates beans from bar 1, sends to bar 3
   const progressBar2 = asEntity<PIXI.Container>(new PIXI.Container());
@@ -191,15 +231,14 @@ export async function initProgressBar() {
     barWidth,
     barHeight,
     bitmapText: {
-      ...defaultProgressBarOptions.bitmapText,
-      fontSize: 32,
-      align: 'center',
-      fill: 'black'
+      fontFamily: 'PixelOperator8',
+      fontSize: 32
     }
   }, bar3Logic, false); // Links to bar 3, doesn't auto-increment
   progressBar2.moxiEntity.addLogic(bar2Logic);
   progressBar2.position.set((width / 2) - (barWidth / 2), startY + spacing);
   scene.addChild(progressBar2);
+  progressBar2.moxiEntity.init(scene.renderer);
 
   // Bar 1 (green) - ONLY bar that auto-increments
   const progressBar1 = asEntity<PIXI.Container>(new PIXI.Container());
@@ -210,15 +249,22 @@ export async function initProgressBar() {
     barWidth,
     barHeight,
     bitmapText: {
-      ...defaultProgressBarOptions.bitmapText,
-      fontSize: 32,
-      align: 'center',
-      fill: 'black'
+      fontFamily: 'PixelOperator8',
+      fontSize: 32
     }
   }, bar2Logic, true); // Links to bar 2, auto-increments!
   progressBar1.moxiEntity.addLogic(bar1Logic);
   progressBar1.position.set((width / 2) - (barWidth / 2), startY);
   scene.addChild(progressBar1);
+  progressBar1.moxiEntity.init(scene.renderer);
+
+  // Create a container to manage centering of all bars
+  const barsContainer = asEntity<PIXI.Container>(new PIXI.Container());
+  
+  // Add logic to keep bars centered on resize
+  const centerLogic = new CenterBarsLogic([progressBar1, progressBar2, progressBar3], barWidth, spacing, scene.renderer);
+  barsContainer.moxiEntity.addLogic(centerLogic);
+  scene.addChild(barsContainer);
 
   scene.init();
   engine.start();

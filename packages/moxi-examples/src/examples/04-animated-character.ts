@@ -1,4 +1,4 @@
-import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange } from 'moxi';
+import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange, asBitmapText, asContainer } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
@@ -104,15 +104,17 @@ export async function initAnimatedCharacter() {
 
     // Create label background (light yellow rectangle with dark green border)
     const labelBg = new PIXI.Graphics();
-    const labelText = new PIXI.BitmapText({
-      text: displayNames[index],
-      style: {
-        fontFamily: 'Kenney Blocks',
-        fontSize: 10, // Increased by 2 pixels
-        fill: 0x3d6b1f // Lighter green color
-      }
-    });
-    labelText.anchor.set(0.5);
+    const labelText = asBitmapText(
+      {
+        text: displayNames[index],
+        style: {
+          fontFamily: 'Kenney Blocks',
+          fontSize: 10, // Increased by 2 pixels
+          fill: 0x3d6b1f // Lighter green color
+        }
+      },
+      { anchor: 0.5 }
+    );
 
     // Draw background rectangle based on text bounds
     const padding = 2;
@@ -123,11 +125,9 @@ export async function initAnimatedCharacter() {
     labelBg.stroke({ color: 0x2d5016, width: 1 }); // Dark green border
 
     // Create container for background + text
-    const labelContainer = new PIXI.Container();
+    const labelContainer = asContainer({ x, y: y - 30 }); // Closer to character in world coordinates (80 / 3)
     labelContainer.addChild(labelBg);
     labelContainer.addChild(labelText);
-    labelContainer.x = x;
-    labelContainer.y = y - 30; // Closer to character in world coordinates (80 / 3)
     scene.addChild(asEntity(labelContainer));
 
     // Create animated sprite from spritesheet animation

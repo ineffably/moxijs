@@ -4,7 +4,8 @@ import {
   CameraLogic,
   ParallaxBackground,
   TilingParallaxLayer,
-  Logic
+  Logic,
+  asSprite
 } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
@@ -222,10 +223,10 @@ export async function initParallaxSpaceShooter() {
   const spaceShooterSheet = PIXIAssets.get('space_shooter');
   const playerTexture = spaceShooterSheet.textures['playerShip1_blue.png'];
 
-  const playerShip = new PIXI.Sprite(playerTexture);
-
-  // Scale ship down by 50%
-  playerShip.scale.set(0.5);
+  const playerShip = asSprite(
+    { texture: playerTexture },
+    { scale: 0.5 }
+  );
 
   // Convert to Moxi entity
   const shipEntity = asEntity<PIXI.Sprite>(playerShip);

@@ -12,6 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
 import { Camera, CameraLogic } from './core/camera';
 import { asTextureFrames } from './library/texture-frames';
+import { asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { EdgeInsets } from './ui/core/edge-insets';
@@ -103,13 +104,18 @@ export type ClientEventsType = {
 // Re-export types
 export { 
   SequenceInfo, 
-  ResizeHandlerOptions 
+  ResizeHandlerOptions
 };
 
 const exportedObjects = {
   AssetLoader,
   asEntity,
   asTextureFrames,
+  asBitmapText,
+  asSprite,
+  asText,
+  asGraphics,
+  asContainer,
   Logic,
   Camera,
   CameraLogic,
@@ -172,6 +178,12 @@ export {
   AssetLoader,
   asEntity,
   asTextureFrames,
+  asBitmapText,
+  asSprite,
+  asText,
+  asGraphics,
+  asContainer,
+  PixiProps,
   Logic,
   Camera,
   CameraLogic,

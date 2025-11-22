@@ -463,4 +463,28 @@ Inspired by how Unity and Godot handle things, mixed with some frustration about
 
 ---
 
+## Asset Credits
+
+The examples use assets from these talented creators:
+
+### Sprites & UI
+
+- **[Kenney.nl](https://www.kenney.nl/)** - UI Pack, UI Pack: Sci-fi, and Space Shooter sprites (CC0)
+  - Support: [Patreon](https://www.patreon.com/kenney/) | [Donate](http://support.kenney.nl)
+
+- **[Cup Nooble](https://cupnooble.itch.io/)** - Sprout Lands Basic and Sprout Lands UI asset packs
+  - [Sprout Lands Basic](https://cupnooble.itch.io/sprout-lands-asset-pack) | [Twitter](https://twitter.com/Sprout_Lands)
+
+### Fonts
+
+- **[PixelOperator](https://github.com/thinkofdeath/Minecraft-Font)** - PixelOperator and PixelOperator8 fonts (CC0)
+
+- **[Roberto Mocci](https://www.patreon.com/rmocci)** - Dogica Pixel font (SIL Open Font License)
+
+- **[Spottie Leonard](https://fontstruct.com/fontstructions/show/2330337)** - VHS Gothic font (CC BY-SA 3.0)
+
+- **Minecraft Font** - Faithful OpenType recreation (Public Domain)
+
+---
+
 Made for people who like TypeScript and want to make games without the ceremony.

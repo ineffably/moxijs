@@ -7,7 +7,8 @@
  *
  * This demo helps developers choose the right method for their use case.
  */
-import { setupMoxi, Logic, asEntity } from 'moxi';
+import { setupMoxi, Logic, asEntity, UIScrollContainer, UIComponent, EdgeInsets } from 'moxi';
+import type { MeasuredSize } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapText, Text } from 'pixi.js';
 import { ASSETS } from '../assets-config';
@@ -36,62 +37,48 @@ export async function initFontRenderingComparison() {
     ASSETS.KENNEY_FUTURE_NARROW_FONT,
     ASSETS.KENNEY_BOLD_FONT,
     ASSETS.KENVECTOR_FUTURE_FONT,
-    ASSETS.KENVECTOR_FUTURE_THIN_FONT
+    ASSETS.KENVECTOR_FUTURE_THIN_FONT,
+    ASSETS.PIXEL_OPERATOR8_FONT,
+    ASSETS.PIXEL_OPERATOR8_BOLD_FONT,
+    ASSETS.PIXEL_OPERATOR_FONT,
+    ASSETS.PIXEL_OPERATOR_BOLD_FONT,
+    ASSETS.MINECRAFT_FONT,
+    ASSETS.DOGICA_PIXEL_FONT,
+    ASSETS.DOGICA_PIXEL_BOLD_FONT,
+    ASSETS.RETRO_GAMING_FONT,
+    ASSETS.VHS_GOTHIC_FONT,
+    ASSETS.RAINYHEARTS_FONT
   ]);
 
-  // Generate bitmap fonts from TTF
-  PIXI.BitmapFont.install({
-    name: 'KenneyBlocks',
-    style: {
-      fontFamily: 'Kenney Blocks',
-      fontSize: 32,
-      fill: 0xffffff
-    }
-  });
+  // Generate bitmap fonts from TTF - data-driven approach
+  const fontConfigs = [
+    { name: 'KenneyBlocks', fontFamily: 'Kenney Blocks', fontSize: 32 },
+    { name: 'KenneyFuture', fontFamily: 'Kenney Future', fontSize: 24 },
+    { name: 'KenneyFutureNarrow', fontFamily: 'Kenney Future Narrow', fontSize: 24 },
+    { name: 'KenneyBold', fontFamily: 'Kenney Bold', fontSize: 24 },
+    { name: 'KenvectorFuture', fontFamily: 'Kenvector Future', fontSize: 24 },
+    { name: 'KenvectorFutureThin', fontFamily: 'Kenvector Future Thin', fontSize: 24 },
+    { name: 'PixelOperator8', fontFamily: 'PixelOperator8', fontSize: 24 },
+    { name: 'PixelOperator8Bold', fontFamily: 'PixelOperator8-Bold', fontSize: 24 },
+    { name: 'PixelOperator', fontFamily: 'PixelOperator', fontSize: 24 },
+    { name: 'PixelOperatorBold', fontFamily: 'PixelOperator-Bold', fontSize: 24 },
+    { name: 'Minecraft', fontFamily: 'Minecraft', fontSize: 24 },
+    { name: 'DogicaPixel', fontFamily: 'Dogica Pixel', fontSize: 24 },
+    { name: 'DogicaPixelBold', fontFamily: 'Dogica Pixel Bold', fontSize: 24 },
+    { name: 'RetroGaming', fontFamily: 'Retro Gaming', fontSize: 24 },
+    { name: 'VHSGothic', fontFamily: 'VHS Gothic', fontSize: 24 },
+    { name: 'RainyHearts', fontFamily: 'RainyHearts', fontSize: 24 }
+  ];
 
-  PIXI.BitmapFont.install({
-    name: 'KenneyFuture',
-    style: {
-      fontFamily: 'Kenney Future',
-      fontSize: 24,
-      fill: 0xffffff
-    }
-  });
-
-  PIXI.BitmapFont.install({
-    name: 'KenneyFutureNarrow',
-    style: {
-      fontFamily: 'Kenney Future Narrow',
-      fontSize: 24,
-      fill: 0xffffff
-    }
-  });
-
-  PIXI.BitmapFont.install({
-    name: 'KenneyBold',
-    style: {
-      fontFamily: 'Kenney Bold',
-      fontSize: 24,
-      fill: 0xffffff
-    }
-  });
-
-  PIXI.BitmapFont.install({
-    name: 'KenvectorFuture',
-    style: {
-      fontFamily: 'Kenvector Future',
-      fontSize: 24,
-      fill: 0xffffff
-    }
-  });
-
-  PIXI.BitmapFont.install({
-    name: 'KenvectorFutureThin',
-    style: {
-      fontFamily: 'Kenvector Future Thin',
-      fontSize: 24,
-      fill: 0xffffff
-    }
+  fontConfigs.forEach(config => {
+    PIXI.BitmapFont.install({
+      name: config.name,
+      style: {
+        fontFamily: config.fontFamily,
+        fontSize: config.fontSize,
+        fill: 0xffffff
+      }
+    });
   });
 
   // Create three columns for comparison
@@ -423,15 +410,81 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
   panel.position.set(x, y + 55);
   scene.addChild(panel);
 
-  let currentY = y + 75;
+  // Create scroll container for font samples
+  const scrollView = new UIScrollContainer({
+    width: width,
+    height: 825,
+    backgroundColor: 0x8e44ad,
+    scrollbarWidth: 14,
+    scrollbarTrackColor: 0x2d2d44,
+    scrollbarThumbColor: 0x4a4a6a,
+    scrollbarThumbHoverColor: 0x6a6a8a,
+    padding: EdgeInsets.all(0)
+  });
+  scrollView.container.x = x;
+  scrollView.container.y = y + 55;
+  scene.addChild(scrollView.container);
 
-  // Font showcase section
+  // Create content container for font samples
+  const contentContainer = new PIXI.Container();
+  
+  // Create a UIComponent wrapper for the content
+  class FontSamplesContent extends UIComponent {
+    private contentHeight: number = 0;
+
+    constructor(private pixiContainer: PIXI.Container) {
+      super();
+      this.container.addChild(pixiContainer);
+    }
+
+    measure(): MeasuredSize {
+      // Calculate height from children
+      let maxY = 0;
+      this.pixiContainer.children.forEach(child => {
+        const bounds = child.getBounds();
+        const bottom = bounds.y + bounds.height;
+        if (bottom > maxY) {
+          maxY = bottom;
+        }
+      });
+      this.contentHeight = maxY + 20; // Add padding at bottom
+      return {
+        width: width,
+        height: this.contentHeight
+      };
+    }
+
+    layout(availableWidth: number, availableHeight: number): void {
+      // No-op, children are positioned absolutely
+    }
+
+    protected render(): void {
+      // No-op, children are rendered directly
+    }
+  }
+
+  const fontSamplesContent = new FontSamplesContent(contentContainer);
+  scrollView.addChild(fontSamplesContent);
+
+  let currentY = 20;
+
+  // Font showcase section - all fonts including new ones
   const fontSamples = [
     { name: 'Kenney Blocks', fontFamily: 'KenneyBlocks', size: 20, lineHeight: 25 },
     { name: 'Kenney Bold', fontFamily: 'KenneyBold', size: 20, lineHeight: 32 },
     { name: 'Kenney Future Narrow', fontFamily: 'KenneyFutureNarrow', size: 20, lineHeight: 25 },
     { name: 'Kenvector Future', fontFamily: 'KenvectorFuture', size: 20, lineHeight: 25 },
-    { name: 'Kenvector Future Thin', fontFamily: 'KenvectorFutureThin', size: 20, lineHeight: 25 }
+    { name: 'Kenvector Future Thin', fontFamily: 'KenvectorFutureThin', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Regular', fontFamily: 'PixelOperator8', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Bold', fontFamily: 'PixelOperator8Bold', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Regular', fontFamily: 'PixelOperator', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Bold', fontFamily: 'PixelOperatorBold', size: 20, lineHeight: 25 },
+    { name: 'Minecraft', fontFamily: 'Minecraft', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Regular', fontFamily: 'DogicaPixel', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Bold', fontFamily: 'DogicaPixelBold', size: 20, lineHeight: 25 },
+    { name: 'Retro Gaming', fontFamily: 'RetroGaming', size: 20, lineHeight: 25 },
+    { name: 'VHS Gothic', fontFamily: 'VHSGothic', size: 20, lineHeight: 25 },
+    { name: 'RainyHearts', fontFamily: 'RainyHearts', size: 20, lineHeight: 25 }
   ];
 
   const sampleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=';
@@ -445,8 +498,8 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
         fontSize: 18
       }
     });
-    fontNameLabel.position.set(x + 20, currentY);
-    scene.addChild(fontNameLabel);
+    fontNameLabel.position.set(20, currentY);
+    contentContainer.addChild(fontNameLabel);
     currentY += 25;
 
     // Character sample
@@ -458,9 +511,13 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
         lineHeight: font.lineHeight
       }
     });
-    sample.position.set(x + 20, currentY);
-    scene.addChild(sample);
+    sample.position.set(20, currentY);
+    contentContainer.addChild(sample);
     currentY += 100;
   });
+
+  // Update scroll container layout after adding all children
+  fontSamplesContent.markLayoutDirty();
+  scrollView.layout(width, 825);
 }
 

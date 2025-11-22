@@ -1,4 +1,4 @@
-import { utils, setupMoxi, Logic, asEntity } from 'moxi';
+import { utils, setupMoxi, Logic, asEntity, asBitmapText, asSprite } from 'moxi';
 import { Sprite, BitmapText, Renderer } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
@@ -49,22 +49,28 @@ export async function initRotatingSprite() {
     { src: ASSETS.KENNEY_FUTURE_THIN_FONT, alias: 'kenney-future-thin' }
   ]);
   
-  const labelText = new BitmapText({
-    text: '0°',
-    style: {
-      fontFamily: 'kenney-future-thin',
-      fontSize: 32,
-      fontStyle: 'normal',
-      fill: 0x000000, // black
-    }
-  });
-
   const texture = PIXIAssets.get('character');
-  const characterSprite = new Sprite({ texture });
-  characterSprite.eventMode = 'none';
-
-  const label = asEntity(labelText);
-  label.position.set(renderer.canvas.width / 2, 50);
+  
+  const characterSprite = asSprite(
+    { texture },
+    { eventMode: 'none' }
+  );
+  
+  const label = asEntity(asBitmapText(
+    {
+      text: '0°',
+      style: {
+        fontFamily: 'kenney-future-thin',
+        fontSize: 32,
+        fontStyle: 'normal',
+        fill: 0x000000, // black
+      }
+    },
+    {
+      x: renderer.canvas.width / 2,
+      y: 50
+    }
+  ));
   label.moxiEntity.addLogic(new RotationLabel(characterSprite));
 
   const character = asEntity<Sprite>(characterSprite);

@@ -12,6 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './core/moxi-entity';
 import { Camera, CameraLogic } from './core/camera';
 import { asTextureFrames } from './library/texture-frames';
+import { asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { EdgeInsets } from './ui/core/edge-insets';
@@ -84,6 +85,11 @@ declare const exportedObjects: {
     AssetLoader: typeof AssetLoader;
     asEntity: typeof asEntity;
     asTextureFrames: typeof asTextureFrames;
+    asBitmapText: typeof asBitmapText;
+    asSprite: typeof asSprite;
+    asText: typeof asText;
+    asGraphics: typeof asGraphics;
+    asContainer: typeof asContainer;
     Logic: typeof Logic;
     Camera: typeof Camera;
     CameraLogic: typeof CameraLogic;
@@ -177,4 +183,4 @@ declare const exportedObjects: {
     UIScaleMode: typeof UIScaleMode;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode };
+export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode };

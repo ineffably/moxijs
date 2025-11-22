@@ -2,8 +2,8 @@
  * Example 17: Sprite Editor
  * Edit and manipulate sprites
  */
-import { setupMoxi } from 'moxi';
-import { Assets, BitmapFont, BitmapText } from 'pixi.js';
+import { setupMoxi, asBitmapText } from 'moxi';
+import { Assets, BitmapFont } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 
 export async function initSpriteEditor() {
@@ -40,26 +40,28 @@ export async function initSpriteEditor() {
   });
 
   // Example usage of the fonts
-  const pixelOperatorRegular = new BitmapText({
-    text: 'PixelOperator Regular',
-    style: {
-      fontFamily: 'PixelOperator',
-      fontSize: 16
-    }
-  });
-  pixelOperatorRegular.x = 20;
-  pixelOperatorRegular.y = 20;
+  const pixelOperatorRegular = asBitmapText(
+    {
+      text: 'PixelOperator Regular',
+      style: {
+        fontFamily: 'PixelOperator',
+        fontSize: 16
+      }
+    },
+    { x: 20, y: 20 }
+  );
   scene.addChild(pixelOperatorRegular);
 
-  const pixelOperatorBold = new BitmapText({
-    text: 'PixelOperator Bold',
-    style: {
-      fontFamily: 'PixelOperatorBold',
-      fontSize: 16
-    }
-  });
-  pixelOperatorBold.x = 20;
-  pixelOperatorBold.y = 50;
+  const pixelOperatorBold = asBitmapText(
+    {
+      text: 'PixelOperator Bold',
+      style: {
+        fontFamily: 'PixelOperatorBold',
+        fontSize: 16
+      }
+    },
+    { x: 20, y: 50 }
+  );
   scene.addChild(pixelOperatorBold);
 
   scene.init();

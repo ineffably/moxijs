@@ -7,9 +7,11 @@ import {
   setupMoxi,
   asPhysicsEntity,
   PhysicsMaterials,
-  getPhysicsBody
+  getPhysicsBody,
+  asGraphics,
+  asSprite
 } from 'moxi';
-import { Graphics, Point, Sprite, Assets } from 'pixi.js';
+import { Graphics, Point, Assets } from 'pixi.js';
 import * as planck from 'planck';
 import { ASSETS } from '../assets-config';
 
@@ -58,7 +60,7 @@ export async function initPhysicsBasic() {
   // Create ground platform (centered at origin to match physics shape)
   // Make it wide - 85% of screen width (1280px * 0.85 = 1088px)
   const groundWidth = 1088;
-  const ground = new Graphics();
+  const ground = asGraphics();
   ground.rect(-groundWidth / 2, -25, groundWidth, 50);
   ground.fill(0x8B4513); // Brown
 
@@ -76,7 +78,7 @@ export async function initPhysicsBasic() {
   const colors = [0xFF6B6B, 0x4ECDC4, 0xFFE66D, 0x95E1D3, 0xF38181];
 
   for (let i = 0; i < 5; i++) {
-    const box = new Graphics();
+    const box = asGraphics();
     box.rect(-25, -25, 50, 50);
     box.fill(colors[i]);
 
@@ -96,7 +98,7 @@ export async function initPhysicsBasic() {
   // Create bouncy balls
   const ballEntities: any[] = [];
   for (let i = 0; i < 3; i++) {
-    const ball = new Graphics();
+    const ball = asGraphics();
     ball.circle(0, 0, 25);
     ball.fill(0xFF1493); // Deep pink
 
@@ -120,8 +122,10 @@ export async function initPhysicsBasic() {
   // Set pixel-perfect rendering to avoid texture bleeding
   meteorTexture.source.scaleMode = 'nearest';
 
-  const meteor = new Sprite(meteorTexture);
-  meteor.anchor.set(0.5);
+  const meteor = asSprite(
+    { texture: meteorTexture },
+    { anchor: 0.5 }
+  );
 
   // Sprites require an explicit Graphics collision shape
   const meteorCollisionShape = new Graphics();

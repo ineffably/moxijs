@@ -11,6 +11,8 @@
     "build:dev": "webpack --mode development",
     "watch": "webpack watch --mode development",
     "test": "jest --config ./jest.config.js --collect-coverage",
+    "test:watch": "jest --config ./jest.config.js --watch",
+    "test:ci": "jest --config ./jest.config.js --ci --coverage --maxWorkers=2",
     "gendocs": "typedoc --out ./docs ./src",
     "docs": "typedoc"
   },
@@ -18,8 +20,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "bundle-stats-webpack-plugin": "^4.21.6",
+    "jest": "^30.2.0",
     "pixi.js": "^8.14.0",
+    "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",
     "typedoc": "^0.28.14",
     "typedoc-plugin-markdown": "^4.9.0",

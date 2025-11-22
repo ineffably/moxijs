@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Particle Emitter Sandbox - PixiJS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+        }
+        
+        #canvas-container {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            background: #0a0a0a;
+        }
+        
+        #pixi-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #controls {
+            width: 320px;
+            min-width: 320px;
+            flex-shrink: 0;
+            background: #242424;
+            padding: 16px;
+            overflow-y: auto;
+            border-left: 2px solid #333;
+        }
+        
+        @media (max-width: 768px) {
+            #controls {
+                width: 100%;
+                min-width: 100%;
+                height: 40vh;
+                border-left: none;
+                border-top: 2px solid #333;
+            }
+            
+            #canvas-container {
+                height: 60vh;
+                min-width: 100%;
+            }
+        }
+        
+        h1 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #fff;
+            border-bottom: 2px solid #4a9eff;
+            padding-bottom: 8px;
+        }
+        
+        .control-group {
+            margin-bottom: 12px;
+            padding: 0;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #2a2a2a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 12px 14px;
+            background: linear-gradient(to bottom, #333, #2a2a2a);
+            border-bottom: 1px solid #444;
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+        
+        .control-group-header:hover {
+            background: linear-gradient(to bottom, #3a3a3a, #333);
+            border-bottom-color: #4a9eff;
+        }
+        
+        .control-group-header:active {
+            background: #282828;
+        }
+        
+        .control-group-header h3 {
+            margin: 0;
+            transition: color 0.2s ease;
+        }
+        
+        .control-group-header:hover h3 {
+            color: #6ab0ff;
+        }
+        
+        .collapse-icon {
+            font-size: 12px;
+            font-weight: bold;
+            transition: transform 0.2s ease, color 0.2s ease;
+            color: #666;
+        }
+        
+        .control-group-header:hover .collapse-icon {
+            color: #4a9eff;
+        }
+        
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .control-group-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.15s ease-out, opacity 0.15s ease-out;
+            opacity: 1;
+            padding: 12px 14px;
+        }
+        
+        .control-group-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        
+        h3 {
+            font-size: 13px;
+            margin-bottom: 12px;
+            color: #4a9eff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .control {
+            margin-bottom: 10px;
+        }
+        
+        .control:last-child {
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #aaa;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            outline: none;
+            border-radius: 2px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+        
+        input[type="color"]:hover {
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.1);
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px;
+            background: #333;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        select:hover {
+            border-color: #4a9eff;
+            background: #3a3a3a;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+        
+        .value-display {
+            float: right;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(74, 158, 255, 0.3);
+        }
+        
+        button:hover {
+            background: #3a8eef;
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(74, 158, 255, 0.3);
+        }
+        
+        button.secondary {
+            background: #444;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        button.secondary:hover {
+            background: #555;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .preset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-top: 6px;
+            font-size: 13px;
+            text-align: left;
+            padding-left: 12px;
+        }
+        
+        .preset-btn:hover {
+            background: linear-gradient(135deg, #7689f1 0%, #8557b3 100%);
+            transform: translateY(-1px);
+        }
+        
+        .preset-btn:first-child {
+            margin-top: 0;
+        }
+        
+        .checkbox-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .checkbox-control:hover {
+            background: rgba(74, 158, 255, 0.05);
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #4a9eff;
+        }
+        
+        #stats {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            color: #4a9eff;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(74, 158, 255, 0.2);
+        }
+        
+        .color-stop {
+            background: #333;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+        
+        .color-stop:last-child {
+            margin-bottom: 0;
+        }
+        
+        .color-stop input[type="color"] {
+            width: 100%;
+            height: 40px;
+            margin-bottom: 8px;
+        }
+        
+        .color-stop label {
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #aaa;
+        }
+        
+        .color-stop input[type="range"] {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .color-stop-remove {
+            width: 100%;
+            background: #c44;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 0;
+        }
+        
+        .color-stop-remove:hover {
+            background: #d55;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <div id="stats">
+            Particles: <span id="particle-count">0</span><br>
+            FPS: <span id="fps">60</span>
+        </div>
+    </div>
+    
+    <div id="controls">
+        <h1>⚡ Particle Emitter (PixiJS)</h1>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('presets')">
+                <h3>🎨 Presets</h3>
+                <span class="collapse-icon" id="presets-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="presets-content">
+                <button id="preset-fire" class="preset-btn">🔥 Fire</button>
+                <button id="preset-explosion" class="preset-btn">💥 Explosion</button>
+                <button id="preset-rain" class="preset-btn">🌧️ Rain</button>
+                <button id="preset-snow" class="preset-btn">❄️ Snow</button>
+                <button id="preset-fireworks" class="preset-btn">🎆 Fireworks</button>
+                <button id="preset-smoke" class="preset-btn">💨 Smoke</button>
+                <button id="preset-magic" class="preset-btn">✨ Magic Sparkles</button>
+                <button id="preset-rocket" class="preset-btn">🚀 Rocket Exhaust</button>
+                <button id="preset-stars" class="preset-btn">⭐ Starfield</button>
+                <button id="preset-confetti" class="preset-btn">🎉 Confetti</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('emission')">
+                <h3>Emission</h3>
+                <span class="collapse-icon" id="emission-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="emission-content">
+            <div class="control">
+                <label>Emitter Shape</label>
+                <select id="emitter-shape">
+                    <option value="point">Point</option>
+                    <option value="line">Line (Horizontal)</option>
+                    <option value="lineVertical">Line (Vertical)</option>
+                    <option value="rectangle">Rectangle</option>
+                    <option value="circle">Circle</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Emitter Width (%) <span class="value-display" id="emitter-width-value">0</span></label>
+                <input type="range" id="emitter-width" min="0" max="150" value="0">
+            </div>
+            <div class="control">
+                <label>Emitter Height <span class="value-display" id="emitter-height-value">0</span></label>
+                <input type="range" id="emitter-height" min="0" max="500" value="0">
+            </div>
+            <div class="control">
+                <label>Rate (particles/sec) <span class="value-display" id="rate-value">50</span></label>
+                <input type="range" id="rate" min="1" max="500" value="50">
+            </div>
+            <div class="control">
+                <label>Burst Size <span class="value-display" id="burst-value">10</span></label>
+                <input type="range" id="burst" min="1" max="100" value="10">
+            </div>
+            <div class="control checkbox-control">
+                <input type="checkbox" id="continuous" checked>
+                <label for="continuous">Continuous Emission</label>
+            </div>
+            <div class="control checkbox-control">
+                <input type="checkbox" id="follow-mouse">
+                <label for="follow-mouse">Follow Mouse/Touch</label>
+            </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('life')">
+                <h3>Particle Life</h3>
+                <span class="collapse-icon" id="life-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="life-content">
+            <div class="control">
+                <label>Lifetime (sec) <span class="value-display" id="lifetime-value">2.0</span></label>
+                <input type="range" id="lifetime" min="0.1" max="10" step="0.1" value="2.0">
+            </div>
+            <div class="control">
+                <label>Lifetime Variance <span class="value-display" id="lifetime-var-value">0.5</span></label>
+                <input type="range" id="lifetime-variance" min="0" max="2" step="0.1" value="0.5">
+            </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('velocity')">
+                <h3>Velocity</h3>
+                <span class="collapse-icon" id="velocity-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="velocity-content">
+            <div class="control">
+                <label>Speed <span class="value-display" id="speed-value">100</span></label>
+                <input type="range" id="speed" min="0" max="500" value="100">
+            </div>
+            <div class="control">
+                <label>Speed Variance <span class="value-display" id="speed-var-value">50</span></label>
+                <input type="range" id="speed-variance" min="0" max="200" value="50">
+            </div>
+            <div class="control">
+                <label>Angle (degrees) <span class="value-display" id="angle-value">-90</span></label>
+                <input type="range" id="angle" min="0" max="360" value="270">
+            </div>
+            <div class="control">
+                <label>Spread (degrees) <span class="value-display" id="spread-value">30</span></label>
+                <input type="range" id="spread" min="0" max="360" value="30">
+            </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('physics')">
+                <h3>Physics</h3>
+                <span class="collapse-icon" id="physics-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="physics-content">
+            <div class="control">
+                <label>Gravity <span class="value-display" id="gravity-value">100</span></label>
+                <input type="range" id="gravity" min="-500" max="500" value="100">
+            </div>
+            <div class="control">
+                <label>Damping <span class="value-display" id="damping-value">0.0</span></label>
+                <input type="range" id="damping" min="0" max="1" step="0.01" value="0">
+            </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('appearance')">
+                <h3>Appearance</h3>
+                <span class="collapse-icon" id="appearance-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="appearance-content">
+            <div class="control">
+                <label>Texture/Sprite</label>
+                <select id="texture">
+                    <option value="circle">⚪ Circle</option>
+                    <option value="square">⬜ Square</option>
+                    <option value="star">⭐ Star</option>
+                    <option value="sparkle">✨ Sparkle</option>
+                    <option value="glow">💫 Glow</option>
+                    <option value="plus">➕ Plus</option>
+                    <option value="diamond">💎 Diamond</option>
+                    <option value="particle">• Particle (Tiny)</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Blend Mode</label>
+                <select id="blend-mode">
+                    <option value="NORMAL">Normal</option>
+                    <option value="ADD">Add (Glow)</option>
+                    <option value="MULTIPLY">Multiply</option>
+                    <option value="SCREEN">Screen</option>
+                </select>
+            </div>
+            <div class="control">
+                <label>Rotation Speed <span class="value-display" id="rotation-value">0</span></label>
+                <input type="range" id="rotation" min="-10" max="10" step="0.5" value="0">
+            </div>
+            <div class="control">
+                <label>Size (start) <span class="value-display" id="size-value">8</span></label>
+                <input type="range" id="size" min="1" max="50" value="8">
+            </div>
+            <div class="control">
+                <label>Size (end) <span class="value-display" id="size-end-value">4</span></label>
+                <input type="range" id="size-end" min="0" max="50" value="4">
+            </div>
+            <div class="control">
+                <label>Opacity (start) <span class="value-display" id="opacity-value">1.0</span></label>
+                <input type="range" id="opacity" min="0" max="1" step="0.1" value="1">
+            </div>
+            <div class="control">
+                <label>Opacity (end) <span class="value-display" id="opacity-end-value">0.0</span></label>
+                <input type="range" id="opacity-end" min="0" max="1" step="0.1" value="0">
+            </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('colors')">
+                <h3>Colors</h3>
+                <span class="collapse-icon" id="colors-icon">▼</span>
+            </div>
+            <div class="control-group-content" id="colors-content">
+                <div id="color-stops-container"></div>
+                <button id="add-color-btn" class="secondary" style="font-size: 12px; padding: 8px;">+ Add Color Stop</button>
+            </div>
+        </div>
+        
+        <button id="burst-btn">Emit Burst</button>
+        <button id="clear-btn" class="secondary">Clear Particles</button>
+        
+        <div class="control-group">
+            <div class="control-group-header" onclick="toggleSection('config')">
+                <h3>Configuration</h3>
+                <span class="collapse-icon collapsed" id="config-icon">▼</span>
+            </div>
+            <div class="control-group-content collapsed" id="config-content">
+            <button id="export-btn" class="secondary">Export Settings</button>
+            <button id="import-btn" class="secondary">Import Settings</button>
+            <button id="reset-btn" class="secondary">Reset to Defaults</button>
+            <div id="json-container" style="display: none; margin-top: 8px;">
+                <textarea id="json-output" readonly style="width: 100%; height: 200px; background: #1a1a1a; color: #4a9eff; border: 1px solid #333; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 11px; resize: vertical; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);"></textarea>
+                <button id="copy-json-btn" style="margin-top: 5px;">Copy to Clipboard</button>
+            </div>
+            <div id="import-container" style="display: none; margin-top: 8px;">
+                <textarea id="json-input" placeholder="Paste your JSON configuration here..." style="width: 100%; height: 200px; background: #1a1a1a; color: #e0e0e0; border: 1px solid #333; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 11px; resize: vertical; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);"></textarea>
+                <button id="load-json-btn" style="margin-top: 5px;">Load Configuration</button>
+            </div>
+            <div style="margin-top: 8px; padding: 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; font-size: 11px; color: #888; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);">
+                💾 Settings auto-save to browser storage
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage management
+        const STORAGE_KEY = 'particleEmitterSettings';
+        const COLLAPSED_KEY = 'particleEmitterCollapsed';
+        
+        function saveSettings() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (e) {
+                console.warn('Failed to save settings:', e);
+            }
+        }
+        
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Backward compatibility
+                    if ('alwaysEmit' in parsed && !('followMouse' in parsed)) {
+                        parsed.followMouse = parsed.alwaysEmit;
+                        delete parsed.alwaysEmit;
+                    }
+                    // Ensure widthMode and widthPercent exist
+                    if (!parsed.widthMode) {
+                        parsed.widthMode = 'percentage';
+                    }
+                    if (!parsed.widthPercent) {
+                        // Convert old emitterWidth to percentage if needed
+                        if (parsed.emitterWidth && parsed.emitterWidth > 0) {
+                            parsed.widthPercent = 50; // Default to 50% for existing settings
+                        } else {
+                            parsed.widthPercent = 100;
+                        }
+                    }
+                    return parsed;
+                }
+            } catch (e) {
+                console.warn('Failed to load settings:', e);
+            }
+            return null;
+        }
+        
+        function clearStorage() {
+            // Clear localStorage
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(COLLAPSED_KEY);
+            
+            // Reset settings object to defaults
+            Object.assign(settings, defaultSettings);
+            
+            // Reset all UI controls
+            Object.keys(rangeInputs).forEach(id => {
+                document.getElementById(id).value = settings[rangeInputs[id]];
+            });
+            
+            document.getElementById('emitter-shape').value = settings.emitterShape;
+            document.getElementById('continuous').checked = settings.continuous;
+            document.getElementById('follow-mouse').checked = settings.followMouse;
+            document.getElementById('texture').value = settings.texture;
+            document.getElementById('blend-mode').value = settings.blendMode;
+            
+            // Render color stops
+            renderColorStops();
+            
+            // Update displays
+            updateDisplays();
+            updateEmitterIndicator();
+            
+            // Clear all particles
+            particles.forEach(p => {
+                app.stage.removeChild(p.sprite);
+                p.sprite.destroy();
+            });
+            particles.length = 0;
+            
+            // Reset emitter position to default (1/3 from bottom, centered)
+            emitterX = app.screen.width / 2;
+            emitterY = app.screen.height * (2/3);
+        }
+        
+        // Collapsible sections
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const icon = document.getElementById(sectionId + '-icon');
+            
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+            
+            saveCollapsedState();
+        }
+        
+        function saveCollapsedState() {
+            const collapsed = {};
+            ['emission', 'life', 'velocity', 'physics', 'appearance', 'colors', 'presets', 'config'].forEach(id => {
+                const content = document.getElementById(id + '-content');
+                collapsed[id] = content.classList.contains('collapsed');
+            });
+            localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
+        }
+        
+        function loadCollapsedState() {
+            try {
+                const saved = localStorage.getItem(COLLAPSED_KEY);
+                if (saved) {
+                    const collapsed = JSON.parse(saved);
+                    Object.keys(collapsed).forEach(id => {
+                        if (collapsed[id]) {
+                            const content = document.getElementById(id + '-content');
+                            const icon = document.getElementById(id + '-icon');
+                            content.classList.add('collapsed');
+                            icon.classList.add('collapsed');
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Failed to load collapsed state:', e);
+            }
+        }
+        
+        // Make toggle function available globally for inline handlers
+        window.toggleSection = toggleSection;
+        
+        // Particle Presets
+        const presets = {
+            fire: {
+                emitterShape: 'line',
+                emitterWidth: 100,
+                emitterHeight: 0,
+                rate: 80,
+                burst: 20,
+                continuous: true,
+                followMouse: false,
+                lifetime: 1.5,
+                lifetimeVariance: 0.5,
+                speed: 120,
+                speedVariance: 40,
+                angle: 270,
+                spread: 25,
+                gravity: -50,
+                damping: 0.3,
+                texture: 'glow',
+                blendMode: 'ADD',
+                rotation: 0,
+                size: 20,
+                sizeEnd: 5,
+                colorStops: [
+                    { position: 0, color: '#ff4400' },
+                    { position: 30, color: '#ff8800' },
+                    { position: 60, color: '#ffaa00' },
+                    { position: 100, color: '#ff0000' }
+                ],
+                opacity: 0.8,
+                opacityEnd: 0.0
+            },
+            explosion: {
+                emitterShape: 'point',
+                emitterWidth: 0,
+                emitterHeight: 0,
+                rate: 200,
+                burst: 100,
+                continuous: false,
+                followMouse: false,
+                lifetime: 1.2,
+                lifetimeVariance: 0.4,
+                speed: 300,
+                speedVariance: 150,
+                angle: 270,
+                spread: 360,
+                gravity: 200,
+                damping: 0.5,
+                texture: 'sparkle',
+                blendMode: 'ADD',
+                rotation: 5,
+                size: 15,
+                sizeEnd: 3,
+                colorStops: [
+                    { position: 0, color: '#ffffff' },
+                    { position: 20, color: '#ffff00' },
+                    { position: 50, color: '#ff8800' },
+                    { position: 100, color: '#ff0000' }
+                ],
+                opacity: 1.0,
+                opacityEnd: 0.0
+            },
+            rain: {
+                emitterShape: 'line',
+                emitterWidth: 100, // This will be treated as percentage
+                emitterHeight: 0,
+                widthMode: 'percentage',
+                widthPercent: 100,
+                rate: 120,
+                burst: 40,
+                continuous: true,
+                followMouse: false,
+                lifetime: 3.0,
+                lifetimeVariance: 0.5,
+                speed: 250,
+                speedVariance: 60,
+                angle: 180,
+                spread: 2,
+                gravity: 150,
+                damping: 0,
+                texture: 'particle',
+                blendMode: 'NORMAL',
+                rotation: 0,
+                size: 6,
+                sizeEnd: 5,
+                colorStops: [
+                    { position: 0, color: '#88ccff' },
+                    { position: 100, color: '#4499ff' }
+                ],
+                opacity: 0.7,
+                opacityEnd: 0.4
+            },
+            snow: {
+                emitterShape: 'line',
+                emitterWidth: 100, // This will be treated as percentage
+                emitterHeight: 0,
+                widthMode: 'percentage',
+                widthPercent: 100,
+                rate: 40,
+                burst: 15,
+                continuous: true,
+                followMouse: false,
+                lifetime: 8.0,
+                lifetimeVariance: 2.0,
+                speed: 30,
+                speedVariance: 20,
+                angle: 180,
+                spread: 8,
+                gravity: 20,
+                damping: 0.1,
+                texture: 'sparkle',
+                blendMode: 'NORMAL',
+                rotation: 1.5,
+                size: 8,
+                sizeEnd: 6,
+                colorStops: [
+                    { position: 0, color: '#ffffff' },
+                    { position: 100, color: '#e0f0ff' }
+                ],
+                opacity: 0.9,
+                opacityEnd: 0.5
+            },
+            fireworks: {
+                emitterShape: 'point',
+                emitterWidth: 0,
+                emitterHeight: 0,
+                rate: 150,
+                burst: 80,
+                continuous: false,
+                followMouse: false,
+                lifetime: 2.0,
+                lifetimeVariance: 0.5,
+                speed: 250,
+                speedVariance: 100,
+                angle: 270,
+                spread: 360,
+                gravity: 150,
+                damping: 0.2,
+                texture: 'star',
+                blendMode: 'ADD',
+                rotation: 3,
+                size: 12,
+                sizeEnd: 4,
+                colorStops: [
+                    { position: 0, color: '#ff00ff' },
+                    { position: 25, color: '#00ffff' },
+                    { position: 50, color: '#ffff00' },
+                    { position: 75, color: '#ff00ff' },
+                    { position: 100, color: '#0088ff' }
+                ],
+                opacity: 1.0,
+                opacityEnd: 0.0
+            },
+            smoke: {
+                emitterShape: 'line',
+                emitterWidth: 80,
+                emitterHeight: 0,
+                rate: 30,
+                burst: 10,
+                continuous: true,
+                followMouse: false,
+                lifetime: 4.0,
+                lifetimeVariance: 1.0,
+                speed: 40,
+                speedVariance: 20,
+                angle: 270,
+                spread: 20,
+                gravity: -10,
+                damping: 0.4,
+                texture: 'glow',
+                blendMode: 'NORMAL',
+                rotation: 0.5,
+                size: 25,
+                sizeEnd: 40,
+                colorStops: [
+                    { position: 0, color: '#666666' },
+                    { position: 50, color: '#888888' },
+                    { position: 100, color: '#aaaaaa' }
+                ],
+                opacity: 0.4,
+                opacityEnd: 0.0
+            },
+            magic: {
+                emitterShape: 'circle',
+                emitterWidth: 100,
+                emitterHeight: 100,
+                rate: 60,
+                burst: 25,
+                continuous: true,
+                followMouse: true,
+                lifetime: 2.5,
+                lifetimeVariance: 0.8,
+                speed: 60,
+                speedVariance: 30,
+                angle: 270,
+                spread: 360,
+                gravity: -20,
+                damping: 0.2,
+                texture: 'sparkle',
+                blendMode: 'ADD',
+                rotation: 2,
+                size: 10,
+                sizeEnd: 3,
+                colorStops: [
+                    { position: 0, color: '#ff00ff' },
+                    { position: 20, color: '#ff0088' },
+                    { position: 40, color: '#8800ff' },
+                    { position: 60, color: '#00ffff' },
+                    { position: 80, color: '#00ff88' },
+                    { position: 100, color: '#ffff00' }
+                ],
+                opacity: 0.9,
+                opacityEnd: 0.0
+            },
+            rocket: {
+                emitterShape: 'point',
+                emitterWidth: 0,
+                emitterHeight: 0,
+                rate: 120,
+                burst: 40,
+                continuous: true,
+                followMouse: false,
+                lifetime: 0.8,
+                lifetimeVariance: 0.3,
+                speed: 200,
+                speedVariance: 80,
+                angle: 180,
+                spread: 25,
+                gravity: 50,
+                damping: 0.1,
+                texture: 'glow',
+                blendMode: 'ADD',
+                rotation: 0,
+                size: 15,
+                sizeEnd: 5,
+                colorStops: [
+                    { position: 0, color: '#ffffff' },
+                    { position: 30, color: '#88ccff' },
+                    { position: 70, color: '#0088ff' },
+                    { position: 100, color: '#ff6600' }
+                ],
+                opacity: 1.0,
+                opacityEnd: 0.0
+            },
+            stars: {
+                emitterShape: 'line',
+                emitterWidth: 500,
+                emitterHeight: 0,
+                rate: 25,
+                burst: 10,
+                continuous: true,
+                followMouse: false,
+                lifetime: 10.0,
+                lifetimeVariance: 3.0,
+                speed: 30,
+                speedVariance: 15,
+                angle: 180,
+                spread: 2,
+                gravity: 0,
+                damping: 0,
+                texture: 'star',
+                blendMode: 'ADD',
+                rotation: 1,
+                size: 6,
+                sizeEnd: 4,
+                colorStops: [
+                    { position: 0, color: '#ffffff' },
+                    { position: 50, color: '#ffffaa' },
+                    { position: 100, color: '#ffffff' }
+                ],
+                opacity: 1.0,
+                opacityEnd: 0.8
+            },
+            confetti: {
+                emitterShape: 'point',
+                emitterWidth: 0,
+                emitterHeight: 0,
+                rate: 100,
+                burst: 50,
+                continuous: false,
+                followMouse: false,
+                lifetime: 3.0,
+                lifetimeVariance: 1.0,
+                speed: 300,
+                speedVariance: 150,
+                angle: 270,
+                spread: 180,
+                gravity: 250,
+                damping: 0.3,
+                texture: 'square',
+                blendMode: 'NORMAL',
+                rotation: 8,
+                size: 8,
+                sizeEnd: 6,
+                colorStops: [
+                    { position: 0, color: '#ff0066' },
+                    { position: 20, color: '#ffff00' },
+                    { position: 40, color: '#00ff88' },
+                    { position: 60, color: '#0088ff' },
+                    { position: 80, color: '#ff00ff' },
+                    { position: 100, color: '#ff6600' }
+                ],
+                opacity: 1.0,
+                opacityEnd: 0.9
+            }
+        };
+        
+        function applyPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+            
+            // Apply all settings from preset
+            Object.assign(settings, preset);
+            
+            // Ensure widthMode is set
+            if (!settings.widthMode) {
+                settings.widthMode = 'percentage';
+            }
+            
+            // Position emitter based on preset type
+            if (presetName === 'rain') {
+                // Position at very top of viewport, full width
+                emitterX = app.screen.width / 2;
+                emitterY = 0;
+                settings.widthMode = 'percentage';
+                settings.widthPercent = 100;
+            } else if (presetName === 'snow' || presetName === 'stars') {
+                // Position at top for falling effects, full width
+                emitterX = app.screen.width / 2;
+                emitterY = 0;
+                settings.widthMode = 'percentage';
+                settings.widthPercent = 100;
+            } else {
+                // Reset to default position (1/3 from bottom)
+                emitterX = app.screen.width / 2;
+                emitterY = app.screen.height * (2/3);
+            }
+            
+            // Update all UI controls
+            Object.keys(rangeInputs).forEach(id => {
+                document.getElementById(id).value = settings[rangeInputs[id]];
+            });
+            
+            document.getElementById('emitter-shape').value = settings.emitterShape;
+            document.getElementById('continuous').checked = settings.continuous;
+            document.getElementById('follow-mouse').checked = settings.followMouse;
+            document.getElementById('texture').value = settings.texture;
+            document.getElementById('blend-mode').value = settings.blendMode;
+            
+            renderColorStops();
+            updateDisplays();
+            saveSettings();
+            
+            // Show emitter indicator briefly
+            emitterGrabbed = true;
+            updateEmitterIndicator();
+            setTimeout(() => {
+                emitterGrabbed = false;
+                updateEmitterIndicator();
+            }, 2000);
+            
+            // Clear existing particles for clean transition
+            particles.forEach(p => {
+                app.stage.removeChild(p.sprite);
+                p.sprite.destroy();
+            });
+            particles.length = 0;
+        }
+        
+        // Initialize PixiJS
+        const app = new PIXI.Application({
+            background: '#0a0a0a',
+            resizeTo: document.getElementById('canvas-container'),
+            antialias: true
+        });
+        
+        document.getElementById('canvas-container').appendChild(app.view);
+        
+        // Particle system
+        const particles = [];
+        let emitterX = app.screen.width / 2;
+        let emitterY = app.screen.height * (2/3); // 1/3 up from bottom
+        let lastEmitTime = 0;
+        let isEmitting = false;
+        let emitterGrabbed = false;
+        
+        // Default settings
+        const defaultSettings = {
+            emitterShape: 'point',
+            emitterWidth: 0,
+            emitterHeight: 0,
+            widthMode: 'percentage', // 'percentage' or 'pixels'
+            widthPercent: 100,
+            rate: 50,
+            burst: 10,
+            continuous: true,
+            followMouse: false,
+            lifetime: 2.0,
+            lifetimeVariance: 0.5,
+            speed: 100,
+            speedVariance: 50,
+            angle: 270,
+            spread: 30,
+            gravity: 100,
+            damping: 0,
+            texture: 'circle',
+            blendMode: 'NORMAL',
+            rotation: 0,
+            size: 8,
+            sizeEnd: 4,
+            colorStops: [
+                { position: 0, color: '#ff6b35' },
+                { position: 100, color: '#4a9eff' }
+            ],
+            opacity: 1.0,
+            opacityEnd: 0.0
+        };
+        
+        // Load settings from localStorage or use defaults
+        const settings = Object.assign({}, defaultSettings, loadSettings() || {});
+        
+        // Ensure widthMode is set to percentage (backward compatibility)
+        if (!settings.widthMode) {
+            settings.widthMode = 'percentage';
+        }
+        
+        // Ensure widthPercent is set
+        if (!settings.widthPercent && settings.widthPercent !== 0) {
+            settings.widthPercent = defaultSettings.widthPercent;
+        }
+        
+        // Ensure colorStops exists and is valid (backward compatibility)
+        if (!settings.colorStops || !Array.isArray(settings.colorStops) || settings.colorStops.length === 0) {
+            // Migrate from old colorStart/colorEnd if they exist
+            if (settings.colorStart && settings.colorEnd) {
+                settings.colorStops = [
+                    { position: 0, color: settings.colorStart },
+                    { position: 100, color: settings.colorEnd }
+                ];
+            } else {
+                settings.colorStops = defaultSettings.colorStops;
+            }
+        }
+        
+        // Color stops management
+        function renderColorStops() {
+            const container = document.getElementById('color-stops-container');
+            container.innerHTML = '';
+            
+            settings.colorStops.forEach((stop, index) => {
+                const stopEl = document.createElement('div');
+                stopEl.className = 'color-stop';
+                stopEl.innerHTML = `
+                    <input type="color" value="${stop.color}" onchange="updateColorStop(${index}, 'color', this.value)">
+                    <label>Position: <span>${stop.position}%</span></label>
+                    <input type="range" min="0" max="100" value="${stop.position}" oninput="updateColorStop(${index}, 'position', this.value); this.previousElementSibling.querySelector('span').textContent = this.value + '%'">
+                    ${settings.colorStops.length > 2 ? `<button class="color-stop-remove" onclick="removeColorStop(${index})">Remove</button>` : ''}
+                `;
+                container.appendChild(stopEl);
+            });
+        }
+        
+        function addColorStop() {
+            if (settings.colorStops.length >= 8) {
+                return; // Max 8 color stops
+            }
+            
+            // Add new stop at 50% with a color interpolated between neighbors
+            const newPosition = 50;
+            settings.colorStops.push({
+                position: newPosition,
+                color: '#ffffff'
+            });
+            
+            // Sort by position
+            settings.colorStops.sort((a, b) => a.position - b.position);
+            
+            renderColorStops();
+            saveSettings();
+        }
+        
+        function removeColorStop(index) {
+            if (settings.colorStops.length <= 2) {
+                return; // Must have at least 2 stops
+            }
+            settings.colorStops.splice(index, 1);
+            renderColorStops();
+            saveSettings();
+        }
+        
+        function updateColorStop(index, property, value) {
+            if (property === 'position') {
+                settings.colorStops[index].position = parseInt(value);
+                // Re-sort after position change
+                settings.colorStops.sort((a, b) => a.position - b.position);
+                renderColorStops();
+            } else {
+                settings.colorStops[index][property] = value;
+            }
+            saveSettings();
+        }
+        
+        // Get interpolated color at a given position (0-100)
+        function getColorAtPosition(position) {
+            // Find the two color stops we're between
+            let beforeStop = settings.colorStops[0];
+            let afterStop = settings.colorStops[settings.colorStops.length - 1];
+            
+            for (let i = 0; i < settings.colorStops.length - 1; i++) {
+                if (position >= settings.colorStops[i].position && position <= settings.colorStops[i + 1].position) {
+                    beforeStop = settings.colorStops[i];
+                    afterStop = settings.colorStops[i + 1];
+                    break;
+                }
+            }
+            
+            // If position is exact match, return that color
+            if (beforeStop.position === afterStop.position) {
+                return beforeStop.color;
+            }
+            
+            // Interpolate between the two colors
+            const range = afterStop.position - beforeStop.position;
+            const t = (position - beforeStop.position) / range;
+            
+            const startColor = PIXI.utils.hex2rgb(parseInt(beforeStop.color.slice(1), 16));
+            const endColor = PIXI.utils.hex2rgb(parseInt(afterStop.color.slice(1), 16));
+            
+            const r = startColor[0] + (endColor[0] - startColor[0]) * t;
+            const g = startColor[1] + (endColor[1] - startColor[1]) * t;
+            const b = startColor[2] + (endColor[2] - startColor[2]) * t;
+            
+            return PIXI.utils.rgb2hex([r, g, b]);
+        }
+        
+        // Make functions available globally for inline handlers
+        window.removeColorStop = removeColorStop;
+        window.updateColorStop = updateColorStop;
+        
+        // Get spawn position based on emitter shape
+        function getSpawnPosition() {
+            const shape = settings.emitterShape;
+            let width = settings.emitterWidth;
+            let height = settings.emitterHeight;
+            
+            // Calculate actual width based on mode
+            if (settings.widthMode === 'percentage') {
+                width = app.screen.width * (settings.widthPercent / 100);
+            }
+            
+            switch (shape) {
+                case 'point':
+                    return { x: emitterX, y: emitterY };
+                    
+                case 'line':
+                    return {
+                        x: emitterX + (Math.random() - 0.5) * width,
+                        y: emitterY
+                    };
+                    
+                case 'lineVertical':
+                    return {
+                        x: emitterX,
+                        y: emitterY + (Math.random() - 0.5) * height
+                    };
+                    
+                case 'rectangle':
+                    return {
+                        x: emitterX + (Math.random() - 0.5) * width,
+                        y: emitterY + (Math.random() - 0.5) * height
+                    };
+                    
+                case 'circle':
+                    const radius = width / 2;
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.sqrt(Math.random()) * radius;
+                    return {
+                        x: emitterX + Math.cos(angle) * r,
+                        y: emitterY + Math.sin(angle) * r
+                    };
+                    
+                default:
+                    return { x: emitterX, y: emitterY };
+            }
+        }
+        
+        // Create textures
+        function createCircleTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            graphics.drawCircle(16, 16, 16);
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createSquareTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            graphics.drawRect(0, 0, 32, 32);
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createStarTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            const outerRadius = 16;
+            const innerRadius = 8;
+            const points = 5;
+            const step = Math.PI / points;
+            let rot = Math.PI / 2 * 3;
+            
+            graphics.moveTo(16, 0);
+            for (let i = 0; i < points; i++) {
+                graphics.lineTo(16 + Math.cos(rot) * outerRadius, 16 + Math.sin(rot) * outerRadius);
+                rot += step;
+                graphics.lineTo(16 + Math.cos(rot) * innerRadius, 16 + Math.sin(rot) * innerRadius);
+                rot += step;
+            }
+            graphics.closePath();
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createSparkleTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF, 1.0);
+            graphics.drawCircle(16, 16, 4);
+            graphics.endFill();
+            graphics.beginFill(0xFFFFFF, 0.5);
+            graphics.drawCircle(16, 16, 10);
+            graphics.endFill();
+            graphics.beginFill(0xFFFFFF, 0.2);
+            graphics.drawCircle(16, 16, 16);
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 64, 64);
+            return PIXI.Texture.from(canvas);
+        }
+        
+        function createPlusTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            graphics.drawRect(12, 6, 8, 20);
+            graphics.drawRect(6, 12, 20, 8);
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createDiamondTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            graphics.moveTo(16, 4);
+            graphics.lineTo(28, 16);
+            graphics.lineTo(16, 28);
+            graphics.lineTo(4, 16);
+            graphics.closePath();
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        function createParticleTexture() {
+            const graphics = new PIXI.Graphics();
+            graphics.beginFill(0xFFFFFF);
+            graphics.drawCircle(8, 8, 3);
+            graphics.endFill();
+            return app.renderer.generateTexture(graphics);
+        }
+        
+        const textures = {
+            circle: createCircleTexture(),
+            square: createSquareTexture(),
+            star: createStarTexture(),
+            sparkle: createSparkleTexture(),
+            glow: createGlowTexture(),
+            plus: createPlusTexture(),
+            diamond: createDiamondTexture(),
+            particle: createParticleTexture()
+        };
+        
+        // Particle class
+        class Particle {
+            constructor() {
+                const spawnPos = getSpawnPosition();
+                
+                const lifetime = settings.lifetime + (Math.random() - 0.5) * settings.lifetimeVariance * 2;
+                this.maxLife = Math.max(0.1, lifetime);
+                this.life = this.maxLife;
+                
+                const angleRad = (settings.angle + (Math.random() - 0.5) * settings.spread) * Math.PI / 180;
+                const speed = settings.speed + (Math.random() - 0.5) * settings.speedVariance * 2;
+                
+                this.vx = Math.cos(angleRad) * speed;
+                this.vy = Math.sin(angleRad) * speed;
+                this.rotationSpeed = settings.rotation;
+                
+                // Create sprite
+                this.sprite = new PIXI.Sprite(textures[settings.texture]);
+                this.sprite.anchor.set(0.5);
+                this.sprite.x = spawnPos.x;
+                this.sprite.y = spawnPos.y;
+                this.sprite.scale.set(settings.size / 16);
+                this.sprite.blendMode = PIXI.BLEND_MODES[settings.blendMode];
+                
+                app.stage.addChild(this.sprite);
+            }
+            
+            update(dt) {
+                this.life -= dt;
+                if (this.life <= 0) {
+                    app.stage.removeChild(this.sprite);
+                    this.sprite.destroy();
+                    return false;
+                }
+                
+                const t = 1 - (this.life / this.maxLife);
+                
+                // Apply gravity
+                this.vy += settings.gravity * dt;
+                
+                // Apply damping
+                if (settings.damping > 0) {
+                    this.vx *= (1 - settings.damping * dt);
+                    this.vy *= (1 - settings.damping * dt);
+                }
+                
+                this.sprite.x += this.vx * dt;
+                this.sprite.y += this.vy * dt;
+                
+                // Apply rotation
+                if (this.rotationSpeed !== 0) {
+                    this.sprite.rotation += this.rotationSpeed * dt;
+                }
+                
+                // Interpolate size
+                const size = settings.size + (settings.sizeEnd - settings.size) * t;
+                this.sprite.scale.set(size / 16);
+                
+                // Get color from gradient at current lifetime position
+                const colorPosition = t * 100; // Convert to 0-100 range
+                this.sprite.tint = getColorAtPosition(colorPosition);
+                
+                // Interpolate opacity
+                const opacity = settings.opacity + (settings.opacityEnd - settings.opacity) * t;
+                this.sprite.alpha = opacity;
+                
+                return true;
+            }
+        }
+        
+        function emitBurst(count) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        // Helper to update settings and auto-save
+        function updateSetting(key, value) {
+            settings[key] = value;
+            saveSettings();
+            updateDisplays();
+        }
+        
+        // Update displays
+        function updateDisplays() {
+            document.getElementById('emitter-width-value').textContent = Math.round(settings.widthPercent) + '%';
+            document.getElementById('emitter-height-value').textContent = Math.round(settings.emitterHeight);
+            document.getElementById('rate-value').textContent = settings.rate;
+            document.getElementById('burst-value').textContent = settings.burst;
+            document.getElementById('lifetime-value').textContent = settings.lifetime.toFixed(1);
+            document.getElementById('lifetime-var-value').textContent = settings.lifetimeVariance.toFixed(1);
+            document.getElementById('speed-value').textContent = Math.round(settings.speed);
+            document.getElementById('speed-var-value').textContent = Math.round(settings.speedVariance);
+            document.getElementById('angle-value').textContent = Math.round(settings.angle - 90);
+            document.getElementById('spread-value').textContent = Math.round(settings.spread);
+            document.getElementById('gravity-value').textContent = Math.round(settings.gravity);
+            document.getElementById('damping-value').textContent = settings.damping.toFixed(2);
+            document.getElementById('rotation-value').textContent = settings.rotation.toFixed(1);
+            document.getElementById('size-value').textContent = Math.round(settings.size);
+            document.getElementById('size-end-value').textContent = Math.round(settings.sizeEnd);
+            document.getElementById('opacity-value').textContent = settings.opacity.toFixed(1);
+            document.getElementById('opacity-end-value').textContent = settings.opacityEnd.toFixed(1);
+        }
+        
+        // Setup controls - optimized with helpers
+        const rangeInputs = {
+            'emitter-width': 'widthPercent',
+            'emitter-height': 'emitterHeight',
+            'rate': 'rate',
+            'burst': 'burst',
+            'lifetime': 'lifetime',
+            'lifetime-variance': 'lifetimeVariance',
+            'speed': 'speed',
+            'speed-variance': 'speedVariance',
+            'angle': 'angle',
+            'spread': 'spread',
+            'gravity': 'gravity',
+            'damping': 'damping',
+            'rotation': 'rotation',
+            'size': 'size',
+            'size-end': 'sizeEnd',
+            'opacity': 'opacity',
+            'opacity-end': 'opacityEnd'
+        };
+        
+        Object.keys(rangeInputs).forEach(id => {
+            const input = document.getElementById(id);
+            input.value = settings[rangeInputs[id]];
+            input.addEventListener('input', (e) => {
+                updateSetting(rangeInputs[id], parseFloat(e.target.value));
+            });
+        });
+        
+        // Emitter shape controls with visual feedback
+        document.getElementById('emitter-shape').value = settings.emitterShape;
+        document.getElementById('emitter-shape').addEventListener('change', (e) => {
+            updateSetting('emitterShape', e.target.value);
+            emitterGrabbed = true;
+            updateEmitterIndicator();
+            setTimeout(() => { emitterGrabbed = false; updateEmitterIndicator(); }, 2000);
+        });
+        
+        ['emitter-width', 'emitter-height'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                emitterGrabbed = true;
+                updateEmitterIndicator();
+            });
+            document.getElementById(id).addEventListener('change', () => {
+                setTimeout(() => { emitterGrabbed = false; updateEmitterIndicator(); }, 1000);
+            });
+        });
+        
+        // Checkbox controls
+        document.getElementById('continuous').checked = settings.continuous;
+        document.getElementById('continuous').addEventListener('change', (e) => {
+            updateSetting('continuous', e.target.checked);
+        });
+        
+        document.getElementById('follow-mouse').checked = settings.followMouse;
+        document.getElementById('follow-mouse').addEventListener('change', (e) => {
+            updateSetting('followMouse', e.target.checked);
+            if (e.target.checked) {
+                emitterGrabbed = true;
+                updateEmitterIndicator();
+                setTimeout(() => { emitterGrabbed = false; updateEmitterIndicator(); }, 1500);
+            }
+        });
+        
+        // Select controls
+        document.getElementById('texture').value = settings.texture;
+        document.getElementById('texture').addEventListener('change', (e) => {
+            updateSetting('texture', e.target.value);
+        });
+        
+        document.getElementById('blend-mode').value = settings.blendMode;
+        document.getElementById('blend-mode').addEventListener('change', (e) => {
+            updateSetting('blendMode', e.target.value);
+        });
+        
+        // Color stops
+        renderColorStops();
+        document.getElementById('add-color-btn').addEventListener('click', addColorStop);
+        
+        document.getElementById('burst-btn').addEventListener('click', () => {
+            emitBurst(settings.burst);
+        });
+        
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            particles.forEach(p => {
+                app.stage.removeChild(p.sprite);
+                p.sprite.destroy();
+            });
+            particles.length = 0;
+        });
+        
+        // Preset buttons
+        document.getElementById('preset-fire').addEventListener('click', () => applyPreset('fire'));
+        document.getElementById('preset-explosion').addEventListener('click', () => applyPreset('explosion'));
+        document.getElementById('preset-rain').addEventListener('click', () => applyPreset('rain'));
+        document.getElementById('preset-snow').addEventListener('click', () => applyPreset('snow'));
+        document.getElementById('preset-fireworks').addEventListener('click', () => applyPreset('fireworks'));
+        document.getElementById('preset-smoke').addEventListener('click', () => applyPreset('smoke'));
+        document.getElementById('preset-magic').addEventListener('click', () => applyPreset('magic'));
+        document.getElementById('preset-rocket').addEventListener('click', () => applyPreset('rocket'));
+        document.getElementById('preset-stars').addEventListener('click', () => applyPreset('stars'));
+        document.getElementById('preset-confetti').addEventListener('click', () => applyPreset('confetti'));
+        
+        // Export/Import functionality
+        document.getElementById('export-btn').addEventListener('click', () => {
+            const jsonContainer = document.getElementById('json-container');
+            const importContainer = document.getElementById('import-container');
+            
+            if (jsonContainer.style.display === 'none') {
+                jsonContainer.style.display = 'block';
+                importContainer.style.display = 'none';
+                document.getElementById('json-output').value = JSON.stringify(settings, null, 2);
+            } else {
+                jsonContainer.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('import-btn').addEventListener('click', () => {
+            const jsonContainer = document.getElementById('json-container');
+            const importContainer = document.getElementById('import-container');
+            
+            if (importContainer.style.display === 'none') {
+                importContainer.style.display = 'block';
+                jsonContainer.style.display = 'none';
+            } else {
+                importContainer.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', clearStorage);
+        
+        document.getElementById('copy-json-btn').addEventListener('click', () => {
+            const jsonOutput = document.getElementById('json-output');
+            jsonOutput.select();
+            document.execCommand('copy');
+            
+            const btn = document.getElementById('copy-json-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        });
+        
+        document.getElementById('load-json-btn').addEventListener('click', () => {
+            const jsonInput = document.getElementById('json-input');
+            try {
+                const newSettings = JSON.parse(jsonInput.value);
+                
+                // Backward compatibility
+                if ('alwaysEmit' in newSettings && !('followMouse' in newSettings)) {
+                    newSettings.followMouse = newSettings.alwaysEmit;
+                    delete newSettings.alwaysEmit;
+                }
+                
+                // Update settings and save
+                Object.assign(settings, newSettings);
+                saveSettings();
+                
+                // Update all UI controls
+                Object.keys(rangeInputs).forEach(id => {
+                    document.getElementById(id).value = settings[rangeInputs[id]];
+                });
+                
+                document.getElementById('emitter-shape').value = settings.emitterShape || 'point';
+                document.getElementById('follow-mouse').checked = settings.followMouse || false;
+                document.getElementById('continuous').checked = settings.continuous;
+                document.getElementById('texture').value = settings.texture || 'circle';
+                document.getElementById('blend-mode').value = settings.blendMode || 'NORMAL';
+                
+                // Render color stops
+                renderColorStops();
+                
+                updateDisplays();
+                
+                // Show indicator briefly
+                emitterGrabbed = true;
+                updateEmitterIndicator();
+                setTimeout(() => {
+                    emitterGrabbed = false;
+                    updateEmitterIndicator();
+                }, 2000);
+                
+                const btn = document.getElementById('load-json-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Loaded!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    document.getElementById('import-container').style.display = 'none';
+                }, 2000);
+            } catch (error) {
+                alert('Invalid JSON format. Please check your input.');
+            }
+        });
+        
+        // Canvas interaction
+        function getPosition(e) {
+            const rect = app.view.getBoundingClientRect();
+            let clientX, clientY;
+            
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+        
+        app.view.addEventListener('click', (e) => {
+            const pos = getPosition(e);
+            emitterX = pos.x;
+            emitterY = pos.y;
+            if (!settings.continuous) {
+                emitBurst(settings.burst);
+            }
+            // Show indicator briefly
+            emitterGrabbed = true;
+            updateEmitterIndicator();
+            setTimeout(() => {
+                emitterGrabbed = false;
+                updateEmitterIndicator();
+            }, 1000);
+        });
+        
+        app.view.addEventListener('mousemove', (e) => {
+            if (settings.followMouse) {
+                const pos = getPosition(e);
+                emitterX = pos.x;
+                emitterY = pos.y;
+                emitterGrabbed = true;
+            } else if (e.buttons === 1) {
+                // Dragging with mouse button held
+                const pos = getPosition(e);
+                emitterX = pos.x;
+                emitterY = pos.y;
+                isEmitting = true;
+                emitterGrabbed = true;
+            } else {
+                isEmitting = false;
+                emitterGrabbed = false;
+            }
+        });
+        
+        app.view.addEventListener('mousedown', (e) => {
+            emitterGrabbed = true;
+        });
+        
+        app.view.addEventListener('mouseup', () => {
+            isEmitting = false;
+            emitterGrabbed = false;
+        });
+        
+        app.view.addEventListener('mouseleave', () => {
+            if (!isEmitting) {
+                emitterGrabbed = false;
+            }
+        });
+        
+        // Touch events
+        app.view.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const pos = getPosition(e);
+            emitterX = pos.x;
+            emitterY = pos.y;
+            emitterGrabbed = true;
+            if (!settings.continuous) {
+                emitBurst(settings.burst);
+            }
+            if (settings.followMouse) {
+                isEmitting = true;
+            }
+        });
+        
+        app.view.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (settings.followMouse || e.touches.length > 0) {
+                const pos = getPosition(e);
+                emitterX = pos.x;
+                emitterY = pos.y;
+                emitterGrabbed = true;
+            }
+        });
+        
+        app.view.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isEmitting = false;
+            emitterGrabbed = false;
+        });
+        
+        // Draw emitter indicator
+        const emitterIndicator = new PIXI.Graphics();
+        app.stage.addChild(emitterIndicator);
+        
+        function updateEmitterIndicator() {
+            emitterIndicator.clear();
+            
+            // Only show indicator when emitter is grabbed
+            if (!emitterGrabbed) {
+                return;
+            }
+            
+            emitterIndicator.lineStyle(2, 0x4a9eff, 0.5);
+            
+            const shape = settings.emitterShape;
+            let width = settings.emitterWidth;
+            const height = settings.emitterHeight;
+            
+            // Calculate actual width based on mode
+            if (settings.widthMode === 'percentage') {
+                width = app.screen.width * (settings.widthPercent / 100);
+            }
+            
+            switch (shape) {
+                case 'point':
+                    emitterIndicator.beginFill(0x4a9eff, 0.5);
+                    emitterIndicator.drawCircle(emitterX, emitterY, 5);
+                    emitterIndicator.endFill();
+                    break;
+                    
+                case 'line':
+                    emitterIndicator.moveTo(emitterX - width/2, emitterY);
+                    emitterIndicator.lineTo(emitterX + width/2, emitterY);
+                    emitterIndicator.drawCircle(emitterX, emitterY, 3);
+                    break;
+                    
+                case 'lineVertical':
+                    emitterIndicator.moveTo(emitterX, emitterY - height/2);
+                    emitterIndicator.lineTo(emitterX, emitterY + height/2);
+                    emitterIndicator.drawCircle(emitterX, emitterY, 3);
+                    break;
+                    
+                case 'rectangle':
+                    emitterIndicator.drawRect(emitterX - width/2, emitterY - height/2, width, height);
+                    emitterIndicator.drawCircle(emitterX, emitterY, 3);
+                    break;
+                    
+                case 'circle':
+                    emitterIndicator.drawCircle(emitterX, emitterY, width/2);
+                    emitterIndicator.drawCircle(emitterX, emitterY, 3);
+                    break;
+            }
+        }
+        
+        // Handle resize to reposition emitter
+        window.addEventListener('resize', () => {
+            if (!settings.followMouse && !isEmitting) {
+                emitterX = app.screen.width / 2;
+                emitterY = app.screen.height * (2/3);
+            }
+        });
+        
+        // Animation loop
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+        
+        app.ticker.add((delta) => {
+            const dt = delta / 60; // PixiJS delta is in frames, convert to seconds
+            const currentTime = performance.now();
+            
+            // Update FPS
+            frameCount++;
+            if (currentTime - lastFpsUpdate > 1000) {
+                document.getElementById('fps').textContent = Math.round(app.ticker.FPS);
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+            }
+            
+            // Emit particles
+            if (settings.continuous || isEmitting) {
+                const timeSinceEmit = currentTime - lastEmitTime;
+                const emitInterval = 1000 / settings.rate;
+                
+                if (timeSinceEmit >= emitInterval) {
+                    particles.push(new Particle());
+                    lastEmitTime = currentTime;
+                }
+            }
+            
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                if (!particles[i].update(dt)) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Update emitter indicator
+            updateEmitterIndicator();
+            
+            // Update particle count
+            document.getElementById('particle-count').textContent = particles.length;
+        });
+        
+        // Initialize UI
+        updateDisplays();
+        loadCollapsedState();
+    </script>
+</body>
+</html>

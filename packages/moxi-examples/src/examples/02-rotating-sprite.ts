@@ -65,7 +65,8 @@ export async function initRotatingSprite() {
         fontSize: 32,
         fontStyle: 'normal',
         fill: 0x000000, // black
-      }
+      },
+      pixelPerfect: true
     },
     {
       x: renderer.canvas.width / 2,

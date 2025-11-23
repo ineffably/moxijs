@@ -10,6 +10,7 @@ export interface BitmapTextOptions {
         fill?: number | string;
         [key: string]: any;
     };
+    pixelPerfect?: boolean;
     [key: string]: any;
 }
 export interface SpriteOptions {

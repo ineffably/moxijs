@@ -20,14 +20,11 @@ export async function initFontRenderingComparison() {
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
     showLoadingScene: true,
+    pixelPerfect: true, // Enable all pixel-perfect settings
     renderOptions: {
       width: 1600,
       height: 900,
       backgroundColor: 0x0a0a0a,
-      resolution: window.devicePixelRatio || 1,
-      autoDensity: true,
-      antialias: false,
-      roundPixels: true
     }
   });
 
@@ -52,6 +49,7 @@ export async function initFontRenderingComparison() {
   ]);
 
   // Generate bitmap fonts from TTF - data-driven approach
+  // Pixel fonts use smaller sizes for crisp rasterization
   const fontConfigs = [
     { name: 'KenneyBlocks', fontFamily: 'Kenney Blocks', fontSize: 32 },
     { name: 'KenneyFuture', fontFamily: 'Kenney Future', fontSize: 24 },
@@ -59,16 +57,16 @@ export async function initFontRenderingComparison() {
     { name: 'KenneyBold', fontFamily: 'Kenney Bold', fontSize: 24 },
     { name: 'KenvectorFuture', fontFamily: 'Kenvector Future', fontSize: 24 },
     { name: 'KenvectorFutureThin', fontFamily: 'Kenvector Future Thin', fontSize: 24 },
-    { name: 'PixelOperator8', fontFamily: 'PixelOperator8', fontSize: 24 },
-    { name: 'PixelOperator8Bold', fontFamily: 'PixelOperator8-Bold', fontSize: 24 },
-    { name: 'PixelOperator', fontFamily: 'PixelOperator', fontSize: 24 },
-    { name: 'PixelOperatorBold', fontFamily: 'PixelOperator-Bold', fontSize: 24 },
-    { name: 'Minecraft', fontFamily: 'Minecraft', fontSize: 24 },
-    { name: 'DogicaPixel', fontFamily: 'Dogica Pixel', fontSize: 24 },
-    { name: 'DogicaPixelBold', fontFamily: 'Dogica Pixel Bold', fontSize: 24 },
-    { name: 'RetroGaming', fontFamily: 'Retro Gaming', fontSize: 24 },
-    { name: 'VHSGothic', fontFamily: 'VHS Gothic', fontSize: 24 },
-    { name: 'RainyHearts', fontFamily: 'RainyHearts', fontSize: 24 }
+    { name: 'PixelOperator8', fontFamily: 'PixelOperator8', fontSize: 16 },
+    { name: 'PixelOperator8Bold', fontFamily: 'PixelOperator8-Bold', fontSize: 16 },
+    { name: 'PixelOperator', fontFamily: 'PixelOperator', fontSize: 16 },
+    { name: 'PixelOperatorBold', fontFamily: 'PixelOperator-Bold', fontSize: 16 },
+    { name: 'Minecraft', fontFamily: 'Minecraft', fontSize: 16 },
+    { name: 'DogicaPixel', fontFamily: 'Dogica Pixel', fontSize: 16 },
+    { name: 'DogicaPixelBold', fontFamily: 'Dogica Pixel Bold', fontSize: 16 },
+    { name: 'RetroGaming', fontFamily: 'Retro Gaming', fontSize: 16 },
+    { name: 'VHSGothic', fontFamily: 'VHS Gothic', fontSize: 16 },
+    { name: 'RainyHearts', fontFamily: 'RainyHearts', fontSize: 16 }
   ];
 
   fontConfigs.forEach(config => {
@@ -403,18 +401,71 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
   headerText.position.set(x + width / 2, y + 25);
   scene.addChild(headerText);
 
+  // Tab buttons for Regular vs Pixel Perfect
+  let activeTab: 'regular' | 'pixel-perfect' = 'regular';
+  const tabContainer = new PIXI.Container();
+  tabContainer.position.set(x + width / 2 - 140, y + 60);
+  scene.addChild(tabContainer);
+
+  const createTabButton = (label: string, offsetX: number, tabType: 'regular' | 'pixel-perfect', buttonWidth: number) => {
+    const bg = new PIXI.Graphics();
+    const isActive = activeTab === tabType;
+
+    bg.rect(0, 0, buttonWidth, 28);
+    bg.fill({ color: isActive ? 0x9b59b6 : 0x5a3a6b });
+    bg.stroke({ color: 0xffffff, width: 2 });
+
+    const text = new PIXI.BitmapText({
+      text: label,
+      style: {
+        fontFamily: 'KenneyFuture',
+        fontSize: 14,
+        fill: 0xffffff
+      }
+    });
+    text.anchor.set(0.5);
+    text.position.set(buttonWidth / 2, 14);
+
+    bg.addChild(text);
+    bg.position.set(offsetX, 0);
+    bg.eventMode = 'static';
+    bg.cursor = 'pointer';
+
+    bg.on('pointerdown', () => {
+      activeTab = tabType;
+      updateTabs();
+    });
+
+    return bg;
+  };
+
+  let regularTabButton: PIXI.Graphics;
+  let pixelPerfectTabButton: PIXI.Graphics;
+
+  const updateTabs = () => {
+    tabContainer.removeChildren();
+    regularTabButton = createTabButton('Regular', 0, 'regular', 130);
+    pixelPerfectTabButton = createTabButton('Pixel Perfect', 145, 'pixel-perfect', 180);
+    tabContainer.addChild(regularTabButton);
+    tabContainer.addChild(pixelPerfectTabButton);
+
+    // Toggle scroll container visibility
+    regularScrollView.container.visible = activeTab === 'regular';
+    pixelPerfectScrollView.container.visible = activeTab === 'pixel-perfect';
+  };
+
   // Background panel
   const panel = new PIXI.Graphics();
-  panel.rect(0, 0, width, 825);
+  panel.rect(0, 0, width, 735);
   panel.fill({ color: 0x8e44ad });
   panel.alpha = 0.3;
-  panel.position.set(x, y + 55);
+  panel.position.set(x, y + 95);
   scene.addChild(panel);
 
-  // Create scroll container for font samples
-  const scrollView = new UIScrollContainer({
+  // Create scroll container for REGULAR font samples
+  const regularScrollView = new UIScrollContainer({
     width: width,
-    height: 825,
+    height: 735,
     backgroundColor: 0x8e44ad,
     scrollbarWidth: 14,
     scrollbarTrackColor: 0x2d2d44,
@@ -422,13 +473,29 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
     scrollbarThumbHoverColor: 0x6a6a8a,
     padding: EdgeInsets.all(0)
   });
-  scrollView.container.x = x;
-  scrollView.container.y = y + 55;
-  scene.addChild(scrollView.container);
+  regularScrollView.container.x = x;
+  regularScrollView.container.y = y + 95;
+  scene.addChild(regularScrollView.container);
 
-  // Create content container for font samples
-  const contentContainer = new PIXI.Container();
-  
+  // Create scroll container for PIXEL PERFECT font samples
+  const pixelPerfectScrollView = new UIScrollContainer({
+    width: width,
+    height: 735,
+    backgroundColor: 0x8e44ad,
+    scrollbarWidth: 14,
+    scrollbarTrackColor: 0x2d2d44,
+    scrollbarThumbColor: 0x4a4a6a,
+    scrollbarThumbHoverColor: 0x6a6a8a,
+    padding: EdgeInsets.all(0)
+  });
+  pixelPerfectScrollView.container.x = x;
+  pixelPerfectScrollView.container.y = y + 95;
+  scene.addChild(pixelPerfectScrollView.container);
+
+  // Create content containers for both regular and pixel-perfect
+  const regularContentContainer = new PIXI.Container();
+  const pixelPerfectContentContainer = new PIXI.Container();
+
   // Create a UIComponent wrapper for the content
   class FontSamplesContent extends UIComponent {
     private contentHeight: number = 0;
@@ -464,32 +531,66 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
     }
   }
 
-  const fontSamplesContent = new FontSamplesContent(contentContainer);
-  scrollView.addChild(fontSamplesContent);
+  const regularFontSamplesContent = new FontSamplesContent(regularContentContainer);
+  regularScrollView.addChild(regularFontSamplesContent);
 
-  let currentY = 20;
+  const pixelPerfectFontSamplesContent = new FontSamplesContent(pixelPerfectContentContainer);
+  pixelPerfectScrollView.addChild(pixelPerfectFontSamplesContent);
 
   // Font showcase section - all fonts including new ones
+  // bitmapFontFamily is for BitmapText, cssFontFamily is for Text
   const fontSamples = [
-    { name: 'Kenney Blocks', fontFamily: 'KenneyBlocks', size: 20, lineHeight: 25 },
-    { name: 'Kenney Bold', fontFamily: 'KenneyBold', size: 20, lineHeight: 32 },
-    { name: 'Kenney Future Narrow', fontFamily: 'KenneyFutureNarrow', size: 20, lineHeight: 25 },
-    { name: 'Kenvector Future', fontFamily: 'KenvectorFuture', size: 20, lineHeight: 25 },
-    { name: 'Kenvector Future Thin', fontFamily: 'KenvectorFutureThin', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator8 Regular', fontFamily: 'PixelOperator8', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator8 Bold', fontFamily: 'PixelOperator8Bold', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator Regular', fontFamily: 'PixelOperator', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator Bold', fontFamily: 'PixelOperatorBold', size: 20, lineHeight: 25 },
-    { name: 'Minecraft', fontFamily: 'Minecraft', size: 20, lineHeight: 25 },
-    { name: 'Dogica Pixel Regular', fontFamily: 'DogicaPixel', size: 20, lineHeight: 25 },
-    { name: 'Dogica Pixel Bold', fontFamily: 'DogicaPixelBold', size: 20, lineHeight: 25 },
-    { name: 'Retro Gaming', fontFamily: 'RetroGaming', size: 20, lineHeight: 25 },
-    { name: 'VHS Gothic', fontFamily: 'VHSGothic', size: 20, lineHeight: 25 },
-    { name: 'RainyHearts', fontFamily: 'RainyHearts', size: 20, lineHeight: 25 }
+    { name: 'Kenney Blocks', bitmapFontFamily: 'KenneyBlocks', cssFontFamily: 'Kenney Blocks', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future', bitmapFontFamily: 'KenvectorFuture', cssFontFamily: 'Kenvector Future', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future Thin', bitmapFontFamily: 'KenvectorFutureThin', cssFontFamily: 'Kenvector Future Thin', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Regular', bitmapFontFamily: 'PixelOperator8', cssFontFamily: 'PixelOperator8', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Bold', bitmapFontFamily: 'PixelOperator8Bold', cssFontFamily: 'PixelOperator8-Bold', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Regular', bitmapFontFamily: 'PixelOperator', cssFontFamily: 'PixelOperator', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Bold', bitmapFontFamily: 'PixelOperatorBold', cssFontFamily: 'PixelOperator-Bold', size: 20, lineHeight: 25 },
+    { name: 'Minecraft', bitmapFontFamily: 'Minecraft', cssFontFamily: 'Minecraft', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Regular', bitmapFontFamily: 'DogicaPixel', cssFontFamily: 'Dogica Pixel', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Bold', bitmapFontFamily: 'DogicaPixelBold', cssFontFamily: 'Dogica Pixel Bold', size: 20, lineHeight: 25 },
+    { name: 'Retro Gaming', bitmapFontFamily: 'RetroGaming', cssFontFamily: 'Retro Gaming', size: 20, lineHeight: 25 },
+    { name: 'VHS Gothic', bitmapFontFamily: 'VHSGothic', cssFontFamily: 'VHS Gothic', size: 20, lineHeight: 25 },
+    { name: 'RainyHearts', bitmapFontFamily: 'RainyHearts', cssFontFamily: 'RainyHearts', size: 20, lineHeight: 25 }
   ];
 
   const sampleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=';
 
+  // Populate REGULAR content (using Text for anti-aliased rendering)
+  let regularY = 20;
+  fontSamples.forEach(font => {
+    // Font name label
+    const fontNameLabel = new Text({
+      text: font.name + ':',
+      style: {
+        fontFamily: 'Kenney Future',
+        fontSize: 18,
+        fill: 0xffffff
+      },
+      resolution: 2
+    });
+    fontNameLabel.position.set(20, regularY);
+    regularContentContainer.addChild(fontNameLabel);
+    regularY += 25;
+
+    // Character sample using Text (anti-aliased)
+    const sample = new Text({
+      text: sampleChars,
+      style: {
+        fontFamily: font.cssFontFamily,
+        fontSize: font.size,
+        fill: 0xffffff
+      },
+      resolution: 2
+    });
+    sample.position.set(20, regularY);
+    regularContentContainer.addChild(sample);
+    regularY += 100;
+  });
+
+  // Populate PIXEL PERFECT content
+  let pixelPerfectY = 20;
   fontSamples.forEach(font => {
     // Font name label
     const fontNameLabel = new BitmapText({
@@ -499,26 +600,34 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
         fontSize: 18
       }
     });
-    fontNameLabel.position.set(20, currentY);
-    contentContainer.addChild(fontNameLabel);
-    currentY += 25;
+    fontNameLabel.roundPixels = true; // Pixel perfect!
+    fontNameLabel.position.set(20, pixelPerfectY);
+    pixelPerfectContentContainer.addChild(fontNameLabel);
+    pixelPerfectY += 25;
 
-    // Character sample
+    // Character sample with pixel perfect rendering
     const sample = new BitmapText({
       text: sampleChars,
       style: {
-        fontFamily: font.fontFamily,
+        fontFamily: font.bitmapFontFamily,
         fontSize: font.size,
         lineHeight: font.lineHeight
       }
     });
-    sample.position.set(20, currentY);
-    contentContainer.addChild(sample);
-    currentY += 100;
+    sample.roundPixels = true; // Pixel perfect!
+    sample.position.set(20, pixelPerfectY);
+    pixelPerfectContentContainer.addChild(sample);
+    pixelPerfectY += 100;
   });
 
-  // Update scroll container layout after adding all children
-  fontSamplesContent.markLayoutDirty();
-  scrollView.layout(width, 825);
+  // Update scroll container layouts
+  regularFontSamplesContent.markLayoutDirty();
+  regularScrollView.layout(width, 735);
+
+  pixelPerfectFontSamplesContent.markLayoutDirty();
+  pixelPerfectScrollView.layout(width, 735);
+
+  // Initialize tabs
+  updateTabs();
 }
 

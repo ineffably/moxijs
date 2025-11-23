@@ -112,7 +112,8 @@ export async function initAnimatedCharacter() {
           fontFamily: 'Kenney Blocks',
           fontSize: 10, // Increased by 2 pixels
           fill: 0x3d6b1f // Lighter green color
-        }
+        },
+        pixelPerfect: true
       },
       { anchor: 0.5 }
     );

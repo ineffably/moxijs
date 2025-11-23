@@ -10,7 +10,10 @@ export async function initSpriteEditor() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
-  const { scene, engine, renderer } = await setupMoxi({ hostElement: root });
+  const { scene, engine, renderer } = await setupMoxi({ 
+    hostElement: root,
+    showLoadingScene: true
+  });
   
   renderer.background.color = 0x1a1a2e;
 

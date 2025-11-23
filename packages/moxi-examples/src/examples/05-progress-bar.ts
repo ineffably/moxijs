@@ -182,7 +182,10 @@ export async function initProgressBar() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
-  const { scene, engine, loadAssets } = await setupMoxi({ hostElement: root });
+  const { scene, engine, loadAssets } = await setupMoxi({ 
+    hostElement: root,
+    showLoadingScene: true
+  });
 
   // Load the font for the percentage text
   await Assets.load(ASSETS.PIXEL_OPERATOR8_FONT);

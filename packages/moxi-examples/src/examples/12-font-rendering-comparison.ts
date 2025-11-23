@@ -19,6 +19,7 @@ export async function initFontRenderingComparison() {
 
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
+    showLoadingScene: true,
     renderOptions: {
       width: 1600,
       height: 900,

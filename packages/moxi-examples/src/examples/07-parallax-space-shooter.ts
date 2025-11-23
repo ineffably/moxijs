@@ -175,7 +175,8 @@ export async function initParallaxSpaceShooter() {
   if (!root) throw new Error('App element not found');
 
   const { scene, engine, loadAssets, camera, PIXIAssets } = await setupMoxi({
-    hostElement: root
+    hostElement: root,
+    showLoadingScene: true
   });
 
   // Set space background color

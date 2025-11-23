@@ -14,7 +14,8 @@ export async function initBunnyAdventure() {
   if (!root) throw new Error('App element not found');
 
   const { scene, engine, loadAssets, camera, PIXIAssets } = await setupMoxi({
-    hostElement: root
+    hostElement: root,
+    showLoadingScene: true
   });
 
   scene.renderer.background.color = 0x88c070; // Gameboy-inspired green

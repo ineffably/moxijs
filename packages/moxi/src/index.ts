@@ -35,6 +35,7 @@ import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
+import { LoadingScene } from './library/loading-scene';
 import {
   PhysicsWorld,
   PhysicsBodyLogic,
@@ -55,6 +56,7 @@ export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
+export type { LoadingSceneOptions } from './library/loading-scene';
 export type {
   BodyType,
   SyncMode,
@@ -132,6 +134,7 @@ const exportedObjects = {
   ParallaxBackground,
   ParallaxBackgroundLogic,
   ParallaxLayer,
+  LoadingScene,
   setupMoxi,
   RenderManager,
   Scene,
@@ -200,6 +203,7 @@ export {
   ParallaxBackground,
   ParallaxBackgroundLogic,
   ParallaxLayer,
+  LoadingScene,
   setupMoxi,
   RenderManager,
   Scene,

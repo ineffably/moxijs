@@ -36,6 +36,7 @@ export async function initRotatingSprite() {
 
   const { scene, engine, PIXIAssets, loadAssets } = await setupMoxi({ 
     hostElement: root,
+    showLoadingScene: true,
     renderOptions: {
       width: 1280,
       height: 720,

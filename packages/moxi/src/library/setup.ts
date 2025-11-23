@@ -5,11 +5,14 @@ import { Engine } from '../core/engine';
 import { RenderManager } from '../core/render-manager';
 import { Scene } from '../core/scene';
 import { PhysicsWorld, type PhysicsWorldOptions } from './physics';
+import { LoadingScene, type LoadingSceneOptions } from './loading-scene';
 
 export interface SetupMoxiArgs {
   hostElement: HTMLElement;
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
   physics?: PhysicsWorldOptions | boolean;
+  showLoadingScene?: boolean;
+  loadingSceneOptions?: LoadingSceneOptions;
 }
 
 export interface SetupMoxiResult {
@@ -20,6 +23,7 @@ export interface SetupMoxiResult {
   loadAssets: AssetLoader['loadAssets'];
   camera: Camera;
   physicsWorld?: PhysicsWorld;
+  loadingScene?: LoadingScene;
 }
 
 export const defaultRenderOptions = {
@@ -31,13 +35,20 @@ export const defaultRenderOptions = {
   antialias: true
 } as Partial<PIXI.AutoDetectOptions>;
 
-export async function setupMoxi({ hostElement, renderOptions = defaultRenderOptions, physics } = {} as SetupMoxiArgs) {
+export async function setupMoxi({ 
+  hostElement, 
+  renderOptions = defaultRenderOptions, 
+  physics,
+  showLoadingScene = false,
+  loadingSceneOptions = {}
+} = {} as SetupMoxiArgs) {
   const { renderer } = await RenderManager.create(hostElement, renderOptions);
   const scene = new Scene(renderer);
   const engine = new Engine(scene);
 
-  // Get the singleton AssetLoader instance
-  const { PIXIAssets, loadAssets } = new AssetLoader();
+  // Get the AssetLoader instance
+  const assetLoader = new AssetLoader();
+  const { PIXIAssets, loadAssets } = assetLoader;
 
   const camera = new Camera(scene, renderer);
 
@@ -53,6 +64,29 @@ export async function setupMoxi({ hostElement, renderOptions = defaultRenderOpti
     engine.addPhysicsWorld(physicsWorld);
   }
 
+  // Setup loading scene if requested
+  let loadingScene: LoadingScene | undefined;
+  if (showLoadingScene) {
+    loadingScene = new LoadingScene(loadingSceneOptions);
+    loadingScene.zIndex = 10000; // Ensure it's on top
+    loadingScene.init(renderer);
+    scene.addChild(loadingScene);
+    loadingScene.hide();
+
+    // Hook into asset loading events
+    assetLoader.on('loading:start', () => {
+      if (loadingScene) {
+        loadingScene.show();
+      }
+    });
+
+    assetLoader.on('loading:end', () => {
+      if (loadingScene) {
+        loadingScene.hide();
+      }
+    });
+  }
+
   return {
     scene,
     engine,
@@ -60,7 +94,8 @@ export async function setupMoxi({ hostElement, renderOptions = defaultRenderOpti
     renderer,
     loadAssets,
     camera,
-    physicsWorld
+    physicsWorld,
+    loadingScene
   };
 }
 

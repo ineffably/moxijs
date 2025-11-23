@@ -25,6 +25,7 @@ export async function initUIShowcase() {
 
   const { scene, engine } = await setupMoxi({
     hostElement: root,
+    showLoadingScene: true,
     renderOptions: {
       width: 1600,
       height: 900,

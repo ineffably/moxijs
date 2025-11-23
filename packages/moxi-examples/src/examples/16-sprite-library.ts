@@ -64,7 +64,10 @@ export async function initSpriteLibrary() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
-  const { scene, engine, loadAssets, PIXIAssets } = await setupMoxi({ hostElement: root });
+  const { scene, engine, loadAssets, PIXIAssets } = await setupMoxi({ 
+    hostElement: root,
+    showLoadingScene: true
+  });
   
   scene.renderer.background.color = 0x1a1a2e;
 

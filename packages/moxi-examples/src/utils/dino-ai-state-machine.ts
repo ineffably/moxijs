@@ -1,11 +1,11 @@
 import { StateLogic, StateMachine } from 'moxi';
 import * as PIXI from 'pixi.js';
-import { RadarLogic } from '../behavior-logic/radar-logic';
-import { FollowTargetLogic } from '../behavior-logic/follow-target-logic';
-import { FleeFromTargetLogic } from '../behavior-logic/flee-from-target-logic';
-import { WanderLogic } from '../behavior-logic/wander-logic';
-import { PatrolLogic } from '../behavior-logic/patrol-logic';
-import { DinoAnimationLogic } from '../behavior-logic/dino-animation-logic';
+import { RadarLogic } from '../examples/behavior-logic/radar-logic';
+import { FollowTargetLogic } from '../examples/behavior-logic/follow-target-logic';
+import { FleeFromTargetLogic } from '../examples/behavior-logic/flee-from-target-logic';
+import { WanderLogic } from '../examples/behavior-logic/wander-logic';
+import { PatrolLogic } from '../examples/behavior-logic/patrol-logic';
+import { DinoAnimationLogic } from '../examples/behavior-logic/dino-animation-logic';
 
 /**
  * Idle State - Entity stays still, watching for targets

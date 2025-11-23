@@ -6,7 +6,7 @@ import { setupMoxi } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { PixelCard, GRID, px, UI_COLORS } from './editor/pixel-card';
+import { PixelCard, GRID, px, UI_COLORS, BORDER } from './editor/pixel-card';
 import { createPixelButton } from './editor/pixel-button';
 import { createToolIcon, ToolType } from './editor/tool-icons';
 
@@ -107,6 +107,8 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer): Pixel
         size: swatchSize,
         selected: i === selectedColorIndex,
         backgroundColor: color,
+        selectionMode: 'highlight',
+        actionMode: 'toggle',
         onClick: () => {
           selectedColorIndex = i;
           console.log(`Selected color #${i}: #${color.toString(16).padStart(6, '0')}`);
@@ -227,6 +229,7 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
         selected: i === selectedToolIndex,
         label: toolNames[tool],
         selectionMode: 'press',
+        actionMode: 'toggle',
         tooltip: toolNames[tool],
         onClick: () => {
           selectedToolIndex = i;
@@ -288,6 +291,162 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
   return card;
 }
 
+/**
+ * Creates an info bar for displaying contextual information in horizontal sections
+ */
+function createInfoBar(renderer: PIXI.Renderer): PixelCard {
+  const canvasWidth = renderer.width;
+  const canvasHeight = renderer.height;
+
+  // Position near bottom with some margin
+  const bottomMargin = 20;
+  const barHeight = 8; // Grid units for a slim horizontal bar
+  const barWidth = 10; // Grid units - will auto-size to content with minContentSize
+
+  const x = 20;
+  const y = canvasHeight - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24; // Account for title bar height
+
+  // Create the card with custom background color
+  const card = new PixelCard({
+    title: 'Info',
+    x,
+    y,
+    contentWidth: barWidth,
+    contentHeight: barHeight,
+    renderer,
+    minContentSize: true, // Prevent resizing below content's actual size
+    backgroundColor: 0xaac39e, // Light green background
+    onResize: (newWidth, newHeight) => {
+      updateInfoSections();
+    }
+  });
+
+  const contentContainer = card.getContentContainer();
+
+  function updateInfoSections() {
+    contentContainer.removeChildren();
+
+    // Define sections with labels and values
+    const sections = [
+      { label: 'Tool:', value: 'Pencil' },
+      { label: 'Color:', value: '#000000' },
+      { label: 'Position:', value: '0, 0' }
+    ];
+
+    let currentX = px(2);
+    const sectionSpacing = px(4);
+
+    sections.forEach((section, index) => {
+      // Label text
+      const labelText = new PIXI.BitmapText({
+        text: section.label,
+        style: {
+          fontFamily: 'PixelOperator8Bitmap',
+          fontSize: 64,
+          fill: 0x81a38e, // Medium green for labels
+        }
+      });
+      labelText.roundPixels = true;
+      labelText.scale.set(GRID.fontScale);
+      labelText.position.set(currentX, px(2));
+      contentContainer.addChild(labelText);
+
+      currentX += labelText.width + px(1);
+
+      // Value text
+      const valueText = new PIXI.BitmapText({
+        text: section.value,
+        style: {
+          fontFamily: 'PixelOperator8Bitmap',
+          fontSize: 64,
+          fill: 0x686461, // Medium gray for values
+        }
+      });
+      valueText.roundPixels = true;
+      valueText.scale.set(GRID.fontScale);
+      valueText.position.set(currentX, px(2));
+      contentContainer.addChild(valueText);
+
+      currentX += valueText.width + sectionSpacing;
+    });
+  }
+
+  // Initial draw
+  updateInfoSections();
+
+  // Update minimum content size based on actual content
+  card.updateMinContentSize();
+
+  return card;
+}
+
+/**
+ * Creates a commander bar for actions and options
+ */
+function createCommanderBar(renderer: PIXI.Renderer): PixelCard {
+  const canvasWidth = renderer.width;
+  const canvasHeight = renderer.height;
+
+  // Position at top, docked left, almost full width
+  const margin = 20;
+  const barHeight = 12; // Grid units for commander bar
+
+  // Calculate width in grid units (canvas width - margins, converted to grid units)
+  const barWidth = Math.floor((canvasWidth - margin * 2 - px(BORDER.total * 2)) / px(1));
+
+  const x = margin;
+  const y = margin;
+
+  // Create the card
+  const card = new PixelCard({
+    title: 'Commander',
+    x,
+    y,
+    contentWidth: barWidth,
+    contentHeight: barHeight,
+    renderer,
+    minContentSize: true, // Prevent resizing below content's actual size
+    onResize: (newWidth, newHeight) => {
+      drawCommands();
+    }
+  });
+
+  const contentContainer = card.getContentContainer();
+
+  function drawCommands() {
+    contentContainer.removeChildren();
+
+    const buttonWidth = 20; // Grid units
+    const buttonHeight = 12; // Grid units (same as bar height for full height button)
+    const buttonSpacing = px(2);
+
+    let currentX = 0;
+
+    // New button
+    const newButton = createPixelButton({
+      width: buttonWidth,
+      height: buttonHeight,
+      label: 'New',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        console.log('New button clicked');
+      }
+    });
+    newButton.position.set(currentX, 0);
+    contentContainer.addChild(newButton);
+    currentX += px(buttonWidth) + buttonSpacing;
+  }
+
+  // Initial draw
+  drawCommands();
+
+  // Update minimum content size based on actual content
+  card.updateMinContentSize();
+
+  return card;
+}
+
 export async function initSpriteEditor() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
@@ -317,13 +476,27 @@ export async function initSpriteEditor() {
     }
   });
 
-  // Create palette card
-  const paletteCard = createPaletteCard(20, 20, renderer);
+  // Create commander bar at top
+  const commanderBar = createCommanderBar(renderer);
+  scene.addChild(commanderBar.container);
+
+  // Calculate top offset for cards below commander bar
+  const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Commander bar total height
+  const topOffset = 20 + commanderBarHeight + 10; // Margin + commander height + gap
+
+  // Create palette card (left side)
+  const paletteCard = createPaletteCard(20, topOffset, renderer);
   scene.addChild(paletteCard.container);
 
-  // Create tool card
-  const toolCard = createToolCard(220, 20, renderer);
+  // Create tool card (docked right)
+  // Tool width (46) + borders + padding
+  const toolCardWidth = px(46) + px(BORDER.total * 2) + px(GRID.padding * 2);
+  const toolCard = createToolCard(renderer.width - toolCardWidth - 20, topOffset, renderer);
   scene.addChild(toolCard.container);
+
+  // Create info bar
+  const infoBar = createInfoBar(renderer);
+  scene.addChild(infoBar.container);
 
   scene.init();
   engine.start();

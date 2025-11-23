@@ -32,6 +32,11 @@ export class SpriteSheetController {
   private sprite: PIXI.Sprite | null = null;
   private showGrid: boolean;
   private onScaleChange?: (scale: number) => void;
+  private isPanning: boolean = false;
+  private panStartX: number = 0;
+  private panStartY: number = 0;
+  private spriteStartX: number = 0;
+  private spriteStartY: number = 0;
 
   constructor(options: SpriteSheetControllerOptions) {
     this.config = options.config;
@@ -54,6 +59,9 @@ export class SpriteSheetController {
 
     // Setup mouse wheel zoom
     this.setupMouseWheelZoom();
+
+    // Setup middle mouse button pan
+    this.setupMiddleMousePan();
   }
 
   /**
@@ -113,6 +121,73 @@ export class SpriteSheetController {
       };
 
       window.addEventListener('wheel', handleWheel, { passive: false });
+    }
+  }
+
+  /**
+   * Setup middle mouse button pan handler
+   */
+  private setupMiddleMousePan() {
+    if (typeof window !== 'undefined') {
+      const handleMouseDown = (e: MouseEvent) => {
+        if (e.button !== 1 || !this.sprite) return; // Middle button only
+
+        // Get canvas bounds
+        const canvas = this.renderer.canvas as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        // Convert client coordinates to canvas coordinates
+        const canvasX = (e.clientX - rect.left) * scaleX;
+        const canvasY = (e.clientY - rect.top) * scaleY;
+
+        // Get sprite sheet bounds
+        const bounds = this.sprite.getBounds();
+
+        // Check if mouse is over the sprite sheet
+        if (canvasX >= bounds.x && canvasX <= bounds.x + bounds.width &&
+            canvasY >= bounds.y && canvasY <= bounds.y + bounds.height) {
+          e.preventDefault();
+          this.isPanning = true;
+          this.panStartX = e.clientX;
+          this.panStartY = e.clientY;
+          this.spriteStartX = this.sprite.x;
+          this.spriteStartY = this.sprite.y;
+        }
+      };
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!this.isPanning || !this.sprite) return;
+
+        e.preventDefault();
+
+        // Get canvas bounds for scaling
+        const canvas = this.renderer.canvas as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        // Calculate delta in screen space, then convert to canvas space
+        const deltaScreenX = e.clientX - this.panStartX;
+        const deltaScreenY = e.clientY - this.panStartY;
+        const deltaX = deltaScreenX * scaleX;
+        const deltaY = deltaScreenY * scaleY;
+
+        // Update sprite position
+        this.sprite.x = this.spriteStartX + deltaX;
+        this.sprite.y = this.spriteStartY + deltaY;
+      };
+
+      const handleMouseUp = (e: MouseEvent) => {
+        if (e.button === 1) { // Middle button
+          this.isPanning = false;
+        }
+      };
+
+      window.addEventListener('mousedown', handleMouseDown);
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
     }
   }
 

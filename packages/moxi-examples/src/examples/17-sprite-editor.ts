@@ -11,6 +11,7 @@ import { createPixelButton } from './editor/pixel-button';
 import { createToolIcon, ToolType } from './editor/tool-icons';
 import { createPixelDialog } from './editor/pixel-dialog';
 import { createSpriteCard, SPRITE_CONFIGS } from './editor/sprite-card';
+import { createSVGIconButton, SVG_ICONS } from './editor/svg-icon-button';
 
 // Aerugo palette - for editor UI (32 colors)
 const AERUGO_PALETTE = [
@@ -294,6 +295,123 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
 }
 
 /**
+ * Creates a sprite sheet tools toolbar (SPT)
+ */
+async function createSPTToolbar(renderer: PIXI.Renderer): Promise<PixelCard> {
+  const canvasWidth = renderer.width;
+  const canvasHeight = renderer.height;
+
+  // Position on left side below palette
+  const margin = 20;
+  const buttonSize = 16; // Grid units - square buttons (4px = 1 grid unit, so +4px = +1 grid unit)
+  const buttonSpacing = 1; // Grid units between buttons
+  const numButtons = 2; // Pan and Zoom
+
+  const barWidth = buttonSize; // Single column
+  const barHeight = numButtons * buttonSize + (numButtons - 1) * buttonSpacing; // Stack vertically
+
+  const x = margin;
+  const y = margin + 200; // Below palette (approximate)
+
+  // Create the card
+  const card = new PixelCard({
+    title: 'SPT',
+    x,
+    y,
+    contentWidth: barWidth,
+    contentHeight: barHeight,
+    renderer,
+    minContentSize: true,
+  });
+
+  const contentContainer = card.getContentContainer();
+
+  let selectedTool = 'pan'; // Default selected tool
+
+  // Create pan button
+  const panButton = await createSVGIconButton({
+    size: buttonSize,
+    svgString: SVG_ICONS.PAN,
+    iconColor: 0x000000,
+    backgroundColor: UI_COLORS.buttonBg,
+    selected: selectedTool === 'pan',
+    selectionMode: 'press',
+    actionMode: 'toggle',
+    onClick: () => {
+      selectedTool = 'pan';
+      console.log('Pan tool selected');
+      updateButtons();
+    }
+  });
+
+  // Create zoom cursor button
+  const zoomButton = await createSVGIconButton({
+    size: buttonSize,
+    svgString: SVG_ICONS.ZOOM_CURSOR,
+    iconColor: 0x000000,
+    backgroundColor: UI_COLORS.buttonBg,
+    selected: selectedTool === 'zoom',
+    selectionMode: 'press',
+    actionMode: 'toggle',
+    onClick: () => {
+      selectedTool = 'zoom';
+      console.log('Zoom tool selected');
+      updateButtons();
+    }
+  });
+
+  function updateButtons() {
+    // Remove all buttons
+    contentContainer.removeChildren();
+
+    // Re-add with updated selection
+    createSVGIconButton({
+      size: buttonSize,
+      svgString: SVG_ICONS.PAN,
+      iconColor: 0x000000,
+      backgroundColor: UI_COLORS.buttonBg,
+      selected: selectedTool === 'pan',
+      selectionMode: 'press',
+      actionMode: 'toggle',
+      onClick: () => {
+        selectedTool = 'pan';
+        console.log('Pan tool selected');
+        updateButtons();
+      }
+    }).then(btn => {
+      btn.position.set(0, 0);
+      contentContainer.addChild(btn);
+    });
+
+    createSVGIconButton({
+      size: buttonSize,
+      svgString: SVG_ICONS.ZOOM_CURSOR,
+      iconColor: 0x000000,
+      backgroundColor: UI_COLORS.buttonBg,
+      selected: selectedTool === 'zoom',
+      selectionMode: 'press',
+      actionMode: 'toggle',
+      onClick: () => {
+        selectedTool = 'zoom';
+        console.log('Zoom tool selected');
+        updateButtons();
+      }
+    }).then(btn => {
+      btn.position.set(0, px(buttonSize + buttonSpacing));
+      contentContainer.addChild(btn);
+    });
+  }
+
+  panButton.position.set(0, 0);
+  zoomButton.position.set(0, px(buttonSize + buttonSpacing));
+
+  contentContainer.addChild(panButton);
+  contentContainer.addChild(zoomButton);
+
+  return card;
+}
+
+/**
  * Creates an info bar for displaying contextual information in horizontal sections
  */
 function createInfoBar(renderer: PIXI.Renderer): PixelCard {
@@ -540,6 +658,12 @@ export async function initSpriteEditor() {
   // Create palette card (left side)
   const paletteCard = createPaletteCard(20, topOffset, renderer);
   scene.addChild(paletteCard.container);
+
+  // Create SPT toolbar (left side, below palette)
+  const paletteCardHeight = paletteCard.container.getBounds().height;
+  const sptToolbar = await createSPTToolbar(renderer);
+  sptToolbar.container.y = topOffset + paletteCardHeight + 10; // Below palette with 10px gap
+  scene.addChild(sptToolbar.container);
 
   // Create tool card (docked right)
   // Tool width (46) + borders + padding

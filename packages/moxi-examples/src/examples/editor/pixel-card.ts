@@ -8,7 +8,7 @@ export const GRID = {
   unit: 1,        // Base pixel unit at 1x scale
   scale: 4,       // Scale everything by 4x for visibility
   border: 1,      // Border width in grid units (will be 4px at 4x scale)
-  padding: 2,     // Standard padding (will be 8px at 4x scale)
+  padding: 1,     // Standard padding (will be 4px at 4x scale)
   gap: 1,         // Gap between elements (will be 4px at 4x scale)
   fontScale: 0.25 // Font scale (64px * 0.25 = 16px)
 };
@@ -43,11 +43,15 @@ export interface PixelCardOptions {
   contentHeight: number;  // In grid units
   renderer: PIXI.Renderer;
   onResize?: (width: number, height: number) => void;
+  minContentSize?: boolean; // If true, prevents resizing below content's actual size
+  backgroundColor?: number; // Custom background color (defaults to UI_COLORS.cardBg)
 }
 
 export interface PixelCardResizeState {
   contentWidth: number;   // Current content width in grid units
   contentHeight: number;  // Current content height in grid units
+  minContentWidth?: number;  // Minimum content width in grid units (when minContentSize is enabled)
+  minContentHeight?: number; // Minimum content height in grid units (when minContentSize is enabled)
 }
 
 /**
@@ -125,18 +129,22 @@ export class PixelCard {
         const deltaGridUnitsX = Math.round(deltaX / px(1));
         const deltaGridUnitsY = Math.round(deltaY / px(1));
 
+        // Determine minimum sizes
+        const minWidth = this.state.minContentWidth ?? 10;
+        const minHeight = this.state.minContentHeight ?? 10;
+
         // Horizontal resizing
         if (this.resizeDirection.includes('e')) {
-          this.state.contentWidth = Math.max(10, this.resizeStartWidth + deltaGridUnitsX);
+          this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth + deltaGridUnitsX);
         } else if (this.resizeDirection.includes('w')) {
-          this.state.contentWidth = Math.max(10, this.resizeStartWidth - deltaGridUnitsX);
+          this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth - deltaGridUnitsX);
         }
 
         // Vertical resizing
         if (this.resizeDirection.includes('s')) {
-          this.state.contentHeight = Math.max(10, this.resizeStartHeight + deltaGridUnitsY);
+          this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight + deltaGridUnitsY);
         } else if (this.resizeDirection.includes('n')) {
-          this.state.contentHeight = Math.max(10, this.resizeStartHeight - deltaGridUnitsY);
+          this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight - deltaGridUnitsY);
         }
 
         this.redraw();
@@ -181,6 +189,14 @@ export class PixelCard {
     const bg = new PIXI.Graphics();
     bg.roundPixels = true;
 
+    // Shadow offset
+    const shadowOffset = px(1);
+    const shadowColor = 0x000000;
+
+    // Drop shadow (below and to the right)
+    bg.rect(shadowOffset, shadowOffset, px(cardWidth), cardHeight);
+    bg.fill({ color: shadowColor, alpha: 0.3 });
+
     // Layer 1: Outer black border
     bg.rect(0, 0, px(cardWidth), cardHeight);
     bg.fill({ color: 0x000000 });
@@ -199,7 +215,7 @@ export class PixelCard {
     // Layer 4: Content background
     bg.rect(px(BORDER.total), px(BORDER.total),
             px(cardWidth - BORDER.total * 2), cardHeight - px(BORDER.total * 2));
-    bg.fill({ color: UI_COLORS.cardBg });
+    bg.fill({ color: this.options.backgroundColor ?? UI_COLORS.cardBg });
 
     this.container.addChild(bg);
 
@@ -333,6 +349,30 @@ export class PixelCard {
    */
   public refresh() {
     this.redraw();
+  }
+
+  /**
+   * Updates minimum content size based on actual content bounds
+   * Call this after adding content to the content container when minContentSize is enabled
+   */
+  public updateMinContentSize() {
+    if (!this.options.minContentSize) return;
+
+    const bounds = this.contentContainer.getLocalBounds();
+
+    // Convert pixel bounds to grid units (round up to ensure content fits)
+    const minWidth = Math.ceil((bounds.x + bounds.width) / px(1));
+    const minHeight = Math.ceil((bounds.y + bounds.height) / px(1));
+
+    this.state.minContentWidth = minWidth;
+    this.state.minContentHeight = minHeight;
+
+    // Ensure current size is at least the minimum
+    if (this.state.contentWidth < minWidth || this.state.contentHeight < minHeight) {
+      this.state.contentWidth = Math.max(this.state.contentWidth, minWidth);
+      this.state.contentHeight = Math.max(this.state.contentHeight, minHeight);
+      this.redraw();
+    }
   }
 
   /**

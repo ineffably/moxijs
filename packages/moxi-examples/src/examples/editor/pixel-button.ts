@@ -5,6 +5,7 @@ import * as PIXI from 'pixi.js';
 import { GRID, px, UI_COLORS } from './pixel-card';
 
 export type SelectionMode = 'highlight' | 'press';
+export type ActionMode = 'click' | 'toggle';
 
 export interface PixelButtonOptions {
   size?: number;          // Size in grid units (for square buttons)
@@ -15,15 +16,21 @@ export interface PixelButtonOptions {
   icon?: PIXI.Sprite | PIXI.Graphics;   // Optional icon sprite or graphic
   backgroundColor?: number;
   onClick?: () => void;
-  selectionMode?: SelectionMode;  // 'highlight' for swatches, 'press' for buttons
+  selectionMode?: SelectionMode;  // 'highlight' for swatches, 'press' for tool buttons (visual appearance)
+  actionMode?: ActionMode;        // 'click' for simple click, 'toggle' for toggleable state (behavior)
   tooltip?: string;       // Optional tooltip text
 }
 
 /**
  * Creates a pixel-perfect button with optional label
- * Supports two selection modes:
+ *
+ * Selection modes (visual appearance):
  * - 'highlight': Shows orange border when selected (for color swatches)
  * - 'press': Shows pressed state with bevel (for tool buttons)
+ *
+ * Action modes (behavior):
+ * - 'click': Simple click action, no visual state change
+ * - 'toggle': Toggleable selection state (for swatches, tool groups)
  */
 export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
   const {
@@ -35,7 +42,8 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     icon,
     backgroundColor = UI_COLORS.buttonBg,
     onClick,
-    selectionMode = 'highlight',
+    selectionMode = 'press',
+    actionMode = 'click',
     tooltip
   } = options;
 

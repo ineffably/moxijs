@@ -37,6 +37,7 @@ import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial } from './library/physics';
 export type { StateChangeEvent } from './library/state-machine';
+export type { AsEntity, MoxiLogic } from './core/moxi-entity';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';

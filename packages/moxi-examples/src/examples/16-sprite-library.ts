@@ -15,6 +15,7 @@ interface SpriteEntry {
 
 // Simple wrapper UIComponent for sprite cards container
 class SpriteCardsContainer extends UIComponent {
+  public container: Container; // Explicitly declare inherited property for TypeScript
   private cardsContainer: Container;
   private viewportWidth: number;
 

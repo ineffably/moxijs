@@ -32,7 +32,7 @@ import {
 /**
  * Creates a pixel-perfect palette card
  */
-function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer): PixelCard {
+function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer, palette: number[]): PixelCard {
   // State
   let colorsPerRow = 4;
   let rows = 4;
@@ -52,7 +52,7 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer): Pixel
     renderer,
     onResize: (newWidth, newHeight) => {
       // Calculate new swatch size to fit the available space while showing all colors
-      const totalColors = PICO8_PALETTE.length; // 16 colors
+      const totalColors = palette.length;
 
       // Try different column layouts and pick the best fitting size
       let bestSize = 2;
@@ -92,8 +92,8 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer): Pixel
     const totalSwatches = colorsPerRow * rows;
 
     // Draw color swatches
-    for (let i = 0; i < Math.min(totalSwatches, PICO8_PALETTE.length); i++) {
-      const color = PICO8_PALETTE[i];
+    for (let i = 0; i < Math.min(totalSwatches, palette.length); i++) {
+      const color = palette[i];
       const col = i % colorsPerRow;
       const row = Math.floor(i / colorsPerRow);
 
@@ -507,42 +507,119 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
 }
 
 /**
- * State for current sprite sheet and sprite being edited
+ * State for sprite sheets and editing
  */
-let currentSpriteSheetCard: ReturnType<typeof createSpriteSheetCard> | null = null;
-let currentSpriteCard: ReturnType<typeof createSpriteCard> | null = null;
+interface SpriteSheetInstance {
+  sheetCard: ReturnType<typeof createSpriteSheetCard>;
+  spriteCard: ReturnType<typeof createSpriteCard> | null;
+  spriteController: SpriteController | null;
+}
+
+let spriteSheetInstances: SpriteSheetInstance[] = [];
+let activeSpriteSheetInstance: SpriteSheetInstance | null = null;
+let currentPaletteCard: PixelCard | null = null;
 let selectedColorIndex = 0; // Currently selected palette color
+let currentPalette: number[] = PICO8_PALETTE; // Active palette (from active sprite sheet)
+
+/**
+ * Updates the palette card to match the active sprite sheet
+ */
+function updatePaletteForActiveSheet() {
+  if (!activeSpriteSheetInstance) return;
+
+  const renderer = (window as any).renderer;
+  const scene = (window as any).scene;
+
+  // Remove old palette card
+  if (currentPaletteCard) {
+    scene.removeChild(currentPaletteCard.container);
+  }
+
+  // Get palette from active sprite sheet
+  currentPalette = activeSpriteSheetInstance.sheetCard.controller.getConfig().palette;
+
+  // Recreate palette card with the correct palette
+  const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+  const topOffset = 20 + commanderBarHeight + 10;
+  const paletteCard = createPaletteCard(20, topOffset, renderer, currentPalette);
+  scene.addChild(paletteCard.container);
+  currentPaletteCard = paletteCard;
+}
 
 /**
  * Creates a new sprite sheet and sprite card
  */
 function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
-  // Remove old sprite sheet and sprite card if they exist
-  if (currentSpriteSheetCard) {
-    (window as any).scene.removeChild(currentSpriteSheetCard.card.container);
-  }
-  if (currentSpriteCard) {
-    (window as any).scene.removeChild(currentSpriteCard.card.container);
-  }
-
   const renderer = (window as any).renderer;
   const scene = (window as any).scene;
+
+  // Check if we've hit the limit
+  const MAX_SPRITE_SHEETS = 2;
+  if (spriteSheetInstances.length >= MAX_SPRITE_SHEETS) {
+    // Show dialog telling user they've hit the limit
+    const dialog = createPixelDialog({
+      title: 'Sprite Sheet Limit',
+      message: `Maximum ${MAX_SPRITE_SHEETS} sprite sheets allowed.`,
+      buttons: [
+        {
+          label: 'OK',
+          onClick: () => {
+            // Dialog will close automatically
+          }
+        }
+      ],
+      renderer
+    });
+    scene.addChild(dialog);
+    return;
+  }
+
+  // Create the instance object
+  const instance: SpriteSheetInstance = {
+    sheetCard: null as any, // Will be set below
+    spriteCard: null,
+    spriteController: null
+  };
+
+  // Function to make this sprite sheet active and bring to front
+  const makeThisSheetActive = () => {
+    // Set as active
+    activeSpriteSheetInstance = instance;
+
+    // Update palette to match this sheet
+    updatePaletteForActiveSheet();
+
+    // Bring both sprite sheet and sprite card to front
+    if (instance.sheetCard) {
+      scene.removeChild(instance.sheetCard.card.container);
+      scene.addChild(instance.sheetCard.card.container);
+    }
+    if (instance.spriteCard) {
+      scene.removeChild(instance.spriteCard.card.container);
+      scene.addChild(instance.spriteCard.card.container);
+    }
+
+    console.log(`Activated ${type} sprite sheet - brought to front`);
+  };
 
   // Helper function to create sprite card for a cell
   const createSpriteCardForCell = (cellX: number, cellY: number) => {
     console.log(`Selected cell: ${cellX}, ${cellY}`);
 
+    // Make sure this sheet is active when selecting a cell
+    makeThisSheetActive();
+
     // Create or update sprite controller for this cell
     const spriteController = new SpriteController({
-      spriteSheetController: spriteSheetResult.controller,
+      spriteSheetController: instance.sheetCard.controller,
       cellX,
       cellY,
       scale: 32 // Large scale for editing (twice as large)
     });
 
     // Remove old sprite card if it exists
-    if (currentSpriteCard) {
-      scene.removeChild(currentSpriteCard.card.container);
+    if (instance.spriteCard) {
+      scene.removeChild(instance.spriteCard.card.container);
     }
 
     // Create sprite card - just below commander bar, centered horizontally
@@ -560,17 +637,27 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
       renderer,
       spriteController,
       onPixelClick: (x, y) => {
+        // Bring to front when clicking
+        makeThisSheetActive();
+
         // Draw with currently selected color
         spriteController.setPixel(x, y, selectedColorIndex);
 
         // Re-render both cards
         spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
-        spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
       }
     });
 
     scene.addChild(spriteCardResult.card.container);
-    currentSpriteCard = spriteCardResult;
+    instance.spriteCard = spriteCardResult;
+    instance.spriteController = spriteController;
+
+    // Add click handler to sprite card's container to bring to front
+    spriteCardResult.card.container.eventMode = 'static';
+    spriteCardResult.card.container.on('pointerdown', () => {
+      makeThisSheetActive();
+    });
   };
 
   // Create sprite sheet card
@@ -588,7 +675,16 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
   });
 
   scene.addChild(spriteSheetResult.card.container);
-  currentSpriteSheetCard = spriteSheetResult;
+  instance.sheetCard = spriteSheetResult;
+
+  // Add to instances array
+  spriteSheetInstances.push(instance);
+
+  // Set as active sprite sheet
+  activeSpriteSheetInstance = instance;
+
+  // Update palette to match this sprite sheet
+  updatePaletteForActiveSheet();
 
   // Automatically select top-left cell (0, 0) and show sprite card
   spriteSheetResult.controller.selectCell(0, 0);
@@ -768,8 +864,8 @@ export async function initSpriteEditor() {
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
     const topOffset = 20 + commanderBarHeight + 10;
 
-    // Recreate palette card
-    const paletteCard = createPaletteCard(20, topOffset, renderer);
+    // Recreate palette card with current palette
+    const paletteCard = createPaletteCard(20, topOffset, renderer, currentPalette);
     scene.addChild(paletteCard.container);
 
     // Recreate SPT toolbar - HIDDEN

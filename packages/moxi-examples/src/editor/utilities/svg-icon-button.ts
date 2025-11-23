@@ -2,9 +2,9 @@
  * Helper to create buttons with SVG icons
  */
 import * as PIXI from 'pixi.js';
-import { createPixelButton, PixelButtonOptions } from './pixel-button';
+import { createPixelButton, PixelButtonOptions } from '../components/pixel-button';
 import { svgToTexture } from './svg-to-texture';
-import { px } from './pixel-card';
+import { px } from '../components/pixel-card';
 
 export interface SVGIconButtonOptions extends Omit<PixelButtonOptions, 'icon'> {
   svgString: string;

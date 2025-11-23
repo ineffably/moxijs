@@ -22,6 +22,7 @@ export async function initPhysicsBasic() {
   // Setup with physics enabled
   const { scene, engine, physicsWorld } = await setupMoxi({
     hostElement: root,
+    showLoadingScene: true,
     physics: {
       gravity: { x: 0, y: 9.8 },
       pixelsPerMeter: 30

@@ -27,6 +27,7 @@ export async function initFormElements() {
 
   const { scene, engine } = await setupMoxi({
     hostElement: root,
+    showLoadingScene: true,
     renderOptions: {
       width: 1280,
       height: 720,

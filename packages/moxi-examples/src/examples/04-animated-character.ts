@@ -14,7 +14,8 @@ export async function initAnimatedCharacter() {
 
   // Get the Moxi setup
   const { scene, engine, PIXIAssets, loadAssets, camera } = await setupMoxi({
-    hostElement: root
+    hostElement: root,
+    showLoadingScene: true
   });
 
   scene.renderer.background.color = 0x88c070; // Gameboy-inspired green

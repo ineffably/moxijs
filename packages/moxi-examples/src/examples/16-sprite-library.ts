@@ -2,7 +2,7 @@
  * Example 16: Sprite Library
  * Browse all available sprites and textures loaded in the examples app
  */
-import { setupMoxi, asEntity, UITextInput, UILabel, FlexContainer, FlexDirection, UILayer, UIScrollContainer, EdgeInsets, UIComponent, asTextureFrames } from 'moxi';
+import { setupMoxi, asEntity, UITextInput, UILabel, FlexContainer, FlexDirection, FlexAlign, UILayer, UIScrollContainer, EdgeInsets, UIComponent, asTextureFrames } from 'moxi';
 import { Sprite, Container, Graphics, BitmapText, Assets, BitmapFont } from 'pixi.js';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
@@ -309,6 +309,13 @@ export async function initSpriteLibrary() {
   let searchQuery = '';
   let renderSpritesFn: () => void;
   
+  const searchLabel = new UILabel({
+    text: 'Search your sprite library.',
+    fontSize: 18,
+    color: 0xffffff,
+    fontWeight: 'normal'
+  });
+
   const searchInput = new UITextInput({
     placeholder: 'Search sprites by name...',
     width: 400,
@@ -325,10 +332,12 @@ export async function initSpriteLibrary() {
 
   const searchContainer = new FlexContainer({
     direction: FlexDirection.Row,
-    gap: 10,
+    align: FlexAlign.Center,
+    gap: 15,
     width: scene.renderer.width
   });
   searchContainer.addChild(searchInput);
+  searchContainer.addChild(searchLabel);
   searchInput.tabIndex = 0;
   
   // Layout the container

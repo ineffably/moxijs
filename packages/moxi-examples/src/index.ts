@@ -167,22 +167,102 @@ function initCodeEditor(container: HTMLElement, sourceCode: string) {
   });
 }
 
+// Copy code to clipboard
+async function copyCodeToClipboard(sourceCode: string) {
+  try {
+    await navigator.clipboard.writeText(sourceCode);
+    const copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+      const originalText = copyBtn.innerHTML;
+      copyBtn.classList.add('copied');
+      copyBtn.innerHTML = `
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+        </svg>
+        Copied!
+      `;
+      setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyBtn.innerHTML = originalText;
+      }, 2000);
+    }
+  } catch (err) {
+    console.error('Failed to copy code:', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = sourceCode;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      const copyBtn = document.getElementById('copy-btn');
+      if (copyBtn) {
+        const originalText = copyBtn.innerHTML;
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = `
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      }
+    } catch (fallbackErr) {
+      console.error('Fallback copy also failed:', fallbackErr);
+    }
+    document.body.removeChild(textArea);
+  }
+}
+
 // Load and display source code
 function loadSourceCode(exampleKey: string) {
   const example = examples[exampleKey];
   if (!example) return;
 
-  const codeContainer = document.getElementById('code-container');
-  if (!codeContainer) return;
+  const codeEditorWrapper = document.getElementById('code-editor-wrapper');
+  if (!codeEditorWrapper) return;
+
+  // Clear previous editor
+  codeEditorWrapper.innerHTML = '';
 
   // Source code is already bundled via ?raw imports
-  initCodeEditor(codeContainer, example.source);
+  initCodeEditor(codeEditorWrapper, example.source);
+
+  // Update copy button handler
+  const copyBtn = document.getElementById('copy-btn');
+  if (copyBtn) {
+    copyBtn.onclick = () => copyCodeToClipboard(example.source);
+  }
+}
+
+// Initialize copy button
+function initCopyButton() {
+  const copyBtn = document.getElementById('copy-btn');
+  if (copyBtn && currentExample) {
+    const example = examples[currentExample];
+    if (example) {
+      copyBtn.onclick = () => copyCodeToClipboard(example.source);
+    }
+  }
+}
+
+// Trigger canvas resize
+function triggerCanvasResize() {
+  // Trigger a resize event to update canvas sizing
+  // This ensures the canvas recalculates its size when container dimensions change
+  window.dispatchEvent(new Event('resize'));
 }
 
 // Tab switching
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const app = document.getElementById('app');
+  if (!app) return;
 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -192,16 +272,74 @@ function initTabs() {
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Toggle split view based on which tab is active
+      // Update app class to show/hide appropriate views
       if (targetTab === 'code') {
-        // Show both canvas and code in split view
-        app?.classList.add('split-view');
+        app.classList.remove('code-hidden');
+        app.classList.add('code-view');
       } else {
-        // Show only canvas (full screen)
-        app?.classList.remove('split-view');
+        app.classList.remove('code-view');
+        app.classList.add('code-hidden');
       }
+
+      // Trigger canvas resize after tab switch
+      setTimeout(() => {
+        triggerCanvasResize();
+      }, 100);
     });
   });
+}
+
+// Initialize resize handle for split pane
+function initResizeHandle() {
+  const resizeHandle = document.getElementById('resize-handle');
+  const canvasContainer = document.getElementById('canvas-container');
+  const codeContainer = document.getElementById('code-container');
+  const app = document.getElementById('app');
+
+  if (!resizeHandle || !canvasContainer || !codeContainer || !app) return;
+
+  let isResizing = false;
+
+  const startResize = (e: MouseEvent) => {
+    isResizing = true;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  };
+
+  const doResize = (e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const appRect = app.getBoundingClientRect();
+    const mouseY = e.clientY - appRect.top;
+    const appHeight = appRect.height;
+    
+    // Use absolute pixel values - more direct and responsive
+    const minHeight = 200;
+    const maxHeight = appHeight - minHeight;
+    
+    // Constrain mouse position to valid range
+    const canvasHeight = Math.max(minHeight, Math.min(maxHeight, mouseY));
+    const codeHeight = appHeight - canvasHeight;
+    
+    // Set absolute pixel heights
+    canvasContainer.style.flex = 'none';
+    canvasContainer.style.height = `${canvasHeight}px`;
+    codeContainer.style.flex = 'none';
+    codeContainer.style.height = `${codeHeight}px`;
+  };
+
+  const stopResize = () => {
+    if (!isResizing) return;
+    isResizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    triggerCanvasResize();
+  };
+
+  resizeHandle.addEventListener('mousedown', startResize);
+  document.addEventListener('mousemove', doResize);
+  document.addEventListener('mouseup', stopResize);
 }
 
 // Load an example
@@ -230,8 +368,36 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
   });
   document.querySelector(`[data-example="${exampleKey}"]`)?.classList.add('active');
 
+  // Reset to game view when loading a new example
+  const app = document.getElementById('app');
+  const gameTab = document.getElementById('game-tab');
+  const codeTab = document.getElementById('code-tab');
+  const codeContainer = document.getElementById('code-container');
+  
+  if (app) {
+    app.classList.remove('code-view');
+    app.classList.add('code-hidden');
+  }
+  
+  // Reset container heights to default (remove explicit pixel heights)
+  if (canvasContainer && codeContainer) {
+    canvasContainer.style.height = '';
+    canvasContainer.style.flex = '';
+    codeContainer.style.height = '';
+    codeContainer.style.flex = '';
+  }
+  
+  // Update tab states
+  if (gameTab && codeTab) {
+    gameTab.classList.add('active');
+    codeTab.classList.remove('active');
+  }
+
   // Load source code
   loadSourceCode(exampleKey);
+
+  // Initialize copy button
+  initCopyButton();
 
   // Run the example
   try {
@@ -284,7 +450,14 @@ function handleHashChange() {
 
 // Start the app
 document.addEventListener('DOMContentLoaded', () => {
+  // Hide code panel by default
+  const app = document.getElementById('app');
+  if (app) {
+    app.classList.add('code-hidden');
+  }
+
   initUI();
+  initResizeHandle();
   initTabs();
   window.addEventListener('hashchange', handleHashChange);
 });

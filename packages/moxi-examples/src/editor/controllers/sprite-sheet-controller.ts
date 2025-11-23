@@ -18,6 +18,8 @@ export interface SpriteSheetControllerOptions {
   renderer: PIXI.Renderer;
   showGrid?: boolean;
   onScaleChange?: (scale: number) => void;
+  onCellHover?: (cellX: number, cellY: number) => void;
+  onCellClick?: (cellX: number, cellY: number) => void;
 }
 
 /**
@@ -32,17 +34,31 @@ export class SpriteSheetController {
   private sprite: PIXI.Sprite | null = null;
   private showGrid: boolean;
   private onScaleChange?: (scale: number) => void;
+  private onCellHover?: (cellX: number, cellY: number) => void;
+  private onCellClick?: (cellX: number, cellY: number) => void;
   private isPanning: boolean = false;
   private panStartX: number = 0;
   private panStartY: number = 0;
   private spriteStartX: number = 0;
   private spriteStartY: number = 0;
+  private cellOverlay: PIXI.Graphics | null = null;
+  private selectedCellX: number = -1;
+  private selectedCellY: number = -1;
+  private hoveredCellX: number = -1;
+  private hoveredCellY: number = -1;
+  private interactionSetup: boolean = false;
+  private isDragging: boolean = false;
+  private dragStartX: number = 0;
+  private dragStartY: number = 0;
+  private clickThreshold: number = 5; // Pixels of movement before it's considered a drag
 
   constructor(options: SpriteSheetControllerOptions) {
     this.config = options.config;
     this.renderer = options.renderer;
     this.showGrid = options.showGrid ?? false;
     this.onScaleChange = options.onScaleChange;
+    this.onCellHover = options.onCellHover;
+    this.onCellClick = options.onCellClick;
 
     // Calculate initial scale to fit nicely (50% of viewport height)
     const targetHeight = this.renderer.height * 0.5;
@@ -312,6 +328,155 @@ export class SpriteSheetController {
   }
 
   /**
+   * Draw the cell overlay (highlighting selected/hovered cells)
+   */
+  private drawCellOverlay() {
+    if (!this.cellOverlay || !this.sprite) return;
+
+    this.cellOverlay.clear();
+
+    const cellSize = 8 * this.scale;
+    // Sprite has anchor (0.5, 0.5), so adjust for centered origin
+    const spriteX = this.sprite.x - (this.config.width * this.scale) / 2;
+    const spriteY = this.sprite.y - (this.config.height * this.scale) / 2;
+
+    // Draw selected cell first (strong highlight) - behind hover
+    if (this.selectedCellX >= 0 && this.selectedCellY >= 0) {
+      this.cellOverlay.rect(
+        spriteX + this.selectedCellX * cellSize,
+        spriteY + this.selectedCellY * cellSize,
+        cellSize,
+        cellSize
+      );
+      this.cellOverlay.stroke({ color: 0xffec27, width: 2 }); // Yellow highlight
+    }
+
+    // Draw hovered cell on top (subtle highlight)
+    if (this.hoveredCellX >= 0 && this.hoveredCellY >= 0) {
+      this.cellOverlay.rect(
+        spriteX + this.hoveredCellX * cellSize,
+        spriteY + this.hoveredCellY * cellSize,
+        cellSize,
+        cellSize
+      );
+      this.cellOverlay.stroke({ color: 0xffffff, width: 1, alpha: 0.5 });
+    }
+  }
+
+  /**
+   * Setup cell interaction handlers
+   */
+  private setupCellInteraction(container: PIXI.Container) {
+    if (!this.onCellHover && !this.onCellClick) return;
+    if (this.interactionSetup) return; // Already set up
+
+    this.interactionSetup = true;
+    container.eventMode = 'static';
+    container.cursor = 'pointer';
+
+    container.on('pointermove', (e: PIXI.FederatedPointerEvent) => {
+      if (!this.sprite) return;
+
+      // Convert to sprite-local coordinates (unscaled, centered at origin)
+      const spriteLocal = e.getLocalPosition(this.sprite);
+      const cellSize = 8; // Cell size in texture space (unscaled)
+
+      // Adjust for centered anchor (sprite origin is at center)
+      const adjustedX = spriteLocal.x + (this.config.width / 2);
+      const adjustedY = spriteLocal.y + (this.config.height / 2);
+
+      const cellX = Math.floor(adjustedX / cellSize);
+      const cellY = Math.floor(adjustedY / cellSize);
+
+      const maxCellX = Math.floor(this.config.width / 8) - 1;
+      const maxCellY = Math.floor(this.config.height / 8) - 1;
+
+      if (cellX >= 0 && cellX <= maxCellX && cellY >= 0 && cellY <= maxCellY) {
+        if (cellX !== this.hoveredCellX || cellY !== this.hoveredCellY) {
+          this.hoveredCellX = cellX;
+          this.hoveredCellY = cellY;
+          this.drawCellOverlay();
+          if (this.onCellHover) {
+            this.onCellHover(cellX, cellY);
+          }
+        }
+      } else {
+        if (this.hoveredCellX !== -1 || this.hoveredCellY !== -1) {
+          this.hoveredCellX = -1;
+          this.hoveredCellY = -1;
+          this.drawCellOverlay();
+        }
+      }
+    });
+
+    container.on('pointerout', () => {
+      this.hoveredCellX = -1;
+      this.hoveredCellY = -1;
+      this.drawCellOverlay();
+    });
+
+    // Click and drag interaction
+    container.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
+      if (!this.sprite) return;
+
+      this.isDragging = false;
+      this.dragStartX = e.global.x;
+      this.dragStartY = e.global.y;
+      this.spriteStartX = this.sprite.x;
+      this.spriteStartY = this.sprite.y;
+    });
+
+    container.on('globalpointermove', (e: PIXI.FederatedPointerEvent) => {
+      if (!this.sprite) return;
+
+      // Check if we've moved beyond the click threshold
+      const dx = e.global.x - this.dragStartX;
+      const dy = e.global.y - this.dragStartY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > this.clickThreshold && (this.dragStartX !== 0 || this.dragStartY !== 0)) {
+        this.isDragging = true;
+        // Pan the sprite
+        this.sprite.x = this.spriteStartX + dx;
+        this.sprite.y = this.spriteStartY + dy;
+      }
+    });
+
+    container.on('pointerup', () => {
+      // If we didn't drag, it's a click - select the cell
+      if (!this.isDragging && this.onCellClick) {
+        if (this.hoveredCellX >= 0 && this.hoveredCellY >= 0) {
+          this.selectedCellX = this.hoveredCellX;
+          this.selectedCellY = this.hoveredCellY;
+          this.drawCellOverlay();
+          this.onCellClick!(this.selectedCellX, this.selectedCellY);
+        }
+      }
+
+      // Reset drag state
+      this.isDragging = false;
+      this.dragStartX = 0;
+      this.dragStartY = 0;
+    });
+
+    container.on('pointerupoutside', () => {
+      // Reset drag state
+      this.isDragging = false;
+      this.dragStartX = 0;
+      this.dragStartY = 0;
+    });
+
+    // Update overlay continuously to follow sprite when panning
+    if (typeof window !== 'undefined') {
+      const updateOverlay = () => {
+        this.drawCellOverlay();
+        requestAnimationFrame(updateOverlay);
+      };
+      requestAnimationFrame(updateOverlay);
+    }
+  }
+
+  /**
    * Render the sprite sheet
    */
   public render(container: PIXI.Container) {
@@ -322,6 +487,11 @@ export class SpriteSheetController {
     // Remove old sprite if it exists
     if (this.sprite) {
       container.removeChild(this.sprite);
+    }
+
+    // Remove old overlay if it exists
+    if (this.cellOverlay) {
+      container.removeChild(this.cellOverlay);
     }
 
     // Update texture from pixel data (with grid baked in if enabled)
@@ -345,6 +515,28 @@ export class SpriteSheetController {
     }
 
     container.addChild(this.sprite);
+
+    // Create and add cell overlay AFTER sprite (so it renders on top)
+    this.cellOverlay = new PIXI.Graphics();
+    this.cellOverlay.roundPixels = true;
+    container.addChild(this.cellOverlay);
+
+    // Setup cell interaction once
+    if (this.onCellHover || this.onCellClick) {
+      this.setupCellInteraction(container);
+    }
+
+    // Initial overlay draw
+    this.drawCellOverlay();
+  }
+
+  /**
+   * Programmatically select a cell
+   */
+  public selectCell(cellX: number, cellY: number) {
+    this.selectedCellX = cellX;
+    this.selectedCellY = cellY;
+    this.drawCellOverlay();
   }
 
   /**

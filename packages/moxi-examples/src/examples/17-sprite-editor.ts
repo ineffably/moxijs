@@ -15,6 +15,8 @@ import {
   createPixelButton,
   createPixelDialog,
   createSpriteSheetCard,
+  createSpriteCard,
+  SpriteController,
   SPRITESHEET_CONFIGS,
   createSVGIconButton,
   SVG_ICONS,
@@ -35,7 +37,6 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer): Pixel
   let colorsPerRow = 4;
   let rows = 4;
   let swatchSize = 12; // Grid units (8 * 1.5 = 12)
-  let selectedColorIndex = 0; // Track selected color
 
   // Calculate initial content size
   const contentWidth = colorsPerRow * swatchSize + (colorsPerRow - 1) * GRID.gap;
@@ -506,6 +507,97 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
 }
 
 /**
+ * State for current sprite sheet and sprite being edited
+ */
+let currentSpriteSheetCard: ReturnType<typeof createSpriteSheetCard> | null = null;
+let currentSpriteCard: ReturnType<typeof createSpriteCard> | null = null;
+let selectedColorIndex = 0; // Currently selected palette color
+
+/**
+ * Creates a new sprite sheet and sprite card
+ */
+function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
+  // Remove old sprite sheet and sprite card if they exist
+  if (currentSpriteSheetCard) {
+    (window as any).scene.removeChild(currentSpriteSheetCard.card.container);
+  }
+  if (currentSpriteCard) {
+    (window as any).scene.removeChild(currentSpriteCard.card.container);
+  }
+
+  const renderer = (window as any).renderer;
+  const scene = (window as any).scene;
+
+  // Helper function to create sprite card for a cell
+  const createSpriteCardForCell = (cellX: number, cellY: number) => {
+    console.log(`Selected cell: ${cellX}, ${cellY}`);
+
+    // Create or update sprite controller for this cell
+    const spriteController = new SpriteController({
+      spriteSheetController: spriteSheetResult.controller,
+      cellX,
+      cellY,
+      scale: 32 // Large scale for editing (twice as large)
+    });
+
+    // Remove old sprite card if it exists
+    if (currentSpriteCard) {
+      scene.removeChild(currentSpriteCard.card.container);
+    }
+
+    // Create sprite card - just below commander bar, centered horizontally
+    const spriteCardDims = spriteController.getScaledDimensions();
+    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Title bar height
+    const topMargin = 20;
+    const gapBelowCommander = 10;
+
+    const spriteCardX = (renderer.width - spriteCardDims.width) / 2;
+    const spriteCardY = topMargin + commanderBarHeight + gapBelowCommander;
+
+    const spriteCardResult = createSpriteCard({
+      x: spriteCardX,
+      y: spriteCardY,
+      renderer,
+      spriteController,
+      onPixelClick: (x, y) => {
+        // Draw with currently selected color
+        spriteController.setPixel(x, y, selectedColorIndex);
+
+        // Re-render both cards
+        spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
+        spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+      }
+    });
+
+    scene.addChild(spriteCardResult.card.container);
+    currentSpriteCard = spriteCardResult;
+  };
+
+  // Create sprite sheet card
+  const spriteSheetResult = createSpriteSheetCard({
+    config: SPRITESHEET_CONFIGS[type],
+    renderer,
+    showGrid,
+    onCellHover: (cellX, cellY) => {
+      // Update info bar or show tooltip with cell coordinates
+      console.log(`Hovering cell: ${cellX}, ${cellY}`);
+    },
+    onCellClick: (cellX, cellY) => {
+      createSpriteCardForCell(cellX, cellY);
+    }
+  });
+
+  scene.addChild(spriteSheetResult.card.container);
+  currentSpriteSheetCard = spriteSheetResult;
+
+  // Automatically select top-left cell (0, 0) and show sprite card
+  spriteSheetResult.controller.selectCell(0, 0);
+  createSpriteCardForCell(0, 0);
+
+  console.log(`Created ${type} sprite sheet`, spriteSheetResult.controller);
+}
+
+/**
  * Creates a commander bar for actions and options
  */
 function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): PixelCard {
@@ -571,25 +663,13 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
             {
               label: 'PICO-8',
               onClick: (checkboxStates) => {
-                const { card, controller } = createSpriteSheetCard({
-                  config: SPRITESHEET_CONFIGS['PICO-8'],
-                  renderer,
-                  showGrid: checkboxStates?.showGrid ?? false
-                });
-                scene.addChild(card.container);
-                console.log('Created PICO-8 sprite sheet', controller);
+                createNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
               }
             },
             {
               label: 'TIC-80',
               onClick: (checkboxStates) => {
-                const { card, controller } = createSpriteSheetCard({
-                  config: SPRITESHEET_CONFIGS['TIC-80'],
-                  renderer,
-                  showGrid: checkboxStates?.showGrid ?? false
-                });
-                scene.addChild(card.container);
-                console.log('Created TIC-80 sprite sheet', controller);
+                createNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
               }
             }
           ],
@@ -692,23 +772,25 @@ export async function initSpriteEditor() {
     const paletteCard = createPaletteCard(20, topOffset, renderer);
     scene.addChild(paletteCard.container);
 
-    // Recreate SPT toolbar
-    const paletteCardHeight = paletteCard.container.getBounds().height;
-    const sptToolbar = await createSPTToolbar(renderer);
-    sptToolbar.container.y = topOffset + paletteCardHeight + 10;
-    scene.addChild(sptToolbar.container);
+    // Recreate SPT toolbar - HIDDEN
+    // const paletteCardHeight = paletteCard.container.getBounds().height;
+    // const sptToolbar = await createSPTToolbar(renderer);
+    // sptToolbar.container.y = topOffset + paletteCardHeight + 10;
+    // scene.addChild(sptToolbar.container);
 
-    // Recreate tool card
-    const toolCardWidth = px(46) + px(BORDER.total * 2) + px(GRID.padding * 2);
-    const toolCard = createToolCard(renderer.width - toolCardWidth - 20, topOffset, renderer);
-    scene.addChild(toolCard.container);
+    // Recreate tool card - HIDDEN
+    // const toolCardWidth = px(46) + px(BORDER.total * 2) + px(GRID.padding * 2);
+    // const toolCard = createToolCard(renderer.width - toolCardWidth - 20, topOffset, renderer);
+    // scene.addChild(toolCard.container);
 
     // Recreate info bar
     const infoBar = createInfoBar(renderer);
     scene.addChild(infoBar.container);
   }
 
-  // Make recreateUI available globally so commander bar can use it
+  // Make renderer, scene, and recreateUI available globally
+  (window as any).renderer = renderer;
+  (window as any).scene = scene;
   (window as any).recreateUI = recreateUI;
 
   // Initial UI creation

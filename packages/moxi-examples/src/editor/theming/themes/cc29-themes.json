@@ -1,0 +1,91 @@
+{
+  "paletteName": "CC-29",
+  "classic": [
+    {
+      "name": "Dark",
+      "description": "Classic dark theme",
+      "backgroundRoot": "0x212123",
+      "backgroundSurface": "0x212123",
+      "backgroundRaised": "0x646365",
+      "backgroundOverlay": "0x45444f",
+      "borderStrong": "0x212123",
+      "borderSubtle": "0x868188",
+      "accentPrimary": "0x4b80ca",
+      "accentSecondary": "0x68c2d3",
+      "textPrimary": "0xf2f0e5",
+      "textSecondary": "0xb8b5b9"
+    },
+    {
+      "name": "Light",
+      "description": "Clean light theme",
+      "backgroundRoot": "0x868188",
+      "backgroundSurface": "0xf2f0e5",
+      "backgroundRaised": "0xb8b5b9",
+      "backgroundOverlay": "0xb8b5b9",
+      "borderStrong": "0x646365",
+      "borderSubtle": "0xb8b5b9",
+      "accentPrimary": "0x4b80ca",
+      "accentSecondary": "0x43436a",
+      "textPrimary": "0x212123",
+      "textSecondary": "0x646365"
+    }
+  ],
+  "seasonal": [
+    {
+      "name": "Spring",
+      "description": "Fresh greens and soft pastels",
+      "backgroundRoot": "0xb2b47e",
+      "backgroundSurface": "0xa2dcc7",
+      "backgroundRaised": "0xc2d368",
+      "backgroundOverlay": "0x8ab060",
+      "borderStrong": "0x4e584a",
+      "borderSubtle": "0xc2d368",
+      "accentPrimary": "0xedc8c4",
+      "accentSecondary": "0xcf8acb",
+      "textPrimary": "0x212123",
+      "textSecondary": "0x4e584a"
+    },
+    {
+      "name": "Summer",
+      "description": "Bright blues and warm sunshine",
+      "backgroundRoot": "0xa2dcc7",
+      "backgroundSurface": "0x68c2d3",
+      "backgroundRaised": "0xede19e",
+      "backgroundOverlay": "0x4b80ca",
+      "borderStrong": "0x80493a",
+      "borderSubtle": "0xede19e",
+      "accentPrimary": "0xd3a068",
+      "accentSecondary": "0x80493a",
+      "textPrimary": "0x212123",
+      "textSecondary": "0x3a3858"
+    },
+    {
+      "name": "Autumn",
+      "description": "Warm oranges, browns, and deep reds",
+      "backgroundRoot": "0x7b7243",
+      "backgroundSurface": "0xa77b5b",
+      "backgroundRaised": "0xd3a068",
+      "backgroundOverlay": "0x80493a",
+      "borderStrong": "0x80493a",
+      "borderSubtle": "0xd3a068",
+      "accentPrimary": "0xb45252",
+      "accentSecondary": "0x80493a",
+      "textPrimary": "0xf2f0e5",
+      "textSecondary": "0xe5ceb4"
+    },
+    {
+      "name": "Winter",
+      "description": "Cool blues, purples, and icy whites",
+      "backgroundRoot": "0x212123",
+      "backgroundSurface": "0x43436a",
+      "backgroundRaised": "0x68c2d3",
+      "backgroundOverlay": "0x4b4158",
+      "borderStrong": "0x3a3858",
+      "borderSubtle": "0xcf8acb",
+      "accentPrimary": "0xcf8acb",
+      "accentSecondary": "0xedc8c4",
+      "textPrimary": "0xf2f0e5",
+      "textSecondary": "0xb8b5b9"
+    }
+  ]
+}

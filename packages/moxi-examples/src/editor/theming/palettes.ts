@@ -84,7 +84,23 @@ export const CC29_PALETTE = [
   0x5f556a  // Dark purple-gray
 ];
 
-export type PaletteType = 'pico8' | 'tic80' | 'cc29';
+/**
+ * Aerugo color palette (32 colors)
+ * The editor's UI palette
+ * From https://lospec.com/palette-list/aerugo
+ */
+export const AERUGO_PALETTE = [
+  0x2f1e1a, 0x4f3322, 0x723627, 0x95392c,
+  0xc75533, 0xe76d46, 0x934e28, 0xa2663c,
+  0xc87d40, 0xf5a95b, 0x6b8b8c, 0x81a38e,
+  0xaac39e, 0xffffff, 0xd1d0ce, 0xbab7b2,
+  0x898a8a, 0x686461, 0x554d4b, 0x3c3d3b,
+  0x343230, 0x87d1ef, 0x64a1c2, 0x466480,
+  0x2f485c, 0x242e35, 0x1b2026, 0xaa9c8a,
+  0x917f6d, 0x86624a, 0x715b48, 0x5e4835
+];
+
+export type PaletteType = 'pico8' | 'tic80' | 'cc29' | 'aerugo';
 
 export function getPalette(type: PaletteType): number[] {
   switch (type) {
@@ -94,6 +110,8 @@ export function getPalette(type: PaletteType): number[] {
       return TIC80_PALETTE;
     case 'cc29':
       return CC29_PALETTE;
+    case 'aerugo':
+      return AERUGO_PALETTE;
   }
 }
 

@@ -1,14 +1,14 @@
 /**
- * Sprite card component for displaying and editing sprite sheets
+ * Sprite sheet card component for displaying and editing sprite sheets
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
-import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from './sprite-sheet-controller';
+import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from '../controllers/sprite-sheet-controller';
 
 export { SpriteSheetType, SpriteSheetConfig };
 
 // Sprite sheet configurations
-export const SPRITE_CONFIGS: Record<SpriteSheetType, SpriteSheetConfig> = {
+export const SPRITESHEET_CONFIGS: Record<SpriteSheetType, SpriteSheetConfig> = {
   'PICO-8': {
     type: 'PICO-8',
     width: 128,
@@ -33,7 +33,7 @@ export const SPRITE_CONFIGS: Record<SpriteSheetType, SpriteSheetConfig> = {
   }
 };
 
-export interface SpriteCardOptions {
+export interface SpriteSheetCardOptions {
   config: SpriteSheetConfig;
   x?: number;
   y?: number;
@@ -41,15 +41,15 @@ export interface SpriteCardOptions {
   showGrid?: boolean;
 }
 
-export interface SpriteCardResult {
+export interface SpriteSheetCardResult {
   card: PixelCard;
   controller: SpriteSheetController;
 }
 
 /**
- * Creates a sprite card with a canvas for editing
+ * Creates a sprite sheet card with a canvas for editing
  */
-export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
+export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSheetCardResult {
   const { config, x, y, renderer, showGrid = false } = options;
 
   let card: PixelCard;

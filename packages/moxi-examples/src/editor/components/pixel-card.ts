@@ -2,6 +2,7 @@
  * Pixel-perfect card component with drag, resize, and triple border
  */
 import * as PIXI from 'pixi.js';
+import { getTheme } from '../theming/theme';
 
 // Pixel Perfect Grid System
 export const GRID = {
@@ -24,15 +25,15 @@ export const BORDER = {
 // Helper to convert grid units to pixels
 export const px = (units: number) => units * GRID.unit * GRID.scale;
 
-// UI Colors (using Aerugo palette)
+// UI Colors - Maps theme tokens to component usage
 export const UI_COLORS = {
-  cardBg: 0x917f6d,        // Warm brown from Aerugo
-  cardBorder: 0x000000,
-  middleBorder: 0xffffff,  // White
-  text: 0x000000,
-  titleBar: 0x686461,      // Medium gray from Aerugo
-  selected: 0xe76d46,      // Orange selection
-  buttonBg: 0xbab7b2,      // Light gray for button backgrounds
+  get cardBg() { return getTheme().backgroundSurface; },
+  get cardBorder() { return getTheme().borderStrong; },
+  get middleBorder() { return getTheme().borderSubtle; },
+  get text() { return getTheme().textPrimary; },
+  get titleBar() { return getTheme().backgroundOverlay; },
+  get selected() { return getTheme().accentPrimary; },
+  get buttonBg() { return getTheme().backgroundRaised; },
 };
 
 export interface PixelCardOptions {

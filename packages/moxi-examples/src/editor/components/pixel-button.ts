@@ -3,6 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { GRID, px, UI_COLORS } from './pixel-card';
+import { getTheme } from '../theming/theme';
 
 export type SelectionMode = 'highlight' | 'press';
 export type ActionMode = 'click' | 'toggle';
@@ -134,26 +135,26 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     });
   }
 
-  const bevelColor = 0x868188; // CC-29 medium gray
+  const theme = getTheme();
 
   if (selectionMode === 'highlight') {
     // Highlight mode (for swatches)
     if (selected) {
-      // Selected: orange border, then black border, then background/color
+      // Selected: accent border, then strong border, then background/color
       button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: UI_COLORS.selected });
+      button.fill({ color: theme.accentPrimary });
 
       button.rect(px(GRID.border), px(GRID.border),
                   px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
-      button.fill({ color: 0x000000 });
+      button.fill({ color: theme.borderStrong });
 
       button.rect(px(GRID.border * 2), px(GRID.border * 2),
                   px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4));
       button.fill({ color: backgroundColor });
     } else {
-      // Unselected: black border, then background/color
+      // Unselected: border, then background/color
       button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: 0x000000 });
+      button.fill({ color: theme.borderStrong });
 
       button.rect(px(GRID.border), px(GRID.border),
                   px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
@@ -162,32 +163,32 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
   } else {
     // Press mode (for tool buttons)
     if (selected) {
-      // Pressed: starts 1px lower, black border, white inner border, background (no bevel)
+      // Pressed: starts 1px lower, strong border, subtle border, background (no bevel)
       // Shift everything down by 1px and reduce height by 1px
       button.rect(0, px(1), px(buttonWidth), px(buttonHeight) - px(1));
-      button.fill({ color: 0x000000 });
+      button.fill({ color: theme.borderStrong });
 
       button.rect(px(GRID.border), px(GRID.border + 1),
                   px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2 - 1));
-      button.fill({ color: 0xffffff });
+      button.fill({ color: theme.borderSubtle });
 
       button.rect(px(GRID.border * 2), px(GRID.border * 2 + 1),
                   px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4 - 1));
       button.fill({ color: backgroundColor });
     } else {
-      // Unpressed: black border, gray bevel at bottom, white inner border, background
+      // Unpressed: strong border, bevel at bottom (overlay layer), subtle border, background
       button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: 0x000000 });
+      button.fill({ color: theme.borderStrong });
 
-      // Gray bevel strip at bottom (between black border and white border)
+      // Bevel strip at bottom (between border and inner border)
       button.rect(px(GRID.border), px(buttonHeight - GRID.border * 2),
                   px(buttonWidth - GRID.border * 2), px(GRID.border));
-      button.fill({ color: bevelColor });
+      button.fill({ color: theme.backgroundOverlay });
 
-      // White inner border (on top, sides, and covers most of bottom except bevel)
+      // Inner border (on top, sides, and covers most of bottom except bevel)
       button.rect(px(GRID.border), px(GRID.border),
                   px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 3));
-      button.fill({ color: 0xffffff });
+      button.fill({ color: theme.borderSubtle });
 
       // Background
       button.rect(px(GRID.border * 2), px(GRID.border * 2),
@@ -213,7 +214,7 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
       style: {
         fontFamily: 'PixelOperator8Bitmap',
         fontSize: 64,
-        fill: 0x000000,
+        fill: theme.textPrimary,
       }
     });
     buttonText.roundPixels = true;

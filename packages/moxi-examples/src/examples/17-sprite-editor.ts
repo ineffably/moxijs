@@ -6,32 +6,26 @@ import { setupMoxi } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { PixelCard, GRID, px, UI_COLORS, BORDER } from './editor/pixel-card';
-import { createPixelButton } from './editor/pixel-button';
-import { createToolIcon, ToolType } from './editor/tool-icons';
-import { createPixelDialog } from './editor/pixel-dialog';
-import { createSpriteCard, SPRITE_CONFIGS } from './editor/sprite-card';
-import { createSVGIconButton, SVG_ICONS } from './editor/svg-icon-button';
-
-// Aerugo palette - for editor UI (32 colors)
-const AERUGO_PALETTE = [
-  0x2f1e1a, 0x4f3322, 0x723627, 0x95392c,
-  0xc75533, 0xe76d46, 0x934e28, 0xa2663c,
-  0xc87d40, 0xf5a95b, 0x6b8b8c, 0x81a38e,
-  0xaac39e, 0xffffff, 0xd1d0ce, 0xbab7b2,
-  0x898a8a, 0x686461, 0x554d4b, 0x3c3d3b,
-  0x343230, 0x87d1ef, 0x64a1c2, 0x466480,
-  0x2f485c, 0x242e35, 0x1b2026, 0xaa9c8a,
-  0x917f6d, 0x86624a, 0x715b48, 0x5e4835
-];
-
-// PICO-8 palette - for user painting (16 colors)
-const PICO8_PALETTE = [
-  0x000000, 0x1d2b53, 0x7e2553, 0x008751,
-  0xab5236, 0x5f574f, 0xc2c3c7, 0xfff1e8,
-  0xff004d, 0xffa300, 0xffec27, 0x00e436,
-  0x29adff, 0x83769c, 0xff77a8, 0xffccaa
-];
+import {
+  PixelCard,
+  GRID,
+  px,
+  UI_COLORS,
+  BORDER,
+  createPixelButton,
+  createPixelDialog,
+  createSpriteSheetCard,
+  SPRITESHEET_CONFIGS,
+  createSVGIconButton,
+  SVG_ICONS,
+  createToolIcon,
+  ToolType,
+  AERUGO_PALETTE,
+  PICO8_PALETTE,
+  getTheme,
+  setThemeByMetadata,
+  getAllThemes
+} from '../editor';
 
 /**
  * Creates a pixel-perfect palette card
@@ -435,7 +429,7 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
   const x = 20;
   const y = canvasHeight - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24; // Account for title bar height
 
-  // Create the card with custom background color
+  // Create the card (uses default card background from theme)
   const card = new PixelCard({
     title: 'Info',
     x,
@@ -444,7 +438,6 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
     contentHeight: barHeight,
     renderer,
     minContentSize: true, // Prevent resizing below content's actual size
-    backgroundColor: 0xaac39e, // Light green background
     onResize: (newWidth, newHeight) => {
       // Only update if the resize maintains horizontal layout
       if (newWidth >= barHeight) {
@@ -475,7 +468,7 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
         style: {
           fontFamily: 'PixelOperator8Bitmap',
           fontSize: 64,
-          fill: 0x81a38e, // Medium green for labels
+          fill: getTheme().textSecondary, // Use theme secondary text
         }
       });
       labelText.roundPixels = true;
@@ -491,7 +484,7 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
         style: {
           fontFamily: 'PixelOperator8Bitmap',
           fontSize: 64,
-          fill: 0x686461, // Medium gray for values
+          fill: getTheme().textPrimary, // Use theme primary text
         }
       });
       valueText.roundPixels = true;
@@ -552,6 +545,7 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
     const buttonHeight = 12; // Grid units (same as bar height for full height button)
     const buttonSpacing = px(2);
 
+    // Left side buttons (starting at x=0)
     let currentX = 0;
 
     // New button - shows dialog to choose sprite sheet type
@@ -577,8 +571,8 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
             {
               label: 'PICO-8',
               onClick: (checkboxStates) => {
-                const { card, controller } = createSpriteCard({
-                  config: SPRITE_CONFIGS['PICO-8'],
+                const { card, controller } = createSpriteSheetCard({
+                  config: SPRITESHEET_CONFIGS['PICO-8'],
                   renderer,
                   showGrid: checkboxStates?.showGrid ?? false
                 });
@@ -589,8 +583,8 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
             {
               label: 'TIC-80',
               onClick: (checkboxStates) => {
-                const { card, controller } = createSpriteCard({
-                  config: SPRITE_CONFIGS['TIC-80'],
+                const { card, controller } = createSpriteSheetCard({
+                  config: SPRITESHEET_CONFIGS['TIC-80'],
                   renderer,
                   showGrid: checkboxStates?.showGrid ?? false
                 });
@@ -606,7 +600,38 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
     });
     newButton.position.set(currentX, 0);
     contentContainer.addChild(newButton);
-    currentX += px(buttonWidth) + buttonSpacing;
+
+    // Right side button (Theme) - positioned at the far right
+    const themeButtonWidth = 24; // Grid units
+    const themeButton = createPixelButton({
+      width: themeButtonWidth,
+      height: buttonHeight,
+      label: 'Theme',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        // Show theme selection dialog
+        // Dynamically create buttons from all available themes
+        const allThemes = getAllThemes();
+        const dialog = createPixelDialog({
+          title: 'Choose Theme',
+          message: 'Select a theme:',
+          buttons: allThemes.map(themeMetadata => ({
+            label: themeMetadata.name,
+            onClick: () => {
+              setThemeByMetadata(themeMetadata);
+              // Use global recreateUI function
+              (window as any).recreateUI();
+            }
+          })),
+          renderer
+        });
+        scene.addChild(dialog);
+      }
+    });
+    // Position at far right (content width - button width)
+    themeButton.position.set(px(barWidth - themeButtonWidth), 0);
+    contentContainer.addChild(themeButton);
   }
 
   // Initial draw
@@ -630,7 +655,7 @@ export async function initSpriteEditor() {
     renderOptions: {
       width: 1280,
       height: 720,
-      backgroundColor: 0x3c3d3b, // Aerugo dark gray
+      backgroundColor: getTheme().backgroundRoot, // Use theme root background
     }
   });
 
@@ -647,33 +672,47 @@ export async function initSpriteEditor() {
     }
   });
 
-  // Create commander bar at top
-  const commanderBar = createCommanderBar(renderer, scene);
-  scene.addChild(commanderBar.container);
+  // Function to recreate all UI with current theme
+  async function recreateUI() {
+    // Remove all UI
+    scene.removeChildren();
 
-  // Calculate top offset for cards below commander bar
-  const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Commander bar total height
-  const topOffset = 20 + commanderBarHeight + 10; // Margin + commander height + gap
+    // Update renderer background
+    renderer.background.color = getTheme().backgroundRoot;
 
-  // Create palette card (left side)
-  const paletteCard = createPaletteCard(20, topOffset, renderer);
-  scene.addChild(paletteCard.container);
+    // Recreate commander bar at top
+    const commanderBar = createCommanderBar(renderer, scene);
+    scene.addChild(commanderBar.container);
 
-  // Create SPT toolbar (left side, below palette)
-  const paletteCardHeight = paletteCard.container.getBounds().height;
-  const sptToolbar = await createSPTToolbar(renderer);
-  sptToolbar.container.y = topOffset + paletteCardHeight + 10; // Below palette with 10px gap
-  scene.addChild(sptToolbar.container);
+    // Calculate top offset for cards below commander bar
+    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+    const topOffset = 20 + commanderBarHeight + 10;
 
-  // Create tool card (docked right)
-  // Tool width (46) + borders + padding
-  const toolCardWidth = px(46) + px(BORDER.total * 2) + px(GRID.padding * 2);
-  const toolCard = createToolCard(renderer.width - toolCardWidth - 20, topOffset, renderer);
-  scene.addChild(toolCard.container);
+    // Recreate palette card
+    const paletteCard = createPaletteCard(20, topOffset, renderer);
+    scene.addChild(paletteCard.container);
 
-  // Create info bar
-  const infoBar = createInfoBar(renderer);
-  scene.addChild(infoBar.container);
+    // Recreate SPT toolbar
+    const paletteCardHeight = paletteCard.container.getBounds().height;
+    const sptToolbar = await createSPTToolbar(renderer);
+    sptToolbar.container.y = topOffset + paletteCardHeight + 10;
+    scene.addChild(sptToolbar.container);
+
+    // Recreate tool card
+    const toolCardWidth = px(46) + px(BORDER.total * 2) + px(GRID.padding * 2);
+    const toolCard = createToolCard(renderer.width - toolCardWidth - 20, topOffset, renderer);
+    scene.addChild(toolCard.container);
+
+    // Recreate info bar
+    const infoBar = createInfoBar(renderer);
+    scene.addChild(infoBar.container);
+  }
+
+  // Make recreateUI available globally so commander bar can use it
+  (window as any).recreateUI = recreateUI;
+
+  // Initial UI creation
+  await recreateUI();
 
   scene.init();
   engine.start();

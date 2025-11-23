@@ -45,6 +45,7 @@ export interface PixelCardOptions {
   onResize?: (width: number, height: number) => void;
   minContentSize?: boolean; // If true, prevents resizing below content's actual size
   backgroundColor?: number; // Custom background color (defaults to UI_COLORS.cardBg)
+  clipContent?: boolean; // If true, clips content to container bounds (like CSS overflow: hidden)
 }
 
 export interface PixelCardResizeState {
@@ -266,6 +267,23 @@ export class PixelCard {
       px(BORDER.total + GRID.padding),
       px(BORDER.total) + this.titleBarHeightPx + px(GRID.padding)
     );
+
+    // Create mask to clip content (like CSS overflow: hidden) - only if enabled
+    if (this.options.clipContent) {
+      const mask = new PIXI.Graphics();
+      mask.rect(
+        px(BORDER.total + GRID.padding),
+        px(BORDER.total) + this.titleBarHeightPx + px(GRID.padding),
+        px(this.state.contentWidth),
+        px(this.state.contentHeight)
+      );
+      mask.fill({ color: 0xffffff });
+      this.container.addChild(mask);
+      this.contentContainer.mask = mask;
+    } else {
+      this.contentContainer.mask = null;
+    }
+
     this.container.addChild(this.contentContainer);
 
     // Add resize handles

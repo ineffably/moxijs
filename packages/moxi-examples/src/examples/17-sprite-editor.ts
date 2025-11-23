@@ -303,7 +303,16 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
   // Position near bottom with some margin
   const bottomMargin = 20;
   const barHeight = 8; // Grid units for a slim horizontal bar
-  const barWidth = 10; // Grid units - will auto-size to content with minContentSize
+
+  // Calculate initial width based on content
+  const sections = [
+    { label: 'Tool:', value: 'Pencil' },
+    { label: 'Color:', value: '#000000' },
+    { label: 'Scale:', value: '1x' }
+  ];
+
+  // Estimate width: each section takes roughly 20 grid units
+  const barWidth = sections.length * 20;
 
   const x = 20;
   const y = canvasHeight - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24; // Account for title bar height
@@ -319,7 +328,10 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
     minContentSize: true, // Prevent resizing below content's actual size
     backgroundColor: 0xaac39e, // Light green background
     onResize: (newWidth, newHeight) => {
-      updateInfoSections();
+      // Only update if the resize maintains horizontal layout
+      if (newWidth >= barHeight) {
+        updateInfoSections();
+      }
     }
   });
 
@@ -436,27 +448,36 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
         const dialog = createPixelDialog({
           title: 'New Sprite Sheet',
           message: 'Choose sprite sheet type:',
+          checkboxes: [
+            {
+              name: 'showGrid',
+              label: 'Show 8x8 Grid',
+              defaultValue: true
+            }
+          ],
           buttons: [
             {
               label: 'PICO-8',
-              onClick: () => {
-                const spriteCard = createSpriteCard({
+              onClick: (checkboxStates) => {
+                const { card, controller } = createSpriteCard({
                   config: SPRITE_CONFIGS['PICO-8'],
-                  renderer
+                  renderer,
+                  showGrid: checkboxStates?.showGrid ?? false
                 });
-                scene.addChild(spriteCard.container);
-                console.log('Created PICO-8 sprite sheet');
+                scene.addChild(card.container);
+                console.log('Created PICO-8 sprite sheet', controller);
               }
             },
             {
               label: 'TIC-80',
-              onClick: () => {
-                const spriteCard = createSpriteCard({
+              onClick: (checkboxStates) => {
+                const { card, controller } = createSpriteCard({
                   config: SPRITE_CONFIGS['TIC-80'],
-                  renderer
+                  renderer,
+                  showGrid: checkboxStates?.showGrid ?? false
                 });
-                scene.addChild(spriteCard.container);
-                console.log('Created TIC-80 sprite sheet');
+                scene.addChild(card.container);
+                console.log('Created TIC-80 sprite sheet', controller);
               }
             }
           ],

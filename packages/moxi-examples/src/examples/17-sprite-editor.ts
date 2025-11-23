@@ -590,12 +590,20 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
     updatePaletteForActiveSheet();
 
     // Bring both sprite sheet and sprite card to front
+    // Strategy: Remove both, then re-add in order (sheet first, sprite second)
+    // This ensures they're on top and sprite card is above sprite sheet
     if (instance.sheetCard) {
       scene.removeChild(instance.sheetCard.card.container);
-      scene.addChild(instance.sheetCard.card.container);
     }
     if (instance.spriteCard) {
       scene.removeChild(instance.spriteCard.card.container);
+    }
+
+    // Re-add in order - sprite sheet first, then sprite card
+    if (instance.sheetCard) {
+      scene.addChild(instance.sheetCard.card.container);
+    }
+    if (instance.spriteCard) {
       scene.addChild(instance.spriteCard.card.container);
     }
 
@@ -637,30 +645,26 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
       renderer,
       spriteController,
       onPixelClick: (x, y) => {
-        // Bring to front when clicking
-        makeThisSheetActive();
-
         // Draw with currently selected color
         spriteController.setPixel(x, y, selectedColorIndex);
 
         // Re-render both cards
         spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
         instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
-      }
+      },
+      onFocus: makeThisSheetActive
     });
 
     scene.addChild(spriteCardResult.card.container);
     instance.spriteCard = spriteCardResult;
     instance.spriteController = spriteController;
 
-    // Add click handler to sprite card's container to bring to front
-    spriteCardResult.card.container.eventMode = 'static';
-    spriteCardResult.card.container.on('pointerdown', () => {
-      makeThisSheetActive();
-    });
+    // Link the paired cards
+    spriteCardResult.card.setPairedCard(instance.sheetCard.card);
+    instance.sheetCard.card.setPairedCard(spriteCardResult.card);
   };
 
-  // Create sprite sheet card
+  // Create sprite sheet card with focus callback
   const spriteSheetResult = createSpriteSheetCard({
     config: SPRITESHEET_CONFIGS[type],
     renderer,
@@ -671,7 +675,8 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
     },
     onCellClick: (cellX, cellY) => {
       createSpriteCardForCell(cellX, cellY);
-    }
+    },
+    onFocus: makeThisSheetActive
   });
 
   scene.addChild(spriteSheetResult.card.container);

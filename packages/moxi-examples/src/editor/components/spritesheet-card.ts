@@ -41,6 +41,7 @@ export interface SpriteSheetCardOptions {
   showGrid?: boolean;
   onCellHover?: (cellX: number, cellY: number) => void;
   onCellClick?: (cellX: number, cellY: number) => void;
+  onFocus?: () => void;
 }
 
 export interface SpriteSheetCardResult {
@@ -52,7 +53,7 @@ export interface SpriteSheetCardResult {
  * Creates a sprite sheet card with a canvas for editing
  */
 export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSheetCardResult {
-  const { config, x, y, renderer, showGrid = false, onCellHover, onCellClick } = options;
+  const { config, x, y, renderer, showGrid = false, onCellHover, onCellClick, onFocus } = options;
 
   let card: PixelCard;
   let contentContainer: PIXI.Container;
@@ -94,7 +95,8 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
     contentHeight,
     renderer,
     backgroundColor: 0x2f485c, // Dark blue background
-    clipContent: true // Enable clipping for sprite sheet (overflow: hidden)
+    clipContent: true, // Enable clipping for sprite sheet (overflow: hidden)
+    onFocus
   });
 
   contentContainer = card.getContentContainer();

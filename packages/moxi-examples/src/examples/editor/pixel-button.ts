@@ -198,7 +198,9 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
 
   // Add icon if provided
   if (icon) {
-    icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2);
+    // When pressed in 'press' mode, shift icon down 1px with the button
+    const yOffset = (selectionMode === 'press' && selected) ? px(1) : 0;
+    icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2 + yOffset);
     button.addChild(icon);
   }
   // Add label if provided (and no icon)

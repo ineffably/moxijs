@@ -5,6 +5,7 @@ import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
 import { createPixelButton } from './pixel-button';
 import { createPixelCheckbox } from './pixel-checkbox';
+import { getTheme } from '../theming/theme';
 
 export interface DialogButton {
   label: string;
@@ -56,12 +57,13 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
   const messageMargin = px(4);
 
   // Create message text to measure it
+  const theme = getTheme();
   const messageText = new PIXI.BitmapText({
     text: message,
     style: {
       fontFamily: 'PixelOperator8Bitmap',
       fontSize: 64,
-      fill: 0x000000,
+      fill: theme.textPrimary,
     }
   });
   messageText.roundPixels = true;

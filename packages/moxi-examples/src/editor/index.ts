@@ -9,9 +9,11 @@ export { createPixelButton, PixelButtonOptions, SelectionMode, ActionMode } from
 export { createPixelDialog, PixelDialogOptions } from './components/pixel-dialog';
 export { createPixelCheckbox } from './components/pixel-checkbox';
 export { createSpriteSheetCard, SPRITESHEET_CONFIGS, SpriteSheetCardOptions, SpriteSheetCardResult } from './components/spritesheet-card';
+export { createSpriteCard, SpriteCardOptions, SpriteCardResult } from './components/sprite-card';
 
 // Controllers
 export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions, SpriteSheetType } from './controllers/sprite-sheet-controller';
+export { SpriteController, SpriteControllerOptions } from './controllers/sprite-controller';
 
 // Utilities
 export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilities/svg-icon-button';

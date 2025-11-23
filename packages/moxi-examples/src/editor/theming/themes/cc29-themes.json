@@ -8,7 +8,7 @@
       "backgroundSurface": "0x212123",
       "backgroundRaised": "0x646365",
       "backgroundOverlay": "0x45444f",
-      "borderStrong": "0x212123",
+      "borderStrong": "0x000000",
       "borderSubtle": "0x868188",
       "accentPrimary": "0x4b80ca",
       "accentSecondary": "0x68c2d3",

@@ -39,6 +39,8 @@ export interface SpriteSheetCardOptions {
   y?: number;
   renderer: PIXI.Renderer;
   showGrid?: boolean;
+  onCellHover?: (cellX: number, cellY: number) => void;
+  onCellClick?: (cellX: number, cellY: number) => void;
 }
 
 export interface SpriteSheetCardResult {
@@ -50,7 +52,7 @@ export interface SpriteSheetCardResult {
  * Creates a sprite sheet card with a canvas for editing
  */
 export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSheetCardResult {
-  const { config, x, y, renderer, showGrid = false } = options;
+  const { config, x, y, renderer, showGrid = false, onCellHover, onCellClick } = options;
 
   let card: PixelCard;
   let contentContainer: PIXI.Container;
@@ -65,7 +67,9 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
       card.setTitle(`Sprite Sheet - ${config.type} (${newScale.toFixed(2)}x)`);
       // Re-render the sprite sheet
       controller.render(contentContainer);
-    }
+    },
+    onCellHover,
+    onCellClick
   });
 
   // Get initial scaled dimensions
@@ -75,11 +79,12 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
   const contentWidth = Math.ceil(scaledWidth / px(1));
   const contentHeight = Math.ceil(scaledHeight / px(1));
 
-  // Default position to center of screen if not specified
+  // Default position to bottom right (minimap style) if not specified
   const cardPadding = px(GRID.padding * 2) + px(6); // padding + border
   const titleBarHeight = 24; // Title bar height in pixels
-  const defaultX = x ?? (renderer.width - px(contentWidth) - cardPadding) / 2;
-  const defaultY = y ?? (renderer.height - px(contentHeight) - cardPadding - titleBarHeight) / 2;
+  const margin = 20; // Margin from edges
+  const defaultX = x ?? (renderer.width - px(contentWidth) - cardPadding - margin);
+  const defaultY = y ?? (renderer.height - px(contentHeight) - cardPadding - titleBarHeight - margin);
 
   card = new PixelCard({
     title: `Sprite Sheet - ${config.type} (${controller.getScale().toFixed(2)}x)`,
@@ -94,7 +99,7 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
 
   contentContainer = card.getContentContainer();
 
-  // Initial render
+  // Initial render - controller now handles cell selection/highlighting
   controller.render(contentContainer);
 
   return { card, controller };

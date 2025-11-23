@@ -352,6 +352,14 @@ export class PixelCard {
   }
 
   /**
+   * Update the card title
+   */
+  public setTitle(title: string) {
+    this.options.title = title;
+    this.redraw();
+  }
+
+  /**
    * Updates minimum content size based on actual content bounds
    * Call this after adding content to the content container when minContentSize is enabled
    */

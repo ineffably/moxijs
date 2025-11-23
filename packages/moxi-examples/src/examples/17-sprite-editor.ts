@@ -9,6 +9,8 @@ import { ASSETS } from '../assets-config';
 import { PixelCard, GRID, px, UI_COLORS, BORDER } from './editor/pixel-card';
 import { createPixelButton } from './editor/pixel-button';
 import { createToolIcon, ToolType } from './editor/tool-icons';
+import { createPixelDialog } from './editor/pixel-dialog';
+import { createSpriteCard, SPRITE_CONFIGS } from './editor/sprite-card';
 
 // Aerugo palette - for editor UI (32 colors)
 const AERUGO_PALETTE = [
@@ -330,7 +332,7 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
     const sections = [
       { label: 'Tool:', value: 'Pencil' },
       { label: 'Color:', value: '#000000' },
-      { label: 'Position:', value: '0, 0' }
+      { label: 'Scale:', value: '1x' }
     ];
 
     let currentX = px(2);
@@ -383,7 +385,7 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
 /**
  * Creates a commander bar for actions and options
  */
-function createCommanderBar(renderer: PIXI.Renderer): PixelCard {
+function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): PixelCard {
   const canvasWidth = renderer.width;
   const canvasHeight = renderer.height;
 
@@ -422,7 +424,7 @@ function createCommanderBar(renderer: PIXI.Renderer): PixelCard {
 
     let currentX = 0;
 
-    // New button
+    // New button - shows dialog to choose sprite sheet type
     const newButton = createPixelButton({
       width: buttonWidth,
       height: buttonHeight,
@@ -430,7 +432,37 @@ function createCommanderBar(renderer: PIXI.Renderer): PixelCard {
       selectionMode: 'press',
       actionMode: 'click',
       onClick: () => {
-        console.log('New button clicked');
+        // Show dialog to choose sprite sheet type
+        const dialog = createPixelDialog({
+          title: 'New Sprite Sheet',
+          message: 'Choose sprite sheet type:',
+          buttons: [
+            {
+              label: 'PICO-8',
+              onClick: () => {
+                const spriteCard = createSpriteCard({
+                  config: SPRITE_CONFIGS['PICO-8'],
+                  renderer
+                });
+                scene.addChild(spriteCard.container);
+                console.log('Created PICO-8 sprite sheet');
+              }
+            },
+            {
+              label: 'TIC-80',
+              onClick: () => {
+                const spriteCard = createSpriteCard({
+                  config: SPRITE_CONFIGS['TIC-80'],
+                  renderer
+                });
+                scene.addChild(spriteCard.container);
+                console.log('Created TIC-80 sprite sheet');
+              }
+            }
+          ],
+          renderer
+        });
+        scene.addChild(dialog);
       }
     });
     newButton.position.set(currentX, 0);
@@ -477,7 +509,7 @@ export async function initSpriteEditor() {
   });
 
   // Create commander bar at top
-  const commanderBar = createCommanderBar(renderer);
+  const commanderBar = createCommanderBar(renderer, scene);
   scene.addChild(commanderBar.container);
 
   // Calculate top offset for cards below commander bar

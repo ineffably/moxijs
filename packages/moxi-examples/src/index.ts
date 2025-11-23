@@ -132,13 +132,13 @@ const examples: Record<string, Example> = {
     description: 'Browse all available sprites and textures loaded in the examples app',
     init: initSpriteLibrary,
     source: spriteLibrarySource
+  },
+  'sprite-editor': {
+    name: '17 - Sprite Editor',
+    description: 'Edit and manipulate sprites with pixel-perfect rendering, palettes, and tools',
+    init: initSpriteEditor,
+    source: spriteEditorSource
   }
-  // 'sprite-editor': {
-  //   name: '17 - Sprite Editor',
-  //   description: 'Edit and manipulate sprites',
-  //   init: initSpriteEditor,
-  //   source: spriteEditorSource
-  // }
 };
 
 let currentExample: string | null = null;

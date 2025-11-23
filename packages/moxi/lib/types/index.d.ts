@@ -33,6 +33,8 @@ import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
+import { svgToTexture } from './library/svg-utils/svg-to-texture';
+import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pixel-grid';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene } from './library/loading-scene';
@@ -55,6 +57,8 @@ export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
 export type { UILayerOptions } from './ui/UILayer';
+export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
+export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 export type Asset = {
     src: string;
     alias?: string;
@@ -185,6 +189,25 @@ declare const exportedObjects: {
     UITabs: typeof UITabs;
     UILayer: typeof UILayer;
     UIScaleMode: typeof UIScaleMode;
+    svgToTexture: typeof svgToTexture;
+    PixelGrid: typeof PixelGrid;
+    px: (units: number) => number;
+    units: (pixels: number) => number;
+    GRID: {
+        readonly unit: number;
+        readonly scale: number;
+        readonly border: number;
+        readonly padding: number;
+        readonly gap: number;
+        readonly fontScale: number;
+    };
+    BORDER: {
+        readonly outer: 1;
+        readonly middle: 1;
+        readonly inner: 1;
+        readonly total: 3;
+    };
+    createBorderConfig: typeof createBorderConfig;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode };
+export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode, svgToTexture, PixelGrid, px, units, GRID, BORDER, createBorderConfig };

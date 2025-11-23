@@ -177,6 +177,7 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
 
   let toolWidth = 46; // Grid units per tool button width (38 * 1.2 = 45.6, rounded to 46)
   let toolHeight = 12; // Grid units per tool button height
+  let fontScale = GRID.fontScale; // Local font scale that can be modified
   let toolsPerRow = 1; // One button per row (vertical layout)
   let rows = 4; // Four tools stacked vertically
 
@@ -202,7 +203,7 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
       // Scale font proportionally with button height
       // Base: toolHeight=12 → fontScale=0.25 (16px)
       // Scale font linearly: fontScale = 0.25 * (toolHeight / 12)
-      GRID.fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
+      fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
 
       drawTools();
     }
@@ -264,7 +265,7 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
       toolHeight = Math.max(4, Math.min(20, toolHeight + delta));
 
       // Scale font proportionally with button height
-      GRID.fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
+      fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
 
       // Update card content size
       const newContentWidth = toolWidth;
@@ -544,6 +545,9 @@ function updatePaletteForActiveSheet() {
   const paletteCard = createPaletteCard(20, topOffset, renderer, currentPalette);
   scene.addChild(paletteCard.container);
   currentPaletteCard = paletteCard;
+
+  // Also update the reference used for theme updates
+  (window as any).paletteCardRef = paletteCard;
 }
 
 /**
@@ -625,19 +629,25 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
       scale: 32 // Large scale for editing (twice as large)
     });
 
-    // Remove old sprite card if it exists
+    // Save existing sprite card position if it exists
+    let spriteCardX: number;
+    let spriteCardY: number;
+
     if (instance.spriteCard) {
+      // Reuse existing position
+      spriteCardX = instance.spriteCard.card.container.x;
+      spriteCardY = instance.spriteCard.card.container.y;
       scene.removeChild(instance.spriteCard.card.container);
+    } else {
+      // Create sprite card at default position - just below commander bar, centered horizontally
+      const spriteCardDims = spriteController.getScaledDimensions();
+      const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Title bar height
+      const topMargin = 20;
+      const gapBelowCommander = 10;
+
+      spriteCardX = (renderer.width - spriteCardDims.width) / 2;
+      spriteCardY = topMargin + commanderBarHeight + gapBelowCommander;
     }
-
-    // Create sprite card - just below commander bar, centered horizontally
-    const spriteCardDims = spriteController.getScaledDimensions();
-    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Title bar height
-    const topMargin = 20;
-    const gapBelowCommander = 10;
-
-    const spriteCardX = (renderer.width - spriteCardDims.width) / 2;
-    const spriteCardY = topMargin + commanderBarHeight + gapBelowCommander;
 
     const spriteCardResult = createSpriteCard({
       x: spriteCardX,
@@ -801,8 +811,8 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
             label: themeMetadata.name,
             onClick: () => {
               setThemeByMetadata(themeMetadata);
-              // Use global recreateUI function
-              (window as any).recreateUI();
+              // Update theme without recreating UI (preserves state)
+              (window as any).updateTheme();
             }
           })),
           renderer
@@ -853,6 +863,38 @@ export async function initSpriteEditor() {
     }
   });
 
+  // Keep references to all UI cards for theme updates
+  let commanderBarCard: PixelCard;
+  let paletteCardRef: PixelCard;
+  let infoBarCard: PixelCard;
+
+  // Function to update theme without losing state
+  function updateTheme() {
+    // Update renderer background
+    renderer.background.color = getTheme().backgroundRoot;
+
+    // Refresh all cards to apply new theme colors
+    if (commanderBarCard) commanderBarCard.refresh();
+
+    // Get current palette card reference (may be updated by updatePaletteForActiveSheet)
+    const currentPalette = (window as any).paletteCardRef || paletteCardRef;
+    if (currentPalette) currentPalette.refresh();
+
+    if (infoBarCard) infoBarCard.refresh();
+
+    // Refresh all sprite sheet instance cards
+    spriteSheetInstances.forEach(instance => {
+      if (instance.sheetCard) {
+        instance.sheetCard.card.refresh();
+      }
+      if (instance.spriteCard) {
+        instance.spriteCard.card.refresh();
+      }
+    });
+
+    console.log('✨ Theme updated without losing state');
+  }
+
   // Function to recreate all UI with current theme
   async function recreateUI() {
     // Remove all UI
@@ -862,16 +904,16 @@ export async function initSpriteEditor() {
     renderer.background.color = getTheme().backgroundRoot;
 
     // Recreate commander bar at top
-    const commanderBar = createCommanderBar(renderer, scene);
-    scene.addChild(commanderBar.container);
+    commanderBarCard = createCommanderBar(renderer, scene);
+    scene.addChild(commanderBarCard.container);
 
     // Calculate top offset for cards below commander bar
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
     const topOffset = 20 + commanderBarHeight + 10;
 
     // Recreate palette card with current palette
-    const paletteCard = createPaletteCard(20, topOffset, renderer, currentPalette);
-    scene.addChild(paletteCard.container);
+    paletteCardRef = createPaletteCard(20, topOffset, renderer, currentPalette);
+    scene.addChild(paletteCardRef.container);
 
     // Recreate SPT toolbar - HIDDEN
     // const paletteCardHeight = paletteCard.container.getBounds().height;
@@ -885,14 +927,15 @@ export async function initSpriteEditor() {
     // scene.addChild(toolCard.container);
 
     // Recreate info bar
-    const infoBar = createInfoBar(renderer);
-    scene.addChild(infoBar.container);
+    infoBarCard = createInfoBar(renderer);
+    scene.addChild(infoBarCard.container);
   }
 
-  // Make renderer, scene, and recreateUI available globally
+  // Make renderer, scene, and functions available globally
   (window as any).renderer = renderer;
   (window as any).scene = scene;
   (window as any).recreateUI = recreateUI;
+  (window as any).updateTheme = updateTheme;
 
   // Initial UI creation
   await recreateUI();

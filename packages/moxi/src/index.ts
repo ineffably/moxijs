@@ -33,6 +33,8 @@ import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
+import { svgToTexture } from './library/svg-utils/svg-to-texture';
+import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pixel-grid';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene } from './library/loading-scene';
@@ -79,6 +81,8 @@ export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
 export type { UILayerOptions } from './ui/UILayer';
+export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
+export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 
 export type Asset = { src: string, alias?: string };
 
@@ -173,7 +177,14 @@ const exportedObjects = {
   UIScrollContainer,
   UITabs,
   UILayer,
-  UIScaleMode
+  UIScaleMode,
+  svgToTexture,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig
 };
 
 export default exportedObjects;
@@ -242,6 +253,13 @@ export {
   UIScrollContainer,
   UITabs,
   UILayer,
-  UIScaleMode
+  UIScaleMode,
+  svgToTexture,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig
 };
 

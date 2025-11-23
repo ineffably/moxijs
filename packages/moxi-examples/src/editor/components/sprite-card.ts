@@ -11,6 +11,7 @@ export interface SpriteCardOptions {
   renderer: PIXI.Renderer;
   spriteController: SpriteController;
   onPixelClick?: (x: number, y: number) => void;
+  onFocus?: () => void;
 }
 
 export interface SpriteCardResult {
@@ -22,7 +23,7 @@ export interface SpriteCardResult {
  * Creates a sprite card for editing a single 8x8 sprite
  */
 export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
-  const { x, y, renderer, spriteController, onPixelClick } = options;
+  const { x, y, renderer, spriteController, onPixelClick, onFocus } = options;
 
   // Get scaled dimensions
   const dims = spriteController.getScaledDimensions();
@@ -41,7 +42,8 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
     onResize: (width, height) => {
       // Re-render sprite when card resizes
       drawSprite();
-    }
+    },
+    onFocus
   });
 
   const contentContainer = card.getContentContainer();

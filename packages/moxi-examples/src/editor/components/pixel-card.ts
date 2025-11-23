@@ -47,6 +47,8 @@ export interface PixelCardOptions {
   minContentSize?: boolean; // If true, prevents resizing below content's actual size
   backgroundColor?: number; // Custom background color (defaults to UI_COLORS.cardBg)
   clipContent?: boolean; // If true, clips content to container bounds (like CSS overflow: hidden)
+  pairedCard?: PixelCard; // Optional paired card that should layer together
+  onFocus?: () => void; // Callback when card is clicked/focused
 }
 
 export interface PixelCardResizeState {
@@ -81,9 +83,14 @@ export class PixelCard {
   private state: PixelCardResizeState;
 
   private scaleIndicator: PIXI.Container | null = null;
+  private pairedCard: PixelCard | null = null;
+  private onFocus: (() => void) | null = null;
 
   constructor(options: PixelCardOptions) {
     this.options = options;
+    this.pairedCard = options.pairedCard ?? null;
+    this.onFocus = options.onFocus ?? null;
+
     this.container = new PIXI.Container();
     this.container.position.set(options.x ?? 0, options.y ?? 0);
 
@@ -230,8 +237,13 @@ export class PixelCard {
                   px(cardWidth - BORDER.total * 2), this.titleBarHeightPx);
     titleBar.fill({ color: UI_COLORS.titleBar });
 
-    // Title bar dragging
+    // Title bar dragging and focus
     titleBar.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
+      // Trigger focus callback to bring this card to front
+      if (this.onFocus) {
+        this.onFocus();
+      }
+
       this.isDragging = true;
       this.cardStartX = this.container.x;
       this.cardStartY = this.container.y;
@@ -376,6 +388,13 @@ export class PixelCard {
   public setTitle(title: string) {
     this.options.title = title;
     this.redraw();
+  }
+
+  /**
+   * Set the paired card (usually set after both cards are created)
+   */
+  public setPairedCard(card: PixelCard) {
+    this.pairedCard = card;
   }
 
   /**

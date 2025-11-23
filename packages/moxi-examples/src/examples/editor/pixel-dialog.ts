@@ -4,16 +4,24 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
 import { createPixelButton } from './pixel-button';
+import { createPixelCheckbox } from './pixel-checkbox';
 
 export interface DialogButton {
   label: string;
-  onClick: () => void;
+  onClick: (checkboxStates?: Record<string, boolean>) => void;
+}
+
+export interface DialogCheckbox {
+  name: string;
+  label: string;
+  defaultValue?: boolean;
 }
 
 export interface PixelDialogOptions {
   title: string;
   message: string;
   buttons: DialogButton[];
+  checkboxes?: DialogCheckbox[];
   renderer: PIXI.Renderer;
 }
 
@@ -22,7 +30,7 @@ export interface PixelDialogOptions {
  * Returns a container with the dialog and a semi-transparent backdrop
  */
 export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
-  const { title, message, buttons, renderer } = options;
+  const { title, message, buttons, checkboxes = [], renderer } = options;
 
   // Create overlay container
   const overlay = new PIXI.Container();
@@ -34,10 +42,17 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
   backdrop.eventMode = 'static'; // Block clicks to elements below
   overlay.addChild(backdrop);
 
+  // Track checkbox states
+  const checkboxStates: Record<string, boolean> = {};
+  checkboxes.forEach(cb => {
+    checkboxStates[cb.name] = cb.defaultValue ?? false;
+  });
+
   // Calculate dialog dimensions
   const buttonWidth = 30; // Grid units per button
   const buttonHeight = 12; // Grid units
   const buttonSpacing = px(2);
+  const checkboxHeight = 8; // Grid units per checkbox
   const messageMargin = px(4);
 
   // Create message text to measure it
@@ -52,14 +67,15 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
   messageText.roundPixels = true;
   messageText.scale.set(GRID.fontScale);
 
-  // Calculate content dimensions based on message and buttons
+  // Calculate content dimensions based on message, checkboxes, and buttons
   const messageWidthInGridUnits = Math.ceil(messageText.width / px(1));
   const buttonsWidthInGridUnits = buttons.length * buttonWidth + (buttons.length - 1) * (buttonSpacing / px(1));
   const contentWidth = Math.max(messageWidthInGridUnits, buttonsWidthInGridUnits) + 4; // +4 for margins
 
   const messageHeightInGridUnits = Math.ceil(messageText.height / px(1));
-  const verticalSpacing = 4; // Grid units between message and buttons
-  const contentHeight = messageHeightInGridUnits + verticalSpacing + buttonHeight + 4; // +4 for top/bottom margins
+  const checkboxesHeightInGridUnits = checkboxes.length > 0 ? checkboxes.length * checkboxHeight + 2 : 0;
+  const verticalSpacing = 4; // Grid units between sections
+  const contentHeight = messageHeightInGridUnits + checkboxesHeightInGridUnits + verticalSpacing + buttonHeight + 4; // +4 for top/bottom margins
 
   // Create dialog card
   const dialogCard = new PixelCard({
@@ -75,11 +91,30 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
   const contentContainer = dialogCard.getContentContainer();
 
   // Add message text
-  messageText.position.set(px(2), px(2));
+  const messageY = px(2);
+  messageText.position.set(px(2), messageY);
   contentContainer.addChild(messageText);
 
+  // Add checkboxes
+  let checkboxY = messageY + messageText.height + px(4); // message position + message height + 4 grid units (16px at 4x scale)
+  checkboxes.forEach((checkboxConfig) => {
+    const checkbox = createPixelCheckbox({
+      label: checkboxConfig.label,
+      checked: checkboxStates[checkboxConfig.name],
+      onChange: (checked) => {
+        checkboxStates[checkboxConfig.name] = checked;
+      }
+    });
+    checkbox.position.set(px(2), checkboxY);
+    contentContainer.addChild(checkbox);
+
+    // Get actual height of checkbox container for proper spacing
+    const checkboxContainer = checkbox as PIXI.Container;
+    checkboxY += checkboxContainer.height + px(1); // Add spacing between checkboxes
+  });
+
   // Add buttons
-  const buttonY = px(messageHeightInGridUnits + verticalSpacing + 2);
+  const buttonY = px(messageHeightInGridUnits + checkboxesHeightInGridUnits + verticalSpacing + 2);
   let currentX = px((contentWidth - buttonsWidthInGridUnits) / 2); // Center buttons
 
   buttons.forEach((buttonConfig, index) => {
@@ -90,7 +125,7 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
       selectionMode: 'press',
       actionMode: 'click',
       onClick: () => {
-        buttonConfig.onClick();
+        buttonConfig.onClick(checkboxStates);
         // Close dialog when button is clicked
         overlay.destroy();
       }

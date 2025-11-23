@@ -3,15 +3,9 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
+import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from './sprite-sheet-controller';
 
-export type SpriteSheetType = 'PICO-8' | 'TIC-80';
-
-export interface SpriteSheetConfig {
-  type: SpriteSheetType;
-  width: number;   // In pixels
-  height: number;  // In pixels
-  palette: number[]; // Array of color values
-}
+export { SpriteSheetType, SpriteSheetConfig };
 
 // Sprite sheet configurations
 export const SPRITE_CONFIGS: Record<SpriteSheetType, SpriteSheetConfig> = {
@@ -44,101 +38,64 @@ export interface SpriteCardOptions {
   x?: number;
   y?: number;
   renderer: PIXI.Renderer;
+  showGrid?: boolean;
+}
+
+export interface SpriteCardResult {
+  card: PixelCard;
+  controller: SpriteSheetController;
 }
 
 /**
  * Creates a sprite card with a canvas for editing
  */
-export function createSpriteCard(options: SpriteCardOptions): PixelCard {
-  const { config, x, y, renderer } = options;
+export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
+  const { config, x, y, renderer, showGrid = false } = options;
 
-  // Calculate initial scale to fit nicely (50% of viewport height)
-  const targetHeight = renderer.height * 0.5;
-  let currentScale = Math.max(1, Math.floor(targetHeight / config.height));
+  let card: PixelCard;
+  let contentContainer: PIXI.Container;
 
-  // Scale the sprite sheet dimensions
-  let scaledWidth = config.width * currentScale;
-  let scaledHeight = config.height * currentScale;
+  // Create sprite sheet controller
+  const controller = new SpriteSheetController({
+    config,
+    renderer,
+    showGrid,
+    onScaleChange: (newScale) => {
+      // Update card title when scale changes
+      card.setTitle(`Sprite Sheet - ${config.type} (${newScale.toFixed(2)}x)`);
+      // Re-render the sprite sheet
+      controller.render(contentContainer);
+    }
+  });
+
+  // Get initial scaled dimensions
+  const { width: scaledWidth, height: scaledHeight } = controller.getScaledDimensions();
 
   // Convert pixel dimensions to grid units
-  let contentWidth = Math.ceil(scaledWidth / px(1));
-  let contentHeight = Math.ceil(scaledHeight / px(1));
+  const contentWidth = Math.ceil(scaledWidth / px(1));
+  const contentHeight = Math.ceil(scaledHeight / px(1));
 
   // Default position to center of screen if not specified
-  const defaultX = x ?? (renderer.width - px(contentWidth) - px(GRID.padding * 2) - px(6)) / 2;
-  const defaultY = y ?? (renderer.height - px(contentHeight) - px(GRID.padding * 2) - px(6) - 24) / 2;
+  const cardPadding = px(GRID.padding * 2) + px(6); // padding + border
+  const titleBarHeight = 24; // Title bar height in pixels
+  const defaultX = x ?? (renderer.width - px(contentWidth) - cardPadding) / 2;
+  const defaultY = y ?? (renderer.height - px(contentHeight) - cardPadding - titleBarHeight) / 2;
 
-  const card = new PixelCard({
-    title: `Sprite Sheet - ${config.type} (${currentScale}x)`,
+  card = new PixelCard({
+    title: `Sprite Sheet - ${config.type} (${controller.getScale().toFixed(2)}x)`,
     x: defaultX,
     y: defaultY,
     contentWidth,
     contentHeight,
     renderer,
-    backgroundColor: 0xffffff // White background for sprite editing
+    backgroundColor: 0x2f485c, // Dark blue background
+    clipContent: true // Enable clipping for sprite sheet (overflow: hidden)
   });
 
-  const contentContainer = card.getContentContainer();
+  contentContainer = card.getContentContainer();
 
-  function drawSpriteSheet() {
-    contentContainer.removeChildren();
+  // Initial render
+  controller.render(contentContainer);
 
-    // Create sprite sheet canvas
-    const canvas = new PIXI.Graphics();
-    canvas.roundPixels = true;
-
-    // Draw scaled sprite sheet (each pixel becomes currentScale x currentScale)
-    for (let y = 0; y < config.height; y++) {
-      for (let x = 0; x < config.width; x++) {
-        canvas.rect(x * currentScale, y * currentScale, currentScale, currentScale);
-        canvas.fill({ color: config.palette[0] });
-      }
-    }
-
-    contentContainer.addChild(canvas);
-  }
-
-  // Mouse wheel zoom for sprite scale
-  const handleWheel = (e: WheelEvent) => {
-    const canvas = renderer.canvas as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
-
-    const cardBounds = card.container.getBounds();
-
-    if (mouseX >= cardBounds.x && mouseX <= cardBounds.x + cardBounds.width &&
-        mouseY >= cardBounds.y && mouseY <= cardBounds.y + cardBounds.height) {
-      e.preventDefault();
-
-      const delta = e.deltaY > 0 ? -1 : 1;
-      const newScale = Math.max(1, Math.min(16, currentScale + delta));
-
-      if (newScale !== currentScale) {
-        currentScale = newScale;
-
-        // Update card title to show new scale
-        card.setTitle(`Sprite Sheet - ${config.type} (${currentScale}x)`);
-
-        // Redraw sprite sheet at new scale (card size stays the same)
-        drawSpriteSheet();
-      }
-    }
-  };
-
-  if (typeof window !== 'undefined') {
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-    card.container.on('destroyed', () => {
-      window.removeEventListener('wheel', handleWheel);
-    });
-  }
-
-  // Initial draw
-  drawSpriteSheet();
-
-  return card;
+  return { card, controller };
 }

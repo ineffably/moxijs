@@ -4,12 +4,16 @@
  */
 
 // Components
-export { PixelCard, GRID, px, UI_COLORS, BORDER } from './components/pixel-card';
+export { PixelCard, UI_COLORS } from './components/pixel-card';
 export { createPixelButton, PixelButtonOptions, SelectionMode, ActionMode } from './components/pixel-button';
 export { createPixelDialog, PixelDialogOptions } from './components/pixel-dialog';
 export { createPixelCheckbox } from './components/pixel-checkbox';
 export { createSpriteSheetCard, SPRITESHEET_CONFIGS, SpriteSheetCardOptions, SpriteSheetCardResult } from './components/spritesheet-card';
 export { createSpriteCard, SpriteCardOptions, SpriteCardResult } from './components/sprite-card';
+
+// Re-export pixel grid utilities from moxi
+export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from 'moxi';
+export type { PixelGridConfig, BorderConfig } from 'moxi';
 
 // Controllers
 export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions, SpriteSheetType } from './controllers/sprite-sheet-controller';
@@ -17,7 +21,10 @@ export { SpriteController, SpriteControllerOptions } from './controllers/sprite-
 
 // Utilities
 export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilities/svg-icon-button';
-export { svgToTexture, SVGToTextureOptions } from './utilities/svg-to-texture';
+
+// Re-export SVG utilities from moxi
+export { svgToTexture } from 'moxi';
+export type { SVGToTextureOptions } from 'moxi';
 
 // Theming System
 export {

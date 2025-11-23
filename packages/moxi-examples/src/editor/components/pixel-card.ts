@@ -3,27 +3,10 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
+import { GRID, BORDER, px } from 'moxi';
 
-// Pixel Perfect Grid System
-export const GRID = {
-  unit: 1,        // Base pixel unit at 1x scale
-  scale: 4,       // Scale everything by 4x for visibility
-  border: 1,      // Border width in grid units (will be 4px at 4x scale)
-  padding: 1,     // Standard padding (will be 4px at 4x scale)
-  gap: 1,         // Gap between elements (will be 4px at 4x scale)
-  fontScale: 0.25 // Font scale (64px * 0.25 = 16px)
-};
-
-// Triple border system: black/tan/black
-export const BORDER = {
-  outer: 1,       // Outer black border (1 grid unit)
-  middle: 1,      // Middle tan border (1 grid unit)
-  inner: 1,       // Inner black border (1 grid unit)
-  total: 3        // Total border width (3 grid units = 9px at 3x scale)
-};
-
-// Helper to convert grid units to pixels
-export const px = (units: number) => units * GRID.unit * GRID.scale;
+// Re-export for backwards compatibility with editor code
+export { GRID, BORDER, px };
 
 // UI Colors - Maps theme tokens to component usage
 export const UI_COLORS = {

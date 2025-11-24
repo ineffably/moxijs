@@ -327,6 +327,28 @@ export class PixelCard {
     titleText.position.set(px(BORDER.total) + 2, Math.floor(verticalCenter));
     this.container.addChild(titleText);
 
+    // ALPHA! stamp for PIKCELL title (temporary fun branding)
+    if (this.options.title === 'PIKCELL') {
+      const alphaStamp = new PIXI.BitmapText({
+        text: 'ALPHA!',
+        style: {
+          fontFamily: 'KennyBlocksBitmap',
+          fontSize: 64,
+          fill: 0x00e436, // Lime green from PICO-8 palette
+        }
+      });
+      alphaStamp.roundPixels = true;
+      alphaStamp.anchor.set(0.5); // Center origin for rotation
+      alphaStamp.scale.set(GRID.fontScale * 1.2); // Scale up a bit
+      alphaStamp.angle = -8; // Slight counter-clockwise rotation
+
+      // Position after PIKCELL text with some spacing, adjusted for centered anchor
+      const stampX = titleText.x + titleText.width + px(2) + px(8) + px(2);
+      const stampY = verticalCenter - px(2) + px(4) - px(1);
+      alphaStamp.position.set(stampX, stampY);
+      this.container.addChild(alphaStamp);
+    }
+
     // Position content container
     this.contentContainer.position.set(
       px(BORDER.total + GRID.padding),

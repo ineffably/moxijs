@@ -27,14 +27,24 @@ export async function initSpriteEditor() {
     }
   });
 
-  // Load pixel font
-  await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT]);
+  // Load pixel fonts
+  await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT, ASSETS.KENNEY_BLOCKS_FONT]);
 
   // Install bitmap font at 64px for high quality, will scale down to 16px
   PIXI.BitmapFont.install({
     name: 'PixelOperator8Bitmap',
     style: {
       fontFamily: 'PixelOperator8',
+      fontSize: 64,
+      fill: 0xffffff,
+    }
+  });
+
+  // Install Kenney Blocks bitmap font for ALPHA! stamp
+  PIXI.BitmapFont.install({
+    name: 'KennyBlocksBitmap',
+    style: {
+      fontFamily: 'Kenney Blocks',
       fontSize: 64,
       fill: 0xffffff,
     }

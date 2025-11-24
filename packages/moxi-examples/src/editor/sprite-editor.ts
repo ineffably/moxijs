@@ -11,6 +11,7 @@ import { SpriteController } from './controllers/sprite-controller';
 import { SpriteSheetType } from './controllers/sprite-sheet-controller';
 import { UIStateManager, CardState } from './state/ui-state-manager';
 import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/project-state-manager';
+import { LayoutStateManager, LayoutSlotState, CardLayoutState } from './state/layout-state-manager';
 import { getTheme } from './theming/theme';
 import { PICO8_PALETTE } from './theming/palettes';
 import { GRID, BORDER, px } from 'moxi';
@@ -21,6 +22,7 @@ import { createToolCard, ToolCardResult } from './cards/tool-card';
 import { createSPTToolbarCard, SPTToolbarCardResult } from './cards/spt-toolbar-card';
 import { createInfoBarCard, InfoBarCardResult } from './cards/info-bar-card';
 import { createCommanderBarCard, CommanderBarCardResult } from './cards/commander-bar-card';
+import { createScaleCard, ScaleCardResult } from './cards/scale-card';
 import { createCardZoomHandler } from './utilities/card-zoom-handler';
 
 /**
@@ -93,6 +95,7 @@ export class SpriteEditor {
   private toolCard?: ToolCardResult;
   private sptToolbarCard?: SPTToolbarCardResult;
   private infoBarCard?: InfoBarCardResult;
+  private scaleCard?: ScaleCardResult;
 
   // Sprite sheets
   private spriteSheetInstances: SpriteSheetInstance[] = [];
@@ -190,13 +193,13 @@ export class SpriteEditor {
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
     const topOffset = commanderBarHeight + px(GRID.gap * 2);
 
-    // Position commander bar at top (y=0, x=0)
+    // Position PIKCELL bar at top (y=0, x=0)
     const commanderCard = this.cardRegistry.get('commander');
     if (commanderCard) {
       commanderCard.container.position.set(0, 0);
     }
 
-    // Position palette card below commander, docked to left edge
+    // Position palette card below PIKCELL, docked to left edge
     const paletteCard = this.cardRegistry.get('palette');
     if (paletteCard) {
       paletteCard.container.position.set(0, topOffset);
@@ -246,7 +249,7 @@ export class SpriteEditor {
       }
     });
 
-    // Position sprite cards centered below commander bar
+    // Position sprite cards centered below PIKCELL bar
     this.cardRegistry.forEach((card, id) => {
       if (id.startsWith('sprite-card-')) {
         const cardBounds = card.container.getBounds();
@@ -364,7 +367,7 @@ export class SpriteEditor {
         spriteCardY = instance.spriteCard.card.container.y;
         this.scene.removeChild(instance.spriteCard.card.container);
       } else {
-        // Create sprite card at default position - just below commander bar, centered horizontally
+        // Create sprite card at default position - just below PIKCELL bar, centered horizontally
         const spriteCardDims = spriteController.getScaledDimensions();
         const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Title bar height
 
@@ -559,7 +562,7 @@ export class SpriteEditor {
     // Update renderer background
     this.renderer.background.color = getTheme().backgroundRoot;
 
-    // Recreate commander bar at top
+    // Recreate PIKCELL bar at top
     this.commanderBarCard = createCommanderBarCard({
       x: px(GRID.margin),
       y: px(GRID.margin),
@@ -569,7 +572,11 @@ export class SpriteEditor {
         onNew: () => this.handleNew(),
         onSave: () => this.handleSave(),
         onLoad: () => this.handleLoad(),
+        onExport: () => this.handleExport(),
         onApplyLayout: () => this.applyDefaultLayout(),
+        onSaveLayoutSlot: (slot) => this.handleSaveLayoutSlot(slot),
+        onLoadLayoutSlot: (slot) => this.handleLoadLayoutSlot(slot),
+        hasLayoutSlot: (slot) => LayoutStateManager.hasLayoutSlot(slot),
         onThemeChange: () => this.updateTheme(),
         onScaleChange: (scale) => this.handleScaleChange(scale) // TEMPORARY
       }
@@ -577,7 +584,7 @@ export class SpriteEditor {
     this.scene.addChild(this.commanderBarCard.card.container);
     this.registerCard('commander', this.commanderBarCard.card);
 
-    // Calculate top offset for cards below commander bar
+    // Calculate top offset for cards below PIKCELL bar
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
     const topOffset = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
 
@@ -609,6 +616,17 @@ export class SpriteEditor {
     });
     this.scene.addChild(this.infoBarCard.card.container);
     this.registerCard('info', this.infoBarCard.card);
+
+    // Create scale card (TEMPORARY: for testing GRID scaling)
+    // HIDDEN: Uncomment to enable scale testing controls
+    // this.scaleCard = createScaleCard({
+    //   x: px(GRID.margin),
+    //   y: px(GRID.margin) * 2 + commanderBarHeight,
+    //   renderer: this.renderer,
+    //   onScaleChange: (scale) => this.handleScaleChange(scale)
+    // });
+    // this.scene.addChild(this.scaleCard.card.container);
+    // this.registerCard('scale', this.scaleCard.card);
 
     // Load project state (sprite sheets and pixel data)
     this.loadProjectState();
@@ -858,6 +876,120 @@ export class SpriteEditor {
     // Save to localStorage and recreate UI
     ProjectStateManager.saveProject(this.projectState);
     this.loadProjectState();
+  }
+
+  /**
+   * Handle "Export" button - Export sprite sheet as PNG
+   */
+  private handleExport(): void {
+    // Get the active sprite sheet instance
+    if (!this.activeSpriteSheetInstance) {
+      const dialog = createPixelDialog({
+        title: 'No Sprite Sheet',
+        message: 'No sprite sheet available. Please create a sprite sheet first.',
+        buttons: [
+          {
+            label: 'OK',
+            onClick: () => {}
+          }
+        ],
+        renderer: this.renderer
+      });
+      this.scene.addChild(dialog);
+      return;
+    }
+
+    const spriteSheetController = this.activeSpriteSheetInstance.sheetCard.controller;
+    const config = spriteSheetController.getConfig();
+
+    // Create a temporary canvas at the sprite sheet's full dimensions
+    const canvas = document.createElement('canvas');
+    canvas.width = config.width;
+    canvas.height = config.height;
+    const ctx = canvas.getContext('2d')!;
+
+    // Get the sprite sheet's full pixel data (2D array)
+    const pixelData = spriteSheetController.getPixelData();
+    const palette = config.palette;
+
+    // Draw all pixels to canvas
+    for (let y = 0; y < config.height; y++) {
+      for (let x = 0; x < config.width; x++) {
+        const colorIndex = pixelData[y][x];
+        const color = palette[colorIndex];
+
+        // Convert hex color to RGB
+        const r = (color >> 16) & 0xff;
+        const g = (color >> 8) & 0xff;
+        const b = color & 0xff;
+
+        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+
+    // Convert canvas to blob and download
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `spritesheet-${config.type.toLowerCase()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  /**
+   * Handle saving current layout to a slot
+   */
+  private handleSaveLayoutSlot(slot: 'A' | 'B' | 'C'): void {
+    const layoutState: LayoutSlotState = {
+      cards: []
+    };
+
+    // Capture all card positions and sizes
+    this.cardRegistry.forEach((card, id) => {
+      const contentSize = card.getContentSize();
+      layoutState.cards.push({
+        id,
+        x: card.container.x,
+        y: card.container.y,
+        width: contentSize.width,
+        height: contentSize.height
+      });
+    });
+
+    // Save to localStorage
+    LayoutStateManager.saveLayoutSlot(slot, layoutState);
+
+    console.log(`Layout saved to slot ${slot}`);
+  }
+
+  /**
+   * Handle loading layout from a slot
+   */
+  private handleLoadLayoutSlot(slot: 'A' | 'B' | 'C'): void {
+    const layoutState = LayoutStateManager.loadLayoutSlot(slot);
+    if (!layoutState) {
+      console.warn(`No layout found in slot ${slot}`);
+      return;
+    }
+
+    // Apply the layout to all cards
+    layoutState.cards.forEach(cardLayout => {
+      const card = this.cardRegistry.get(cardLayout.id);
+      if (card) {
+        // Set position
+        card.container.position.set(cardLayout.x, cardLayout.y);
+
+        // Set size
+        card.setContentSize(cardLayout.width, cardLayout.height);
+      }
+    });
+
+    console.log(`Layout loaded from slot ${slot}`);
   }
 
   /**

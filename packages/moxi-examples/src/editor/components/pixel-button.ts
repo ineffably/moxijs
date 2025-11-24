@@ -48,9 +48,33 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     tooltip
   } = options;
 
-  // Determine button dimensions
-  const buttonWidth = width ?? size ?? 10;
+  // Auto-calculate width for text labels if not explicitly provided
+  let buttonWidth = width ?? size ?? 10;
   const buttonHeight = height ?? size ?? 10;
+
+  // If label is provided and no explicit width, calculate based on text + padding
+  if (label && !width && !size) {
+    const tempText = new PIXI.BitmapText({
+      text: label,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: 0xffffff,
+      }
+    });
+    tempText.scale.set(GRID.fontScale);
+
+    // Calculate text width in grid units
+    // Need to account for:
+    // - 2 border layers on each side (GRID.border * 2 on each side = 4 total)
+    // - 1 grid unit padding on each side (2 total)
+    const textWidthInGridUnits = Math.ceil(tempText.width / px(1));
+    const bordersWidth = GRID.border * 4; // 2 borders on each side
+    const paddingWidth = 2; // 1 grid unit on each side
+    buttonWidth = textWidthInGridUnits + bordersWidth + paddingWidth;
+
+    tempText.destroy();
+  }
 
   const button = new PIXI.Graphics();
   button.roundPixels = true;

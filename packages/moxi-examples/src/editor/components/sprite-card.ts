@@ -17,6 +17,7 @@ export interface SpriteCardOptions {
 export interface SpriteCardResult {
   card: PixelCard;
   controller: SpriteController;
+  redraw: () => void;
 }
 
 /**
@@ -32,13 +33,14 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
 
   // Create the card
   const card = new PixelCard({
-    title: 'Sprite',
+    title: `Sprite (${spriteController.getScale()}x)`,
     x,
     y,
     contentWidth,
     contentHeight,
     renderer,
     minContentSize: true,
+    clipContent: true, // Enable clipping for sprite canvas (overflow: hidden)
     onResize: (width, height) => {
       // Re-render sprite when card resizes
       drawSprite();
@@ -108,6 +110,7 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
 
   return {
     card,
-    controller: spriteController
+    controller: spriteController,
+    redraw: drawSprite
   };
 }

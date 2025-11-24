@@ -27,6 +27,7 @@ export interface PixelCardOptions {
   contentHeight: number;  // In grid units
   renderer: PIXI.Renderer;
   onResize?: (width: number, height: number) => void;
+  onRefresh?: () => void; // Callback when card is refreshed (e.g., theme change)
   minContentSize?: boolean; // If true, prevents resizing below content's actual size
   backgroundColor?: number; // Custom background color (defaults to UI_COLORS.cardBg)
   clipContent?: boolean; // If true, clips content to container bounds (like CSS overflow: hidden)
@@ -68,6 +69,8 @@ export class PixelCard {
   private scaleIndicator: PIXI.Container | null = null;
   private pairedCard: PixelCard | null = null;
   private onFocus: (() => void) | null = null;
+  private onStateChange: (() => void) | null = null;
+  private contentMask: PIXI.Graphics | null = null;
 
   constructor(options: PixelCardOptions) {
     this.options = options;
@@ -151,12 +154,20 @@ export class PixelCard {
     };
 
     const handleGlobalUp = () => {
+      const wasDragging = this.isDragging;
+      const wasResizing = this.isResizing;
+
       this.isDragging = false;
       this.isResizing = false;
       this.resizeDirection = null;
 
       // Hide scale indicator
       this.hideScaleIndicator();
+
+      // Trigger state change callback if position or size changed
+      if ((wasDragging || wasResizing) && this.onStateChange) {
+        this.onStateChange();
+      }
     };
 
     if (typeof window !== 'undefined') {
@@ -242,12 +253,13 @@ export class PixelCard {
     this.container.addChild(titleBar);
 
     // Title text
+    const theme = getTheme();
     const titleText = new PIXI.BitmapText({
       text: this.options.title,
       style: {
         fontFamily: 'PixelOperator8Bitmap',
         fontSize: 64,
-        fill: 0xffffff,
+        fill: theme.textPrimary,
       }
     });
     titleText.roundPixels = true;
@@ -266,16 +278,21 @@ export class PixelCard {
 
     // Create mask to clip content (like CSS overflow: hidden) - only if enabled
     if (this.options.clipContent) {
-      const mask = new PIXI.Graphics();
-      mask.rect(
+      // Reuse existing mask or create new one
+      if (!this.contentMask) {
+        this.contentMask = new PIXI.Graphics();
+      }
+
+      this.contentMask.clear();
+      this.contentMask.rect(
         px(BORDER.total + GRID.padding),
         px(BORDER.total) + this.titleBarHeightPx + px(GRID.padding),
         px(this.state.contentWidth),
         px(this.state.contentHeight)
       );
-      mask.fill({ color: 0xffffff });
-      this.container.addChild(mask);
-      this.contentContainer.mask = mask;
+      this.contentMask.fill({ color: 0xffffff });
+      this.container.addChild(this.contentMask);
+      this.contentContainer.mask = this.contentMask;
     } else {
       this.contentContainer.mask = null;
     }
@@ -356,6 +373,11 @@ export class PixelCard {
     this.state.contentWidth = width;
     this.state.contentHeight = height;
     this.redraw();
+
+    // Trigger onResize callback so content can adapt to new size
+    if (this.options.onResize) {
+      this.options.onResize(width, height);
+    }
   }
 
   /**
@@ -363,6 +385,11 @@ export class PixelCard {
    */
   public refresh() {
     this.redraw();
+
+    // Trigger content refresh callback if provided
+    if (this.options.onRefresh) {
+      this.options.onRefresh();
+    }
   }
 
   /**
@@ -378,6 +405,40 @@ export class PixelCard {
    */
   public setPairedCard(card: PixelCard) {
     this.pairedCard = card;
+  }
+
+  /**
+   * Set callback for when card state changes (position/size)
+   */
+  public onStateChanged(callback: () => void) {
+    this.onStateChange = callback;
+  }
+
+  /**
+   * Export card state for persistence
+   */
+  public exportState(id: string): { id: string; x: number; y: number; contentWidth: number; contentHeight: number; visible: boolean } {
+    return {
+      id,
+      x: this.container.x,
+      y: this.container.y,
+      contentWidth: this.state.contentWidth,
+      contentHeight: this.state.contentHeight,
+      visible: this.container.visible
+    };
+  }
+
+  /**
+   * Import card state (restore position and size)
+   */
+  public importState(state: { x: number; y: number; contentWidth: number; contentHeight: number; visible: boolean }): void {
+    this.container.position.set(state.x, state.y);
+    this.container.visible = state.visible;
+
+    if (state.contentWidth !== this.state.contentWidth ||
+        state.contentHeight !== this.state.contentHeight) {
+      this.setContentSize(state.contentWidth, state.contentHeight);
+    }
   }
 
   /**
@@ -425,12 +486,13 @@ export class PixelCard {
 
     const scaleText = `${this.state.contentWidth}x${this.state.contentHeight}`;
 
+    const theme = getTheme();
     const text = new PIXI.BitmapText({
       text: scaleText,
       style: {
         fontFamily: 'PixelOperator8Bitmap',
         fontSize: 64,
-        fill: 0xffffff,
+        fill: theme.textPrimary,
       }
     });
     text.roundPixels = true;

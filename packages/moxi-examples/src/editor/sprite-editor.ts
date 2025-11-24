@@ -10,6 +10,7 @@ import { createSpriteCard, SpriteCardResult } from './components/sprite-card';
 import { SpriteController } from './controllers/sprite-controller';
 import { SpriteSheetType } from './controllers/sprite-sheet-controller';
 import { UIStateManager, CardState } from './state/ui-state-manager';
+import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/project-state-manager';
 import { getTheme } from './theming/theme';
 import { PICO8_PALETTE } from './theming/palettes';
 import { GRID, BORDER, px } from 'moxi';
@@ -26,6 +27,7 @@ import { createCardZoomHandler } from './utilities/card-zoom-handler';
  * State for sprite sheets and editing
  */
 interface SpriteSheetInstance {
+  id: string; // Unique identifier for this sprite sheet
   sheetCard: SpriteSheetCardResult;
   spriteCard: SpriteCardResult | null;
   spriteController: SpriteController | null;
@@ -65,10 +67,19 @@ export class SpriteEditor {
   private cardRegistry = new Map<string, PixelCard>();
   private uiStateSaveTimer: number | null = null;
 
+  // Project state
+  private projectState: ProjectState;
+  private projectSaveTimer: number | null = null;
+  private hasUnsavedChanges: boolean = false;
+
   constructor(options: SpriteEditorOptions) {
     this.renderer = options.renderer;
     this.scene = options.scene;
     this.maxSpriteSheets = options.maxSpriteSheets ?? 2;
+
+    // Initialize or load project state
+    const savedProject = ProjectStateManager.loadProject();
+    this.projectState = savedProject ?? ProjectStateManager.createEmptyProject();
   }
 
   /**
@@ -206,13 +217,13 @@ export class SpriteEditor {
   /**
    * Creates a new sprite sheet and sprite card
    */
-  private createNewSpriteSheet(type: SpriteSheetType, showGrid: boolean): void {
-    // Check if we've hit the limit
-    if (this.spriteSheetInstances.length >= this.maxSpriteSheets) {
-      // Show dialog telling user they've hit the limit
+  private createNewSpriteSheet(type: SpriteSheetType, showGrid: boolean, savedState?: SpriteSheetState): void {
+    // Enforce single sprite sheet type per project (unless loading from saved state)
+    if (!savedState && this.spriteSheetInstances.length > 0) {
+      const existingType = this.spriteSheetInstances[0].sheetCard.controller.getConfig().type;
       const dialog = createPixelDialog({
-        title: 'Sprite Sheet Limit',
-        message: `Maximum ${this.maxSpriteSheets} sprite sheets allowed.`,
+        title: 'One Sprite Sheet Per Project',
+        message: `This project already contains a ${existingType} sprite sheet. Create a new project to use ${type}.`,
         buttons: [
           {
             label: 'OK',
@@ -227,8 +238,12 @@ export class SpriteEditor {
       return;
     }
 
+    // Generate unique ID for this sprite sheet
+    const sheetId = savedState?.id ?? `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     // Create the instance object
     const instance: SpriteSheetInstance = {
+      id: sheetId,
       sheetCard: null as any, // Will be set below
       spriteCard: null,
       spriteController: null
@@ -310,6 +325,9 @@ export class SpriteEditor {
           // Re-render both cards
           spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
           instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+          // Save project state after pixel change
+          this.saveProjectState();
         },
         onFocus: makeThisSheetActive
       });
@@ -375,6 +393,16 @@ export class SpriteEditor {
     this.scene.addChild(spriteSheetResult.card.container);
     instance.sheetCard = spriteSheetResult;
 
+    // Restore pixel data if loading from saved state
+    if (savedState) {
+      spriteSheetResult.controller.setPixelData(savedState.pixels);
+      if (savedState.scale) {
+        spriteSheetResult.controller.setScale(savedState.scale);
+      }
+      // Re-render with loaded data
+      spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+    }
+
     // Register sprite sheet card for state persistence
     const sheetIndex = this.spriteSheetInstances.length;
     this.registerCard(`sprite-sheet-${sheetIndex}`, spriteSheetResult.card);
@@ -388,11 +416,29 @@ export class SpriteEditor {
     // Update palette to match this sprite sheet
     this.updatePaletteForActiveSheet();
 
-    // Automatically select top-left cell (0, 0) and show sprite card
-    spriteSheetResult.controller.selectCell(0, 0);
-    createSpriteCardForCell(0, 0);
+    // Automatically select saved cell or default to (0, 0) and show sprite card
+    const cellX = savedState?.selectedCellX ?? 0;
+    const cellY = savedState?.selectedCellY ?? 0;
+    spriteSheetResult.controller.selectCell(cellX, cellY);
+    createSpriteCardForCell(cellX, cellY);
+
+    // If loading from saved state with sprite card scale, apply it
+    if (savedState?.spriteCardScale && instance.spriteController) {
+      instance.spriteController.setScale(savedState.spriteCardScale);
+      if (instance.spriteCard) {
+        instance.spriteCard.card.setTitle(`Sprite (${savedState.spriteCardScale}x)`);
+        const dims = instance.spriteController.getScaledDimensions();
+        const newContentWidth = Math.ceil(dims.width / px(1));
+        const newContentHeight = Math.ceil(dims.height / px(1));
+        instance.spriteCard.card.setContentSize(newContentWidth, newContentHeight);
+        instance.spriteCard.redraw();
+      }
+    }
 
     console.log(`Created ${type} sprite sheet`, spriteSheetResult.controller);
+
+    // Save project state after creating new sheet
+    this.saveProjectState();
   }
 
   /**
@@ -438,7 +484,9 @@ export class SpriteEditor {
       renderer: this.renderer,
       scene: this.scene,
       callbacks: {
-        onNewSpriteSheet: (type, showGrid) => this.createNewSpriteSheet(type, showGrid),
+        onNew: () => this.handleNew(),
+        onSave: () => this.handleSave(),
+        onLoad: () => this.handleLoad(),
         onApplyLayout: () => this.applyDefaultLayout(),
         onThemeChange: () => this.updateTheme()
       }
@@ -476,8 +524,254 @@ export class SpriteEditor {
     this.scene.addChild(this.infoBarCard.card.container);
     this.registerCard('info', this.infoBarCard.card);
 
-    // Restore UI state if available
+    // Load project state (sprite sheets and pixel data)
+    this.loadProjectState();
+
+    // Restore UI state (card positions) if available
     this.restoreUIState();
+  }
+
+  /**
+   * Save current project state to localStorage (debounced)
+   */
+  private saveProjectState(): void {
+    this.hasUnsavedChanges = true;
+
+    // Debounce: wait 1000ms after last change before saving
+    if (this.projectSaveTimer) {
+      clearTimeout(this.projectSaveTimer);
+    }
+
+    this.projectSaveTimer = window.setTimeout(() => {
+      // Update project state with current sprite sheet data
+      this.projectState.spriteSheets = this.spriteSheetInstances.map(instance => {
+        const cell = instance.sheetCard.controller.getSelectedCell();
+        const state: SpriteSheetState = {
+          id: instance.id,
+          type: instance.sheetCard.controller.getConfig().type,
+          showGrid: false, // TODO: track this
+          pixels: instance.sheetCard.controller.getPixelData(),
+          selectedCellX: cell.x,
+          selectedCellY: cell.y,
+          scale: instance.sheetCard.controller.getScale(),
+          spriteCardScale: instance.spriteController?.getScale()
+        };
+        return state;
+      });
+
+      this.projectState.activeSpriteSheetId = this.activeSpriteSheetInstance?.id ?? null;
+      this.projectState.selectedColorIndex = this.selectedColorIndex;
+
+      ProjectStateManager.saveProject(this.projectState);
+    }, 1000);
+  }
+
+  /**
+   * Load project state and recreate sprite sheets
+   */
+  private loadProjectState(): void {
+    if (this.projectState.spriteSheets.length === 0) {
+      console.log('No sprite sheets in project state');
+      return;
+    }
+
+    // Restore selected color
+    this.selectedColorIndex = this.projectState.selectedColorIndex ?? 0;
+
+    // Recreate each sprite sheet
+    this.projectState.spriteSheets.forEach(sheetState => {
+      this.createNewSpriteSheet(
+        sheetState.type,
+        sheetState.showGrid,
+        sheetState
+      );
+    });
+
+    console.log('📂 Project state loaded');
+  }
+
+  /**
+   * Handle "New" button - Check for unsaved work, then create new project
+   */
+  private async handleNew(): Promise<void> {
+    // If there's existing work, prompt to save
+    if (this.spriteSheetInstances.length > 0) {
+      const dialog = createPixelDialog({
+        title: 'Save Current Project?',
+        message: 'You have unsaved work. Save before creating new project?',
+        buttons: [
+          {
+            label: 'Save',
+            onClick: () => {
+              this.handleSave();
+              // Then create new project
+              setTimeout(() => this.createNewProject(), 100);
+            }
+          },
+          {
+            label: 'Discard',
+            onClick: () => {
+              this.createNewProject();
+            }
+          },
+          {
+            label: 'Cancel',
+            onClick: () => {
+              // Do nothing, just close dialog
+            }
+          }
+        ],
+        renderer: this.renderer
+      });
+      this.scene.addChild(dialog);
+    } else {
+      // No existing work, just show the new project dialog
+      this.createNewProject();
+    }
+  }
+
+  /**
+   * Create a new project - show sprite sheet type dialog
+   */
+  private createNewProject(): void {
+    // Clear existing work
+    this.spriteSheetInstances.forEach(instance => {
+      if (instance.sheetCard) {
+        this.scene.removeChild(instance.sheetCard.card.container);
+      }
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+      }
+    });
+
+    this.spriteSheetInstances = [];
+    this.activeSpriteSheetInstance = null;
+    this.projectState = ProjectStateManager.createEmptyProject();
+    this.hasUnsavedChanges = false;
+
+    // Show dialog to choose sprite sheet type
+    const dialog = createPixelDialog({
+      title: 'New Sprite Sheet',
+      message: 'Choose sprite sheet type:',
+      checkboxes: [
+        {
+          name: 'showGrid',
+          label: 'Show 8x8 Grid',
+          defaultValue: true
+        }
+      ],
+      buttons: [
+        {
+          label: 'PICO-8',
+          onClick: (checkboxStates) => {
+            this.createNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
+          }
+        },
+        {
+          label: 'TIC-80',
+          onClick: (checkboxStates) => {
+            this.createNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
+          }
+        }
+      ],
+      renderer: this.renderer
+    });
+    this.scene.addChild(dialog);
+  }
+
+  /**
+   * Handle "Save" button - Download project file
+   */
+  private handleSave(): void {
+    // Force immediate save to project state
+    if (this.projectSaveTimer) {
+      clearTimeout(this.projectSaveTimer);
+    }
+
+    // Update project state with current data
+    this.projectState.spriteSheets = this.spriteSheetInstances.map(instance => {
+      const cell = instance.sheetCard.controller.getSelectedCell();
+      return {
+        id: instance.id,
+        type: instance.sheetCard.controller.getConfig().type,
+        showGrid: false,
+        pixels: instance.sheetCard.controller.getPixelData(),
+        selectedCellX: cell.x,
+        selectedCellY: cell.y,
+        scale: instance.sheetCard.controller.getScale(),
+        spriteCardScale: instance.spriteController?.getScale()
+      };
+    });
+
+    this.projectState.activeSpriteSheetId = this.activeSpriteSheetInstance?.id ?? null;
+    this.projectState.selectedColorIndex = this.selectedColorIndex;
+
+    // Download as .moxi file
+    ProjectStateManager.downloadProject(this.projectState);
+    this.hasUnsavedChanges = false;
+  }
+
+  /**
+   * Handle "Load" button - Load project from file
+   */
+  private async handleLoad(): Promise<void> {
+    // If there's existing work, warn user
+    if (this.spriteSheetInstances.length > 0 && this.hasUnsavedChanges) {
+      const dialog = createPixelDialog({
+        title: 'Unsaved Changes',
+        message: 'Loading will replace current project. Continue?',
+        buttons: [
+          {
+            label: 'Continue',
+            onClick: async () => {
+              await this.loadProjectFile();
+            }
+          },
+          {
+            label: 'Cancel',
+            onClick: () => {
+              // Do nothing
+            }
+          }
+        ],
+        renderer: this.renderer
+      });
+      this.scene.addChild(dialog);
+    } else {
+      await this.loadProjectFile();
+    }
+  }
+
+  /**
+   * Load a project file and recreate the UI
+   */
+  private async loadProjectFile(): Promise<void> {
+    const loadedState = await ProjectStateManager.loadProjectFromFile();
+    if (!loadedState) {
+      console.log('No file selected or failed to load');
+      return;
+    }
+
+    // Clear existing work
+    this.spriteSheetInstances.forEach(instance => {
+      if (instance.sheetCard) {
+        this.scene.removeChild(instance.sheetCard.card.container);
+      }
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+      }
+    });
+
+    this.spriteSheetInstances = [];
+    this.activeSpriteSheetInstance = null;
+
+    // Set the loaded state
+    this.projectState = loadedState;
+    this.hasUnsavedChanges = false;
+
+    // Save to localStorage and recreate UI
+    ProjectStateManager.saveProject(this.projectState);
+    this.loadProjectState();
   }
 
   /**
@@ -486,6 +780,9 @@ export class SpriteEditor {
   destroy(): void {
     if (this.uiStateSaveTimer) {
       clearTimeout(this.uiStateSaveTimer);
+    }
+    if (this.projectSaveTimer) {
+      clearTimeout(this.projectSaveTimer);
     }
     this.cardRegistry.clear();
     this.spriteSheetInstances = [];

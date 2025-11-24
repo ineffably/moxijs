@@ -10,7 +10,9 @@ import { getAllThemes, setThemeByMetadata } from '../theming/theme';
 import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
 
 export interface CommanderBarCallbacks {
-  onNewSpriteSheet?: (type: SpriteSheetType, showGrid: boolean) => void;
+  onNew?: () => void;
+  onSave?: () => void;
+  onLoad?: () => void;
   onApplyLayout?: () => void;
   onThemeChange?: () => void;
 }
@@ -68,49 +70,52 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     // Left side buttons (starting at x=0)
     let currentX = 0;
 
-    // New button - shows dialog to choose sprite sheet type
+    // New button
     const newButton = createPixelButton({
       height: buttonHeight,
       label: 'New',
       selectionMode: 'press',
       actionMode: 'click',
       onClick: () => {
-        // Show dialog to choose sprite sheet type
-        const dialog = createPixelDialog({
-          title: 'New Sprite Sheet',
-          message: 'Choose sprite sheet type:',
-          checkboxes: [
-            {
-              name: 'showGrid',
-              label: 'Show 8x8 Grid',
-              defaultValue: true
-            }
-          ],
-          buttons: [
-            {
-              label: 'PICO-8',
-              onClick: (checkboxStates) => {
-                if (callbacks?.onNewSpriteSheet) {
-                  callbacks.onNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
-                }
-              }
-            },
-            {
-              label: 'TIC-80',
-              onClick: (checkboxStates) => {
-                if (callbacks?.onNewSpriteSheet) {
-                  callbacks.onNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
-                }
-              }
-            }
-          ],
-          renderer
-        });
-        scene.addChild(dialog);
+        if (callbacks?.onNew) {
+          callbacks.onNew();
+        }
       }
     });
     newButton.position.set(currentX, 0);
     contentContainer.addChild(newButton);
+    currentX += newButton.width + buttonSpacing;
+
+    // Save button
+    const saveButton = createPixelButton({
+      height: buttonHeight,
+      label: 'Save',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        if (callbacks?.onSave) {
+          callbacks.onSave();
+        }
+      }
+    });
+    saveButton.position.set(currentX, 0);
+    contentContainer.addChild(saveButton);
+    currentX += saveButton.width + buttonSpacing;
+
+    // Load button
+    const loadButton = createPixelButton({
+      height: buttonHeight,
+      label: 'Load',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        if (callbacks?.onLoad) {
+          callbacks.onLoad();
+        }
+      }
+    });
+    loadButton.position.set(currentX, 0);
+    contentContainer.addChild(loadButton);
 
     // Right side buttons - positioned at the far right
     const rightButtonsSpacing = px(2);

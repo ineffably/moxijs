@@ -17,16 +17,63 @@ export const GRID = {
   border: 1,         // Border width in grid units
   padding: 1,        // Padding in grid units
   gap: 1,            // Gap between elements in grid units
-  fontScale: 0.25    // Font scale (64px bitmap font * 0.25 = 16px)
+  margin: 5,         // Margin/spacing in grid units (5 * 4 = 20px at 4x scale)
+  fontScale: 0.25    // Font scale (dynamically calculated: scale / 16)
 };
 
 // Helper: Convert grid units to pixels
 export function px(gridUnits: number): number {
   return gridUnits * GRID.unit * GRID.scale; // gridUnits * 1 * 4
 }
+
+// Example: Use GRID.margin instead of hardcoded values
+const x = px(GRID.margin);  // 20px at 4x scale, 15px at 3x scale
 ```
 
 **Key principle**: `px(1) = 4 pixels` at default scale. Always use `px()` for positioning and sizing.
+
+### Dynamic GRID Scaling
+
+The GRID system supports dynamic scaling, allowing the entire UI to scale proportionally. This is achieved by calculating `fontScale` proportionally to the base scale:
+
+```typescript
+export class PixelGrid {
+  constructor(config: PixelGridConfig = {}) {
+    this.scale = config.scale ?? 4;
+    // Font scale is proportional to GRID scale (0.25 at 4x scale)
+    // At 4x: 64px * 0.25 = 16px, At 3x: 64px * 0.1875 = 12px, etc.
+    this.fontScale = config.fontScale ?? (this.scale / 16);
+  }
+}
+```
+
+**Scale examples**:
+- `scale: 4` → `fontScale: 0.25` → 16px font (default)
+- `scale: 3` → `fontScale: 0.1875` → 12px font
+- `scale: 2` → `fontScale: 0.125` → 8px font
+- `scale: 1` → `fontScale: 0.0625` → 4px font
+
+**Dynamic measurements**: All UI elements that depend on scale should calculate their sizes dynamically:
+
+```typescript
+// ❌ BAD - Hardcoded title bar height
+private titleBarHeightPx = px(5) + 4;
+
+// ✅ GOOD - Calculated based on font size + padding
+constructor(options: PixelCardOptions) {
+  const fontHeight = 64 * GRID.fontScale;
+  const verticalPadding = px(GRID.padding * 2);
+  this.titleBarHeightPx = Math.ceil(fontHeight + verticalPadding);
+}
+```
+
+**Why this matters**:
+- Allows the entire UI to scale proportionally (1x, 2x, 3x, 4x)
+- Maintains proper spacing and proportions at all scales
+- Eliminates hardcoded pixel values that break at different scales
+- Text, borders, padding, and margins all scale together
+
+**Best practice**: Never hardcode pixel values. Always derive them from GRID constants or calculate them from font sizes.
 
 ### Border System
 
@@ -334,6 +381,83 @@ if (typeof window !== 'undefined') {
 }
 ```
 
+## Initialization Patterns
+
+### Sprite Sheet Creation with Auto-Zoom and Selection
+
+When creating a new sprite sheet, provide a smooth initial experience by:
+1. Auto-selecting the first cell (0, 0)
+2. Auto-zooming the sprite sheet card to a comfortable viewing scale (4x)
+3. Automatically creating the sprite card for editing
+
+```typescript
+private createNewSpriteSheet(type: SpriteSheetType, showGrid: boolean, savedState?: SpriteSheetState): void {
+  // ... create sprite sheet card ...
+  
+  // Restore pixel data if loading from saved state
+  if (savedState) {
+    spriteSheetResult.controller.setPixelData(savedState.pixels);
+    if (savedState.scale) {
+      spriteSheetResult.controller.setScale(savedState.scale);
+    }
+    spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+  }
+
+  // If creating a new spritesheet (not loading from saved state), zoom to 4x
+  if (!savedState) {
+    spriteSheetResult.controller.setScale(4);
+    const dims = spriteSheetResult.controller.getScaledDimensions();
+    const newContentWidth = Math.ceil(dims.width / px(1));
+    const newContentHeight = Math.ceil(dims.height / px(1));
+    spriteSheetResult.card.setContentSize(newContentWidth, newContentHeight);
+    spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+  }
+
+  // Automatically select saved cell or default to (0, 0) and show sprite card
+  const cellX = savedState?.selectedCellX ?? 0;
+  const cellY = savedState?.selectedCellY ?? 0;
+  spriteSheetResult.controller.selectCell(cellX, cellY);
+  createSpriteCardForCell(cellX, cellY);
+}
+```
+
+**Key points**:
+- Only apply auto-zoom for **new** spritesheets (when `savedState` is undefined)
+- When loading from saved state, restore the saved scale instead
+- Always update card content size when scale changes: `card.setContentSize(newWidth, newHeight)`
+- Re-render the controller after scale changes: `controller.render(contentContainer)`
+- Auto-select grid (0, 0) for new spritesheets, or restore saved selection
+
+**Why this pattern**:
+- Provides immediate visual feedback - users see the sprite sheet at a comfortable zoom level
+- Saves a click - users don't need to manually select the first cell
+- Preserves user preferences - saved projects maintain their zoom level
+- Ensures card size matches content - prevents clipping or empty space
+
+### Updating Card Content Size When Scale Changes
+
+When programmatically changing a controller's scale, always update the card's content size:
+
+```typescript
+// 1. Set the new scale on the controller
+controller.setScale(newScale);
+
+// 2. Get the new scaled dimensions
+const dims = controller.getScaledDimensions();
+
+// 3. Convert pixel dimensions to grid units
+const newContentWidth = Math.ceil(dims.width / px(1));
+const newContentHeight = Math.ceil(dims.height / px(1));
+
+// 4. Update the card's content size
+card.setContentSize(newContentWidth, newContentHeight);
+
+// 5. Re-render the controller with updated content container
+controller.render(card.getContentContainer());
+```
+
+**Critical**: The card's content size must match the scaled dimensions, otherwise content will be clipped or have empty space.
+
 ## Layout Patterns
 
 ### Default Layout System
@@ -343,28 +467,27 @@ Provide a reset function to restore default positions:
 ```typescript
 function applyDefaultLayout() {
   const renderer = (window as any).renderer;
-  const margin = 20;
   const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
 
-  // Commander bar - top left, full width
+  // Commander bar - top left with margin
   const commanderCard = cardRegistry.get('commander');
   if (commanderCard) {
-    commanderCard.container.position.set(0, 0);
+    commanderCard.container.position.set(px(GRID.margin), px(GRID.margin));
   }
 
   // Palette - below commander, left side
   const paletteCard = cardRegistry.get('palette');
   if (paletteCard) {
-    const topOffset = commanderBarHeight + 10;
-    paletteCard.container.position.set(margin, topOffset);
+    const topOffset = commanderBarHeight + px(GRID.gap * 2);
+    paletteCard.container.position.set(px(GRID.margin), topOffset);
   }
 
   // Sprite sheets - bottom right (minimap style)
   cardRegistry.forEach((card, id) => {
     if (id.startsWith('sprite-sheet-')) {
       const cardBounds = card.container.getBounds();
-      const x = renderer.width - cardBounds.width - margin;
-      const y = renderer.height - cardBounds.height - margin;
+      const x = renderer.width - cardBounds.width - px(GRID.margin);
+      const y = renderer.height - cardBounds.height - px(GRID.margin);
       card.container.position.set(x, y);
     }
   });
@@ -472,6 +595,27 @@ const scaleY = canvas.height / rect.height;
 const mouseX = (e.clientX - rect.left) * scaleX;
 const mouseY = (e.clientY - rect.top) * scaleY;
 ```
+
+### ❌ Hardcoding Pixel Values Instead of Using GRID
+
+```typescript
+// BAD - breaks when GRID.scale changes
+const margin = 20;
+const titleBarHeight = px(5) + 4;
+paletteCard.container.position.set(margin, topOffset);
+```
+
+**Problem**: Hardcoded pixel values don't scale proportionally when GRID.scale changes.
+
+**Solution**: Always use GRID constants and calculate dynamically:
+
+```typescript
+// GOOD - scales proportionally
+const titleBarHeight = Math.ceil(64 * GRID.fontScale + px(GRID.padding * 2));
+paletteCard.container.position.set(px(GRID.margin), topOffset);
+```
+
+**Rule**: If you're typing a number that represents pixels or spacing, it should probably use a GRID constant.
 
 ## Best Practices
 
@@ -581,12 +725,29 @@ function scheduleSave() {
 
 **Core Principles**:
 1. Everything aligns to the grid using `px()` helper
-2. Components auto-calculate sizes (text + borders + padding)
-3. Reuse Graphics objects (especially masks)
-4. Always trigger callbacks on programmatic changes
-5. Transform mouse coordinates to canvas space
-6. Clean up event listeners and objects
-7. Debounce expensive operations
-8. Save state to localStorage with version management
+2. Never hardcode pixel values - use GRID constants (margin, padding, gap, etc.)
+3. Font scale is proportional to GRID scale (`scale / 16`)
+4. Calculate dynamic measurements based on font size and GRID constants
+5. Components auto-calculate sizes (text + borders + padding)
+6. Reuse Graphics objects (especially masks)
+7. Always trigger callbacks on programmatic changes
+8. Transform mouse coordinates to canvas space
+9. Clean up event listeners and objects
+10. Debounce expensive operations
+11. Save state to localStorage with version management
+12. Provide smart defaults on initialization (auto-select, auto-zoom)
+13. Update card content size when controller scale changes
 
-**Result**: A consistent, pixel-perfect UI that feels crisp, responsive, and preserves user layouts between sessions.
+**Initialization Best Practices**:
+- Auto-select the first cell (0, 0) when creating new sprite sheets
+- Auto-zoom new sprite sheets to a comfortable viewing level (4x)
+- Preserve user preferences when loading saved state
+- Always update card content size to match scaled dimensions
+
+**Scaling Best Practices**:
+- Use `GRID.margin` instead of hardcoded margins (e.g., `20`)
+- Calculate title bar heights dynamically: `Math.ceil(64 * GRID.fontScale + px(GRID.padding * 2))`
+- Font scale adjusts proportionally: `fontScale = scale / 16`
+- All spacing (margin, padding, gap) scales with `px()` helper
+
+**Result**: A consistent, pixel-perfect UI that feels crisp, responsive, scales proportionally at any GRID scale (1x-4x), preserves user layouts between sessions, and provides an intuitive initial experience.

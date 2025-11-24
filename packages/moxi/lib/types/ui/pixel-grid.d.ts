@@ -4,6 +4,7 @@ export interface PixelGridConfig {
     border?: number;
     padding?: number;
     gap?: number;
+    margin?: number;
     fontScale?: number;
 }
 export interface BorderConfig {
@@ -18,6 +19,7 @@ export declare class PixelGrid {
     readonly border: number;
     readonly padding: number;
     readonly gap: number;
+    readonly margin: number;
     readonly fontScale: number;
     constructor(config?: PixelGridConfig);
     px(units: number): number;
@@ -32,6 +34,7 @@ export declare const GRID: {
     readonly border: number;
     readonly padding: number;
     readonly gap: number;
+    readonly margin: number;
     readonly fontScale: number;
 };
 export declare const BORDER: {

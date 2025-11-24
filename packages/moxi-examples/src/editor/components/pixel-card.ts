@@ -48,7 +48,7 @@ export interface PixelCardResizeState {
 export class PixelCard {
   public container: PIXI.Container;
   public contentContainer: PIXI.Container;
-  private titleBarHeightPx = px(5) + 4; // 5 grid units (20px at 4x scale) + 4px = 24px
+  private titleBarHeightPx: number; // Calculated based on font size + padding
 
   private isDragging = false;
   private dragStartX = 0;
@@ -86,6 +86,12 @@ export class PixelCard {
       contentWidth: options.contentWidth,
       contentHeight: options.contentHeight,
     };
+
+    // Calculate title bar height based on font size
+    // Font renders at 64px * GRID.fontScale, plus vertical padding
+    const fontHeight = 64 * GRID.fontScale;
+    const verticalPadding = px(GRID.padding * 2); // Top and bottom padding
+    this.titleBarHeightPx = Math.ceil(fontHeight + verticalPadding);
 
     this.setupEventListeners();
     this.redraw();

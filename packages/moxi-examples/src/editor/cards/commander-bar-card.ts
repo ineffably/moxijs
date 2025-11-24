@@ -15,6 +15,7 @@ export interface CommanderBarCallbacks {
   onLoad?: () => void;
   onApplyLayout?: () => void;
   onThemeChange?: () => void;
+  onScaleChange?: (scale: number) => void; // TEMPORARY: For testing GRID scaling
 }
 
 export interface CommanderBarCardOptions {
@@ -116,6 +117,39 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     });
     loadButton.position.set(currentX, 0);
     contentContainer.addChild(loadButton);
+    currentX += loadButton.width + buttonSpacing;
+
+    // TEMPORARY: Scale testing buttons
+    const scaleLabel = new PIXI.BitmapText({
+      text: 'Scale:',
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: 0x666666,
+      }
+    });
+    scaleLabel.roundPixels = true;
+    scaleLabel.scale.set(GRID.fontScale);
+    scaleLabel.position.set(currentX, px(3));
+    contentContainer.addChild(scaleLabel);
+    currentX += scaleLabel.width + px(1);
+
+    [1, 2, 3, 4].forEach(scale => {
+      const scaleButton = createPixelButton({
+        height: buttonHeight,
+        label: `${scale}`,
+        selectionMode: 'press',
+        actionMode: 'click',
+        onClick: () => {
+          if (callbacks?.onScaleChange) {
+            callbacks.onScaleChange(scale);
+          }
+        }
+      });
+      scaleButton.position.set(currentX, 0);
+      contentContainer.addChild(scaleButton);
+      currentX += scaleButton.width + px(1);
+    });
 
     // Right side buttons - positioned at the far right
     const rightButtonsSpacing = px(2);

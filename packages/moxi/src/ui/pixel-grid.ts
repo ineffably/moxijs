@@ -37,6 +37,8 @@ export interface PixelGridConfig {
   padding?: number;
   /** Gap between elements in grid units (default: 1) */
   gap?: number;
+  /** Margin/spacing in grid units (default: 5, e.g., 5 * 4 = 20px) */
+  margin?: number;
   /** Font scale multiplier (default: 0.25, e.g., 64px * 0.25 = 16px) */
   fontScale?: number;
 }
@@ -67,6 +69,7 @@ export class PixelGrid {
   public readonly border: number;
   public readonly padding: number;
   public readonly gap: number;
+  public readonly margin: number;
   public readonly fontScale: number;
 
   constructor(config: PixelGridConfig = {}) {
@@ -75,7 +78,10 @@ export class PixelGrid {
     this.border = config.border ?? 1;
     this.padding = config.padding ?? 1;
     this.gap = config.gap ?? 1;
-    this.fontScale = config.fontScale ?? 0.25;
+    this.margin = config.margin ?? 5; // 5 units * 4 scale = 20px default
+    // Font scale is proportional to GRID scale (0.25 at 4x scale)
+    // At 4x: 64px * 0.25 = 16px, At 3x: 64px * 0.1875 = 12px, etc.
+    this.fontScale = config.fontScale ?? (this.scale / 16);
   }
 
   /**
@@ -102,8 +108,25 @@ export class PixelGrid {
  * - 1px base unit
  * - 4x scale (common for retro/pixel games)
  * - 1 unit borders, padding, and gaps
+ *
+ * TEMPORARY: Checks localStorage for 'temp-grid-scale' to override scale for testing
  */
-export const DEFAULT_PIXEL_GRID = new PixelGrid();
+export const DEFAULT_PIXEL_GRID = (() => {
+  // TEMPORARY: Check for scale override in localStorage
+  const tempScale = typeof localStorage !== 'undefined'
+    ? localStorage.getItem('temp-grid-scale')
+    : null;
+
+  if (tempScale) {
+    const scale = parseInt(tempScale, 10);
+    if (!isNaN(scale) && scale >= 1 && scale <= 4) {
+      console.log(`🔧 TEMPORARY: Using GRID scale override: ${scale}x`);
+      return new PixelGrid({ scale });
+    }
+  }
+
+  return new PixelGrid();
+})();
 
 /**
  * Helper function to convert grid units to pixels using the default grid
@@ -128,6 +151,7 @@ export const GRID = {
   border: DEFAULT_PIXEL_GRID.border,
   padding: DEFAULT_PIXEL_GRID.padding,
   gap: DEFAULT_PIXEL_GRID.gap,
+  margin: DEFAULT_PIXEL_GRID.margin,
   fontScale: DEFAULT_PIXEL_GRID.fontScale
 } as const;
 

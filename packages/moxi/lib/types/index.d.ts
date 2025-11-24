@@ -199,6 +199,7 @@ declare const exportedObjects: {
         readonly border: number;
         readonly padding: number;
         readonly gap: number;
+        readonly margin: number;
         readonly fontScale: number;
     };
     BORDER: {

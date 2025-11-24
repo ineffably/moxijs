@@ -148,9 +148,8 @@ export class SpriteEditor {
    * Apply default layout positions to all cards
    */
   private applyDefaultLayout(): void {
-    const margin = 20;
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
-    const topOffset = commanderBarHeight + 10;
+    const topOffset = commanderBarHeight + px(GRID.gap * 2);
 
     // Position commander bar at top (y=0, x=0)
     const commanderCard = this.cardRegistry.get('commander');
@@ -161,16 +160,15 @@ export class SpriteEditor {
     // Position palette card below commander on the left
     const paletteCard = this.cardRegistry.get('palette');
     if (paletteCard) {
-      paletteCard.container.position.set(margin, topOffset);
+      paletteCard.container.position.set(px(GRID.margin), topOffset);
     }
 
     // Position info bar at bottom left
     const infoCard = this.cardRegistry.get('info');
     if (infoCard) {
-      const bottomMargin = 20;
       const barHeight = 8;
-      const y = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24;
-      infoCard.container.position.set(margin, y);
+      const y = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - px(GRID.margin) - 24;
+      infoCard.container.position.set(px(GRID.margin), y);
     }
 
     // Position sprite sheets at their default location (bottom right, minimap style)
@@ -178,8 +176,8 @@ export class SpriteEditor {
       if (id.startsWith('sprite-sheet-')) {
         // Get the sprite sheet's default position (bottom right)
         const cardBounds = card.container.getBounds();
-        const defaultX = this.renderer.width - cardBounds.width - margin;
-        const defaultY = this.renderer.height - cardBounds.height - margin;
+        const defaultX = this.renderer.width - cardBounds.width - px(GRID.margin);
+        const defaultY = this.renderer.height - cardBounds.height - px(GRID.margin);
         card.container.position.set(defaultX, defaultY);
       }
     });
@@ -188,9 +186,8 @@ export class SpriteEditor {
     this.cardRegistry.forEach((card, id) => {
       if (id.startsWith('sprite-card-')) {
         const cardBounds = card.container.getBounds();
-        const gapBelowCommander = 10;
         const x = (this.renderer.width - cardBounds.width) / 2;
-        const y = margin + commanderBarHeight + gapBelowCommander;
+        const y = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
         card.container.position.set(x, y);
       }
     });
@@ -306,11 +303,9 @@ export class SpriteEditor {
         // Create sprite card at default position - just below commander bar, centered horizontally
         const spriteCardDims = spriteController.getScaledDimensions();
         const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24; // Title bar height
-        const topMargin = 20;
-        const gapBelowCommander = 10;
 
         spriteCardX = (this.renderer.width - spriteCardDims.width) / 2;
-        spriteCardY = topMargin + commanderBarHeight + gapBelowCommander;
+        spriteCardY = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
       }
 
       const spriteCardResult = createSpriteCard({
@@ -418,6 +413,16 @@ export class SpriteEditor {
     // Update palette to match this sprite sheet
     this.updatePaletteForActiveSheet();
 
+    // If creating a new spritesheet (not loading from saved state), zoom to 4x
+    if (!savedState) {
+      spriteSheetResult.controller.setScale(4);
+      const dims = spriteSheetResult.controller.getScaledDimensions();
+      const newContentWidth = Math.ceil(dims.width / px(1));
+      const newContentHeight = Math.ceil(dims.height / px(1));
+      spriteSheetResult.card.setContentSize(newContentWidth, newContentHeight);
+      spriteSheetResult.controller.render(spriteSheetResult.card.getContentContainer());
+    }
+
     // Automatically select saved cell or default to (0, 0) and show sprite card
     const cellX = savedState?.selectedCellX ?? 0;
     const cellY = savedState?.selectedCellY ?? 0;
@@ -479,10 +484,9 @@ export class SpriteEditor {
     this.renderer.background.color = getTheme().backgroundRoot;
 
     // Recreate commander bar at top
-    const margin = 20;
     this.commanderBarCard = createCommanderBarCard({
-      x: margin,
-      y: margin,
+      x: px(GRID.margin),
+      y: px(GRID.margin),
       renderer: this.renderer,
       scene: this.scene,
       callbacks: {
@@ -490,7 +494,8 @@ export class SpriteEditor {
         onSave: () => this.handleSave(),
         onLoad: () => this.handleLoad(),
         onApplyLayout: () => this.applyDefaultLayout(),
-        onThemeChange: () => this.updateTheme()
+        onThemeChange: () => this.updateTheme(),
+        onScaleChange: (scale) => this.handleScaleChange(scale) // TEMPORARY
       }
     });
     this.scene.addChild(this.commanderBarCard.card.container);
@@ -498,11 +503,11 @@ export class SpriteEditor {
 
     // Calculate top offset for cards below commander bar
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
-    const topOffset = margin + commanderBarHeight + 10;
+    const topOffset = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
 
     // Recreate palette card with current palette
     this.paletteCard = createPaletteCard({
-      x: margin,
+      x: px(GRID.margin),
       y: topOffset,
       renderer: this.renderer,
       palette: this.currentPalette,
@@ -515,11 +520,10 @@ export class SpriteEditor {
     this.registerCard('palette', this.paletteCard.card);
 
     // Recreate info bar
-    const bottomMargin = 20;
     const barHeight = 8;
-    const infoY = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24;
+    const infoY = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - px(GRID.margin) - 24;
     this.infoBarCard = createInfoBarCard({
-      x: margin,
+      x: px(GRID.margin),
       y: infoY,
       renderer: this.renderer
     });
@@ -774,6 +778,37 @@ export class SpriteEditor {
     // Save to localStorage and recreate UI
     ProjectStateManager.saveProject(this.projectState);
     this.loadProjectState();
+  }
+
+  /**
+   * TEMPORARY: Handle scale change for testing
+   */
+  private handleScaleChange(scale: number): void {
+    console.log(`🔧 TEMPORARY: Changing GRID scale to ${scale}x`);
+
+    // Show a dialog explaining that this requires page reload
+    const dialog = createPixelDialog({
+      title: 'Scale Change',
+      message: `Changing scale to ${scale}x requires reloading the page. This is TEMPORARY for testing the GRID system.`,
+      buttons: [
+        {
+          label: 'Reload',
+          onClick: () => {
+            // Store the desired scale in localStorage
+            localStorage.setItem('temp-grid-scale', scale.toString());
+            window.location.reload();
+          }
+        },
+        {
+          label: 'Cancel',
+          onClick: () => {
+            // Do nothing
+          }
+        }
+      ],
+      renderer: this.renderer
+    });
+    this.scene.addChild(dialog);
   }
 
   /**

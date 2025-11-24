@@ -4,6 +4,7 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
 import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from '../controllers/sprite-sheet-controller';
+import { createCheckerboardTexture } from '../utilities/texture-utils';
 
 export { SpriteSheetType, SpriteSheetConfig };
 
@@ -103,12 +104,21 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
     contentWidth,
     contentHeight,
     renderer,
-    backgroundColor: 0x2f485c, // Dark blue background
     clipContent: true, // Enable clipping for sprite sheet (overflow: hidden)
     onFocus
   });
 
   contentContainer = card.getContentContainer();
+
+  // Create tiled grid background using utility
+  const gridTexture = createCheckerboardTexture(16, 0x2a2a3a, 0x353545);
+  const gridBackground = new PIXI.TilingSprite({
+    texture: gridTexture,
+    width: px(contentWidth),
+    height: px(contentHeight)
+  });
+  gridBackground.tileScale.set(1, 1);
+  contentContainer.addChildAt(gridBackground, 0); // Add as first child (behind everything)
 
   // Initial render - controller now handles cell selection/highlighting
   controller.render(contentContainer);

@@ -24,6 +24,45 @@ import { createCommanderBarCard, CommanderBarCardResult } from './cards/commande
 import { createCardZoomHandler } from './utilities/card-zoom-handler';
 
 /**
+ * Card dimension utilities
+ */
+
+/**
+ * Calculate the title bar height dynamically based on GRID.fontScale
+ */
+function calculateTitleBarHeight(): number {
+  const fontHeight = 64 * GRID.fontScale;
+  const verticalPadding = px(GRID.padding * 2);
+  return Math.ceil(fontHeight + verticalPadding);
+}
+
+/**
+ * Calculate content width needed for edge-to-edge card (full viewport width)
+ * Formula: contentWidth = (rendererWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2)
+ */
+function calculateFullWidthContentSize(rendererWidth: number): number {
+  return Math.floor(rendererWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2);
+}
+
+/**
+ * Calculate total card height in pixels given content height in grid units
+ * Formula: cardHeight = px(contentHeight) + px(BORDER.total * 2) + titleBarHeight + px(GRID.padding * 2)
+ */
+function calculateCardHeight(contentHeightGridUnits: number): number {
+  const titleBarHeightPx = calculateTitleBarHeight();
+  return px(contentHeightGridUnits) + px(BORDER.total * 2) + titleBarHeightPx + px(GRID.padding * 2);
+}
+
+/**
+ * Calculate total card width in pixels given content width in grid units
+ * Formula: cardWidth = px(contentWidth + BORDER.total * 2 + GRID.padding * 2)
+ */
+function calculateCardWidth(contentWidthGridUnits: number): number {
+  const cardWidthGridUnits = contentWidthGridUnits + BORDER.total * 2 + GRID.padding * 2;
+  return px(cardWidthGridUnits);
+}
+
+/**
  * State for sprite sheets and editing
  */
 interface SpriteSheetInstance {
@@ -157,27 +196,47 @@ export class SpriteEditor {
       commanderCard.container.position.set(0, 0);
     }
 
-    // Position palette card below commander on the left
+    // Position palette card below commander, docked to left edge
     const paletteCard = this.cardRegistry.get('palette');
     if (paletteCard) {
-      paletteCard.container.position.set(px(GRID.margin), topOffset);
+      paletteCard.container.position.set(0, topOffset);
     }
 
-    // Position info bar at bottom left
+    // Position info bar at bottom (edge to edge, full width)
     const infoCard = this.cardRegistry.get('info');
     if (infoCard) {
       const barHeight = 8;
-      const y = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - px(GRID.margin) - 24;
-      infoCard.container.position.set(px(GRID.margin), y);
+      const cardTotalHeight = calculateCardHeight(barHeight);
+      const y = this.renderer.height - cardTotalHeight;
+      infoCard.container.position.set(0, y);
     }
 
     // Position sprite sheets at their default location (bottom right, minimap style)
-    this.cardRegistry.forEach((card, id) => {
-      if (id.startsWith('sprite-sheet-')) {
-        // Get the sprite sheet's default position (bottom right)
-        const cardBounds = card.container.getBounds();
-        const defaultX = this.renderer.width - cardBounds.width - px(GRID.margin);
-        const defaultY = this.renderer.height - cardBounds.height - px(GRID.margin);
+    this.spriteSheetInstances.forEach((instance, index) => {
+      if (instance.sheetCard) {
+        const card = instance.sheetCard.card;
+
+        // Set desired card width (minimap size) - content dimensions in grid units
+        const desiredContentWidth = 50; // Grid units for minimap
+        const desiredContentHeight = 50; // Grid units for minimap
+
+        // Set the card's content size
+        card.setContentSize(desiredContentWidth, desiredContentHeight);
+        instance.sheetCard.controller.render(card.getContentContainer());
+
+        // Get card dimensions in pixels
+        const cardWidthPx = card.getPixelWidth();
+        const cardHeightPx = card.getPixelHeight();
+
+        // Position at bottom right (touch right edge, above info bar)
+        const defaultX = this.renderer.width - cardWidthPx;
+
+        // Position above info bar with gap
+        const infoCardFromRegistry = this.cardRegistry.get('info');
+        const defaultY = infoCardFromRegistry
+          ? infoCardFromRegistry.container.y - cardHeightPx - px(GRID.gap)
+          : this.renderer.height - cardHeightPx;
+
         card.container.position.set(defaultX, defaultY);
       }
     });
@@ -519,13 +578,17 @@ export class SpriteEditor {
     this.scene.addChild(this.paletteCard.card.container);
     this.registerCard('palette', this.paletteCard.card);
 
-    // Recreate info bar
+    // Recreate info bar (full width, edge to edge)
     const barHeight = 8;
-    const infoY = this.renderer.height - px(barHeight) - px(BORDER.total * 2) - px(GRID.margin) - 24;
+    const cardTotalHeight = calculateCardHeight(barHeight);
+    const infoY = this.renderer.height - cardTotalHeight;
+    const infoBarWidth = calculateFullWidthContentSize(this.renderer.width);
+
     this.infoBarCard = createInfoBarCard({
-      x: px(GRID.margin),
+      x: 0,
       y: infoY,
-      renderer: this.renderer
+      renderer: this.renderer,
+      width: infoBarWidth
     });
     this.scene.addChild(this.infoBarCard.card.container);
     this.registerCard('info', this.infoBarCard.card);

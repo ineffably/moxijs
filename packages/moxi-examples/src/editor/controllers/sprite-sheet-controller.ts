@@ -596,4 +596,19 @@ export class SpriteSheetController {
   public getSelectedCell(): { x: number; y: number } {
     return { x: this.selectedCellX, y: this.selectedCellY };
   }
+
+  /**
+   * Position the sprite so that cell 0,0 is at the top-left corner of the content container
+   */
+  public positionCell00AtTopLeft(): void {
+    if (!this.sprite) return;
+
+    // With anchor (0.5, 0.5), to position cell 0,0 at top-left (0,0) of content container:
+    // sprite position = (width * scale) / 2, (height * scale) / 2
+    this.sprite.x = (this.config.width * this.scale) / 2;
+    this.sprite.y = (this.config.height * this.scale) / 2;
+
+    // Redraw overlay to reflect new position
+    this.drawCellOverlay();
+  }
 }

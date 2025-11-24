@@ -28,6 +28,37 @@ import {
   setThemeByMetadata,
   getAllThemes
 } from '../editor';
+import { UIStateManager, CardState } from '../editor/state/ui-state-manager';
+
+/**
+ * Helper: Creates a mouse wheel zoom handler for a card
+ * Encapsulates the common zoom logic used by palette, tools, and sprite cards
+ */
+function createCardZoomHandler(
+  renderer: PIXI.Renderer,
+  card: PixelCard,
+  onZoom: (delta: number, event: WheelEvent) => void
+): (e: WheelEvent) => void {
+  return (e: WheelEvent) => {
+    const canvas = renderer.canvas as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    const cardBounds = card.container.getBounds();
+
+    if (mouseX >= cardBounds.x && mouseX <= cardBounds.x + cardBounds.width &&
+        mouseY >= cardBounds.y && mouseY <= cardBounds.y + cardBounds.height) {
+      e.preventDefault();
+
+      const delta = e.deltaY > 0 ? -1 : 1;
+      onZoom(delta, e);
+    }
+  };
+}
 
 /**
  * Creates a pixel-perfect palette card
@@ -79,6 +110,9 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer, palett
       colorsPerRow = bestCols;
       rows = bestRows;
       redrawContent();
+    },
+    onRefresh: () => {
+      redrawContent();
     }
   });
 
@@ -120,32 +154,16 @@ function createPaletteCard(x: number, y: number, renderer: PIXI.Renderer, palett
   }
 
   // Mouse wheel zoom for swatch size
-  const handleWheel = (e: WheelEvent) => {
-    const canvas = renderer.canvas as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+  const handleWheel = createCardZoomHandler(renderer, card, (delta) => {
+    swatchSize = Math.max(2, Math.min(32, swatchSize + delta));
 
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
+    // Update card content size to match new swatch size
+    const newContentWidth = colorsPerRow * swatchSize + (colorsPerRow - 1) * GRID.gap;
+    const newContentHeight = rows * swatchSize + (rows - 1) * GRID.gap;
+    card.setContentSize(newContentWidth, newContentHeight);
 
-    const cardBounds = card.container.getBounds();
-
-    if (mouseX >= cardBounds.x && mouseX <= cardBounds.x + cardBounds.width &&
-        mouseY >= cardBounds.y && mouseY <= cardBounds.y + cardBounds.height) {
-      e.preventDefault();
-
-      const delta = e.deltaY > 0 ? -1 : 1;
-      swatchSize = Math.max(2, Math.min(32, swatchSize + delta));
-
-      // Update card content size to match new swatch size
-      const newContentWidth = colorsPerRow * swatchSize + (colorsPerRow - 1) * GRID.gap;
-      const newContentHeight = rows * swatchSize + (rows - 1) * GRID.gap;
-      card.setContentSize(newContentWidth, newContentHeight);
-
-      redrawContent();
-    }
-  };
+    redrawContent();
+  });
 
   if (typeof window !== 'undefined') {
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -206,6 +224,9 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
       fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
 
       drawTools();
+    },
+    onRefresh: () => {
+      drawTools();
     }
   });
 
@@ -243,38 +264,21 @@ function createToolCard(x: number, y: number, renderer: PIXI.Renderer): PixelCar
   }
 
   // Mouse wheel zoom for tool size
-  const handleWheel = (e: WheelEvent) => {
-    const canvas = renderer.canvas as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+  const handleWheel = createCardZoomHandler(renderer, card, (delta) => {
+    // Adjust both width and height proportionally
+    toolWidth = Math.max(23, Math.min(86, toolWidth + delta * 2));
+    toolHeight = Math.max(4, Math.min(20, toolHeight + delta));
 
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
+    // Scale font proportionally with button height
+    fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
 
-    const cardBounds = card.container.getBounds();
+    // Update card content size
+    const newContentWidth = toolWidth;
+    const newContentHeight = rows * toolHeight + (rows - 1) * GRID.gap;
+    card.setContentSize(newContentWidth, newContentHeight);
 
-    if (mouseX >= cardBounds.x && mouseX <= cardBounds.x + cardBounds.width &&
-        mouseY >= cardBounds.y && mouseY <= cardBounds.y + cardBounds.height) {
-      e.preventDefault();
-
-      const delta = e.deltaY > 0 ? -1 : 1;
-
-      // Adjust both width and height proportionally
-      toolWidth = Math.max(23, Math.min(86, toolWidth + delta * 2));
-      toolHeight = Math.max(4, Math.min(20, toolHeight + delta));
-
-      // Scale font proportionally with button height
-      fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
-
-      // Update card content size
-      const newContentWidth = toolWidth;
-      const newContentHeight = rows * toolHeight + (rows - 1) * GRID.gap;
-      card.setContentSize(newContentWidth, newContentHeight);
-
-      drawTools();
-    }
-  };
+    drawTools();
+  });
 
   if (typeof window !== 'undefined') {
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -318,6 +322,9 @@ async function createSPTToolbar(renderer: PIXI.Renderer): Promise<PixelCard> {
     contentHeight: barHeight,
     renderer,
     minContentSize: true,
+    onRefresh: () => {
+      updateButtons();
+    }
   });
 
   const contentContainer = card.getContentContainer();
@@ -445,6 +452,10 @@ function createInfoBar(renderer: PIXI.Renderer): PixelCard {
       if (newWidth >= barHeight) {
         updateInfoSections();
       }
+    },
+    onRefresh: () => {
+      // Redraw content when theme changes
+      updateInfoSections();
     }
   });
 
@@ -521,6 +532,100 @@ let activeSpriteSheetInstance: SpriteSheetInstance | null = null;
 let currentPaletteCard: PixelCard | null = null;
 let selectedColorIndex = 0; // Currently selected palette color
 let currentPalette: number[] = PICO8_PALETTE; // Active palette (from active sprite sheet)
+
+// Card registry for UI state persistence
+const cardRegistry = new Map<string, PixelCard>();
+let uiStateSaveTimer: number | null = null;
+
+/**
+ * Apply default layout positions to all cards
+ */
+function applyDefaultLayout() {
+  const renderer = (window as any).renderer;
+  if (!renderer) return;
+
+  const margin = 20;
+  const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+  const topOffset = commanderBarHeight + 10;
+
+  // Position commander bar at top (y=0, x=0)
+  const commanderCard = cardRegistry.get('commander');
+  if (commanderCard) {
+    commanderCard.container.position.set(0, 0);
+  }
+
+  // Position palette card below commander on the left
+  const paletteCard = cardRegistry.get('palette');
+  if (paletteCard) {
+    paletteCard.container.position.set(margin, topOffset);
+  }
+
+  // Position info bar at bottom left
+  const infoCard = cardRegistry.get('info');
+  if (infoCard) {
+    const bottomMargin = 20;
+    const barHeight = 8;
+    const y = renderer.height - px(barHeight) - px(BORDER.total * 2) - bottomMargin - 24;
+    infoCard.container.position.set(margin, y);
+  }
+
+  // Position sprite sheets at their default location (bottom right, minimap style)
+  cardRegistry.forEach((card, id) => {
+    if (id.startsWith('sprite-sheet-')) {
+      // Get the sprite sheet's default position (bottom right)
+      const cardBounds = card.container.getBounds();
+      const defaultX = renderer.width - cardBounds.width - margin;
+      const defaultY = renderer.height - cardBounds.height - margin;
+      card.container.position.set(defaultX, defaultY);
+    }
+  });
+
+  // Position sprite cards centered below commander bar
+  cardRegistry.forEach((card, id) => {
+    if (id.startsWith('sprite-card-')) {
+      const cardBounds = card.container.getBounds();
+      const gapBelowCommander = 10;
+      const x = (renderer.width - cardBounds.width) / 2;
+      const y = margin + commanderBarHeight + gapBelowCommander;
+      card.container.position.set(x, y);
+    }
+  });
+
+  // Save the new layout
+  saveUIState();
+
+  console.log('✅ Default layout applied');
+}
+
+/**
+ * Save current UI state to localStorage (debounced)
+ */
+function saveUIState() {
+  // Debounce: wait 500ms after last change before saving
+  if (uiStateSaveTimer) {
+    clearTimeout(uiStateSaveTimer);
+  }
+
+  uiStateSaveTimer = window.setTimeout(() => {
+    const stateMap = new Map<string, CardState>();
+
+    // Export all card states
+    cardRegistry.forEach((card, id) => {
+      stateMap.set(id, card.exportState(id));
+    });
+
+    const renderer = (window as any).renderer;
+    UIStateManager.saveState(stateMap, renderer.width, renderer.height);
+  }, 500);
+}
+
+/**
+ * Register a card and setup auto-save on state changes
+ */
+function registerCard(id: string, card: PixelCard) {
+  cardRegistry.set(id, card);
+  card.onStateChanged(() => saveUIState());
+}
 
 /**
  * Updates the palette card to match the active sprite sheet
@@ -669,9 +774,43 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
     instance.spriteCard = spriteCardResult;
     instance.spriteController = spriteController;
 
+    // Register sprite card for state persistence
+    const sheetIndex = spriteSheetInstances.indexOf(instance);
+    registerCard(`sprite-card-${sheetIndex}`, spriteCardResult.card);
+
     // Link the paired cards
     spriteCardResult.card.setPairedCard(instance.sheetCard.card);
     instance.sheetCard.card.setPairedCard(spriteCardResult.card);
+
+    // Setup mouse wheel zoom for sprite card
+    const handleSpriteZoom = createCardZoomHandler(renderer, spriteCardResult.card, (delta) => {
+      const currentScale = spriteController.getScale();
+      const newScale = Math.max(1, Math.min(32, currentScale + delta));
+
+      if (newScale !== currentScale) {
+        spriteController.setScale(newScale);
+
+        // Update card title
+        spriteCardResult.card.setTitle(`Sprite (${newScale}x)`);
+
+        // Update card content size to match new scale
+        const dims = spriteController.getScaledDimensions();
+        const newContentWidth = Math.ceil(dims.width / px(1));
+        const newContentHeight = Math.ceil(dims.height / px(1));
+        spriteCardResult.card.setContentSize(newContentWidth, newContentHeight);
+
+        // Re-render sprite
+        spriteCardResult.redraw();
+      }
+    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('wheel', handleSpriteZoom, { passive: false });
+
+      spriteCardResult.card.container.on('destroyed', () => {
+        window.removeEventListener('wheel', handleSpriteZoom);
+      });
+    }
   };
 
   // Create sprite sheet card with focus callback
@@ -691,6 +830,10 @@ function createNewSpriteSheet(type: 'PICO-8' | 'TIC-80', showGrid: boolean) {
 
   scene.addChild(spriteSheetResult.card.container);
   instance.sheetCard = spriteSheetResult;
+
+  // Register sprite sheet card for state persistence
+  const sheetIndex = spriteSheetInstances.length;
+  registerCard(`sprite-sheet-${sheetIndex}`, spriteSheetResult.card);
 
   // Add to instances array
   spriteSheetInstances.push(instance);
@@ -736,6 +879,9 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
     minContentSize: true, // Prevent resizing below content's actual size
     onResize: (newWidth, newHeight) => {
       drawCommands();
+    },
+    onRefresh: () => {
+      drawCommands();
     }
   });
 
@@ -744,7 +890,6 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
   function drawCommands() {
     contentContainer.removeChildren();
 
-    const buttonWidth = 20; // Grid units
     const buttonHeight = 12; // Grid units (same as bar height for full height button)
     const buttonSpacing = px(2);
 
@@ -753,7 +898,6 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
 
     // New button - shows dialog to choose sprite sheet type
     const newButton = createPixelButton({
-      width: buttonWidth,
       height: buttonHeight,
       label: 'New',
       selectionMode: 'press',
@@ -792,10 +936,36 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
     newButton.position.set(currentX, 0);
     contentContainer.addChild(newButton);
 
-    // Right side button (Theme) - positioned at the far right
-    const themeButtonWidth = 24; // Grid units
+    // Right side buttons - positioned at the far right
+    const rightButtonsSpacing = px(2);
+
+    // Layout button (auto-sized based on text)
+    const layoutButton = createPixelButton({
+      height: buttonHeight,
+      label: 'Layout',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        // Show layout dialog
+        const dialog = createPixelDialog({
+          title: 'Layout',
+          message: 'Choose layout preset:',
+          buttons: [
+            {
+              label: 'Default',
+              onClick: () => {
+                applyDefaultLayout();
+              }
+            }
+          ],
+          renderer
+        });
+        scene.addChild(dialog);
+      }
+    });
+
+    // Theme button (auto-sized based on text)
     const themeButton = createPixelButton({
-      width: themeButtonWidth,
       height: buttonHeight,
       label: 'Theme',
       selectionMode: 'press',
@@ -820,6 +990,15 @@ function createCommanderBar(renderer: PIXI.Renderer, scene: PIXI.Container): Pix
         scene.addChild(dialog);
       }
     });
+
+    // Position right-side buttons (get their widths after creation)
+    const layoutButtonWidth = layoutButton.width / px(1); // Convert from pixels to grid units
+    const themeButtonWidth = themeButton.width / px(1);
+
+    // Position before theme button (content width - both buttons - spacing)
+    layoutButton.position.set(px(barWidth - layoutButtonWidth - themeButtonWidth) - rightButtonsSpacing, 0);
+    contentContainer.addChild(layoutButton);
+
     // Position at far right (content width - button width)
     themeButton.position.set(px(barWidth - themeButtonWidth), 0);
     contentContainer.addChild(themeButton);
@@ -868,6 +1047,32 @@ export async function initSpriteEditor() {
   let paletteCardRef: PixelCard;
   let infoBarCard: PixelCard;
 
+  /**
+   * Restore UI state from localStorage
+   */
+  function restoreUIState() {
+    const savedState = UIStateManager.loadState();
+    if (!savedState) return false;
+
+    // Adjust for canvas size changes
+    const adjustedState = UIStateManager.adjustForCanvasSize(
+      savedState,
+      renderer.width,
+      renderer.height
+    );
+
+    // Restore each card's state
+    adjustedState.cards.forEach(cardState => {
+      const card = cardRegistry.get(cardState.id);
+      if (card) {
+        card.importState(cardState);
+      }
+    });
+
+    console.log('✅ UI state restored');
+    return true;
+  }
+
   // Function to update theme without losing state
   function updateTheme() {
     // Update renderer background
@@ -906,6 +1111,7 @@ export async function initSpriteEditor() {
     // Recreate commander bar at top
     commanderBarCard = createCommanderBar(renderer, scene);
     scene.addChild(commanderBarCard.container);
+    registerCard('commander', commanderBarCard);
 
     // Calculate top offset for cards below commander bar
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
@@ -914,6 +1120,7 @@ export async function initSpriteEditor() {
     // Recreate palette card with current palette
     paletteCardRef = createPaletteCard(20, topOffset, renderer, currentPalette);
     scene.addChild(paletteCardRef.container);
+    registerCard('palette', paletteCardRef);
 
     // Recreate SPT toolbar - HIDDEN
     // const paletteCardHeight = paletteCard.container.getBounds().height;
@@ -929,6 +1136,10 @@ export async function initSpriteEditor() {
     // Recreate info bar
     infoBarCard = createInfoBar(renderer);
     scene.addChild(infoBarCard.container);
+    registerCard('info', infoBarCard);
+
+    // Restore UI state if available
+    restoreUIState();
   }
 
   // Make renderer, scene, and functions available globally

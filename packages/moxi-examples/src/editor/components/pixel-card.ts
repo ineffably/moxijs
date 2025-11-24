@@ -561,6 +561,13 @@ export class PixelCard {
   }
 
   /**
+   * Get the paired card
+   */
+  public getPairedCard(): PixelCard | null {
+    return this.pairedCard;
+  }
+
+  /**
    * Set callback for when card state changes (position/size)
    */
   public onStateChanged(callback: () => void) {

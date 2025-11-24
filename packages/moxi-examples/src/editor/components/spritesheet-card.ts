@@ -65,12 +65,21 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
     showGrid,
     onScaleChange: (newScale) => {
       // Update card title when scale changes
-      card.setTitle(`Sprite Sheet - ${config.type} (${newScale.toFixed(2)}x)`);
+      const cell = controller.getSelectedCell();
+      const cellText = cell ? `${cell.x},${cell.y}` : 'grid-cell';
+      card.setTitle(`${cellText} | ${newScale.toFixed(2)}x`);
       // Re-render the sprite sheet
       controller.render(contentContainer);
     },
     onCellHover,
-    onCellClick
+    onCellClick: (cellX, cellY) => {
+      // Update title when cell is selected
+      card.setTitle(`${cellX},${cellY} | ${controller.getScale().toFixed(2)}x`);
+      // Call original onCellClick if provided
+      if (onCellClick) {
+        onCellClick(cellX, cellY);
+      }
+    }
   });
 
   // Get initial scaled dimensions
@@ -88,7 +97,7 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
   const defaultY = y ?? (renderer.height - px(contentHeight) - cardPadding - titleBarHeight - margin);
 
   card = new PixelCard({
-    title: `Sprite Sheet - ${config.type} (${controller.getScale().toFixed(2)}x)`,
+    title: `grid-cell | ${controller.getScale().toFixed(2)}x`,
     x: defaultX,
     y: defaultY,
     contentWidth,

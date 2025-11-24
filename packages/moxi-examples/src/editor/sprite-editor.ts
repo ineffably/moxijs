@@ -220,6 +220,11 @@ export class SpriteEditor {
         const desiredContentWidth = 50; // Grid units for minimap
         const desiredContentHeight = 50; // Grid units for minimap
 
+        // Zoom to 5x, select cell 0,0, and position sprite sheet so cell 0,0 is at top-left
+        instance.sheetCard.controller.setScale(5);
+        instance.sheetCard.controller.selectCell(0, 0); // This will trigger onCellClick and update title
+        instance.sheetCard.controller.positionCell00AtTopLeft();
+
         // Set the card's content size
         card.setContentSize(desiredContentWidth, desiredContentHeight);
         instance.sheetCard.controller.render(card.getContentContainer());

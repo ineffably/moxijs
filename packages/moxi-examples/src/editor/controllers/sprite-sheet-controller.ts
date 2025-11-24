@@ -537,6 +537,11 @@ export class SpriteSheetController {
     this.selectedCellX = cellX;
     this.selectedCellY = cellY;
     this.drawCellOverlay();
+
+    // Trigger onCellClick callback to update title
+    if (this.onCellClick) {
+      this.onCellClick(cellX, cellY);
+    }
   }
 
   /**

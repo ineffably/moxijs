@@ -616,4 +616,35 @@ export class SpriteSheetController {
     // Redraw overlay to reflect new position
     this.drawCellOverlay();
   }
+
+  /**
+   * Center a specific cell in the viewport
+   * Positions the sprite so the given cell is centered in the content container
+   */
+  public centerCell(cellX: number, cellY: number, containerWidth: number, containerHeight: number): void {
+    if (!this.sprite) return;
+
+    const cellSize = 8; // Each cell is 8x8 pixels
+
+    // Calculate the center of the cell in sprite-local coordinates (unscaled)
+    const cellCenterX = (cellX * cellSize) + (cellSize / 2);
+    const cellCenterY = (cellY * cellSize) + (cellSize / 2);
+
+    // Calculate the center of the container
+    const containerCenterX = containerWidth / 2;
+    const containerCenterY = containerHeight / 2;
+
+    // With anchor (0.5, 0.5), sprite position (0,0) corresponds to sprite center
+    // To center a cell: position sprite so that cell's scaled position aligns with container center
+    // sprite.x + (cellLocalX - spriteLocalCenterX) * scale = containerCenterX
+
+    const spriteCenterX = this.config.width / 2;
+    const spriteCenterY = this.config.height / 2;
+
+    this.sprite.x = containerCenterX - (cellCenterX - spriteCenterX) * this.scale;
+    this.sprite.y = containerCenterY - (cellCenterY - spriteCenterY) * this.scale;
+
+    // Redraw overlay to reflect new position
+    this.drawCellOverlay();
+  }
 }

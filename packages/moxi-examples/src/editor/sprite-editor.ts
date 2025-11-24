@@ -447,6 +447,8 @@ export class SpriteEditor {
       },
       onCellClick: (cellX, cellY) => {
         createSpriteCardForCell(cellX, cellY);
+        // Save project state so selected cell is persisted
+        this.saveProjectState();
       },
       onFocus: makeThisSheetActive
     });
@@ -491,6 +493,16 @@ export class SpriteEditor {
     const cellX = savedState?.selectedCellX ?? 0;
     const cellY = savedState?.selectedCellY ?? 0;
     spriteSheetResult.controller.selectCell(cellX, cellY);
+
+    // Center the selected cell in the sprite sheet view (if loading from saved state)
+    if (savedState) {
+      // Get content dimensions in pixels from the card
+      const contentState = spriteSheetResult.card.getContentSize();
+      const contentWidthPx = px(contentState.width);
+      const contentHeightPx = px(contentState.height);
+      spriteSheetResult.controller.centerCell(cellX, cellY, contentWidthPx, contentHeightPx);
+    }
+
     createSpriteCardForCell(cellX, cellY);
 
     // If loading from saved state with sprite card scale, apply it

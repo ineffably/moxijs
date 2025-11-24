@@ -3,6 +3,16 @@
  * A complete pixel-perfect sprite editor that can be embedded in any PIXI application
  */
 
+// Main Sprite Editor
+export { SpriteEditor, SpriteEditorOptions } from './sprite-editor';
+
+// Cards
+export { createPaletteCard, PaletteCardOptions, PaletteCardResult } from './cards/palette-card';
+export { createToolCard, ToolCardOptions, ToolCardResult } from './cards/tool-card';
+export { createSPTToolbarCard, SPTToolbarCardOptions, SPTToolbarCardResult, SPTTool } from './cards/spt-toolbar-card';
+export { createInfoBarCard, InfoBarCardOptions, InfoBarCardResult, InfoSection } from './cards/info-bar-card';
+export { createCommanderBarCard, CommanderBarCardOptions, CommanderBarCardResult, CommanderBarCallbacks } from './cards/commander-bar-card';
+
 // Components
 export { PixelCard, UI_COLORS } from './components/pixel-card';
 export { createPixelButton, PixelButtonOptions, SelectionMode, ActionMode } from './components/pixel-button';
@@ -21,10 +31,14 @@ export { SpriteController, SpriteControllerOptions } from './controllers/sprite-
 
 // Utilities
 export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilities/svg-icon-button';
+export { createCardZoomHandler } from './utilities/card-zoom-handler';
 
 // Re-export SVG utilities from moxi
 export { svgToTexture } from 'moxi';
 export type { SVGToTextureOptions } from 'moxi';
+
+// State Management
+export { UIStateManager, CardState, UIState } from './state/ui-state-manager';
 
 // Theming System
 export {

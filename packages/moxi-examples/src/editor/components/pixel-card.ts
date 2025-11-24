@@ -387,6 +387,23 @@ export class PixelCard {
   }
 
   /**
+   * Get total card width in pixels
+   * Formula: cardWidth = px(contentWidth + BORDER.total * 2 + GRID.padding * 2)
+   */
+  public getPixelWidth(): number {
+    const cardWidthGridUnits = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
+    return px(cardWidthGridUnits);
+  }
+
+  /**
+   * Get total card height in pixels
+   * Formula: cardHeight = px(contentHeight) + px(BORDER.total * 2) + titleBarHeight + px(GRID.padding * 2)
+   */
+  public getPixelHeight(): number {
+    return px(this.state.contentHeight) + px(BORDER.total * 2) + this.titleBarHeightPx + px(GRID.padding * 2);
+  }
+
+  /**
    * Manually trigger a redraw (useful after adding/changing content)
    */
   public refresh() {

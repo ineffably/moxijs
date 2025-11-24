@@ -563,4 +563,37 @@ export class SpriteSheetController {
 
     return { x: pixelX, y: pixelY };
   }
+
+  /**
+   * Get all pixel data (for saving)
+   */
+  public getPixelData(): number[][] {
+    // Return a deep copy to prevent external mutation
+    return this.pixels.map(row => [...row]);
+  }
+
+  /**
+   * Set all pixel data (for loading)
+   */
+  public setPixelData(pixels: number[][]): void {
+    // Validate dimensions match
+    if (pixels.length !== this.config.height) {
+      console.error('Pixel data height mismatch');
+      return;
+    }
+    if (pixels[0]?.length !== this.config.width) {
+      console.error('Pixel data width mismatch');
+      return;
+    }
+
+    // Deep copy the pixel data
+    this.pixels = pixels.map(row => [...row]);
+  }
+
+  /**
+   * Get current selected cell
+   */
+  public getSelectedCell(): { x: number; y: number } {
+    return { x: this.selectedCellX, y: this.selectedCellY };
+  }
 }

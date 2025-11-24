@@ -33,7 +33,7 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
 
   // Create the card
   const card = new PixelCard({
-    title: `Sprite (${spriteController.getScale()}x)`,
+    title: `(${spriteController.getScale()}x)`,
     x,
     y,
     contentWidth,

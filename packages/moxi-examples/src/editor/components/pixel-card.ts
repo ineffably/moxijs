@@ -424,6 +424,55 @@ export class PixelCard {
   }
 
   /**
+   * Set custom title bar content with left and right aligned text
+   */
+  public setTitleContent(leftText: string, rightText: string) {
+    // Store custom title content
+    this.options.title = ''; // Clear standard title
+
+    // Remove existing title text children (they have BitmapText type)
+    const titleTextChildren = this.container.children.filter(
+      child => child instanceof PIXI.BitmapText
+    );
+    titleTextChildren.forEach(child => this.container.removeChild(child));
+
+    const theme = getTheme();
+    const textY = px(BORDER.total) + (this.titleBarHeightPx - 64 * GRID.fontScale) / 2;
+
+    // Left-aligned text
+    const leftBitmapText = new PIXI.BitmapText({
+      text: leftText,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: theme.textPrimary,
+      }
+    });
+    leftBitmapText.roundPixels = true;
+    leftBitmapText.scale.set(GRID.fontScale);
+    leftBitmapText.position.set(px(BORDER.total) + 2, Math.floor(textY));
+    this.container.addChild(leftBitmapText);
+
+    // Right-aligned text
+    const rightBitmapText = new PIXI.BitmapText({
+      text: rightText,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: theme.textPrimary,
+      }
+    });
+    rightBitmapText.roundPixels = true;
+    rightBitmapText.scale.set(GRID.fontScale);
+
+    // Calculate card width for right alignment
+    const cardWidth = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
+    const rightX = px(cardWidth - BORDER.total) - rightBitmapText.width - 2;
+    rightBitmapText.position.set(rightX, Math.floor(textY));
+    this.container.addChild(rightBitmapText);
+  }
+
+  /**
    * Set the paired card (usually set after both cards are created)
    */
   public setPairedCard(card: PixelCard) {

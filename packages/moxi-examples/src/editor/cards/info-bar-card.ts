@@ -15,6 +15,7 @@ export interface InfoBarCardOptions {
   x: number;
   y: number;
   renderer: PIXI.Renderer;
+  width?: number;  // Optional width in grid units (defaults to auto-calculated)
   sections?: InfoSection[];
 }
 
@@ -27,7 +28,7 @@ export interface InfoBarCardResult {
  * Creates an info bar for displaying contextual information in horizontal sections
  */
 export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResult {
-  const { x, y, renderer } = options;
+  const { x, y, renderer, width } = options;
 
   const barHeight = 8; // Grid units for a slim horizontal bar
 
@@ -38,8 +39,8 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
     { label: 'Scale:', value: '1x' }
   ];
 
-  // Estimate width: each section takes roughly 20 grid units
-  const barWidth = sections.length * 20;
+  // Use provided width or estimate based on sections
+  const barWidth = width ?? (sections.length * 20);
 
   // Create the card (uses default card background from theme)
   const card = new PixelCard({

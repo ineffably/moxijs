@@ -23,6 +23,7 @@ export interface CommanderBarCardOptions {
   y: number;
   renderer: PIXI.Renderer;
   scene: PIXI.Container;
+  width?: number;  // Optional width in grid units (defaults to auto-calculated)
   callbacks?: CommanderBarCallbacks;
 }
 
@@ -34,14 +35,15 @@ export interface CommanderBarCardResult {
  * Creates a commander bar for actions and options
  */
 export function createCommanderBarCard(options: CommanderBarCardOptions): CommanderBarCardResult {
-  const { x, y, renderer, scene, callbacks } = options;
+  const { x, y, renderer, scene, width, callbacks } = options;
 
   const canvasWidth = renderer.width;
   const barHeight = 12; // Grid units for commander bar
 
-  // Calculate width in grid units (canvas width - margins, converted to grid units)
-  const margin = 20;
-  const barWidth = Math.floor((canvasWidth - margin * 2 - px(BORDER.total * 2)) / px(1));
+  // IMPORTANT: Card adds BORDER.total * 2 + GRID.padding * 2 to contentWidth (in grid units)
+  // So we must subtract those from the desired total width to get the correct contentWidth
+  // Formula: contentWidth = (canvasWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2)
+  const barWidth = width ?? (Math.floor(canvasWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2));
 
   // Create the card
   const card = new PixelCard({

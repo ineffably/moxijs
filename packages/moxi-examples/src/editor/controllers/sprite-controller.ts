@@ -56,7 +56,7 @@ export class SpriteController {
    * Set the scale
    */
   public setScale(newScale: number) {
-    this.scale = Math.max(1, Math.min(32, newScale));
+    this.scale = Math.max(1, Math.min(64, newScale));
   }
 
   /**

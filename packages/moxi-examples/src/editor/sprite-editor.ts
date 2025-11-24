@@ -347,7 +347,9 @@ export class SpriteEditor {
       // Setup mouse wheel zoom for sprite card
       const handleSpriteZoom = createCardZoomHandler(this.renderer, spriteCardResult.card, (delta) => {
         const currentScale = spriteController.getScale();
-        const newScale = Math.max(1, Math.min(32, currentScale + delta));
+        // Use larger increments for more responsive zooming (2x per scroll)
+        const zoomIncrement = delta * 2;
+        const newScale = Math.max(1, Math.min(64, currentScale + zoomIncrement));
 
         if (newScale !== currentScale) {
           spriteController.setScale(newScale);

@@ -63,6 +63,8 @@ export class PixelCard {
   private resizeStartHeight = 0;
   private resizeDirection: 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw' | null = null;
 
+  private capturedPointerId: number | null = null;
+
   private options: PixelCardOptions;
   private state: PixelCardResizeState;
 
@@ -136,16 +138,46 @@ export class PixelCard {
 
         // Horizontal resizing
         if (this.resizeDirection.includes('e')) {
+          // East: grow right
           this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth + deltaGridUnitsX);
         } else if (this.resizeDirection.includes('w')) {
-          this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth - deltaGridUnitsX);
+          // West: try to move left edge (grow left), but stop at viewport edge
+          const newWidth = Math.max(minWidth, this.resizeStartWidth - deltaGridUnitsX);
+          const widthChange = newWidth - this.state.contentWidth;
+
+          // Calculate how much we can actually move left (don't go past x=0)
+          const currentX = this.container.x;
+          const cardWidthChangePixels = px(widthChange);
+          const newX = Math.max(0, currentX - cardWidthChangePixels);
+          const actualMoveX = currentX - newX;
+
+          // Only resize by the amount we can actually move
+          if (actualMoveX > 0) {
+            this.container.x = newX;
+            this.state.contentWidth = this.state.contentWidth + Math.round(actualMoveX / px(1));
+          }
         }
 
         // Vertical resizing
         if (this.resizeDirection.includes('s')) {
+          // South: grow down
           this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight + deltaGridUnitsY);
         } else if (this.resizeDirection.includes('n')) {
-          this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight - deltaGridUnitsY);
+          // North: try to move top edge (grow up), but stop at viewport edge
+          const newHeight = Math.max(minHeight, this.resizeStartHeight - deltaGridUnitsY);
+          const heightChange = newHeight - this.state.contentHeight;
+
+          // Calculate how much we can actually move up (don't go past y=0)
+          const currentY = this.container.y;
+          const cardHeightChangePixels = px(heightChange);
+          const newY = Math.max(0, currentY - cardHeightChangePixels);
+          const actualMoveY = currentY - newY;
+
+          // Only resize by the amount we can actually move
+          if (actualMoveY > 0) {
+            this.container.y = newY;
+            this.state.contentHeight = this.state.contentHeight + Math.round(actualMoveY / px(1));
+          }
         }
 
         this.redraw();
@@ -166,6 +198,19 @@ export class PixelCard {
       this.isDragging = false;
       this.isResizing = false;
       this.resizeDirection = null;
+
+      // Release pointer capture
+      if (this.capturedPointerId !== null) {
+        const canvas = renderer.canvas as HTMLCanvasElement;
+        if (canvas) {
+          try {
+            canvas.releasePointerCapture(this.capturedPointerId);
+          } catch (e) {
+            // Ignore errors if pointer was already released
+          }
+        }
+        this.capturedPointerId = null;
+      }
 
       // Hide scale indicator
       this.hideScaleIndicator();
@@ -253,6 +298,12 @@ export class PixelCard {
       this.dragStartX = e.client.x;
       this.dragStartY = e.client.y;
 
+      // Capture pointer to continue receiving events even outside the window
+      if (canvas && e.pointerId !== undefined) {
+        canvas.setPointerCapture(e.pointerId);
+        this.capturedPointerId = e.pointerId;
+      }
+
       e.stopPropagation();
     });
 
@@ -336,6 +387,14 @@ export class PixelCard {
         this.resizeStartY = e.client.y;
         this.resizeStartWidth = this.state.contentWidth;
         this.resizeStartHeight = this.state.contentHeight;
+
+        // Capture pointer to continue receiving events even outside the window
+        const canvas = this.options.renderer.canvas as HTMLCanvasElement;
+        if (canvas && e.pointerId !== undefined) {
+          canvas.setPointerCapture(e.pointerId);
+          this.capturedPointerId = e.pointerId;
+        }
+
         e.stopPropagation();
       });
 

@@ -146,6 +146,9 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
   // Initial draw
   redrawContent();
 
+  // Update minimum content size to match actual content
+  card.updateMinContentSize();
+
   return {
     card,
     getSelectedColorIndex: () => selectedColorIndex,

@@ -1,5 +1,5 @@
 /**
- * Commander Bar Card - Main action bar with commands
+ * PIKCELL Bar Card - Main action bar with commands
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
@@ -13,7 +13,11 @@ export interface CommanderBarCallbacks {
   onNew?: () => void;
   onSave?: () => void;
   onLoad?: () => void;
+  onExport?: () => void;
   onApplyLayout?: () => void;
+  onSaveLayoutSlot?: (slot: 'A' | 'B' | 'C') => void;
+  onLoadLayoutSlot?: (slot: 'A' | 'B' | 'C') => void;
+  hasLayoutSlot?: (slot: 'A' | 'B' | 'C') => boolean;
   onThemeChange?: () => void;
   onScaleChange?: (scale: number) => void; // TEMPORARY: For testing GRID scaling
 }
@@ -32,13 +36,13 @@ export interface CommanderBarCardResult {
 }
 
 /**
- * Creates a commander bar for actions and options
+ * Creates a PIKCELL bar for actions and options
  */
 export function createCommanderBarCard(options: CommanderBarCardOptions): CommanderBarCardResult {
   const { x, y, renderer, scene, width, callbacks } = options;
 
   const canvasWidth = renderer.width;
-  const barHeight = 12; // Grid units for commander bar
+  const barHeight = 12; // Grid units for PIKCELL bar
 
   // IMPORTANT: Card adds BORDER.total * 2 + GRID.padding * 2 to contentWidth (in grid units)
   // So we must subtract those from the desired total width to get the correct contentWidth
@@ -47,7 +51,7 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
 
   // Create the card
   const card = new PixelCard({
-    title: 'Commander',
+    title: 'PIKCELL',
     x,
     y,
     contentWidth: barWidth,
@@ -70,7 +74,7 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     const buttonHeight = 12; // Grid units (same as bar height for full height button)
     const buttonSpacing = px(2);
 
-    // Left side buttons (starting at x=0)
+    // Left side buttons (flush with content container left edge)
     let currentX = 0;
 
     // New button
@@ -121,37 +125,21 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     contentContainer.addChild(loadButton);
     currentX += loadButton.width + buttonSpacing;
 
-    // TEMPORARY: Scale testing buttons
-    const scaleLabel = new PIXI.BitmapText({
-      text: 'Scale:',
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: 0x666666,
+    // Export button
+    const exportButton = createPixelButton({
+      height: buttonHeight,
+      label: 'Export',
+      selectionMode: 'press',
+      actionMode: 'click',
+      onClick: () => {
+        if (callbacks?.onExport) {
+          callbacks.onExport();
+        }
       }
     });
-    scaleLabel.roundPixels = true;
-    scaleLabel.scale.set(GRID.fontScale);
-    scaleLabel.position.set(currentX, px(3));
-    contentContainer.addChild(scaleLabel);
-    currentX += scaleLabel.width + px(1);
-
-    [1, 2, 3, 4].forEach(scale => {
-      const scaleButton = createPixelButton({
-        height: buttonHeight,
-        label: `${scale}`,
-        selectionMode: 'press',
-        actionMode: 'click',
-        onClick: () => {
-          if (callbacks?.onScaleChange) {
-            callbacks.onScaleChange(scale);
-          }
-        }
-      });
-      scaleButton.position.set(currentX, 0);
-      contentContainer.addChild(scaleButton);
-      currentX += scaleButton.width + px(1);
-    });
+    exportButton.position.set(currentX, 0);
+    contentContainer.addChild(exportButton);
+    currentX += exportButton.width + buttonSpacing;
 
     // Right side buttons - positioned at the far right
     const rightButtonsSpacing = px(2);
@@ -163,20 +151,52 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
       selectionMode: 'press',
       actionMode: 'click',
       onClick: () => {
+        // Build button list dynamically
+        const buttons: Array<{ label: string; onClick: () => void }> = [];
+
+        // Reset layout button
+        buttons.push({
+          label: 'Reset',
+          onClick: () => {
+            if (callbacks?.onApplyLayout) {
+              callbacks.onApplyLayout();
+            }
+          }
+        });
+
+        // Slot A, B, C load/save buttons
+        const slots: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
+        slots.forEach(slot => {
+          const hasSlot = callbacks?.hasLayoutSlot?.(slot) ?? false;
+
+          // Load button (if slot has saved layout)
+          if (hasSlot) {
+            buttons.push({
+              label: `Load ${slot}`,
+              onClick: () => {
+                if (callbacks?.onLoadLayoutSlot) {
+                  callbacks.onLoadLayoutSlot(slot);
+                }
+              }
+            });
+          }
+
+          // Save button
+          buttons.push({
+            label: hasSlot ? `Save ${slot}` : `Save ${slot}`,
+            onClick: () => {
+              if (callbacks?.onSaveLayoutSlot) {
+                callbacks.onSaveLayoutSlot(slot);
+              }
+            }
+          });
+        });
+
         // Show layout dialog
         const dialog = createPixelDialog({
           title: 'Layout',
-          message: 'Choose layout preset:',
-          buttons: [
-            {
-              label: 'Default',
-              onClick: () => {
-                if (callbacks?.onApplyLayout) {
-                  callbacks.onApplyLayout();
-                }
-              }
-            }
-          ],
+          message: 'Choose layout:',
+          buttons,
           renderer
         });
         scene.addChild(dialog);

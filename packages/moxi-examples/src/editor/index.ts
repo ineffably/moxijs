@@ -12,6 +12,7 @@ export { createToolCard, ToolCardOptions, ToolCardResult } from './cards/tool-ca
 export { createSPTToolbarCard, SPTToolbarCardOptions, SPTToolbarCardResult, SPTTool } from './cards/spt-toolbar-card';
 export { createInfoBarCard, InfoBarCardOptions, InfoBarCardResult, InfoSection } from './cards/info-bar-card';
 export { createCommanderBarCard, CommanderBarCardOptions, CommanderBarCardResult, CommanderBarCallbacks } from './cards/commander-bar-card';
+export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scale-card';
 
 // Components
 export { PixelCard, UI_COLORS } from './components/pixel-card';

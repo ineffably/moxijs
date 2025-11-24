@@ -58,6 +58,7 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
 
   let card: PixelCard;
   let contentContainer: PIXI.Container;
+  let gridBackground: PIXI.TilingSprite;
 
   // Create sprite sheet controller
   const controller = new SpriteSheetController({
@@ -105,14 +106,21 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
     contentHeight,
     renderer,
     clipContent: true, // Enable clipping for sprite sheet (overflow: hidden)
-    onFocus
+    onFocus,
+    onResize: (width, height) => {
+      // Update tiled background size when card is resized
+      if (gridBackground) {
+        gridBackground.width = px(width);
+        gridBackground.height = px(height);
+      }
+    }
   });
 
   contentContainer = card.getContentContainer();
 
   // Create tiled grid background using utility
   const gridTexture = createCheckerboardTexture(16, 0x2a2a3a, 0x353545);
-  const gridBackground = new PIXI.TilingSprite({
+  gridBackground = new PIXI.TilingSprite({
     texture: gridTexture,
     width: px(contentWidth),
     height: px(contentHeight)

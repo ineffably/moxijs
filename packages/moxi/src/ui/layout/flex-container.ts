@@ -3,11 +3,7 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { EdgeInsets } from '../core/edge-insets';
 
-/**
- * Flexbox direction (how children are arranged)
- *
- * @category UI
- */
+/** Flexbox direction. */
 export enum FlexDirection {
   Row = 'row',              // Horizontal, left to right
   RowReverse = 'row-reverse',
@@ -15,11 +11,7 @@ export enum FlexDirection {
   ColumnReverse = 'column-reverse'
 }
 
-/**
- * Flexbox justify content (main axis alignment)
- *
- * @category UI
- */
+/** Main axis alignment. */
 export enum FlexJustify {
   Start = 'start',          // Pack items to start
   End = 'end',              // Pack items to end
@@ -29,11 +21,7 @@ export enum FlexJustify {
   SpaceEvenly = 'space-evenly'     // Even space between items
 }
 
-/**
- * Flexbox align items (cross axis alignment)
- *
- * @category UI
- */
+/** Cross axis alignment. */
 export enum FlexAlign {
   Start = 'start',
   End = 'end',
@@ -41,11 +29,7 @@ export enum FlexAlign {
   Stretch = 'stretch'       // Stretch to fill cross axis
 }
 
-/**
- * Props for configuring a FlexContainer
- *
- * @category UI
- */
+/** FlexContainer configuration. */
 export interface FlexContainerProps {
   direction?: FlexDirection;
   justify?: FlexJustify;
@@ -58,23 +42,30 @@ export interface FlexContainerProps {
 }
 
 /**
- * A flexbox-style layout container
- * Arranges children in rows or columns with flexible sizing and alignment
- *
- * @category UI
+ * Flexbox-style layout container for arranging UI components.
+ * Supports row/column direction, alignment, justify, and gaps.
  *
  * @example
- * ```typescript
- * const container = new FlexContainer({
+ * ```ts
+ * // Horizontal row with centered items
+ * const toolbar = new FlexContainer({
  *   direction: FlexDirection.Row,
  *   justify: FlexJustify.Center,
+ *   align: FlexAlign.Center,
  *   gap: 10,
  *   padding: EdgeInsets.all(20)
  * });
+ * toolbar.addChild(button1);
+ * toolbar.addChild(button2);
+ * toolbar.addChild(button3);
  *
- * container.addChild(box1);
- * container.addChild(box2);
- * container.addChild(box3);
+ * // Vertical column with space between
+ * const sidebar = new FlexContainer({
+ *   direction: FlexDirection.Column,
+ *   justify: FlexJustify.SpaceBetween,
+ *   width: 200,
+ *   height: 'fill'
+ * });
  * ```
  */
 export class FlexContainer extends UIComponent {
@@ -99,9 +90,7 @@ export class FlexContainer extends UIComponent {
     };
   }
 
-  /**
-   * Adds a child component to this container
-   */
+  /** Add child component. */
   addChild(child: UIComponent): void {
     child.parent = this;
     this.children.push(child);
@@ -109,9 +98,7 @@ export class FlexContainer extends UIComponent {
     this.markLayoutDirty();
   }
 
-  /**
-   * Removes a child component from this container
-   */
+  /** Remove child component. */
   removeChild(child: UIComponent): void {
     const index = this.children.indexOf(child);
     if (index !== -1) {
@@ -122,9 +109,7 @@ export class FlexContainer extends UIComponent {
     }
   }
 
-  /**
-   * Measures the size needed for this container and its children
-   */
+  /** @internal */
   measure(): MeasuredSize {
     if (this.children.length === 0) {
       const padding = this.boxModel.padding;
@@ -161,9 +146,7 @@ export class FlexContainer extends UIComponent {
     };
   }
 
-  /**
-   * Performs layout for this container and positions children
-   */
+  /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
     const padding = this.boxModel.padding;
     const { direction, justify, align, gap } = this.props;
@@ -207,9 +190,7 @@ export class FlexContainer extends UIComponent {
     this.render();
   }
 
-  /**
-   * Layouts and positions child components
-   */
+  /** @internal */
   private layoutChildren(): void {
     const { direction, justify, align, gap } = this.props;
     const padding = this.boxModel.padding;
@@ -303,9 +284,7 @@ export class FlexContainer extends UIComponent {
     });
   }
 
-  /**
-   * Renders the container (currently no visual representation)
-   */
+  /** @internal */
   protected render(): void {
     // FlexContainer itself has no visual representation
     // Could add debug borders here if needed

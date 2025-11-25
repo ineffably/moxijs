@@ -37,7 +37,7 @@ import { svgToTexture } from './library/svg-utils/svg-to-texture';
 import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pixel-grid';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
-import { LoadingScene } from './library/loading-scene';
+import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
 import {
   PhysicsWorld,
   PhysicsBodyLogic,
@@ -58,7 +58,7 @@ export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
-export type { LoadingSceneOptions } from './library/loading-scene';
+export type { LoadingSceneOptions, LoadingAnimation, LoadingAnimationContext, FallingSquaresOptions } from './library/loading-scene';
 export type {
   BodyType,
   SyncMode,
@@ -139,6 +139,7 @@ const exportedObjects = {
   ParallaxBackgroundLogic,
   ParallaxLayer,
   LoadingScene,
+  FallingSquaresAnimation,
   setupMoxi,
   RenderManager,
   Scene,
@@ -215,6 +216,7 @@ export {
   ParallaxBackgroundLogic,
   ParallaxLayer,
   LoadingScene,
+  FallingSquaresAnimation,
   setupMoxi,
   RenderManager,
   Scene,

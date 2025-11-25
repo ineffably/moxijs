@@ -7,23 +7,31 @@ import { Scene } from '../core/scene';
 import { PhysicsWorld, type PhysicsWorldOptions } from './physics';
 import { LoadingScene, type LoadingSceneOptions } from './loading-scene';
 
+/** Options for pixel-perfect rendering (pixel art games). */
 export interface PixelPerfectOptions {
-  /** Enable all pixel-perfect settings (resolution: 1, antialias: false, roundPixels: true, canvas imageRendering) */
+  /** Enable resolution:1, antialias:false, roundPixels:true. Default true. */
   enabled?: boolean;
-  /** Apply canvas CSS imageRendering for nearest-neighbor scaling */
+  /** Apply CSS imageRendering:pixelated to canvas. Default true. */
   imageRendering?: boolean;
 }
 
+/** Configuration for setupMoxi(). */
 export interface SetupMoxiArgs {
+  /** Container element to attach the canvas. */
   hostElement: HTMLElement;
+  /** PIXI render options (width, height, backgroundColor, etc). */
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
+  /** Enable physics. Pass true for defaults or PhysicsWorldOptions. */
   physics?: PhysicsWorldOptions | boolean;
+  /** Show loading overlay during asset loading. */
   showLoadingScene?: boolean;
+  /** Customize loading scene appearance. */
   loadingSceneOptions?: LoadingSceneOptions;
-  /** Pixel-perfect rendering options. Can be true for all defaults, or an object for fine control */
+  /** Enable pixel-perfect rendering. Pass true for defaults. */
   pixelPerfect?: boolean | PixelPerfectOptions;
 }
 
+/** Return value from setupMoxi(). */
 export interface SetupMoxiResult {
   scene: Scene;
   engine: Engine;
@@ -35,6 +43,7 @@ export interface SetupMoxiResult {
   loadingScene?: LoadingScene;
 }
 
+/** Default PIXI render options. */
 export const defaultRenderOptions = {
   width: 1280,
   height: 720,
@@ -44,6 +53,24 @@ export const defaultRenderOptions = {
   antialias: true
 } as Partial<PIXI.AutoDetectOptions>;
 
+/**
+ * Initialize Moxi. Main entry point.
+ *
+ * @example
+ * ```ts
+ * const { scene, engine, loadAssets, camera } = await setupMoxi({
+ *   hostElement: document.getElementById('app'),
+ *   renderOptions: { width: 1280, height: 720 },
+ *   physics: true,
+ *   pixelPerfect: true
+ * });
+ *
+ * await loadAssets([{ src: './sprite.png', alias: 'sprite' }]);
+ * scene.addChild(asEntity(new PIXI.Sprite(PIXIAssets.get('sprite'))));
+ * scene.init();
+ * engine.start();
+ * ```
+ */
 export async function setupMoxi({
   hostElement,
   renderOptions = defaultRenderOptions,

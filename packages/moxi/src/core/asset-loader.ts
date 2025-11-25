@@ -2,27 +2,45 @@ import PIXI from 'pixi.js';
 import { Asset } from '..';
 import { EventEmitter } from './event-system';
 
+/** Events emitted by AssetLoader. */
 export interface AssetLoaderEvents extends Record<string, (...args: any[]) => void> {
   'loading:start': () => void;
   'loading:end': () => void;
 }
 
+/**
+ * Wrapper around PIXI.Assets with loading events.
+ *
+ * @example
+ * ```ts
+ * const { loadAssets, PIXIAssets } = await setupMoxi({...});
+ *
+ * await loadAssets([
+ *   { src: './player.png', alias: 'player' },
+ *   { src: './enemy.png', alias: 'enemy' }
+ * ]);
+ *
+ * const texture = PIXIAssets.get('player');
+ * ```
+ */
 export class AssetLoader {
+  /** PIXI.Assets instance. Use .get(alias) to retrieve loaded textures. */
   PIXIAssets: PIXI.AssetsClass = PIXI.Assets;
+
+  /** All loaded textures. */
   textures: PIXI.Texture[] = [];
+
+  /** True while loading in progress. */
   isLoading: boolean = false;
+
   private events: EventEmitter<AssetLoaderEvents> = new EventEmitter<AssetLoaderEvents>();
 
-  /**
-   * Subscribe to loading events
-   */
+  /** Subscribe to 'loading:start' or 'loading:end' events. */
   on<K extends keyof AssetLoaderEvents>(event: K, listener: AssetLoaderEvents[K]): void {
     this.events.on(event, listener);
   }
 
-  /**
-   * Unsubscribe from loading events
-   */
+  /** Unsubscribe from events. */
   off<K extends keyof AssetLoaderEvents>(event: K, listener: AssetLoaderEvents[K]): void {
     this.events.off(event, listener);
   }

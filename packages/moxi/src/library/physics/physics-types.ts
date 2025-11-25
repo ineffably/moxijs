@@ -1,34 +1,18 @@
 import * as PIXI from 'pixi.js';
 import type * as planck from 'planck';
 
-/**
- * Physics body type
- */
+/** Body type: 'static' (immovable), 'dynamic' (full physics), 'kinematic' (scripted movement). */
 export type BodyType = 'static' | 'dynamic' | 'kinematic';
 
-/**
- * Synchronization mode between physics body and sprite
- */
+/** Sync direction: 'physics-driven' (physics→sprite), 'sprite-driven' (sprite→physics), 'manual'. */
 export type SyncMode = 'physics-driven' | 'sprite-driven' | 'manual';
 
-/**
- * Shape type for physics bodies
- */
+/** Shape primitives for physics bodies. */
 export type ShapeType = 'rectangle' | 'circle' | 'polygon';
 
 /**
- * Collision tag type - provides autocomplete for common tags but accepts any string
- *
- * The `string & {}` pattern gives TypeScript autocomplete for the literal types
- * while still accepting any custom string value. No generics or configuration needed!
- *
- * @example
- * // Autocomplete suggests common tags
- * collisionTags: ['player', 'enemy']
- *
- * @example
- * // But you can use any custom string
- * collisionTags: ['my-boss-enemy', 'vehicle']
+ * Collision tag with autocomplete for common tags + custom string support.
+ * Uses `string & {}` pattern for TypeScript autocomplete without restricting values.
  */
 export type CollisionTag =
   | 'default'
@@ -40,9 +24,7 @@ export type CollisionTag =
   | 'powerup'
   | (string & {}); // Magic: autocomplete + flexibility
 
-/**
- * Shape configuration for physics bodies
- */
+/** Shape definition for physics fixtures. */
 export interface ShapeConfig {
   shape: ShapeType;
   width?: number;
@@ -51,9 +33,7 @@ export interface ShapeConfig {
   vertices?: PIXI.Point[];
 }
 
-/**
- * Physics world options
- */
+/** PhysicsWorld configuration. */
 export interface PhysicsWorldOptions {
   /** Gravity vector (default: { x: 0, y: 9.8 }) */
   gravity?: { x: number; y: number };
@@ -69,9 +49,7 @@ export interface PhysicsWorldOptions {
   timestep?: number;
 }
 
-/**
- * Physics body options
- */
+/** PhysicsBodyLogic configuration. */
 export interface PhysicsBodyOptions {
   // Body properties
   /** Body type (default: 'dynamic') */
@@ -142,9 +120,7 @@ export interface PhysicsBodyOptions {
   userData?: any;
 }
 
-/**
- * Physics debug renderer options
- */
+/** PhysicsDebugRenderer configuration. */
 export interface PhysicsDebugOptions {
   /** Show collision shapes (default: true) */
   showShapes?: boolean;
@@ -177,9 +153,7 @@ export interface PhysicsDebugOptions {
   lineWidth?: number;
 }
 
-/**
- * Collision event
- */
+/** Data passed to collision callbacks. */
 export interface CollisionEvent {
   bodyA: any; // PhysicsBodyLogic (avoiding circular reference)
   bodyB: any; // PhysicsBodyLogic
@@ -188,9 +162,7 @@ export interface CollisionEvent {
   impulse: number;
 }
 
-/**
- * Raycast callback
- */
+/** Raycast hit callback. Return fraction to continue, 0 to stop. */
 export type RaycastCallback = (
   fixture: planck.Fixture,
   point: PIXI.Point,

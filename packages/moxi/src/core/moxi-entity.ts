@@ -111,11 +111,13 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * }
    * ```
    */
-  update(deltaTime: number) { 
+  update(deltaTime: number) {
+    if (!this.entity) return;
+
     for (const className in this.logic) {
       const logicComponent = this.logic[className];
-      if(logicComponent.update && this.entity && logicComponent.active){
-        logicComponent.update(this.entity, deltaTime); 
+      if (logicComponent && logicComponent.active && logicComponent.update) {
+        logicComponent.update(this.entity, deltaTime);
       }
     }
     // TODO: update children?
@@ -136,9 +138,11 @@ export class MoxiEntity<T> implements MoxiEntityClass<T> {
    * ```
    */
   init(renderer: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]) {
+    if (!this.entity) return;
+
     for (const className in this.logic) {
       const logicComponent = this.logic[className];
-      if(logicComponent.init && this.entity){
+      if (logicComponent && logicComponent.init) {
         logicComponent.init(this.entity, renderer, ...args);
       }
     }

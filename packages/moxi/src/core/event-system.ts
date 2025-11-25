@@ -4,12 +4,12 @@ type MoxiEvents<T extends string | symbol = string, A = any> = {
 
 export class EventEmitter<T extends MoxiEvents = MoxiEvents> {
   private listeners: { [K in keyof T]?: T[K][] } = {};
-  
+
   /**
-   * Singleton instance of EventEmitter
+   * Singleton instance of EventEmitter (lazy initialized)
    * @static
    */
-  public static instance: EventEmitter<MoxiEvents> = new EventEmitter<MoxiEvents>();
+  private static instance: EventEmitter<MoxiEvents> | null = null;
 
   on<K extends keyof T>(event: K, listener: T[K]): void {
     (this.listeners[event] || (this.listeners[event] = [])).push(listener);
@@ -33,14 +33,14 @@ export class EventEmitter<T extends MoxiEvents = MoxiEvents> {
     };
     this.on(event, onceListener as T[K]);
   }
-  
+
   /**
    * Get the singleton instance of EventEmitter
    * @static
    */
   public static getInstance<T extends MoxiEvents = MoxiEvents>(): EventEmitter<T> {
     if (!EventEmitter.instance) {
-      EventEmitter.instance = new EventEmitter<T>();
+      EventEmitter.instance = new EventEmitter<MoxiEvents>();
     }
     return EventEmitter.instance as EventEmitter<T>;
   }

@@ -63,6 +63,11 @@ export class UIFocusManager {
   private setupKeyboardListeners(): void {
     if (typeof window === 'undefined') return;
 
+    // Remove existing handler if present to prevent duplicates
+    if (this.keydownHandler) {
+      window.removeEventListener('keydown', this.keydownHandler);
+    }
+
     this.keydownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -101,18 +106,14 @@ export class UIFocusManager {
    * Recursively discovers focusable components in the tree
    */
   private discoverFocusableComponents(component: UIComponent): void {
-    console.log('🔎 Discovering in component:', component.constructor.name, 'tabIndex:', component.tabIndex);
-
     // Check if this component is focusable
     if (this.isFocusableComponent(component)) {
-      console.log('  ✅ Registering focusable:', component.constructor.name);
       this.register(component as UIComponent & Focusable);
     }
 
     // Recursively check children (if it's a container type)
     if ('children' in component && Array.isArray((component as any).children)) {
       const children = (component as any).children as UIComponent[];
-      console.log(`  📦 Has ${children.length} children`);
       children.forEach(child => this.discoverFocusableComponents(child));
     }
   }
@@ -159,30 +160,24 @@ export class UIFocusManager {
    */
   focus(component: UIComponent & Focusable): void {
     if (!component.canFocus()) {
-      console.log('❌ Component cannot focus');
       return;
     }
 
     const index = this.focusableComponents.indexOf(component);
     if (index === -1) {
-      console.log('❌ Component not registered in focus manager');
       return;
     }
-
-    console.log(`🎯 Focusing component at index ${index}, current index: ${this.currentFocusIndex}`);
 
     // Blur current focus
     if (this.currentFocusIndex !== -1 && this.currentFocusIndex !== index) {
       const current = this.focusableComponents[this.currentFocusIndex];
       if (current) {
-        console.log(`  👋 Blurring component at index ${this.currentFocusIndex}`);
         current.onBlur();
       }
     }
 
     // Focus new component
     this.currentFocusIndex = index;
-    console.log(`  ✅ Calling onFocus() on component`);
     component.onFocus();
   }
 

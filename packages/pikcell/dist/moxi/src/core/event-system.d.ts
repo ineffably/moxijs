@@ -4,10 +4,10 @@ type MoxiEvents<T extends string | symbol = string, A = any> = {
 export declare class EventEmitter<T extends MoxiEvents = MoxiEvents> {
     private listeners;
     /**
-     * Singleton instance of EventEmitter
+     * Singleton instance of EventEmitter (lazy initialized)
      * @static
      */
-    static instance: EventEmitter<MoxiEvents>;
+    private static instance;
     on<K extends keyof T>(event: K, listener: T[K]): void;
     off<K extends keyof T>(event: K, listener: T[K]): void;
     emit<K extends keyof T>(event: K, ...args: Parameters<T[K]>): void;

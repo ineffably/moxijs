@@ -13,7 +13,9 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
       // Use local moxi source for development so webpack can properly handle externals
-      'moxi': path.resolve(__dirname, '../moxi/src/index.ts')
+      'moxi': path.resolve(__dirname, '../moxi/src/index.ts'),
+      // Use local pikcell source for development
+      'pikcell': path.resolve(__dirname, '../pikcell/src/index.ts')
     }
   },
   externalsType: 'window',

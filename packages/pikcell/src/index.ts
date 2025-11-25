@@ -81,8 +81,8 @@ export async function initPikcell(hostElement?: HTMLElement) {
   return { spriteEditor, scene, engine, renderer };
 }
 
-// Auto-init when DOM is ready (for standalone use)
-if (typeof document !== 'undefined') {
+// Auto-init when DOM is ready (for standalone use on port 9001 only)
+if (typeof document !== 'undefined' && window.location.port === '9001') {
   document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
     if (app) {

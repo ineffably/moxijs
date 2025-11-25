@@ -138,46 +138,32 @@ export class PixelCard {
 
         // Horizontal resizing
         if (this.resizeDirection.includes('e')) {
-          // East: grow right
+          // East: resize right edge (width changes, position stays)
           this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth + deltaGridUnitsX);
         } else if (this.resizeDirection.includes('w')) {
-          // West: try to move left edge (grow left), but stop at viewport edge
+          // West: resize left edge (position and width both change)
           const newWidth = Math.max(minWidth, this.resizeStartWidth - deltaGridUnitsX);
-          const widthChange = newWidth - this.state.contentWidth;
+          const widthDelta = newWidth - this.resizeStartWidth; // negative when shrinking
 
-          // Calculate how much we can actually move left (don't go past x=0)
-          const currentX = this.container.x;
-          const cardWidthChangePixels = px(widthChange);
-          const newX = Math.max(0, currentX - cardWidthChangePixels);
-          const actualMoveX = currentX - newX;
-
-          // Only resize by the amount we can actually move
-          if (actualMoveX > 0) {
-            this.container.x = newX;
-            this.state.contentWidth = this.state.contentWidth + Math.round(actualMoveX / px(1));
-          }
+          // Position moves opposite to width change, calculated from start position
+          const newX = Math.max(0, this.cardStartX - px(widthDelta));
+          this.container.x = newX;
+          this.state.contentWidth = newWidth;
         }
 
         // Vertical resizing
         if (this.resizeDirection.includes('s')) {
-          // South: grow down
+          // South: resize bottom edge (height changes, position stays)
           this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight + deltaGridUnitsY);
         } else if (this.resizeDirection.includes('n')) {
-          // North: try to move top edge (grow up), but stop at viewport edge
+          // North: resize top edge (position and height both change)
           const newHeight = Math.max(minHeight, this.resizeStartHeight - deltaGridUnitsY);
-          const heightChange = newHeight - this.state.contentHeight;
+          const heightDelta = newHeight - this.resizeStartHeight; // negative when shrinking
 
-          // Calculate how much we can actually move up (don't go past y=0)
-          const currentY = this.container.y;
-          const cardHeightChangePixels = px(heightChange);
-          const newY = Math.max(0, currentY - cardHeightChangePixels);
-          const actualMoveY = currentY - newY;
-
-          // Only resize by the amount we can actually move
-          if (actualMoveY > 0) {
-            this.container.y = newY;
-            this.state.contentHeight = this.state.contentHeight + Math.round(actualMoveY / px(1));
-          }
+          // Position moves opposite to height change, calculated from start position
+          const newY = Math.max(0, this.cardStartY - px(heightDelta));
+          this.container.y = newY;
+          this.state.contentHeight = newHeight;
         }
 
         this.redraw();
@@ -409,6 +395,8 @@ export class PixelCard {
         this.resizeStartY = e.client.y;
         this.resizeStartWidth = this.state.contentWidth;
         this.resizeStartHeight = this.state.contentHeight;
+        this.cardStartX = this.container.x;
+        this.cardStartY = this.container.y;
 
         // Capture pointer to continue receiving events even outside the window
         const canvas = this.options.renderer.canvas as HTMLCanvasElement;

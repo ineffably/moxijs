@@ -29,18 +29,19 @@ export class SpriteSheetManager implements ISpriteSheetManager {
   create(type: SpriteSheetType, savedId?: string, config?: Partial<SpriteSheetConfig>): SpriteSheetInstance {
     const id = savedId || this.generateId();
 
-    // Create the instance (cards will be set by the caller)
-    const instance: SpriteSheetInstance = {
+    // Create the instance with sheetCard as undefined initially
+    // The caller MUST set sheetCard before using the instance
+    const instance: Partial<SpriteSheetInstance> & { id: string } = {
       id,
-      sheetCard: null as any, // Will be set by caller
       spriteCard: null,
       spriteController: null,
     };
 
-    this.instances.set(id, instance);
+    // Store as full instance - sheetCard will be set by caller
+    this.instances.set(id, instance as SpriteSheetInstance);
     this.emit('created', id);
 
-    return instance;
+    return instance as SpriteSheetInstance;
   }
 
   /**

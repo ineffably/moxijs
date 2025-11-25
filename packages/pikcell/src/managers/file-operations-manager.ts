@@ -161,7 +161,7 @@ export class FileOperationsManager implements IFileOperationsManager {
 
     // Get sprite data
     const { x: cellX, y: cellY } = sprite.getCell();
-    const sheetController = (sprite as any).spriteSheetController as SpriteSheetController;
+    const sheetController = sprite.getSpriteSheetController();
     const config = sheetController.getConfig();
 
     // Create canvas

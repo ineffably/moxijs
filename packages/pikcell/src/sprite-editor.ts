@@ -39,6 +39,9 @@ import { SpriteSheetInstance } from './interfaces/managers';
 // Utility imports
 import { PixelRenderer } from './utilities/pixel-renderer';
 
+// Constants
+import { PERFORMANCE_CONSTANTS, INTERACTION_CONSTANTS } from './config/constants';
+
 export interface SpriteEditorOptions {
   renderer: PIXI.Renderer;
   scene: PIXI.Container;
@@ -86,8 +89,11 @@ export class SpriteEditor {
     this.fileOperationsManager = new FileOperationsManager();
 
     // Initialize or load project state
-    const savedProject = ProjectStateManager.loadProject();
-    this.projectState = savedProject ?? ProjectStateManager.createEmptyProject();
+    const loadResult = ProjectStateManager.loadProject();
+    if (!loadResult.success) {
+      console.warn('Failed to load saved project, starting fresh:', loadResult.error);
+    }
+    this.projectState = loadResult.data ?? ProjectStateManager.createEmptyProject();
 
     // Subscribe to sprite sheet manager events
     this.spriteSheetManager.on('activeChanged', (id) => {
@@ -121,7 +127,7 @@ export class SpriteEditor {
     this.uiStateSaveTimer = window.setTimeout(() => {
       const stateMap = this.uiManager.exportAllStates();
       UIStateManager.saveState(stateMap, this.renderer.width, this.renderer.height);
-    }, 500);
+    }, PERFORMANCE_CONSTANTS.UI_STATE_DEBOUNCE_MS);
   }
 
   /**
@@ -526,8 +532,11 @@ export class SpriteEditor {
       this.projectState.activeSpriteSheetId = activeSheet?.id ?? null;
       this.projectState.selectedColorIndex = this.selectedColorIndex;
 
-      ProjectStateManager.saveProject(this.projectState);
-    }, 1000);
+      const saveResult = ProjectStateManager.saveProject(this.projectState);
+      if (!saveResult.success) {
+        console.warn('Auto-save failed:', saveResult.error);
+      }
+    }, PERFORMANCE_CONSTANTS.AUTO_SAVE_DEBOUNCE_MS);
   }
 
   /**
@@ -561,7 +570,7 @@ export class SpriteEditor {
             label: 'Save',
             onClick: () => {
               this.handleSave();
-              setTimeout(() => this.createNewProject(), 100);
+              setTimeout(() => this.createNewProject(), PERFORMANCE_CONSTANTS.DIALOG_ACTION_DELAY_MS);
             }
           },
           {
@@ -708,7 +717,10 @@ export class SpriteEditor {
     this.projectState = loadedState;
     this.hasUnsavedChanges = false;
 
-    ProjectStateManager.saveProject(this.projectState);
+    const saveResult = ProjectStateManager.saveProject(this.projectState);
+    if (!saveResult.success) {
+      console.warn('Failed to save loaded project to localStorage:', saveResult.error);
+    }
     this.loadProjectState();
   }
 

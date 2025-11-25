@@ -8,6 +8,15 @@ import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
 const PROJECT_STATE_KEY = 'sprite-editor-project';
 
 /**
+ * Result type for operations that can fail
+ */
+export interface OperationResult<T = void> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+/**
  * State for a single sprite sheet in the project
  */
 export interface SpriteSheetState {
@@ -56,26 +65,31 @@ export class ProjectStateManager {
 
   /**
    * Save project state to localStorage
+   * @returns Result indicating success or failure with error message
    */
-  static saveProject(state: ProjectState): void {
+  static saveProject(state: ProjectState): OperationResult {
     try {
       state.modifiedAt = Date.now();
       const serialized = JSON.stringify(state);
       localStorage.setItem(PROJECT_STATE_KEY, serialized);
       console.log('💾 Project saved to localStorage');
+      return { success: true };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to save project state:', error);
+      return { success: false, error: `Failed to save project: ${errorMessage}` };
     }
   }
 
   /**
    * Load project state from localStorage
+   * @returns Result with project data or error message
    */
-  static loadProject(): ProjectState | null {
+  static loadProject(): OperationResult<ProjectState | null> {
     try {
       const serialized = localStorage.getItem(PROJECT_STATE_KEY);
       if (!serialized) {
-        return null;
+        return { success: true, data: null };
       }
 
       const state = JSON.parse(serialized) as ProjectState;
@@ -83,26 +97,31 @@ export class ProjectStateManager {
       // Version migration if needed
       if (state.version !== this.CURRENT_VERSION) {
         console.warn('Project version mismatch, migrating...');
-        return this.migrateProject(state);
+        return { success: true, data: this.migrateProject(state) };
       }
 
       console.log('📂 Project loaded from localStorage');
-      return state;
+      return { success: true, data: state };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to load project state:', error);
-      return null;
+      return { success: false, error: `Failed to load project: ${errorMessage}` };
     }
   }
 
   /**
    * Clear project state (start fresh)
+   * @returns Result indicating success or failure
    */
-  static clearProject(): void {
+  static clearProject(): OperationResult {
     try {
       localStorage.removeItem(PROJECT_STATE_KEY);
       console.log('🗑️ Project cleared');
+      return { success: true };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to clear project state:', error);
+      return { success: false, error: `Failed to clear project: ${errorMessage}` };
     }
   }
 
@@ -134,25 +153,27 @@ export class ProjectStateManager {
 
   /**
    * Import project from JSON string
+   * @returns Result with imported project or error message
    */
-  static importProjectJSON(jsonString: string): ProjectState | null {
+  static importProjectJSON(jsonString: string): OperationResult<ProjectState> {
     try {
       const state = JSON.parse(jsonString) as ProjectState;
 
       // Validate the structure
       if (!state.spriteSheets || !Array.isArray(state.spriteSheets)) {
-        throw new Error('Invalid project structure');
+        return { success: false, error: 'Invalid project file: missing sprite sheet data' };
       }
 
       // Migrate if needed
       if (state.version !== this.CURRENT_VERSION) {
-        return this.migrateProject(state);
+        return { success: true, data: this.migrateProject(state) };
       }
 
-      return state;
+      return { success: true, data: state };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to import project:', error);
-      return null;
+      return { success: false, error: `Failed to import project: ${errorMessage}` };
     }
   }
 
@@ -160,13 +181,13 @@ export class ProjectStateManager {
    * Get project metadata (without full pixel data)
    */
   static getProjectMetadata(): { createdAt: number; modifiedAt: number; sheetCount: number } | null {
-    const state = this.loadProject();
-    if (!state) return null;
+    const result = this.loadProject();
+    if (!result.success || !result.data) return null;
 
     return {
-      createdAt: state.createdAt,
-      modifiedAt: state.modifiedAt,
-      sheetCount: state.spriteSheets.length
+      createdAt: result.data.createdAt,
+      modifiedAt: result.data.modifiedAt,
+      sheetCount: result.data.spriteSheets.length
     };
   }
 
@@ -191,9 +212,9 @@ export class ProjectStateManager {
 
   /**
    * Prompt user to load a project file from their drive
-   * Returns a promise that resolves with the loaded project state
+   * @returns Promise with result containing project or error message
    */
-  static async loadProjectFromFile(): Promise<ProjectState | null> {
+  static async loadProjectFromFile(): Promise<OperationResult<ProjectState | null>> {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -202,20 +223,21 @@ export class ProjectStateManager {
       input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) {
-          resolve(null);
+          resolve({ success: true, data: null }); // User cancelled
           return;
         }
 
         try {
           const text = await file.text();
-          const state = this.importProjectJSON(text);
-          if (state) {
+          const result = this.importProjectJSON(text);
+          if (result.success && result.data) {
             console.log('📂 Pikcell project loaded from file');
           }
-          resolve(state);
+          resolve(result.success ? { success: true, data: result.data } : result);
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           console.error('Failed to load pikcell project file:', error);
-          resolve(null);
+          resolve({ success: false, error: `Failed to read file: ${errorMessage}` });
         }
       };
 

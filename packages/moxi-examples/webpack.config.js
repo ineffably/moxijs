@@ -37,7 +37,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      template: './src/dev.html',
       title: 'Moxi Examples',
       inject: 'body',
       scriptLoading: 'blocking'

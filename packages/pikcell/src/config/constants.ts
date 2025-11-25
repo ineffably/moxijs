@@ -200,8 +200,14 @@ export const PERFORMANCE_CONSTANTS = {
   /** Texture cache size limit */
   TEXTURE_CACHE_SIZE: 100,
 
-  /** Debounce delay for auto-save in milliseconds */
+  /** Debounce delay for project auto-save in milliseconds */
   AUTO_SAVE_DEBOUNCE_MS: 1000,
+
+  /** Debounce delay for UI state save in milliseconds */
+  UI_STATE_DEBOUNCE_MS: 500,
+
+  /** Delay after dialog action before proceeding (allows dialog to close) */
+  DIALOG_ACTION_DELAY_MS: 100,
 } as const;
 
 /**

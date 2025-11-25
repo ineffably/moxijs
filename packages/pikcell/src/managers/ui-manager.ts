@@ -17,6 +17,7 @@ export class UIManager implements IUIManager {
   private cards: Map<string, PixelCard> = new Map();
   private scene: PIXI.Container;
   private focusedCardId: string | null = null;
+  private cardCallbacks: Map<string, () => void> = new Map(); // Track original callbacks for cleanup
 
   constructor(scene: PIXI.Container) {
     this.scene = scene;
@@ -41,13 +42,16 @@ export class UIManager implements IUIManager {
       this.scene.addChild(card.container);
     }
 
-    // Setup focus listener
+    // Setup focus listener - store the wrapper so we can clean up later
     if (card.onStateChanged) {
       const originalOnStateChanged = card.onStateChanged.bind(card);
-      card.onStateChanged = () => {
+      this.cardCallbacks.set(id, originalOnStateChanged);
+
+      const wrappedCallback = () => {
         this.setFocusedCard(id);
         originalOnStateChanged();
       };
+      card.onStateChanged = wrappedCallback;
     }
   }
 
@@ -59,6 +63,13 @@ export class UIManager implements IUIManager {
   unregisterCard(id: string): void {
     const card = this.cards.get(id);
     if (!card) return;
+
+    // Restore original callback if we wrapped it
+    const originalCallback = this.cardCallbacks.get(id);
+    if (originalCallback && card.onStateChanged) {
+      card.onStateChanged = originalCallback;
+    }
+    this.cardCallbacks.delete(id);
 
     // Remove from scene
     if (this.scene.children.includes(card.container)) {

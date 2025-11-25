@@ -1,12 +1,12 @@
 /**
  * Example 17: Sprite Editor - Scaled Pixel Perfect UI
- * A complete pixel-perfect sprite editor with all UI elements aligned to a consistent pixel grid
+ * Uses the PIKCELL sprite editor package from the monorepo
  */
 import { setupMoxi } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { SpriteEditor, getTheme } from '../editor';
+import { SpriteEditor, getTheme } from 'pikcell';
 
 /**
  * Initialize and run the sprite editor
@@ -19,11 +19,11 @@ export async function initSpriteEditor() {
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
     showLoadingScene: false,
-    pixelPerfect: true, // Enable all pixel-perfect settings
+    pixelPerfect: true,
     renderOptions: {
       width: 1280,
       height: 720,
-      backgroundColor: getTheme().backgroundRoot, // Use theme root background
+      backgroundColor: getTheme().backgroundRoot,
     }
   });
 
@@ -50,7 +50,7 @@ export async function initSpriteEditor() {
     }
   });
 
-  // Create the sprite editor
+  // Create the sprite editor using PIKCELL
   const spriteEditor = new SpriteEditor({
     renderer,
     scene,
@@ -64,5 +64,5 @@ export async function initSpriteEditor() {
   scene.init();
   engine.start();
 
-  console.log('✅ Pixel Perfect Sprite Editor loaded');
+  console.log('PIKCELL Sprite Editor loaded');
 }

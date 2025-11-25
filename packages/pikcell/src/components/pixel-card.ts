@@ -320,7 +320,7 @@ export class PixelCard {
         style: {
           fontFamily: 'KennyBlocksBitmap',
           fontSize: 64,
-          fill: 0x00e436, // Lime green from PICO-8 palette
+          fill: 0x29adff, // Cyan from PICO-8 palette
         }
       });
       alphaStamp.roundPixels = true;

@@ -37,6 +37,7 @@
     "@codemirror/theme-one-dark": "^6.1.3",
     "codemirror": "^6.0.2",
     "moxi": "file:../moxi",
+    "pikcell": "file:../pikcell",
     "pixi.js": "^8.14.0"
   }
 }

@@ -245,7 +245,17 @@ export class SpriteEditor {
 
     // Helper to create sprite card for a cell
     const createSpriteCardForCell = (cellX: number, cellY: number) => {
-      console.log(`Selected cell: ${cellX}, ${cellY}`);
+      // If sprite card already exists, update it instead of creating a new one
+      if (instance.spriteCard && instance.spriteController) {
+        console.log(`Updating sprite card to cell: ${cellX}, ${cellY}`);
+        instance.spriteController.setCell(cellX, cellY);
+        instance.spriteCard.redraw();
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+        makeThisSheetActive();
+        return;
+      }
+
+      console.log(`Creating sprite card for cell: ${cellX}, ${cellY}`);
       makeThisSheetActive();
 
       const spriteController = new SpriteController({
@@ -370,6 +380,7 @@ export class SpriteEditor {
     }
 
     // Create sprite card for initial cell
+    // Note: selectCell() triggers onCellClick which calls createSpriteCardForCell
     const cellX = savedState?.selectedCellX ?? 0;
     const cellY = savedState?.selectedCellY ?? 0;
     spriteSheetResult.controller.selectCell(cellX, cellY);
@@ -380,8 +391,6 @@ export class SpriteEditor {
       const contentHeightPx = px(contentState.height);
       spriteSheetResult.controller.centerCell(cellX, cellY, contentWidthPx, contentHeightPx);
     }
-
-    createSpriteCardForCell(cellX, cellY);
 
     // Restore sprite card scale if saved
     if (savedState?.spriteCardScale && instance.spriteController) {

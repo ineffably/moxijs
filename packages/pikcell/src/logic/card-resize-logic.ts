@@ -5,8 +5,7 @@
  * Handles edge and corner resize with visual feedback.
  */
 import * as PIXI from 'pixi.js';
-import { Logic } from 'moxi';
-import { EventManager } from '../utilities/event-manager';
+import { Logic, ActionManager } from 'moxi';
 import { CARD_CONSTANTS } from '../config/constants';
 
 export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw' | null;
@@ -44,7 +43,7 @@ export class CardResizeLogic extends Logic<PIXI.Container> {
   name = 'CardResizeLogic';
 
   private options: Required<CardResizeOptions>;
-  private eventManager: EventManager;
+  private actionManager: ActionManager;
 
   // Resize state
   private isResizing = false;
@@ -72,7 +71,7 @@ export class CardResizeLogic extends Logic<PIXI.Container> {
       onResizeEnd: options.onResizeEnd ?? (() => {})
     };
 
-    this.eventManager = new EventManager();
+    this.actionManager = new ActionManager();
   }
 
   /**
@@ -92,13 +91,13 @@ export class CardResizeLogic extends Logic<PIXI.Container> {
     entity.on('pointerdown', this.handlePointerDown.bind(this));
 
     // Register global listeners
-    this.eventManager.register(
+    this.actionManager.add(
       window as any,
       'pointermove',
       this.handleGlobalPointerMove.bind(this) as EventListener
     );
 
-    this.eventManager.register(
+    this.actionManager.add(
       window as any,
       'pointerup',
       this.handlePointerUp.bind(this) as EventListener
@@ -138,7 +137,7 @@ export class CardResizeLogic extends Logic<PIXI.Container> {
    * Cleanup event listeners
    */
   destroy() {
-    this.eventManager.unregisterAll();
+    this.actionManager.removeAll();
   }
 
   /**

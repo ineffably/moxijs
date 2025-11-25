@@ -5,8 +5,7 @@
  * following the Moxi ECS pattern.
  */
 import * as PIXI from 'pixi.js';
-import { Logic } from 'moxi';
-import { EventManager } from '../utilities/event-manager';
+import { Logic, ActionManager } from 'moxi';
 import { SPRITE_SHEET_CONSTANTS } from '../config/constants';
 
 export interface ZoomPanOptions {
@@ -42,7 +41,7 @@ export class ZoomPanLogic extends Logic<PIXI.Container> {
   name = 'ZoomPanLogic';
 
   private options: Required<ZoomPanOptions>;
-  private eventManager: EventManager;
+  private actionManager: ActionManager;
 
   // Zoom/Pan state
   private currentScale: number;
@@ -71,7 +70,7 @@ export class ZoomPanLogic extends Logic<PIXI.Container> {
     };
 
     this.currentScale = this.options.initialScale;
-    this.eventManager = new EventManager();
+    this.actionManager = new ActionManager();
   }
 
   /**
@@ -88,7 +87,7 @@ export class ZoomPanLogic extends Logic<PIXI.Container> {
 
     // Setup wheel zoom
     if (this.options.zoomEnabled) {
-      this.eventManager.register(
+      this.actionManager.add(
         window as any,
         'wheel',
         this.handleWheel.bind(this) as EventListener,
@@ -98,19 +97,19 @@ export class ZoomPanLogic extends Logic<PIXI.Container> {
 
     // Setup middle mouse pan
     if (this.options.panEnabled) {
-      this.eventManager.register(
+      this.actionManager.add(
         window as any,
         'mousedown',
         this.handleMouseDown.bind(this) as EventListener
       );
 
-      this.eventManager.register(
+      this.actionManager.add(
         window as any,
         'mousemove',
         this.handleMouseMove.bind(this) as EventListener
       );
 
-      this.eventManager.register(
+      this.actionManager.add(
         window as any,
         'mouseup',
         this.handleMouseUp.bind(this) as EventListener
@@ -180,7 +179,7 @@ export class ZoomPanLogic extends Logic<PIXI.Container> {
    * Cleanup event listeners
    */
   destroy() {
-    this.eventManager.unregisterAll();
+    this.actionManager.removeAll();
   }
 
   /**

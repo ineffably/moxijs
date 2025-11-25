@@ -6,39 +6,46 @@ import type { PhysicsBodyOptions, BodyType, ShapeType } from './physics-types';
 import { parseGraphicsShape } from './physics-graphics-parser';
 
 /**
- * PhysicsBodyLogic - Logic component that synchronizes a PIXI entity with a Planck.js physics body
+ * Logic component that syncs a PIXI entity with a Planck.js physics body.
+ * Handles position/rotation sync, collision filtering, and force application.
  *
  * @example
- * ```typescript
- * const sprite = new PIXI.Sprite(texture);
- * const entity = asEntity(sprite);
- *
- * const physicsBody = new PhysicsBodyLogic(physicsWorld, {
+ * ```ts
+ * // Create physics body for a sprite
+ * const sprite = asEntity(new PIXI.Sprite(texture));
+ * const body = new PhysicsBodyLogic(physicsWorld, {
  *   type: 'dynamic',
- *   shape: 'circle',
- *   radius: 25,
- *   density: 1.0
+ *   collisionTags: ['player'],
+ *   collidesWith: ['terrain', 'enemy'],
+ *   density: 1.0,
+ *   friction: 0.3
  * });
+ * sprite.moxiEntity.addLogic(body);
  *
- * entity.moxiEntity.addLogic(physicsBody);
+ * // Apply forces in update loop
+ * body.applyImpulse(new PIXI.Point(100, 0));
+ * body.setVelocity(new PIXI.Point(0, -200));
+ *
+ * // Collision callbacks
+ * body.onCollisionBegin = (other, contact) => console.log('hit!');
  * ```
  */
 export class PhysicsBodyLogic extends Logic<PIXI.Container> {
   name = 'PhysicsBodyLogic';
 
-  /** The Planck.js physics body */
+  /** Planck.js body instance. */
   public body!: planck.Body;
 
-  /** Reference to the physics world */
+  /** Parent physics world. */
   public world: PhysicsWorld;
 
-  /** Physics body options */
+  /** Body configuration. */
   public options: PhysicsBodyOptions;
 
-  /** Collision begin callback */
+  /** Called when collision begins. */
   public onCollisionBegin?: (other: PhysicsBodyLogic, contact: planck.Contact) => void;
 
-  /** Collision end callback */
+  /** Called when collision ends. */
   public onCollisionEnd?: (other: PhysicsBodyLogic, contact: planck.Contact) => void;
 
   constructor(world: PhysicsWorld, options: PhysicsBodyOptions = {}) {
@@ -59,9 +66,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     };
   }
 
-  /**
-   * Initialize the physics body
-   */
+  /** @internal Creates physics body and registers with world. */
   init(entity: PIXI.Container, renderer?: PIXI.Renderer): void {
     // Create the physics body
     this.createPhysicsBody(entity);
@@ -73,9 +78,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     this.world.registerBody(this.body, this);
   }
 
-  /**
-   * Update synchronization between physics and sprite
-   */
+  /** @internal Syncs physics ↔ sprite based on syncMode. */
   update(entity: PIXI.Container, deltaTime?: number): void {
     if (!this.body) return;
 
@@ -93,18 +96,14 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     }
   }
 
-  /**
-   * Clean up physics body
-   */
+  /** Removes body from physics world. */
   destroy(): void {
     if (this.body) {
       this.world.destroyBody(this.body);
     }
   }
 
-  /**
-   * Sync sprite from physics body
-   */
+  /** @internal Updates sprite position/rotation from physics. */
   private syncFromPhysics(entity: PIXI.Container): void {
     if (!this.body) return;
 
@@ -120,9 +119,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     }
   }
 
-  /**
-   * Sync physics body from sprite
-   */
+  /** Updates physics body from sprite position/rotation. */
   syncToPhysics(entity: PIXI.Container): void {
     if (!this.body) return;
 
@@ -137,9 +134,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     }
   }
 
-  /**
-   * Create the Planck.js physics body
-   */
+  /** @internal */
   private createPhysicsBody(entity: PIXI.Container): void {
     // Determine body type
     let bodyType: planck.BodyType;
@@ -186,9 +181,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     }
   }
 
-  /**
-   * Create fixture with shape
-   */
+  /** @internal */
   private createFixture(entity: PIXI.Container): void {
     const shape = this.createShape(entity);
 
@@ -216,9 +209,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     });
   }
 
-  /**
-   * Create Planck shape from Graphics geometry or legacy options
-   */
+  /** @internal Extracts shape from Graphics, collisionShape, or legacy options. */
   private createShape(entity: PIXI.Container): planck.Shape {
     // Priority 1: Explicit collision shape provided
     if (this.options.collisionShape) {
@@ -245,9 +236,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     );
   }
 
-  /**
-   * Create shape from explicit type
-   */
+  /** @internal */
   private createShapeFromType(shapeType: ShapeType): planck.Shape {
     switch (shapeType) {
       case 'circle':
@@ -276,9 +265,7 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     }
   }
 
-  /**
-   * Auto-detect shape from sprite bounds
-   */
+  /** @internal Fallback: creates box from entity bounds. */
   private autoDetectShape(entity: PIXI.Container): planck.Shape {
     // For sprites, use texture bounds
     const bounds = entity.getLocalBounds();
@@ -290,10 +277,10 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     );
   }
 
-  // Physics body manipulation methods
-
   /**
-   * Apply force at a point
+   * Apply continuous force at a point. Force is in pixels/sec².
+   * @param force - Force vector in pixels
+   * @param point - Application point (defaults to center of mass)
    */
   applyForce(force: PIXI.Point, point?: PIXI.Point): void {
     const forceVec = this.world.toPhysicsPoint(force);
@@ -304,7 +291,9 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
   }
 
   /**
-   * Apply impulse at a point
+   * Apply instant impulse at a point. Good for jumps, explosions.
+   * @param impulse - Impulse vector in pixels
+   * @param point - Application point (defaults to center of mass)
    */
   applyImpulse(impulse: PIXI.Point, point?: PIXI.Point): void {
     const impulseVec = this.world.toPhysicsPoint(impulse);
@@ -314,67 +303,52 @@ export class PhysicsBodyLogic extends Logic<PIXI.Container> {
     this.body.applyLinearImpulse(impulseVec, pointVec);
   }
 
-  /**
-   * Apply torque
-   */
+  /** Apply rotational torque. */
   applyTorque(torque: number): void {
     this.body.applyTorque(torque);
   }
 
   /**
-   * Set linear velocity
+   * Set linear velocity directly.
+   * @param velocity - Velocity in pixels/sec
    */
   setVelocity(velocity: PIXI.Point): void {
     const velocityVec = this.world.toPhysicsPoint(velocity);
     this.body.setLinearVelocity(velocityVec);
   }
 
-  /**
-   * Set angular velocity
-   */
+  /** Set rotation speed (radians/sec). */
   setAngularVelocity(omega: number): void {
     this.body.setAngularVelocity(omega);
   }
 
-  /**
-   * Get linear velocity
-   */
+  /** Get current velocity (pixels/sec). */
   getVelocity(): PIXI.Point {
     const vel = this.body.getLinearVelocity();
     return this.world.toPixelsPoint(vel);
   }
 
-  /**
-   * Get angular velocity
-   */
+  /** Get rotation speed (radians/sec). */
   getAngularVelocity(): number {
     return this.body.getAngularVelocity();
   }
 
-  /**
-   * Get mass
-   */
+  /** Get body mass (kg in physics units). */
   getMass(): number {
     return this.body.getMass();
   }
 
-  /**
-   * Check if body is awake
-   */
+  /** True if body is active (not sleeping). */
   isAwake(): boolean {
     return this.body.isAwake();
   }
 
-  /**
-   * Check if body is sleeping
-   */
+  /** True if body is sleeping (inactive). */
   isSleeping(): boolean {
     return !this.body.isAwake();
   }
 
-  /**
-   * Set awake state
-   */
+  /** Wake up or put body to sleep. */
   setAwake(awake: boolean): void {
     this.body.setAwake(awake);
   }

@@ -1,42 +1,145 @@
 import PIXI from 'pixi.js';
 import { Container, Graphics, Text } from 'pixi.js';
+import { FallingSquaresAnimation, FallingSquaresOptions } from './falling-squares-animation';
 
-export interface LoadingSceneOptions {
-  backgroundColor?: number;
-  squareSize?: number;
-  numSquares?: number;
-  text?: string;
-  textStyle?: Partial<PIXI.TextStyle>;
-}
+// Re-export for convenience
+export { FallingSquaresAnimation };
+export type { FallingSquaresOptions };
 
-const PALETTE = [0xf0dab1, 0xe39aac, 0xc45d9f, 0x634b7d, 0x6461c2, 0x2ba9b4, 0x93d4b5, 0xf0f6e8];
+/**
+ * Interface for custom loading animations.
+ * Implement this to create your own loading animation plugin.
+ *
+ * @example
+ * ```ts
+ * class SpinnerAnimation implements LoadingAnimation {
+ *   private spinner: Graphics;
+ *   private rotation = 0;
+ *
+ *   init(container: Container) {
+ *     this.spinner = new Graphics();
+ *     this.spinner.arc(0, 0, 30, 0, Math.PI * 1.5);
+ *     this.spinner.stroke({ width: 4, color: 0xffffff });
+ *     container.addChild(this.spinner);
+ *   }
+ *
+ *   update(context: LoadingAnimationContext) {
+ *     this.rotation += context.deltaTime * 5;
+ *     this.spinner.rotation = this.rotation;
+ *     this.spinner.x = context.width / 2;
+ *     this.spinner.y = context.height / 2 - 20;
+ *   }
+ *
+ *   reset() { this.rotation = 0; }
+ *   destroy() { this.spinner?.destroy(); }
+ * }
+ * ```
+ */
+export interface LoadingAnimation {
+  /**
+   * Initialize the animation. Add your display objects to the container.
+   * @param container - Parent container to add animation elements to
+   */
+  init(container: Container): void;
 
-interface Particle {
-  sprite: Graphics;
-  spawnTime: number;
-  duration: number;
-  spinRate: number;
-  startX: number;
-  startY: number;
-  endY: number;
+  /**
+   * Update animation each frame.
+   * @param context - Current animation context with timing and dimensions
+   */
+  update(context: LoadingAnimationContext): void;
+
+  /**
+   * Reset animation state when loading starts.
+   */
+  reset(): void;
+
+  /**
+   * Clean up animation resources.
+   */
+  destroy(): void;
 }
 
 /**
- * Default loading scene component for Moxi
- * Displays animated pixel squares falling above loading text
- * 
- * @category Library
+ * Context passed to LoadingAnimation.update() each frame.
+ */
+export interface LoadingAnimationContext {
+  /** Total elapsed time in seconds since loading started */
+  time: number;
+  /** Delta time in seconds since last frame */
+  deltaTime: number;
+  /** Screen width in pixels */
+  width: number;
+  /** Screen height in pixels */
+  height: number;
+  /** Loading text element (for positioning relative to text) */
+  textElement: Text;
+}
+
+/**
+ * Loading scene options.
+ */
+export interface LoadingSceneOptions {
+  /** Background color (default: 0x1a1a1a) */
+  backgroundColor?: number;
+  /** Loading text (default: 'LOADING...') */
+  text?: string;
+  /** Text style overrides */
+  textStyle?: Partial<PIXI.TextStyle>;
+  /**
+   * Custom loading animation plugin.
+   * If not provided, uses FallingSquaresAnimation.
+   *
+   * @example
+   * ```ts
+   * // Custom animation
+   * const options: LoadingSceneOptions = {
+   *   animation: new MyCustomAnimation()
+   * };
+   *
+   * // Or customize the default
+   * const options: LoadingSceneOptions = {
+   *   animation: new FallingSquaresAnimation({
+   *     squareSize: 16,
+   *     palette: [0xff0000, 0x00ff00]
+   *   })
+   * };
+   * ```
+   */
+  animation?: LoadingAnimation;
+  /** Options for default FallingSquaresAnimation (ignored if custom animation provided) */
+  fallingSquaresOptions?: FallingSquaresOptions;
+}
+
+/**
+ * Loading scene component for Moxi.
+ * Shows an animated loading screen during asset loading.
+ *
+ * @example
+ * ```ts
+ * // Via setupMoxi (recommended)
+ * const { loadingScene } = await setupMoxi({
+ *   showLoadingScene: true,
+ *   loadingSceneOptions: {
+ *     backgroundColor: 0x222222,
+ *     text: 'Please wait...',
+ *     animation: new FallingSquaresAnimation({ squareSize: 16 })
+ *   }
+ * });
+ *
+ * // Manual control
+ * loadingScene.show();
+ * await loadAssets([...]);
+ * loadingScene.hide();
+ * ```
  */
 export class LoadingScene extends Container {
-  private particles: Particle[] = [];
   private text: Text;
   private background: Graphics;
+  private animationContainer: Container;
+  private animation: LoadingAnimation;
   private ticker: PIXI.Ticker;
   private renderer: PIXI.Renderer | null = null;
   private time: number = 0;
-  private nextSpawn: number = 0;
-  private maxParticles: number;
-  private baseSize: number;
   private backgroundColor: number;
 
   constructor(options: LoadingSceneOptions = {}) {
@@ -44,19 +147,24 @@ export class LoadingScene extends Container {
 
     const {
       backgroundColor = 0x1a1a1a,
-      squareSize = 20,
-      numSquares = 30,
       text = 'LOADING...',
-      textStyle = {}
+      textStyle = {},
+      animation,
+      fallingSquaresOptions
     } = options;
 
-    this.maxParticles = numSquares;
-    this.baseSize = squareSize;
     this.backgroundColor = backgroundColor;
+
+    // Use provided animation or create default
+    this.animation = animation ?? new FallingSquaresAnimation(fallingSquaresOptions);
 
     // Background
     this.background = new Graphics();
     this.addChild(this.background);
+
+    // Animation container (between background and text)
+    this.animationContainer = new Container();
+    this.addChild(this.animationContainer);
 
     // Text
     this.text = new Text({
@@ -72,46 +180,23 @@ export class LoadingScene extends Container {
     this.text.anchor.set(0.5);
     this.addChild(this.text);
 
+    // Initialize animation
+    this.animation.init(this.animationContainer);
+
     // Ticker
     this.ticker = new PIXI.Ticker();
     this.ticker.autoStart = false;
     this.ticker.add(() => {
       if (this.visible && this.renderer) {
-        this.time += this.ticker.deltaTime / 60;
-        this.update(this.renderer.width, this.renderer.height);
+        const deltaTime = this.ticker.deltaTime / 60;
+        this.time += deltaTime;
+        this.update(this.renderer.width, this.renderer.height, deltaTime);
         this.renderer.render(this);
       }
     });
   }
 
-  private spawnParticle(width: number, height: number): void {
-    if (this.particles.length >= this.maxParticles || this.time < this.nextSpawn) return;
-
-    const size = this.baseSize * (0.7 + Math.random() * 0.6);
-    const sprite = new Graphics();
-    sprite.rect(0, 0, size, size);
-    sprite.fill({ color: PALETTE[Math.floor(Math.random() * PALETTE.length)] });
-    sprite.pivot.set(size / 2, size / 2);
-    this.addChild(sprite);
-
-    const textY = height / 2 + 60;
-    const textWidth = this.text.width || 200;
-    const textCenterX = width / 2;
-
-    this.particles.push({
-      sprite,
-      spawnTime: this.time,
-      duration: 1 + Math.random() * 2.5,
-      spinRate: (0.05 + Math.random() * 1.075) * (Math.random() < 0.5 ? 1 : -1),
-      startX: textCenterX - textWidth / 2 + Math.random() * textWidth - 4,
-      startY: textY - 100,
-      endY: textY - 40,
-    });
-
-    this.nextSpawn = this.time + Math.random() * 0.5;
-  }
-
-  private update(width: number, height: number): void {
+  private update(width: number, height: number, deltaTime: number): void {
     // Background
     this.background.clear();
     this.background.rect(0, 0, width, height);
@@ -121,42 +206,39 @@ export class LoadingScene extends Container {
     this.text.x = width / 2 - 4;
     this.text.y = height / 2 + 60;
 
-    // Spawn particles
-    this.spawnParticle(width, height);
-
-    // Update particles
-    this.particles = this.particles.filter(p => {
-      const elapsed = this.time - p.spawnTime;
-      const progress = elapsed / p.duration;
-
-      if (progress < 0 || progress > 1) {
-        p.sprite.destroy();
-        return false;
-      }
-
-      p.sprite.x = p.startX;
-      p.sprite.y = p.startY + (p.endY - p.startY) * progress;
-      p.sprite.rotation = this.time * p.spinRate * Math.PI * 2;
-      p.sprite.alpha = progress < 0.1 ? progress / 0.1 : progress > 0.85 ? (1 - progress) / 0.15 : 1;
-      return true;
+    // Update animation
+    this.animation.update({
+      time: this.time,
+      deltaTime,
+      width,
+      height,
+      textElement: this.text
     });
   }
 
+  /**
+   * Initialize with renderer reference.
+   * @param renderer - PIXI renderer
+   */
   init(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
   }
 
+  /**
+   * Show the loading scene and start animation.
+   */
   show(): void {
     this.visible = true;
     this.time = 0;
-    this.nextSpawn = 0;
-    this.particles.forEach(p => p.sprite.destroy());
-    this.particles = [];
+    this.animation.reset();
     if (!this.ticker.started) {
       this.ticker.start();
     }
   }
 
+  /**
+   * Hide the loading scene and stop animation.
+   */
   hide(): void {
     this.visible = false;
     if (this.ticker.started) {
@@ -164,12 +246,15 @@ export class LoadingScene extends Container {
     }
   }
 
+  /**
+   * Clean up resources.
+   */
   destroy(): void {
     if (this.ticker.started) {
       this.ticker.stop();
     }
     this.ticker.destroy();
-    this.particles.forEach(p => p.sprite.destroy());
+    this.animation.destroy();
     super.destroy();
   }
 }

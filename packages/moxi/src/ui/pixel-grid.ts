@@ -1,31 +1,24 @@
 /**
- * Pixel-Perfect Grid System
- *
- * Provides a consistent grid-based layout system for pixel-perfect UIs,
- * commonly used in retro-style games and pixel art applications.
- *
- * @category UI
+ * Pixel-perfect grid system for consistent UI measurements.
+ * All measurements are in grid units that scale to actual pixels.
  *
  * @example
- * ```typescript
- * // Use the default grid
- * const width = px(10); // 10 grid units = 40 pixels at 4x scale
+ * ```ts
+ * // Use global helpers (default 4x scale)
+ * const width = px(10);      // 10 units = 40px
+ * const gridUnits = units(40); // 40px = 10 units
  *
- * // Create a custom grid
- * const customGrid = new PixelGrid({
- *   unit: 1,
- *   scale: 2,  // 2x scale instead of 4x
- *   border: 1,
- *   padding: 2,
- *   gap: 1
- * });
- * const width = customGrid.px(10); // 20 pixels at 2x scale
+ * // Access grid constants
+ * const padding = px(GRID.padding);  // Default padding in pixels
+ * const gap = px(GRID.gap);          // Default gap in pixels
+ *
+ * // Create custom grid with different scale
+ * const grid2x = new PixelGrid({ scale: 2 });
+ * const width2x = grid2x.px(10);  // 10 units = 20px at 2x
  * ```
  */
 
-/**
- * Configuration for a pixel grid system
- */
+/** PixelGrid configuration. */
 export interface PixelGridConfig {
   /** Base pixel unit at 1x scale (default: 1) */
   unit?: number;
@@ -43,9 +36,7 @@ export interface PixelGridConfig {
   fontScale?: number;
 }
 
-/**
- * Border configuration for multi-layer borders
- */
+/** Multi-layer border configuration. */
 export interface BorderConfig {
   /** Outer border width in grid units (default: 1) */
   outer?: number;
@@ -57,12 +48,7 @@ export interface BorderConfig {
   total?: number;
 }
 
-/**
- * A pixel-perfect grid system for consistent UI measurements
- *
- * All measurements are in grid units that get scaled to actual pixels.
- * This ensures pixel-perfect alignment at any scale factor.
- */
+/** Grid system converting units to pixels at consistent scale. */
 export class PixelGrid {
   public readonly unit: number;
   public readonly scale: number;
@@ -84,33 +70,18 @@ export class PixelGrid {
     this.fontScale = config.fontScale ?? (this.scale / 16);
   }
 
-  /**
-   * Convert grid units to actual pixels
-   * @param units - Number of grid units
-   * @returns Actual pixel value
-   */
+  /** Convert grid units → pixels. */
   px(units: number): number {
     return units * this.unit * this.scale;
   }
 
-  /**
-   * Convert pixels to grid units
-   * @param pixels - Number of pixels
-   * @returns Grid units (rounded)
-   */
+  /** Convert pixels → grid units (rounded). */
   units(pixels: number): number {
     return Math.round(pixels / (this.unit * this.scale));
   }
 }
 
-/**
- * Default pixel grid instance
- * - 1px base unit
- * - 4x scale (common for retro/pixel games)
- * - 1 unit borders, padding, and gaps
- *
- * TEMPORARY: Checks localStorage for 'temp-grid-scale' to override scale for testing
- */
+/** Default grid: 4x scale, 1px base unit. */
 export const DEFAULT_PIXEL_GRID = (() => {
   // TEMPORARY: Check for scale override in localStorage
   const tempScale = typeof localStorage !== 'undefined'
@@ -127,23 +98,13 @@ export const DEFAULT_PIXEL_GRID = (() => {
   return new PixelGrid();
 })();
 
-/**
- * Helper function to convert grid units to pixels using the default grid
- * @param units - Number of grid units
- * @returns Actual pixel value
- */
+/** Convert grid units → pixels (default grid). */
 export const px = (units: number): number => DEFAULT_PIXEL_GRID.px(units);
 
-/**
- * Helper function to convert pixels to grid units using the default grid
- * @param pixels - Number of pixels
- * @returns Grid units (rounded)
- */
+/** Convert pixels → grid units (default grid). */
 export const units = (pixels: number): number => DEFAULT_PIXEL_GRID.units(pixels);
 
-/**
- * Default grid constants for easy access
- */
+/** Default grid constants. */
 export const GRID = {
   unit: DEFAULT_PIXEL_GRID.unit,
   scale: DEFAULT_PIXEL_GRID.scale,
@@ -154,9 +115,7 @@ export const GRID = {
   fontScale: DEFAULT_PIXEL_GRID.fontScale
 } as const;
 
-/**
- * Default border configuration (triple border: outer/middle/inner)
- */
+/** Default triple border (outer/middle/inner). */
 export const BORDER = {
   outer: 1,   // Outer border (1 grid unit)
   middle: 1,  // Middle border (1 grid unit)
@@ -164,11 +123,7 @@ export const BORDER = {
   total: 3    // Total border width (3 grid units)
 } as const;
 
-/**
- * Create a custom border configuration
- * @param config - Border configuration
- * @returns Border configuration with calculated total
- */
+/** Create custom border config with calculated total. */
 export function createBorderConfig(config: BorderConfig = {}): Required<BorderConfig> {
   const outer = config.outer ?? 1;
   const middle = config.middle ?? 1;

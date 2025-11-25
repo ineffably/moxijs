@@ -2,101 +2,55 @@ import { Point } from 'pixi.js';
 import { OnEvent, ClientEventsArgs } from '..';
 
 /**
- * Manages input events from the client (keyboard, mouse, etc.) and provides an interface
- * for querying the current input state.
- * 
- * Implements the Singleton pattern to ensure only one instance of event handlers exists.
- * 
- * @category Core
+ * Singleton input manager for keyboard, mouse, and wheel events.
+ * Tracks current input state for polling-based input handling.
+ *
  * @example
- * ```typescript
- * // Create/get the ClientEvents instance
- * const events = new ClientEvents();
- * 
- * // Check if a key is currently pressed
- * if (events.isKeyDown('ArrowRight')) {
- *   player.moveRight();
- * }
- * 
- * // Access mouse position
- * const mousePos = events.movePosition;
+ * ```ts
+ * const input = ClientEvents.getInstance();
+ *
+ * // In update loop - check key state
+ * if (input.isKeyDown('ArrowRight')) player.moveRight();
+ * if (input.isKeyDown('Space')) player.jump();
+ *
+ * // Mouse position and movement
+ * const mousePos = input.movePosition;
+ * const delta = input.moveDelta;
+ *
+ * // Wheel scrolling
+ * const scroll = input.wheelOffsets;
  * ```
  */
 export class ClientEvents {
-  /**
-   * Current wheel scroll delta values
-   */
+  /** Current wheel scroll delta. */
   wheelDelta: { yValue: number; xValue: number; };
-  
-  /**
-   * The most recent mouse up event
-   */
+  /** Most recent mouseup event. */
   mouseUpEvent: MouseEvent;
-  
-  /**
-   * The most recent mouse down event
-   */
+  /** Most recent mousedown event. */
   mouseDownEvent: MouseEvent;
-  
-  /**
-   * The last mouse down event that occurred
-   */
+  /** Last mousedown event. */
   lastMouseDown: MouseEvent;
-  
-  /**
-   * The last mouse up event that occurred
-   */
+  /** Last mouseup event. */
   lastMouseUp: MouseEvent;
-  
-  /**
-   * The most recent key down event
-   */
+  /** Most recent keydown event. */
   keyDownEvent: KeyboardEvent;
-  
-  /**
-   * The most recent key up event
-   */
+  /** Most recent keyup event. */
   keyUpEvent: KeyboardEvent;
-  
-  /**
-   * Map of currently pressed keys
-   * @internal
-   */
+  /** @internal Currently pressed keys. */
   keydown: Record<string, KeyboardEvent>;
-  
-  /**
-   * Accumulated wheel offset values
-   */
+  /** Accumulated wheel offsets. */
   wheelOffsets: Point;
-  
-  /**
-   * Current mouse position
-   */
+  /** Current mouse position. */
   movePosition: Point;
-  
-  /**
-   * Previous mouse position
-   */
+  /** Previous mouse position. */
   lastMovePosition: Point;
-  
-  /**
-   * Change in mouse position since last update
-   */
+  /** Mouse movement delta. */
   moveDelta: Point;
 
-  /**
-   * Singleton instance of ClientEvents
-   * @static
-   */
+  /** @internal */
   private static instance: ClientEvents | null = null;
 
-  /**
-   * Gets the singleton instance of ClientEvents, creating it if necessary
-   * This is the preferred way to get the ClientEvents instance
-   *
-   * @param options - Configuration options (only used on first call)
-   * @returns The singleton ClientEvents instance
-   */
+  /** Get singleton instance. */
   static getInstance(options: ClientEventsArgs = {}): ClientEvents {
     if (!ClientEvents.instance) {
       ClientEvents.instance = new ClientEvents(options);
@@ -104,14 +58,7 @@ export class ClientEvents {
     return ClientEvents.instance;
   }
 
-  /**
-   * Creates a new ClientEvents instance
-   * Note: Use getInstance() instead to ensure singleton behavior
-   *
-   * @param options - Configuration options
-   * @param options.initWheelOffset - Initial wheel offset value
-   * @param options.onAnyEvent - Callback that fires on any input event
-   */
+  /** @internal Use getInstance() instead. */
   constructor({ initWheelOffset = new Point(), onAnyEvent = (ev: OnEvent) => {} }: ClientEventsArgs = {}) {
     // Return existing instance if one exists (singleton pattern)
     if (ClientEvents.instance) {
@@ -182,29 +129,12 @@ export class ClientEvents {
     ClientEvents.instance = this;
   }
 
-  /**
-   * Checks if a specific key is currently pressed down
-   * 
-   * @param key - The key to check, e.g., 'a', 'ArrowUp', 'Space'
-   * @returns True if the key is currently pressed, false otherwise
-   * 
-   * @example
-   * ```typescript
-   * if (events.isKeyDown('Space')) {
-   *   player.jump();
-   * }
-   * ```
-   */
+  /** True if key is currently pressed. */
   isKeyDown(key: string): boolean {
     return Boolean(this.keydown[key]);
   }
 
-  /**
-   * Checks if a specific key is currently not pressed
-   * 
-   * @param key - The key to check, e.g., 'a', 'ArrowUp', 'Space'
-   * @returns True if the key is currently not pressed, false if it is pressed
-   */
+  /** True if key is not pressed. */
   isKeyUp(key: string): boolean {
     return !this.keydown[key];
   }

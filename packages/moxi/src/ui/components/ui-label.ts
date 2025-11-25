@@ -2,18 +2,10 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 
-/**
- * Text alignment options
- *
- * @category UI
- */
+/** Text alignment options. */
 export type TextAlign = 'left' | 'center' | 'right';
 
-/**
- * Props for configuring a UILabel
- *
- * @category UI
- */
+/** UILabel configuration. */
 export interface UILabelProps {
   /** The text to display */
   text: string;
@@ -36,19 +28,29 @@ export interface UILabelProps {
 }
 
 /**
- * A text label component
- * Wraps PIXI.Text with layout integration
- *
- * @category UI
+ * Text label component wrapping PIXI.Text with layout integration.
+ * Supports word wrapping, custom fonts, and alignment.
  *
  * @example
- * ```typescript
+ * ```ts
  * const label = new UILabel({
  *   text: 'Hello World',
  *   fontSize: 24,
  *   color: 0xffffff,
+ *   fontFamily: 'Arial',
  *   align: 'center'
  * });
+ *
+ * // With word wrap
+ * const paragraph = new UILabel({
+ *   text: 'Long text that needs wrapping...',
+ *   wordWrap: true,
+ *   wordWrapWidth: 200
+ * });
+ *
+ * // Update text dynamically
+ * label.setText('New text');
+ * label.setColor(0xff0000);
  * ```
  */
 export class UILabel extends UIComponent {
@@ -80,9 +82,7 @@ export class UILabel extends UIComponent {
     this.container.addChild(this.textObject);
   }
 
-  /**
-   * Gets the PIXI text style based on current props
-   */
+  /** @internal */
   private getTextStyle(): PIXI.TextStyle {
     const style: any = {
       fontFamily: this.props.fontFamily,
@@ -101,9 +101,7 @@ export class UILabel extends UIComponent {
     return style;
   }
 
-  /**
-   * Measures the size needed for this label
-   */
+  /** @internal */
   measure(): MeasuredSize {
     const padding = this.boxModel.padding;
     const metrics = this.textObject;
@@ -118,9 +116,7 @@ export class UILabel extends UIComponent {
     };
   }
 
-  /**
-   * Performs layout for this label
-   */
+  /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
     const padding = this.boxModel.padding;
 
@@ -162,43 +158,33 @@ export class UILabel extends UIComponent {
     this.render();
   }
 
-  /**
-   * Renders the label (positions the text object)
-   */
+  /** @internal */
   protected render(): void {
     const padding = this.boxModel.padding;
     this.textObject.position.set(padding.left, padding.top);
   }
 
-  /**
-   * Updates the text content
-   */
+  /** Update displayed text. */
   setText(text: string): void {
     this.props.text = text;
     this.textObject.text = text;
     this.markLayoutDirty();
   }
 
-  /**
-   * Updates the text color
-   */
+  /** Update text color. */
   setColor(color: number): void {
     this.props.color = color;
     this.textObject.style.fill = color;
   }
 
-  /**
-   * Updates the font size
-   */
+  /** Update font size. */
   setFontSize(size: number): void {
     this.props.fontSize = size;
     this.textObject.style.fontSize = size;
     this.markLayoutDirty();
   }
 
-  /**
-   * Gets the current text
-   */
+  /** Get current text. */
   getText(): string {
     return this.props.text;
   }

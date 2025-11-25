@@ -8,52 +8,45 @@ import { asEntity } from '../../core/moxi-entity';
 import { initGraphicsPhysicsTracking } from './physics-graphics-parser';
 
 /**
- * PhysicsWorld manages the Planck.js physics simulation and provides
- * integration with MOXI's Scene/Engine.
+ * Planck.js physics simulation manager.
  *
  * @example
- * ```typescript
- * const physicsWorld = new PhysicsWorld({
- *   gravity: { x: 0, y: 9.8 },
- *   pixelsPerMeter: 30
- * });
+ * ```ts
+ * // Via setupMoxi (recommended)
+ * const { physicsWorld } = await setupMoxi({ physics: true });
  *
- * // Integrate with engine
+ * // Or manually
+ * const physicsWorld = new PhysicsWorld({ gravity: { x: 0, y: 9.8 } });
  * engine.addPhysicsWorld(physicsWorld);
+ *
+ * // Collision callbacks
+ * physicsWorld.onCollision('player', 'enemy', (e) => console.log('hit!'));
+ *
+ * // Debug visualization
+ * physicsWorld.enableDebugRenderer(scene);
  * ```
  */
 export class PhysicsWorld {
-  /** The Planck.js world instance */
+  /** Planck.js world. */
   public world: planck.World;
 
-  /** Pixels per meter conversion factor */
+  /** Conversion factor. Default 30. */
   public pixelsPerMeter: number = 30;
 
-  /** Fixed timestep in seconds */
+  /** Fixed timestep (seconds). Default 1/60. */
   public timestep: number = 1/60;
 
-  /** Collision tag registry */
+  /** Collision tag registry for tag-to-bitmask conversion. */
   public collisionRegistry: CollisionRegistry;
 
-  /** Collision event manager */
+  /** Handles collision callbacks between tags. */
   public collisionManager: CollisionManager;
 
-  /** Velocity iterations for solver */
   private velocityIterations: number = 8;
-
-  /** Position iterations for solver */
   private positionIterations: number = 3;
-
-  /** Time accumulator for fixed timestep */
   private accumulator: number = 0;
-
-  /** Registry of physics bodies */
   private bodies: Map<planck.Body, PhysicsBodyLogic> = new Map();
-
-  /** Debug renderer reference */
   private debugRenderer?: PhysicsDebugRenderer;
-
-  /** Debug graphics container */
   private debugGraphics?: PIXI.Graphics;
 
   constructor(options: PhysicsWorldOptions = {}) {

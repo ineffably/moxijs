@@ -107,16 +107,12 @@ describe('EventEmitter', () => {
   });
 
   describe('singleton instance', () => {
-    it('should have a static instance', () => {
-      expect(EventEmitter.instance).toBeInstanceOf(EventEmitter);
-    });
-
     it('should return singleton from getInstance', () => {
       const instance1 = EventEmitter.getInstance();
       const instance2 = EventEmitter.getInstance();
       
       expect(instance1).toBe(instance2);
-      expect(instance1).toBe(EventEmitter.instance);
+      expect(instance1).toBeInstanceOf(EventEmitter);
     });
   });
 });

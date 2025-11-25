@@ -64,7 +64,7 @@ const libraryConfig = {
 // Dev server config (for standalone development)
 const devConfig = {
   mode: 'development',
-  entry: './src/index.ts',
+  entry: './src/main.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -92,7 +92,7 @@ const devConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/dev.html',
+      template: './dev.html',
       title: 'PIKCELL - Pixel Sprite Editor',
       inject: 'body',
       scriptLoading: 'blocking'

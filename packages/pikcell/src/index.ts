@@ -89,15 +89,8 @@ export async function initPikcell(hostElement?: HTMLElement) {
   return { spriteEditor, scene, engine, renderer };
 }
 
-// Auto-init when DOM is ready (for standalone use)
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const app = document.getElementById('app');
-    if (app) {
-      initPikcell(app).catch(console.error);
-    }
-  });
-}
+// Note: Auto-init removed. Call initPikcell() explicitly when using as standalone.
+// For library use, import { SpriteEditor, getTheme } from 'pikcell';
 
 // Export everything for library use
 export { SpriteEditor } from './sprite-editor';

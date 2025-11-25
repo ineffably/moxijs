@@ -38,6 +38,7 @@ import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pix
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
+import { ActionManager, OnAction } from './library/action-manager';
 import {
   PhysicsWorld,
   PhysicsBodyLogic,
@@ -59,6 +60,7 @@ export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
 export type { LoadingSceneOptions, LoadingAnimation, LoadingAnimationContext, FallingSquaresOptions } from './library/loading-scene';
+export type { OnAction } from './library/action-manager';
 export type {
   BodyType,
   SyncMode,
@@ -185,7 +187,8 @@ const exportedObjects = {
   units,
   GRID,
   BORDER,
-  createBorderConfig
+  createBorderConfig,
+  ActionManager
 };
 
 export default exportedObjects;
@@ -262,6 +265,7 @@ export {
   units,
   GRID,
   BORDER,
-  createBorderConfig
+  createBorderConfig,
+  ActionManager
 };
 

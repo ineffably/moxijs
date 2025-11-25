@@ -5,8 +5,7 @@
  * Can be attached to any PIXI.Container to make it draggable.
  */
 import * as PIXI from 'pixi.js';
-import { Logic } from 'moxi';
-import { EventManager } from '../utilities/event-manager';
+import { Logic, ActionManager } from 'moxi';
 import { CARD_CONSTANTS } from '../config/constants';
 
 export interface CardDragOptions {
@@ -36,7 +35,7 @@ export class CardDragLogic extends Logic<PIXI.Container> {
   name = 'CardDragLogic';
 
   private options: Required<CardDragOptions>;
-  private eventManager: EventManager;
+  private actionManager: ActionManager;
 
   // Drag state
   private isDragging = false;
@@ -58,7 +57,7 @@ export class CardDragLogic extends Logic<PIXI.Container> {
       onClick: options.onClick ?? (() => {})
     };
 
-    this.eventManager = new EventManager();
+    this.actionManager = new ActionManager();
   }
 
   /**
@@ -66,6 +65,7 @@ export class CardDragLogic extends Logic<PIXI.Container> {
    */
   init(entity?: PIXI.Container, renderer?: PIXI.Renderer) {
     if (!entity) return;
+    const { actionManager } = this;
 
     // Make entity interactive
     entity.eventMode = 'static';
@@ -74,14 +74,14 @@ export class CardDragLogic extends Logic<PIXI.Container> {
     // Setup drag handlers
     entity.on('pointerdown', this.handlePointerDown.bind(this, entity));
 
-    // Register global listeners via EventManager
-    this.eventManager.register(
+    // Register global listeners via ActionManager
+    actionManager.add(
       window as any,
       'pointermove',
       this.handlePointerMove.bind(this, entity) as EventListener
     );
 
-    this.eventManager.register(
+    actionManager.add(
       window as any,
       'pointerup',
       this.handlePointerUp.bind(this, entity) as EventListener
@@ -121,7 +121,7 @@ export class CardDragLogic extends Logic<PIXI.Container> {
    * Cleanup event listeners
    */
   destroy() {
-    this.eventManager.unregisterAll();
+    this.actionManager.removeAll();
   }
 
   /**

@@ -38,6 +38,7 @@ import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pix
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
+import { ActionManager } from './library/action-manager';
 import { PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial } from './library/physics';
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsEntity, MoxiLogic } from './core/moxi-entity';
@@ -46,6 +47,7 @@ export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
 export type { LoadingSceneOptions, LoadingAnimation, LoadingAnimationContext, FallingSquaresOptions } from './library/loading-scene';
+export type { OnAction } from './library/action-manager';
 export type { BodyType, SyncMode, ShapeType, CollisionTag, ShapeConfig, PhysicsWorldOptions, PhysicsBodyOptions, PhysicsDebugOptions, CollisionEvent, RaycastCallback } from './library/physics';
 export type { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint } from './ui/core/box-model';
 export type { FlexContainerProps } from './ui/layout/flex-container';
@@ -210,6 +212,7 @@ declare const exportedObjects: {
         readonly total: 3;
     };
     createBorderConfig: typeof createBorderConfig;
+    ActionManager: typeof ActionManager;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode, svgToTexture, PixelGrid, px, units, GRID, BORDER, createBorderConfig };
+export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode, svgToTexture, PixelGrid, px, units, GRID, BORDER, createBorderConfig, ActionManager };

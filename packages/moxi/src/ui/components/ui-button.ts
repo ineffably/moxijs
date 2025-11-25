@@ -243,28 +243,18 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerDown(): void {
-    console.log('🔵 Button handlePointerDown called');
-    console.log('  - enabled:', this.props.enabled);
-    console.log('  - canFocus:', this.canFocus());
-    console.log('  - tabIndex:', this.tabIndex);
-
     if (this.props.enabled) {
       this.setState(ButtonState.Pressed);
 
       // Request focus through the focus manager
       if (this.canFocus()) {
         const focusManager = UIFocusManager.getInstance();
-        console.log('  - focusManager:', focusManager);
         if (focusManager) {
-          console.log('  - Calling requestFocus');
           focusManager.requestFocus(this);
         } else {
-          console.log('  - No focus manager, calling onFocus directly');
           // Fallback if no focus manager
           this.onFocus();
         }
-      } else {
-        console.log('  - canFocus returned false, NOT focusing');
       }
     }
   }

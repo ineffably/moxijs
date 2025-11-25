@@ -29,6 +29,7 @@ export class AssetLoader {
 
   loadAssets = async (assets: Asset[]) => {
     const { PIXIAssets } = this;
+    const failedAssets: string[] = [];
 
     // Emit loading start event
     this.isLoading = true;
@@ -37,18 +38,27 @@ export class AssetLoader {
     try {
       for (let i = 0; i < assets.length; i++) {
         const { src, alias } = assets[i];
-        
-        if (alias) {
-          if (!PIXIAssets.cache.has(alias)) {
-            const texture = await PIXIAssets.load({ alias, src });
+
+        try {
+          if (alias) {
+            if (!PIXIAssets.cache.has(alias)) {
+              const texture = await PIXIAssets.load({ alias, src });
+              this.textures.push(texture);
+            }
+          } else {
+            const texture = await PIXIAssets.load(src);
             this.textures.push(texture);
           }
-        }
-        else {
-          const texture = await PIXIAssets.load(src);
-          this.textures.push(texture);
+        } catch (error) {
+          console.error(`Failed to load asset: ${src}`, error);
+          failedAssets.push(src);
         }
       }
+
+      if (failedAssets.length > 0) {
+        console.warn(`${failedAssets.length} asset(s) failed to load:`, failedAssets);
+      }
+
       return this;
     } finally {
       // Emit loading end event

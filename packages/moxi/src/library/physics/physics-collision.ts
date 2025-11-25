@@ -82,6 +82,29 @@ export class CollisionRegistry {
 }
 
 /**
+ * Interface for physics body user data
+ */
+interface PhysicsBodyUserData {
+  options: {
+    collisionTags?: CollisionTag[];
+  };
+  onCollisionBegin?: (other: PhysicsBodyUserData, contact: planck.Contact) => void;
+  onCollisionEnd?: (other: PhysicsBodyUserData, contact: planck.Contact) => void;
+}
+
+/**
+ * Type guard to check if user data is valid physics body data
+ */
+function isPhysicsBodyUserData(obj: unknown): obj is PhysicsBodyUserData {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'options' in obj &&
+    typeof (obj as any).options === 'object'
+  );
+}
+
+/**
  * Collision manager - handles callbacks
  */
 export class CollisionManager {
@@ -144,10 +167,10 @@ export class CollisionManager {
 
   // Trigger callbacks
   private handleBeginContact(contact: planck.Contact): void {
-    const bodyA = contact.getFixtureA().getBody().getUserData() as any;
-    const bodyB = contact.getFixtureB().getBody().getUserData() as any;
+    const bodyA = contact.getFixtureA().getBody().getUserData();
+    const bodyB = contact.getFixtureB().getBody().getUserData();
 
-    if (!bodyA || !bodyB) return;
+    if (!isPhysicsBodyUserData(bodyA) || !isPhysicsBodyUserData(bodyB)) return;
 
     // Call entity-level callbacks
     bodyA.onCollisionBegin?.(bodyB, contact);
@@ -158,18 +181,18 @@ export class CollisionManager {
   }
 
   private handleEndContact(contact: planck.Contact): void {
-    const bodyA = contact.getFixtureA().getBody().getUserData() as any;
-    const bodyB = contact.getFixtureB().getBody().getUserData() as any;
+    const bodyA = contact.getFixtureA().getBody().getUserData();
+    const bodyB = contact.getFixtureB().getBody().getUserData();
 
-    if (!bodyA || !bodyB) return;
+    if (!isPhysicsBodyUserData(bodyA) || !isPhysicsBodyUserData(bodyB)) return;
 
     bodyA.onCollisionEnd?.(bodyB, contact);
     bodyB.onCollisionEnd?.(bodyA, contact);
   }
 
   private triggerTagCallbacks(
-    bodyA: any,
-    bodyB: any,
+    bodyA: PhysicsBodyUserData,
+    bodyB: PhysicsBodyUserData,
     contact: planck.Contact
   ): void {
     // Get tags from both bodies

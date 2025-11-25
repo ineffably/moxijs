@@ -16,7 +16,8 @@ export declare class ClientEvents {
     movePosition: Point;
     lastMovePosition: Point;
     moveDelta: Point;
-    static instance: ClientEvents;
+    private static instance;
+    static getInstance(options?: ClientEventsArgs): ClientEvents;
     constructor({ initWheelOffset, onAnyEvent }?: ClientEventsArgs);
     isKeyDown(key: string): boolean;
     isKeyUp(key: string): boolean;

@@ -88,17 +88,32 @@ export class ClientEvents {
    * Singleton instance of ClientEvents
    * @static
    */
-  static instance: ClientEvents = null;
+  private static instance: ClientEvents | null = null;
 
   /**
-   * Creates a new ClientEvents instance or returns the existing singleton instance
-   * 
+   * Gets the singleton instance of ClientEvents, creating it if necessary
+   * This is the preferred way to get the ClientEvents instance
+   *
+   * @param options - Configuration options (only used on first call)
+   * @returns The singleton ClientEvents instance
+   */
+  static getInstance(options: ClientEventsArgs = {}): ClientEvents {
+    if (!ClientEvents.instance) {
+      ClientEvents.instance = new ClientEvents(options);
+    }
+    return ClientEvents.instance;
+  }
+
+  /**
+   * Creates a new ClientEvents instance
+   * Note: Use getInstance() instead to ensure singleton behavior
+   *
    * @param options - Configuration options
    * @param options.initWheelOffset - Initial wheel offset value
    * @param options.onAnyEvent - Callback that fires on any input event
    */
   constructor({ initWheelOffset = new Point(), onAnyEvent = (ev: OnEvent) => {} }: ClientEventsArgs = {}) {
-    // since we are hooking events into the document, we only want one instance of this class
+    // Return existing instance if one exists (singleton pattern)
     if (ClientEvents.instance) {
       return ClientEvents.instance;
     }

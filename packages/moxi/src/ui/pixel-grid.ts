@@ -120,7 +120,6 @@ export const DEFAULT_PIXEL_GRID = (() => {
   if (tempScale) {
     const scale = parseInt(tempScale, 10);
     if (!isNaN(scale) && scale >= 1 && scale <= 4) {
-      console.log(`🔧 TEMPORARY: Using GRID scale override: ${scale}x`);
       return new PixelGrid({ scale });
     }
   }

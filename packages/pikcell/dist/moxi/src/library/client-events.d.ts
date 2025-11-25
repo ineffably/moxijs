@@ -78,9 +78,18 @@ export declare class ClientEvents {
      * Singleton instance of ClientEvents
      * @static
      */
-    static instance: ClientEvents;
+    private static instance;
     /**
-     * Creates a new ClientEvents instance or returns the existing singleton instance
+     * Gets the singleton instance of ClientEvents, creating it if necessary
+     * This is the preferred way to get the ClientEvents instance
+     *
+     * @param options - Configuration options (only used on first call)
+     * @returns The singleton ClientEvents instance
+     */
+    static getInstance(options?: ClientEventsArgs): ClientEvents;
+    /**
+     * Creates a new ClientEvents instance
+     * Note: Use getInstance() instead to ensure singleton behavior
      *
      * @param options - Configuration options
      * @param options.initWheelOffset - Initial wheel offset value

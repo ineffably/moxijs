@@ -498,8 +498,11 @@ export class SpriteEditor {
     // Load project state
     this.loadProjectState();
 
-    // Restore UI state
-    this.restoreUIState();
+    // Restore UI state, or apply default layout if no saved state
+    const stateRestored = this.restoreUIState();
+    if (!stateRestored) {
+      this.applyDefaultLayout();
+    }
   }
 
   /**

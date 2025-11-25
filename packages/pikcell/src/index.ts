@@ -2,7 +2,7 @@
  * PIKCELL - Pixel-Perfect Sprite Editor
  * Built on Moxi and PIXI.js
  */
-import { setupMoxi } from 'moxi';
+import { setupMoxi, setupResponsiveCanvas } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { SpriteEditor } from './sprite-editor';
@@ -72,6 +72,14 @@ export async function initPikcell(hostElement?: HTMLElement) {
   // Initialize the editor (creates all UI)
   await spriteEditor.initialize();
 
+  // Setup responsive canvas - maintains 16:9 aspect ratio centered
+  setupResponsiveCanvas({
+    rootElement: root,
+    width: 1280,
+    height: 720,
+    pixelArtMode: true
+  });
+
   // Start the engine
   scene.init();
   engine.start();
@@ -81,8 +89,8 @@ export async function initPikcell(hostElement?: HTMLElement) {
   return { spriteEditor, scene, engine, renderer };
 }
 
-// Auto-init when DOM is ready (for standalone use on port 9001 only)
-if (typeof document !== 'undefined' && window.location.port === '9001') {
+// Auto-init when DOM is ready (for standalone use)
+if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
     if (app) {

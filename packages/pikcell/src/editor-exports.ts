@@ -40,7 +40,7 @@ export type { SVGToTextureOptions } from 'moxi';
 
 // State Management
 export { UIStateManager, CardState, UIState } from './state/ui-state-manager';
-export { ProjectStateManager, ProjectState, SpriteSheetState } from './state/project-state-manager';
+export { ProjectStateManager, ProjectState, SpriteSheetState, OperationResult } from './state/project-state-manager';
 
 // Theming System
 export {

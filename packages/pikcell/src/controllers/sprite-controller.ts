@@ -154,4 +154,11 @@ export class SpriteController {
       height: 8 * this.scale
     };
   }
+
+  /**
+   * Get the sprite sheet controller this sprite belongs to
+   */
+  public getSpriteSheetController(): SpriteSheetController {
+    return this.spriteSheetController;
+  }
 }

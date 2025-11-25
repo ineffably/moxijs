@@ -52,6 +52,13 @@ export class SpriteSheetController {
   private dragStartY: number = 0;
   private clickThreshold: number = 5; // Pixels of movement before it's considered a drag
 
+  // Event listener references for cleanup
+  private wheelHandler: ((e: WheelEvent) => void) | null = null;
+  private mouseDownHandler: ((e: MouseEvent) => void) | null = null;
+  private mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+  private mouseUpHandler: ((e: MouseEvent) => void) | null = null;
+  private animationFrameId: number | null = null;
+
   constructor(options: SpriteSheetControllerOptions) {
     this.config = options.config;
     this.renderer = options.renderer;
@@ -86,7 +93,7 @@ export class SpriteSheetController {
    */
   private setupMouseWheelZoom() {
     if (typeof window !== 'undefined') {
-      const handleWheel = (e: WheelEvent) => {
+      this.wheelHandler = (e: WheelEvent) => {
         if (!this.sprite) return;
 
         // Get canvas bounds
@@ -136,7 +143,7 @@ export class SpriteSheetController {
         }
       };
 
-      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('wheel', this.wheelHandler, { passive: false });
     }
   }
 
@@ -145,7 +152,7 @@ export class SpriteSheetController {
    */
   private setupMiddleMousePan() {
     if (typeof window !== 'undefined') {
-      const handleMouseDown = (e: MouseEvent) => {
+      this.mouseDownHandler = (e: MouseEvent) => {
         if (e.button !== 1 || !this.sprite) return; // Middle button only
 
         // Get canvas bounds
@@ -173,7 +180,7 @@ export class SpriteSheetController {
         }
       };
 
-      const handleMouseMove = (e: MouseEvent) => {
+      this.mouseMoveHandler = (e: MouseEvent) => {
         if (!this.isPanning || !this.sprite) return;
 
         e.preventDefault();
@@ -195,15 +202,15 @@ export class SpriteSheetController {
         this.sprite.y = this.spriteStartY + deltaY;
       };
 
-      const handleMouseUp = (e: MouseEvent) => {
+      this.mouseUpHandler = (e: MouseEvent) => {
         if (e.button === 1) { // Middle button
           this.isPanning = false;
         }
       };
 
-      window.addEventListener('mousedown', handleMouseDown);
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousedown', this.mouseDownHandler);
+      window.addEventListener('mousemove', this.mouseMoveHandler);
+      window.addEventListener('mouseup', this.mouseUpHandler);
     }
   }
 
@@ -470,9 +477,9 @@ export class SpriteSheetController {
     if (typeof window !== 'undefined') {
       const updateOverlay = () => {
         this.drawCellOverlay();
-        requestAnimationFrame(updateOverlay);
+        this.animationFrameId = requestAnimationFrame(updateOverlay);
       };
-      requestAnimationFrame(updateOverlay);
+      this.animationFrameId = requestAnimationFrame(updateOverlay);
     }
   }
 
@@ -646,5 +653,49 @@ export class SpriteSheetController {
 
     // Redraw overlay to reflect new position
     this.drawCellOverlay();
+  }
+
+  /**
+   * Clean up resources and event listeners
+   * Call this when the controller is no longer needed to prevent memory leaks
+   */
+  public destroy(): void {
+    // Remove window event listeners
+    if (typeof window !== 'undefined') {
+      if (this.wheelHandler) {
+        window.removeEventListener('wheel', this.wheelHandler);
+        this.wheelHandler = null;
+      }
+      if (this.mouseDownHandler) {
+        window.removeEventListener('mousedown', this.mouseDownHandler);
+        this.mouseDownHandler = null;
+      }
+      if (this.mouseMoveHandler) {
+        window.removeEventListener('mousemove', this.mouseMoveHandler);
+        this.mouseMoveHandler = null;
+      }
+      if (this.mouseUpHandler) {
+        window.removeEventListener('mouseup', this.mouseUpHandler);
+        this.mouseUpHandler = null;
+      }
+      if (this.animationFrameId !== null) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+    }
+
+    // Clean up PIXI resources
+    if (this.texture) {
+      this.texture.destroy(true);
+      this.texture = null;
+    }
+    if (this.cellOverlay) {
+      this.cellOverlay.destroy();
+      this.cellOverlay = null;
+    }
+    if (this.sprite) {
+      this.sprite.destroy();
+      this.sprite = null;
+    }
   }
 }

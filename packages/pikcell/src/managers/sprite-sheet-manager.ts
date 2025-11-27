@@ -24,10 +24,16 @@ export class SpriteSheetManager implements ISpriteSheetManager {
    * @param type Sprite sheet type (PICO-8, TIC-80, etc.)
    * @param savedId Optional saved ID to reuse when loading from state
    * @param config Optional configuration overrides
-   * @returns The created sprite sheet instance
+   * @returns The created sprite sheet instance (or existing one if ID already exists)
    */
   create(type: SpriteSheetType, savedId?: string, config?: Partial<SpriteSheetConfig>): SpriteSheetInstance {
     const id = savedId || this.generateId();
+
+    // If an instance with this ID already exists, return it instead of creating a duplicate
+    if (this.instances.has(id)) {
+      console.warn(`SpriteSheetManager: Instance with ID "${id}" already exists, returning existing instance`);
+      return this.instances.get(id)!;
+    }
 
     // Create the instance with sheetCard as undefined initially
     // The caller MUST set sheetCard before using the instance

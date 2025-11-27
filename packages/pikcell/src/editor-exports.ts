@@ -13,6 +13,7 @@ export { createSPTToolbarCard, SPTToolbarCardOptions, SPTToolbarCardResult, SPTT
 export { createInfoBarCard, InfoBarCardOptions, InfoBarCardResult, InfoSection } from './cards/info-bar-card';
 export { createCommanderBarCard, CommanderBarCardOptions, CommanderBarCardResult, CommanderBarCallbacks } from './cards/commander-bar-card';
 export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scale-card';
+export { createToolbarCard, ToolbarCardOptions, ToolbarCardResult, MainToolType, ToolState } from './cards/toolbar-card';
 
 // Components
 export { PixelCard, UI_COLORS } from './components/pixel-card';
@@ -21,6 +22,7 @@ export { createPixelDialog, PixelDialogOptions, PixelDialogResult } from './comp
 export { createPixelCheckbox, PixelCheckboxOptions, PixelCheckboxResult } from './components/pixel-checkbox';
 export { createSpriteSheetCard, SPRITESHEET_CONFIGS, SpriteSheetCardOptions, SpriteSheetCardResult } from './components/spritesheet-card';
 export { createSpriteCard, SpriteCardOptions, SpriteCardResult } from './components/sprite-card';
+export { createPopupToolbar, PopupToolbarOptions, PopupToolbarResult, PopupToolbarButton } from './components/popup-toolbar';
 
 // Component Interfaces
 export { ComponentResult, CardResult, RefreshableComponent, SelectableComponent, ControllableComponent, hasDestroy, isCardResult } from './interfaces/components';
@@ -81,4 +83,4 @@ export {
 
 // Palettes & Icons
 export { PICO8_PALETTE, TIC80_PALETTE, CC29_PALETTE, AERUGO_PALETTE, getPalette, PaletteType } from './theming/palettes';
-export { createToolIcon, ToolType } from './theming/tool-icons';
+export { createToolIcon, createShapeIcon, ToolType, ShapeType } from './theming/tool-icons';

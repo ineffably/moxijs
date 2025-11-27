@@ -1,189 +1,184 @@
 /**
- * CardDragLogic - Moxi Logic component for draggable card behavior
+ * CardDragHandler - Handles card dragging logic
  *
- * Implements drag functionality following the Moxi ECS pattern.
- * Can be attached to any PIXI.Container to make it draggable.
+ * Extracted from PixelCard to follow Single Responsibility Principle.
+ * Manages pointer capture, screen-to-canvas coordinate conversion, and drag state.
  */
 import * as PIXI from 'pixi.js';
-import { Logic, ActionManager } from 'moxi';
-import { CARD_CONSTANTS } from '../config/constants';
 
-export interface CardDragOptions {
-  /** Whether dragging is enabled */
-  enabled?: boolean;
+export interface DragState {
+  isDragging: boolean;
+  dragStartX: number;
+  dragStartY: number;
+  cardStartX: number;
+  cardStartY: number;
+}
 
-  /** Minimum drag distance to distinguish from click */
-  clickThreshold?: number;
-
-  /** Callback when drag starts */
-  onDragStart?: (x: number, y: number) => void;
-
-  /** Callback during drag */
-  onDrag?: (x: number, y: number, deltaX: number, deltaY: number) => void;
-
-  /** Callback when drag ends */
-  onDragEnd?: (x: number, y: number) => void;
-
-  /** Callback when clicked (not dragged) */
-  onClick?: () => void;
+export interface DragHandlerOptions {
+  renderer: PIXI.Renderer;
+  container: PIXI.Container;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
 /**
- * Logic component for card dragging behavior
+ * Handles drag operations for a card container
  */
-export class CardDragLogic extends Logic<PIXI.Container> {
-  name = 'CardDragLogic';
+export class CardDragHandler {
+  private renderer: PIXI.Renderer;
+  private container: PIXI.Container;
+  private state: DragState;
+  private capturedPointerId: number | null = null;
+  private onDragStart?: () => void;
+  private onDragEnd?: () => void;
 
-  private options: Required<CardDragOptions>;
-  private actionManager: ActionManager;
+  // Bound event handlers for cleanup
+  private boundHandleMove: (e: PointerEvent) => void;
+  private boundHandleUp: () => void;
 
-  // Drag state
-  private isDragging = false;
-  private dragStartX = 0;
-  private dragStartY = 0;
-  private cardStartX = 0;
-  private cardStartY = 0;
-  private hasMoved = false;
+  constructor(options: DragHandlerOptions) {
+    this.renderer = options.renderer;
+    this.container = options.container;
+    this.onDragStart = options.onDragStart;
+    this.onDragEnd = options.onDragEnd;
 
-  constructor(options: CardDragOptions = {}) {
-    super();
-
-    this.options = {
-      enabled: options.enabled ?? true,
-      clickThreshold: options.clickThreshold ?? CARD_CONSTANTS.MIN_DRAG_DISTANCE,
-      onDragStart: options.onDragStart ?? (() => {}),
-      onDrag: options.onDrag ?? (() => {}),
-      onDragEnd: options.onDragEnd ?? (() => {}),
-      onClick: options.onClick ?? (() => {})
+    this.state = {
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      cardStartX: 0,
+      cardStartY: 0,
     };
 
-    this.actionManager = new ActionManager();
-  }
+    // Bind handlers
+    this.boundHandleMove = this.handleMove.bind(this);
+    this.boundHandleUp = this.handleUp.bind(this);
 
-  /**
-   * Initialize drag logic on the entity
-   */
-  init(entity?: PIXI.Container, renderer?: PIXI.Renderer) {
-    if (!entity) return;
-    const { actionManager } = this;
-
-    // Make entity interactive
-    entity.eventMode = 'static';
-    entity.cursor = 'grab';
-
-    // Setup drag handlers
-    entity.on('pointerdown', this.handlePointerDown.bind(this, entity));
-
-    // Register global listeners via ActionManager
-    actionManager.add(
-      window as any,
-      'pointermove',
-      this.handlePointerMove.bind(this, entity) as EventListener
-    );
-
-    actionManager.add(
-      window as any,
-      'pointerup',
-      this.handlePointerUp.bind(this, entity) as EventListener
-    );
-  }
-
-  /**
-   * Update drag logic (called every frame)
-   */
-  update(entity?: PIXI.Container, deltaTime?: number) {
-    // Drag logic is event-driven, no frame updates needed
-  }
-
-  /**
-   * Enable dragging
-   */
-  enable() {
-    this.options.enabled = true;
-  }
-
-  /**
-   * Disable dragging
-   */
-  disable() {
-    this.options.enabled = false;
-    this.isDragging = false;
+    // Setup global listeners
+    this.setupEventListeners();
   }
 
   /**
    * Check if currently dragging
    */
-  isActive(): boolean {
-    return this.isDragging;
+  get isDragging(): boolean {
+    return this.state.isDragging;
+  }
+
+  /**
+   * Start a drag operation
+   * Call this from title bar pointerdown event
+   */
+  startDrag(event: PIXI.FederatedPointerEvent): void {
+    this.state.isDragging = true;
+    this.state.cardStartX = this.container.x;
+    this.state.cardStartY = this.container.y;
+    this.state.dragStartX = event.client.x;
+    this.state.dragStartY = event.client.y;
+
+    // Capture pointer
+    const canvas = this.renderer.canvas as HTMLCanvasElement;
+    if (canvas && event.pointerId !== undefined) {
+      canvas.setPointerCapture(event.pointerId);
+      this.capturedPointerId = event.pointerId;
+    }
+
+    if (this.onDragStart) {
+      this.onDragStart();
+    }
+  }
+
+  /**
+   * Handle pointer move during drag
+   */
+  private handleMove(e: PointerEvent): void {
+    if (!this.state.isDragging) return;
+
+    const canvas = this.renderer.canvas as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const deltaScreenX = e.clientX - this.state.dragStartX;
+    const deltaScreenY = e.clientY - this.state.dragStartY;
+
+    const deltaX = deltaScreenX * scaleX;
+    const deltaY = deltaScreenY * scaleY;
+
+    this.container.x = this.state.cardStartX + deltaX;
+    this.container.y = this.state.cardStartY + deltaY;
+  }
+
+  /**
+   * Handle pointer up to end drag
+   */
+  private handleUp(): void {
+    if (!this.state.isDragging) return;
+
+    const wasDragging = this.state.isDragging;
+    this.state.isDragging = false;
+
+    // Release pointer capture
+    this.releasePointerCapture();
+
+    if (wasDragging && this.onDragEnd) {
+      this.onDragEnd();
+    }
+  }
+
+  /**
+   * Release pointer capture
+   */
+  private releasePointerCapture(): void {
+    if (this.capturedPointerId !== null) {
+      const canvas = this.renderer.canvas as HTMLCanvasElement;
+      if (canvas) {
+        try {
+          canvas.releasePointerCapture(this.capturedPointerId);
+        } catch {
+          // Ignore errors if pointer was already released
+        }
+      }
+      this.capturedPointerId = null;
+    }
+  }
+
+  /**
+   * Setup global event listeners
+   */
+  private setupEventListeners(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pointermove', this.boundHandleMove);
+      window.addEventListener('pointerup', this.boundHandleUp);
+    }
+  }
+
+  /**
+   * Get current card start position (for resize handlers that need this)
+   */
+  getCardStartPosition(): { x: number; y: number } {
+    return {
+      x: this.state.cardStartX,
+      y: this.state.cardStartY,
+    };
+  }
+
+  /**
+   * Update card start position (called when resize starts)
+   */
+  setCardStartPosition(x: number, y: number): void {
+    this.state.cardStartX = x;
+    this.state.cardStartY = y;
   }
 
   /**
    * Cleanup event listeners
    */
-  destroy() {
-    this.actionManager.removeAll();
-  }
-
-  /**
-   * Handle pointer down event
-   */
-  private handlePointerDown(entity: PIXI.Container, event: PIXI.FederatedPointerEvent) {
-    if (!this.options.enabled) return;
-
-    this.isDragging = true;
-    this.hasMoved = false;
-    this.dragStartX = event.global.x;
-    this.dragStartY = event.global.y;
-    this.cardStartX = entity.x;
-    this.cardStartY = entity.y;
-
-    entity.cursor = 'grabbing';
-  }
-
-  /**
-   * Handle pointer move event
-   */
-  private handlePointerMove(entity: PIXI.Container, event: PointerEvent) {
-    if (!this.isDragging || !this.options.enabled) return;
-
-    const deltaX = event.clientX - this.dragStartX;
-    const deltaY = event.clientY - this.dragStartY;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-    // Check if moved beyond click threshold
-    if (!this.hasMoved && distance > this.options.clickThreshold) {
-      this.hasMoved = true;
-      this.options.onDragStart(this.cardStartX, this.cardStartY);
+  destroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointermove', this.boundHandleMove);
+      window.removeEventListener('pointerup', this.boundHandleUp);
     }
-
-    if (this.hasMoved) {
-      // Update entity position
-      const newX = this.cardStartX + deltaX;
-      const newY = this.cardStartY + deltaY;
-
-      entity.x = newX;
-      entity.y = newY;
-
-      this.options.onDrag(newX, newY, deltaX, deltaY);
-    }
-  }
-
-  /**
-   * Handle pointer up event
-   */
-  private handlePointerUp(entity: PIXI.Container, event: PointerEvent) {
-    if (!this.isDragging) return;
-
-    if (this.hasMoved) {
-      // Was a drag
-      this.options.onDragEnd(entity.x, entity.y);
-    } else {
-      // Was a click
-      this.options.onClick();
-    }
-
-    this.isDragging = false;
-    this.hasMoved = false;
-    entity.cursor = 'grab';
+    this.releasePointerCapture();
   }
 }

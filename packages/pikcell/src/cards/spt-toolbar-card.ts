@@ -18,8 +18,10 @@ export interface SPTToolbarCardOptions {
 
 export interface SPTToolbarCardResult {
   card: PixelCard;
+  container: PIXI.Container;
   getSelectedTool: () => SPTTool;
   setSelectedTool: (tool: SPTTool) => void;
+  destroy: () => void;
 }
 
 // SVG Icons (should match those in utilities/svg-icon-button.ts)
@@ -86,8 +88,8 @@ export async function createSPTToolbarCard(options: SPTToolbarCardOptions): Prom
         }
       }
     }).then(btn => {
-      btn.position.set(0, 0);
-      contentContainer.addChild(btn);
+      btn.container.position.set(0, 0);
+      contentContainer.addChild(btn.container);
     });
 
     createSVGIconButton({
@@ -107,8 +109,8 @@ export async function createSPTToolbarCard(options: SPTToolbarCardOptions): Prom
         }
       }
     }).then(btn => {
-      btn.position.set(0, px(buttonSize + buttonSpacing));
-      contentContainer.addChild(btn);
+      btn.container.position.set(0, px(buttonSize + buttonSpacing));
+      contentContainer.addChild(btn.container);
     });
   }
 
@@ -149,18 +151,22 @@ export async function createSPTToolbarCard(options: SPTToolbarCardOptions): Prom
     }
   });
 
-  panButton.position.set(0, 0);
-  zoomButton.position.set(0, px(buttonSize + buttonSpacing));
+  panButton.container.position.set(0, 0);
+  zoomButton.container.position.set(0, px(buttonSize + buttonSpacing));
 
-  contentContainer.addChild(panButton);
-  contentContainer.addChild(zoomButton);
+  contentContainer.addChild(panButton.container);
+  contentContainer.addChild(zoomButton.container);
 
   return {
     card,
+    container: card.container,
     getSelectedTool: () => selectedTool,
     setSelectedTool: (tool: SPTTool) => {
       selectedTool = tool;
       updateButtons();
+    },
+    destroy: () => {
+      card.container.destroy({ children: true });
     }
   };
 }

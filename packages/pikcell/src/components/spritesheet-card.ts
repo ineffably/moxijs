@@ -2,7 +2,8 @@
  * Sprite sheet card component for displaying and editing sprite sheets
  */
 import * as PIXI from 'pixi.js';
-import { PixelCard, GRID, px } from './pixel-card';
+import { PixelCard } from './pixel-card';
+import { GRID, px } from 'moxi';
 import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from '../controllers/sprite-sheet-controller';
 import { createCheckerboardTexture } from '../utilities/texture-utils';
 import { PICO8_PALETTE, TIC80_PALETTE } from '../theming/palettes';
@@ -39,7 +40,9 @@ export interface SpriteSheetCardOptions {
 
 export interface SpriteSheetCardResult {
   card: PixelCard;
+  container: PIXI.Container;
   controller: SpriteSheetController;
+  destroy: () => void;
 }
 
 /**
@@ -123,5 +126,14 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
   // Initial render - controller now handles cell selection/highlighting
   controller.render(contentContainer);
 
-  return { card, controller };
+  return {
+    card,
+    container: card.container,
+    controller,
+    destroy: () => {
+      controller.destroy();
+      gridBackground.destroy();
+      card.container.destroy({ children: true });
+    }
+  };
 }

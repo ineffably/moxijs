@@ -2,8 +2,10 @@
  * Sprite card - displays and allows editing of a single 8x8 sprite
  */
 import * as PIXI from 'pixi.js';
-import { PixelCard, px, GRID } from './pixel-card';
+import { PixelCard } from './pixel-card';
+import { px, GRID } from 'moxi';
 import { SpriteController } from '../controllers/sprite-controller';
+import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
 
 export interface SpriteCardOptions {
   x: number;
@@ -14,10 +16,7 @@ export interface SpriteCardOptions {
   onFocus?: () => void;
 }
 
-export interface SpriteCardResult {
-  card: PixelCard;
-  controller: SpriteController;
-  redraw: () => void;
+export interface SpriteCardResult extends CardResult, ControllableComponent<SpriteController>, RefreshableComponent {
 }
 
 /**
@@ -110,7 +109,12 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
 
   return {
     card,
+    container: card.container,
     controller: spriteController,
-    redraw: drawSprite
+    redraw: drawSprite,
+    destroy: () => {
+      spriteContainer.removeAllListeners();
+      card.container.destroy({ children: true });
+    }
   };
 }

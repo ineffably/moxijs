@@ -9,9 +9,6 @@ import { GRID, BORDER, px } from 'moxi';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
 
-// Re-export for backwards compatibility with editor code
-export { GRID, BORDER, px };
-
 // UI Colors - Maps theme tokens to component usage
 export const UI_COLORS = {
   get cardBg() { return getTheme().backgroundSurface; },

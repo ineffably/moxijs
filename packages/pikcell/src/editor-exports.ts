@@ -16,11 +16,14 @@ export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scal
 
 // Components
 export { PixelCard, UI_COLORS } from './components/pixel-card';
-export { createPixelButton, PixelButtonOptions, SelectionMode, ActionMode } from './components/pixel-button';
-export { createPixelDialog, PixelDialogOptions } from './components/pixel-dialog';
-export { createPixelCheckbox } from './components/pixel-checkbox';
+export { createPixelButton, PixelButtonOptions, PixelButtonResult, SelectionMode, ActionMode } from './components/pixel-button';
+export { createPixelDialog, PixelDialogOptions, PixelDialogResult } from './components/pixel-dialog';
+export { createPixelCheckbox, PixelCheckboxOptions, PixelCheckboxResult } from './components/pixel-checkbox';
 export { createSpriteSheetCard, SPRITESHEET_CONFIGS, SpriteSheetCardOptions, SpriteSheetCardResult } from './components/spritesheet-card';
 export { createSpriteCard, SpriteCardOptions, SpriteCardResult } from './components/sprite-card';
+
+// Component Interfaces
+export { ComponentResult, CardResult, RefreshableComponent, SelectableComponent, ControllableComponent, hasDestroy, isCardResult } from './interfaces/components';
 
 // Re-export pixel grid utilities from moxi
 export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from 'moxi';

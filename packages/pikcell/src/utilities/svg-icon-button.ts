@@ -2,7 +2,7 @@
  * Helper to create buttons with SVG icons
  */
 import * as PIXI from 'pixi.js';
-import { createPixelButton, PixelButtonOptions } from '../components/pixel-button';
+import { createPixelButton, PixelButtonOptions, PixelButtonResult } from '../components/pixel-button';
 import { svgToTexture, px } from 'moxi';
 
 export interface SVGIconButtonOptions extends Omit<PixelButtonOptions, 'icon'> {
@@ -13,8 +13,9 @@ export interface SVGIconButtonOptions extends Omit<PixelButtonOptions, 'icon'> {
 /**
  * Creates a pixel button with an SVG icon
  * The icon will be rendered at the proper size accounting for the button dimensions
+ * Returns the PixelButtonResult for consistent API
  */
-export async function createSVGIconButton(options: SVGIconButtonOptions): Promise<PIXI.Graphics> {
+export async function createSVGIconButton(options: SVGIconButtonOptions): Promise<PixelButtonResult> {
   const { svgString, iconColor = 0x000000, size, width, height, ...buttonOptions } = options;
 
   // Determine button dimensions
@@ -40,15 +41,13 @@ export async function createSVGIconButton(options: SVGIconButtonOptions): Promis
   // Don't set anchor or position - let pixel-button handle it
 
   // Create button with icon
-  const button = createPixelButton({
+  return createPixelButton({
     ...buttonOptions,
     size,
     width,
     height,
     icon: iconSprite
   });
-
-  return button;
 }
 
 // Example SVG icons

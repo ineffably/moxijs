@@ -2,8 +2,9 @@
  * Pixel-perfect checkbox component
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from './pixel-card';
-import { createPixelButton } from './pixel-button';
+import { GRID, px } from 'moxi';
+import { createPixelButton, PixelButtonResult } from './pixel-button';
+import { ComponentResult } from '../interfaces/components';
 
 export interface PixelCheckboxOptions {
   label: string;
@@ -11,16 +12,23 @@ export interface PixelCheckboxOptions {
   onChange?: (checked: boolean) => void;
 }
 
+export interface PixelCheckboxResult extends ComponentResult {
+  /** Get the current checked state */
+  isChecked(): boolean;
+  /** Set the checked state */
+  setChecked(checked: boolean): void;
+}
+
 /**
  * Creates a pixel-perfect checkbox with label
- * Returns a container with the checkbox and label
+ * Returns a result object with the container, state accessors, and destroy method
  */
-export function createPixelCheckbox(options: PixelCheckboxOptions): PIXI.Container {
+export function createPixelCheckbox(options: PixelCheckboxOptions): PixelCheckboxResult {
   const { label, checked = false, onChange } = options;
 
   const container = new PIXI.Container();
 
-  let isChecked = checked;
+  let isCheckedState = checked;
   const checkboxSize = 6; // Grid units for checkbox square
 
   // Checkbox label
@@ -42,21 +50,47 @@ export function createPixelCheckbox(options: PixelCheckboxOptions): PIXI.Contain
   const labelHeight = checkboxLabel.height;
   const checkboxY = (labelHeight - checkboxHeight) / 2;
 
-  const checkbox = createPixelButton({
-    size: checkboxSize,
-    selected: isChecked,
-    selectionMode: 'highlight',
-    actionMode: 'toggle',
-    backgroundColor: 0xffffff,
-    onClick: () => {
-      isChecked = !isChecked;
-      if (onChange) {
-        onChange(isChecked);
-      }
-    }
-  });
-  checkbox.position.set(0, checkboxY);
-  container.addChild(checkbox);
+  let checkboxResult: PixelButtonResult | null = null;
 
-  return container;
+  const createCheckbox = () => {
+    if (checkboxResult) {
+      checkboxResult.destroy();
+    }
+
+    checkboxResult = createPixelButton({
+      size: checkboxSize,
+      selected: isCheckedState,
+      selectionMode: 'highlight',
+      actionMode: 'toggle',
+      backgroundColor: 0xffffff,
+      onClick: () => {
+        isCheckedState = !isCheckedState;
+        checkboxResult?.setSelected(isCheckedState);
+        if (onChange) {
+          onChange(isCheckedState);
+        }
+      }
+    });
+
+    checkboxResult.container.position.set(0, checkboxY);
+    container.addChild(checkboxResult.container);
+  };
+
+  createCheckbox();
+
+  return {
+    container,
+    isChecked: () => isCheckedState,
+    setChecked: (checked: boolean) => {
+      isCheckedState = checked;
+      checkboxResult?.setSelected(checked);
+    },
+    destroy: () => {
+      if (checkboxResult) {
+        checkboxResult.destroy();
+        checkboxResult = null;
+      }
+      container.destroy({ children: true });
+    }
+  };
 }

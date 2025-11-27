@@ -41,6 +41,7 @@ import { PixelRenderer } from './utilities/pixel-renderer';
 
 // Constants
 import { PERFORMANCE_CONSTANTS, INTERACTION_CONSTANTS } from './config/constants';
+import { CARD_IDS, getSpriteSheetCardId, getSpriteCardId, isSpriteCard } from './config/card-ids';
 
 export interface SpriteEditorOptions {
   renderer: PIXI.Renderer;
@@ -159,7 +160,7 @@ export class SpriteEditor {
 
     // Position sprite sheet instances
     const spriteSheets = this.spriteSheetManager.getAll();
-    const infoCard = this.uiManager.getCard('info');
+    const infoCard = this.uiManager.getCard(CARD_IDS.INFO);
 
     spriteSheets.forEach((instance, index) => {
       if (instance.sheetCard) {
@@ -189,7 +190,7 @@ export class SpriteEditor {
     // Center sprite cards
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
     this.uiManager.getAllCards().forEach((card, id) => {
-      if (id.startsWith('sprite-card-')) {
+      if (isSpriteCard(id)) {
         const x = (this.renderer.width - card.getPixelWidth()) / 2;
         const y = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
         card.container.position.set(x, y);
@@ -241,8 +242,8 @@ export class SpriteEditor {
       if (instance.sheetCard) {
         const sheetIndex = this.spriteSheetManager.getAll().indexOf(instance);
         this.uiManager.bringGroupToFront([
-          `sprite-sheet-${sheetIndex}`,
-          `sprite-card-${sheetIndex}`
+          getSpriteSheetCardId(sheetIndex),
+          getSpriteCardId(sheetIndex)
         ]);
       }
 
@@ -308,7 +309,7 @@ export class SpriteEditor {
       instance.spriteController = spriteController;
 
       const sheetIndex = this.spriteSheetManager.getAll().indexOf(instance);
-      this.registerCard(`sprite-card-${sheetIndex}`, spriteCardResult.card);
+      this.registerCard(getSpriteCardId(sheetIndex), spriteCardResult.card);
 
       // Link paired cards
       spriteCardResult.card.setPairedCard(instance.sheetCard.card);
@@ -370,7 +371,7 @@ export class SpriteEditor {
 
     // Register with UIManager
     const sheetIndex = this.spriteSheetManager.count() - 1;
-    this.registerCard(`sprite-sheet-${sheetIndex}`, spriteSheetResult.card);
+    this.registerCard(getSpriteSheetCardId(sheetIndex), spriteSheetResult.card);
 
     // Set as active
     this.spriteSheetManager.setActive(instance.id);
@@ -461,7 +462,7 @@ export class SpriteEditor {
       }
     });
     this.scene.addChild(this.commanderBarCard.card.container);
-    this.registerCard('commander', this.commanderBarCard.card);
+    this.registerCard(CARD_IDS.COMMANDER, this.commanderBarCard.card);
 
     // Create palette card
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
@@ -478,7 +479,7 @@ export class SpriteEditor {
       }
     });
     this.scene.addChild(this.paletteCard.card.container);
-    this.registerCard('palette', this.paletteCard.card);
+    this.registerCard(CARD_IDS.PALETTE, this.paletteCard.card);
 
     // Create info bar using LayoutManager
     const barHeight = 8;
@@ -493,7 +494,7 @@ export class SpriteEditor {
       width: infoBarWidth
     });
     this.scene.addChild(this.infoBarCard.card.container);
-    this.registerCard('info', this.infoBarCard.card);
+    this.registerCard(CARD_IDS.INFO, this.infoBarCard.card);
 
     // Load project state
     this.loadProjectState();
@@ -599,10 +600,15 @@ export class SpriteEditor {
    * Create a new project
    */
   private createNewProject(): void {
-    // Clear using managers
+    // Clear using managers - destroy controllers to prevent memory leaks
     this.spriteSheetManager.getAll().forEach(instance => {
-      if (instance.sheetCard) this.scene.removeChild(instance.sheetCard.card.container);
-      if (instance.spriteCard) this.scene.removeChild(instance.spriteCard.card.container);
+      if (instance.sheetCard) {
+        instance.sheetCard.controller.destroy();
+        this.scene.removeChild(instance.sheetCard.card.container);
+      }
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+      }
     });
 
     this.spriteSheetManager.clear();
@@ -710,10 +716,15 @@ export class SpriteEditor {
       return;
     }
 
-    // Clear existing work
+    // Clear existing work - destroy controllers to prevent memory leaks
     this.spriteSheetManager.getAll().forEach(instance => {
-      if (instance.sheetCard) this.scene.removeChild(instance.sheetCard.card.container);
-      if (instance.spriteCard) this.scene.removeChild(instance.spriteCard.card.container);
+      if (instance.sheetCard) {
+        instance.sheetCard.controller.destroy();
+        this.scene.removeChild(instance.sheetCard.card.container);
+      }
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+      }
     });
 
     this.spriteSheetManager.clear();
@@ -824,6 +835,14 @@ export class SpriteEditor {
     if (this.projectSaveTimer) {
       clearTimeout(this.projectSaveTimer);
     }
+
+    // Destroy all sprite sheet controllers to prevent memory leaks
+    this.spriteSheetManager.getAll().forEach(instance => {
+      if (instance.sheetCard) {
+        instance.sheetCard.controller.destroy();
+      }
+    });
+
     this.uiManager.clear();
     this.spriteSheetManager.clear();
   }

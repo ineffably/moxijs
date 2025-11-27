@@ -3,12 +3,20 @@
  *
  * Extracted from SpriteEditor to follow Single Responsibility Principle.
  * Handles save/load project files, PNG export, and file dialogs.
+ *
+ * Supports both .moxiproject and .pikcell file formats.
  */
 import { IFileOperationsManager } from '../interfaces/managers';
-import { ProjectState } from '../state/project-state-manager';
+import { ProjectState, ProjectStateManager } from '../state/project-state-manager';
 import { SpriteSheetController } from '../controllers/sprite-sheet-controller';
 import { SpriteController } from '../controllers/sprite-controller';
 import { FILE_CONSTANTS } from '../config/constants';
+
+/** Supported project file extensions */
+const SUPPORTED_EXTENSIONS = [
+  FILE_CONSTANTS.PROJECT_FILE_EXTENSION,
+  '.pikcell',
+];
 
 /**
  * Manages all file operations in the editor
@@ -19,31 +27,34 @@ export class FileOperationsManager implements IFileOperationsManager {
   /**
    * Save project to file
    *
-   * Downloads a .moxiproject JSON file with the current project state
+   * Downloads a .pikcell JSON file with the current project state
    *
    * @param projectState Project state to save
+   * @param filename Optional custom filename
    */
-  async saveProject(projectState: ProjectState): Promise<void> {
+  async saveProject(projectState: ProjectState, filename?: string): Promise<void> {
     if (!this.supportsFileOperations()) {
       throw new Error('File operations not supported in this browser');
     }
 
-    const json = JSON.stringify(projectState, null, 2);
+    const json = ProjectStateManager.exportProjectJSON(projectState);
     const blob = new Blob([json], { type: 'application/json' });
 
-    // Generate filename
+    // Generate filename if not provided
     const timestamp = new Date().toISOString().split('T')[0];
-    const filename = `${FILE_CONSTANTS.DEFAULT_PROJECT_NAME}-${timestamp}${FILE_CONSTANTS.PROJECT_FILE_EXTENSION}`;
+    const finalFilename = filename ?? `pikcell-project-${timestamp}.pikcell`;
 
     // Download file
-    this.downloadBlob(blob, filename);
-    this.lastSavedFileName = filename;
+    this.downloadBlob(blob, finalFilename);
+    this.lastSavedFileName = finalFilename;
+
+    console.log('💾 Project saved:', finalFilename);
   }
 
   /**
    * Load project from file
    *
-   * Opens a file picker and loads a .moxiproject JSON file
+   * Opens a file picker and loads a .pikcell or .moxiproject JSON file
    *
    * @returns Loaded project state or null if cancelled/failed
    */
@@ -55,7 +66,7 @@ export class FileOperationsManager implements IFileOperationsManager {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.accept = FILE_CONSTANTS.PROJECT_FILE_EXTENSION;
+      input.accept = SUPPORTED_EXTENSIONS.join(',');
 
       input.onchange = async (e: Event) => {
         const target = e.target as HTMLInputElement;
@@ -68,17 +79,17 @@ export class FileOperationsManager implements IFileOperationsManager {
 
         try {
           const text = await file.text();
-          const json = JSON.parse(text);
+          const result = ProjectStateManager.importProjectJSON(text);
 
-          // Basic validation
-          if (!json.version || !json.spriteSheets) {
-            console.error('Invalid project file format');
+          if (!result.success || !result.data) {
+            console.error('Invalid project file:', result.error);
             resolve(null);
             return;
           }
 
           this.lastSavedFileName = file.name;
-          resolve(json as ProjectState);
+          console.log('📂 Project loaded:', file.name);
+          resolve(result.data);
         } catch (error) {
           console.error('Failed to load project file:', error);
           resolve(null);

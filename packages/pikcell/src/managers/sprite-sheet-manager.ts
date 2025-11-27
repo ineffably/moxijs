@@ -222,7 +222,7 @@ export class SpriteSheetManager implements ISpriteSheetManager {
    * @private
    */
   private generateId(): string {
-    return `sheet-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `sheet-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

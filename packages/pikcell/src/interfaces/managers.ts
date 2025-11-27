@@ -54,6 +54,11 @@ export interface CardPosition {
   y: number;
   width?: number;
   height?: number;
+  // Extended positioning properties for data-driven layouts
+  anchor?: string;      // 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  dock?: string;        // 'top' | 'bottom' | 'left' | 'right'
+  below?: string;       // Card ID to position below
+  gapMultiplier?: number; // Multiplier for gap spacing
 }
 
 /**

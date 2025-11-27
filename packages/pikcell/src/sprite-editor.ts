@@ -13,8 +13,6 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from './components/pixel-card';
 import { createPixelDialog } from './components/pixel-dialog';
 import { createSpriteSheetCard, SPRITESHEET_CONFIGS } from './components/spritesheet-card';
-import { createSpriteCard } from './components/sprite-card';
-import { SpriteController } from './controllers/sprite-controller';
 import { SpriteSheetType } from './controllers/sprite-sheet-controller';
 import { UIStateManager } from './state/ui-state-manager';
 import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/project-state-manager';
@@ -27,17 +25,14 @@ import { GRID, BORDER, px } from 'moxi';
 import { createPaletteCard, PaletteCardResult } from './cards/palette-card';
 import { createInfoBarCard, InfoBarCardResult } from './cards/info-bar-card';
 import { createCommanderBarCard, CommanderBarCardResult } from './cards/commander-bar-card';
-import { createCardZoomHandler } from './utilities/card-zoom-handler';
 
 // Manager imports
 import { SpriteSheetManager } from './managers/sprite-sheet-manager';
 import { UIManager } from './managers/ui-manager';
 import { LayoutManager } from './managers/layout-manager';
 import { FileOperationsManager } from './managers/file-operations-manager';
+import { SpriteCardFactory } from './managers/sprite-card-factory';
 import { SpriteSheetInstance } from './interfaces/managers';
-
-// Utility imports
-import { PixelRenderer } from './utilities/pixel-renderer';
 
 // Constants
 import { PERFORMANCE_CONSTANTS, INTERACTION_CONSTANTS } from './config/constants';
@@ -59,6 +54,7 @@ export class SpriteEditor {
   private uiManager: UIManager;
   private layoutManager: LayoutManager;
   private fileOperationsManager: FileOperationsManager;
+  private spriteCardFactory: SpriteCardFactory;
 
   // Core dependencies
   private renderer: PIXI.Renderer;
@@ -88,6 +84,17 @@ export class SpriteEditor {
     this.uiManager = new UIManager(this.scene);
     this.layoutManager = new LayoutManager(this.renderer);
     this.fileOperationsManager = new FileOperationsManager();
+
+    // Initialize sprite card factory
+    this.spriteCardFactory = new SpriteCardFactory({
+      renderer: this.renderer,
+      scene: this.scene,
+      registerCard: (id, card) => this.registerCard(id, card),
+      getSelectedColorIndex: () => this.selectedColorIndex,
+      onPixelChange: () => this.saveProjectState(),
+      onFocus: (instance) => this.activateInstance(instance),
+      getSheetIndex: (instance) => this.spriteSheetManager.getAll().indexOf(instance)
+    });
 
     // Initialize or load project state
     const loadResult = ProjectStateManager.loadProject();
@@ -213,6 +220,20 @@ export class SpriteEditor {
   }
 
   /**
+   * Activate a sprite sheet instance and bring its cards to front
+   */
+  private activateInstance(instance: SpriteSheetInstance): void {
+    this.spriteSheetManager.setActive(instance.id);
+
+    // Bring cards to front
+    const sheetIndex = this.spriteSheetManager.getAll().indexOf(instance);
+    this.uiManager.bringGroupToFront([
+      getSpriteSheetCardId(sheetIndex),
+      getSpriteCardId(sheetIndex)
+    ]);
+  }
+
+  /**
    * Creates a new sprite sheet and sprite card
    */
   private createNewSpriteSheet(type: SpriteSheetType, showGrid: boolean, savedState?: SpriteSheetState): void {
@@ -236,110 +257,17 @@ export class SpriteEditor {
 
     // Function to make this sprite sheet active
     const makeThisSheetActive = () => {
-      this.spriteSheetManager.setActive(instance.id);
-
-      // Bring cards to front using UIManager
-      if (instance.sheetCard) {
-        const sheetIndex = this.spriteSheetManager.getAll().indexOf(instance);
-        this.uiManager.bringGroupToFront([
-          getSpriteSheetCardId(sheetIndex),
-          getSpriteCardId(sheetIndex)
-        ]);
-      }
-
+      this.activateInstance(instance);
       console.log(`Activated ${type} sprite sheet`);
     };
 
-    // Helper to create sprite card for a cell
+    // Helper to create sprite card for a cell - delegates to factory
     const createSpriteCardForCell = (cellX: number, cellY: number) => {
-      // If sprite card already exists, update it instead of creating a new one
-      if (instance.spriteCard && instance.spriteController) {
-        console.log(`Updating sprite card to cell: ${cellX}, ${cellY}`);
-        instance.spriteController.setCell(cellX, cellY);
-        instance.spriteCard.redraw();
-        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
-        makeThisSheetActive();
-        return;
-      }
-
-      console.log(`Creating sprite card for cell: ${cellX}, ${cellY}`);
-      makeThisSheetActive();
-
-      const spriteController = new SpriteController({
-        spriteSheetController: instance.sheetCard.controller,
+      this.spriteCardFactory.createOrUpdate({
+        instance,
         cellX,
-        cellY,
-        scale: 32
+        cellY
       });
-
-      // Calculate position
-      let spriteCardX: number;
-      let spriteCardY: number;
-
-      if (instance.spriteCard) {
-        spriteCardX = instance.spriteCard.card.container.x;
-        spriteCardY = instance.spriteCard.card.container.y;
-        this.scene.removeChild(instance.spriteCard.card.container);
-      } else {
-        const dims = spriteController.getScaledDimensions();
-        const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
-        spriteCardX = (this.renderer.width - dims.width) / 2;
-        spriteCardY = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
-      }
-
-      const spriteCardResult = createSpriteCard({
-        x: spriteCardX,
-        y: spriteCardY,
-        renderer: this.renderer,
-        spriteController,
-        onPixelClick: (x, y) => {
-          spriteController.setPixel(x, y, this.selectedColorIndex);
-
-          // Re-render using PixelRenderer utility in the future
-          spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
-          instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
-
-          this.saveProjectState();
-        },
-        onFocus: makeThisSheetActive
-      });
-
-      this.scene.addChild(spriteCardResult.card.container);
-      instance.spriteCard = spriteCardResult;
-      instance.spriteController = spriteController;
-
-      const sheetIndex = this.spriteSheetManager.getAll().indexOf(instance);
-      this.registerCard(getSpriteCardId(sheetIndex), spriteCardResult.card);
-
-      // Link paired cards
-      spriteCardResult.card.setPairedCard(instance.sheetCard.card);
-      instance.sheetCard.card.setPairedCard(spriteCardResult.card);
-
-      // Setup zoom handler
-      const handleSpriteZoom = createCardZoomHandler(this.renderer, spriteCardResult.card, (delta) => {
-        const currentScale = spriteController.getScale();
-        const zoomIncrement = delta * 2;
-        const newScale = Math.max(1, Math.min(64, currentScale + zoomIncrement));
-
-        if (newScale !== currentScale) {
-          spriteController.setScale(newScale);
-          spriteCardResult.card.setTitle(`Sprite (${newScale}x)`);
-
-          const dims = spriteController.getScaledDimensions();
-          const newContentWidth = Math.ceil(dims.width / px(1));
-          const newContentHeight = Math.ceil(dims.height / px(1));
-          spriteCardResult.card.setContentSize(newContentWidth, newContentHeight);
-
-          spriteCardResult.redraw();
-        }
-      });
-
-      if (typeof window !== 'undefined') {
-        window.addEventListener('wheel', handleSpriteZoom, { passive: false });
-        spriteCardResult.card.container.on('destroyed', () => {
-          window.removeEventListener('wheel', handleSpriteZoom);
-        });
-      }
     };
 
     // Create sprite sheet card
@@ -401,15 +329,7 @@ export class SpriteEditor {
 
     // Restore sprite card scale if saved
     if (savedState?.spriteCardScale && instance.spriteController) {
-      instance.spriteController.setScale(savedState.spriteCardScale);
-      if (instance.spriteCard) {
-        instance.spriteCard.card.setTitle(`Sprite (${savedState.spriteCardScale}x)`);
-        const dims = instance.spriteController.getScaledDimensions();
-        const newContentWidth = Math.ceil(dims.width / px(1));
-        const newContentHeight = Math.ceil(dims.height / px(1));
-        instance.spriteCard.card.setContentSize(newContentWidth, newContentHeight);
-        instance.spriteCard.redraw();
-      }
+      this.spriteCardFactory.restoreScale(instance, savedState.spriteCardScale);
     }
 
     console.log(`Created ${type} sprite sheet`);
@@ -842,6 +762,9 @@ export class SpriteEditor {
         instance.sheetCard.controller.destroy();
       }
     });
+
+    // Clean up factory
+    this.spriteCardFactory.destroy();
 
     this.uiManager.clear();
     this.spriteSheetManager.clear();

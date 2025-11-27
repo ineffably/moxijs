@@ -1,117 +1,88 @@
 /**
  * Color palette definitions for sprite editor
+ *
+ * Consolidated: All palette data is loaded from config/palettes.json
+ * This file provides typed access to the palette data.
  */
+import palettesConfig from '../config/palettes.json';
+
+/**
+ * Convert hex string array from JSON to number array
+ */
+function parseColorArray(colors: Array<{ hex: string; name?: string }>): number[] {
+  return colors.map(c => parseInt(c.hex, 16));
+}
+
+// Pre-parsed palettes for performance
+const parsedPalettes = {
+  pico8: parseColorArray(palettesConfig.palettes.pico8.colors),
+  tic80: parseColorArray(palettesConfig.palettes.tic80.colors),
+  cc29: parseColorArray(palettesConfig.palettes.cc29.colors),
+  aerugo: parseColorArray(palettesConfig.palettes.aerugo.colors),
+};
 
 /**
  * PICO-8 color palette (16 colors)
  * Standard palette used in PICO-8 fantasy console
  */
-export const PICO8_PALETTE = [
-  0x000000, // black
-  0x1d2b53, // dark blue
-  0x7e2553, // dark purple
-  0x008751, // dark green
-  0xab5236, // brown
-  0x5f574f, // dark gray
-  0xc2c3c7, // light gray
-  0xfff1e8, // white
-  0xff004d, // red
-  0xffa300, // orange
-  0xffec27, // yellow
-  0x00e436, // green
-  0x29adff, // blue
-  0x83769c, // lavender
-  0xff77a8, // pink
-  0xffccaa  // peach
-];
+export const PICO8_PALETTE = parsedPalettes.pico8;
 
 /**
  * TIC-80 color palette (16 colors)
  * Standard palette used in TIC-80 fantasy console
  */
-export const TIC80_PALETTE = [
-  0x000000, // black
-  0x1d2b53, // dark blue
-  0x7e2553, // dark purple
-  0x008751, // dark green
-  0xab5236, // brown
-  0x5f574f, // dark gray
-  0xc2c3c7, // light gray
-  0xfff1e8, // white
-  0xff004d, // red
-  0xffa300, // orange
-  0xffec27, // yellow
-  0x00e436, // green
-  0x29adff, // blue
-  0x83769c, // lavender
-  0xff77a8, // pink
-  0xffccaa  // peach
-];
+export const TIC80_PALETTE = parsedPalettes.tic80;
 
 /**
  * CC-29 color palette (29 colors)
  * From Lospec.com/palette-list
  */
-export const CC29_PALETTE = [
-  0xf2f0e5, // Light cream
-  0xb8b5b9, // Light gray
-  0x868188, // Medium gray
-  0x646365, // Dark gray
-  0x45444f, // Darker gray
-  0x3a3858, // Dark blue-gray
-  0x212123, // Very dark
-  0x352b42, // Dark purple
-  0x43436a, // Medium blue
-  0x4b80ca, // Blue
-  0x68c2d3, // Light blue
-  0xa2dcc7, // Mint green
-  0xede19e, // Light yellow
-  0xd3a068, // Tan
-  0xb45252, // Red
-  0x6a536e, // Purple-gray
-  0x4b4158, // Dark purple-gray
-  0x80493a, // Brown
-  0xa77b5b, // Light brown
-  0xe5ceb4, // Beige
-  0xc2d368, // Yellow-green
-  0x8ab060, // Green
-  0x567b79, // Teal
-  0x4e584a, // Dark green
-  0x7b7243, // Olive
-  0xb2b47e, // Light olive
-  0xedc8c4, // Light pink
-  0xcf8acb, // Pink
-  0x5f556a  // Dark purple-gray
-];
+export const CC29_PALETTE = parsedPalettes.cc29;
 
 /**
  * Aerugo color palette (32 colors)
  * The editor's UI palette
  * From https://lospec.com/palette-list/aerugo
  */
-export const AERUGO_PALETTE = [
-  0x2f1e1a, 0x4f3322, 0x723627, 0x95392c,
-  0xc75533, 0xe76d46, 0x934e28, 0xa2663c,
-  0xc87d40, 0xf5a95b, 0x6b8b8c, 0x81a38e,
-  0xaac39e, 0xffffff, 0xd1d0ce, 0xbab7b2,
-  0x898a8a, 0x686461, 0x554d4b, 0x3c3d3b,
-  0x343230, 0x87d1ef, 0x64a1c2, 0x466480,
-  0x2f485c, 0x242e35, 0x1b2026, 0xaa9c8a,
-  0x917f6d, 0x86624a, 0x715b48, 0x5e4835
-];
+export const AERUGO_PALETTE = parsedPalettes.aerugo;
 
 export type PaletteType = 'pico8' | 'tic80' | 'cc29' | 'aerugo';
 
+/**
+ * Get a palette by type
+ */
 export function getPalette(type: PaletteType): number[] {
-  switch (type) {
-    case 'pico8':
-      return PICO8_PALETTE;
-    case 'tic80':
-      return TIC80_PALETTE;
-    case 'cc29':
-      return CC29_PALETTE;
-    case 'aerugo':
-      return AERUGO_PALETTE;
-  }
+  return parsedPalettes[type];
 }
 
+/**
+ * Get palette metadata (name, description, source)
+ */
+export function getPaletteInfo(type: PaletteType): {
+  name: string;
+  description: string;
+  source?: string;
+  colorCount: number;
+} {
+  const data = palettesConfig.palettes[type];
+  return {
+    name: data.name,
+    description: data.description,
+    source: data.source,
+    colorCount: data.colors.length,
+  };
+}
+
+/**
+ * Get all available palette types
+ */
+export function getAllPaletteTypes(): PaletteType[] {
+  return Object.keys(palettesConfig.palettes) as PaletteType[];
+}
+
+/**
+ * Get color names for a palette (if available)
+ */
+export function getColorNames(type: PaletteType): (string | undefined)[] {
+  return palettesConfig.palettes[type].colors.map(c => c.name);
+}

@@ -5,32 +5,24 @@ import * as PIXI from 'pixi.js';
 import { PixelCard, GRID, px } from './pixel-card';
 import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from '../controllers/sprite-sheet-controller';
 import { createCheckerboardTexture } from '../utilities/texture-utils';
+import { PICO8_PALETTE, TIC80_PALETTE } from '../theming/palettes';
+import palettesConfig from '../config/palettes.json';
 
 export { SpriteSheetType, SpriteSheetConfig };
 
-// Sprite sheet configurations
+// Sprite sheet configurations - now uses centralized palette data
 export const SPRITESHEET_CONFIGS: Record<SpriteSheetType, SpriteSheetConfig> = {
   'PICO-8': {
     type: 'PICO-8',
-    width: 128,
-    height: 128,
-    palette: [
-      0x000000, 0x1d2b53, 0x7e2553, 0x008751,
-      0xab5236, 0x5f574f, 0xc2c3c7, 0xfff1e8,
-      0xff004d, 0xffa300, 0xffec27, 0x00e436,
-      0x29adff, 0x83769c, 0xff77a8, 0xffccaa
-    ]
+    width: palettesConfig.spriteSheets['PICO-8'].width,
+    height: palettesConfig.spriteSheets['PICO-8'].height,
+    palette: PICO8_PALETTE
   },
   'TIC-80': {
     type: 'TIC-80',
-    width: 256,
-    height: 256,
-    palette: [
-      0x140c1c, 0x442434, 0x30346d, 0x4e4a4e,
-      0x854c30, 0x346524, 0xd04648, 0x757161,
-      0x597dce, 0xd27d2c, 0x8595a1, 0x6daa2c,
-      0xd2aa99, 0x6dc2ca, 0xdad45e, 0xdeeed6
-    ]
+    width: palettesConfig.spriteSheets['TIC-80'].width,
+    height: palettesConfig.spriteSheets['TIC-80'].height,
+    palette: TIC80_PALETTE
   }
 };
 

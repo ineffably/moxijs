@@ -3,12 +3,15 @@
  *
  * Extracted from SpriteEditor to follow Single Responsibility Principle.
  * Handles layout presets, card positioning, dimension calculations, and viewport resizing.
+ *
+ * Now data-driven: loads layout definitions from layouts.json
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { ILayoutManager, LayoutSpec, CardPosition } from '../interfaces/managers';
 import { GRID, BORDER, px } from 'moxi';
 import { LAYOUT_CONSTANTS, CARD_CONSTANTS } from '../config/constants';
+import layoutsConfig from '../config/layouts.json';
 
 /**
  * Manages card layouts and positioning
@@ -214,43 +217,44 @@ export class LayoutManager implements ILayoutManager {
   }
 
   /**
-   * Register default layouts
+   * Register default layouts from JSON config
    *
    * @private
    */
   private registerDefaultLayouts(): void {
-    // Default layout
-    this.registerLayout({
-      id: 'default',
-      name: 'Default Layout',
-      positions: {
-        commander: { x: 0, y: 0 },
-        palette: { x: 0, y: 100 }, // Will be calculated dynamically
-        info: { x: 0, y: 700 }, // Will be calculated dynamically
-      },
+    // Load layouts from JSON config
+    const { layouts } = layoutsConfig;
+
+    Object.entries(layouts).forEach(([id, layout]) => {
+      const layoutData = layout as {
+        id: string;
+        name: string;
+        description?: string;
+        positions: Record<string, { x?: number; y?: number; anchor?: string; dock?: string; below?: string; gapMultiplier?: number }>;
+      };
+
+      // Convert JSON positions to CardPosition format
+      const positions: Record<string, CardPosition> = {};
+      Object.entries(layoutData.positions).forEach(([cardId, pos]) => {
+        positions[cardId] = {
+          x: pos.x ?? 0,
+          y: pos.y ?? 0,
+          // Store metadata for dynamic positioning
+          ...(pos.anchor && { anchor: pos.anchor }),
+          ...(pos.dock && { dock: pos.dock }),
+          ...(pos.below && { below: pos.below }),
+          ...(pos.gapMultiplier && { gapMultiplier: pos.gapMultiplier }),
+        } as CardPosition;
+      });
+
+      this.registerLayout({
+        id: layoutData.id,
+        name: layoutData.name,
+        positions,
+      });
     });
 
-    // Compact layout
-    this.registerLayout({
-      id: 'compact',
-      name: 'Compact Layout',
-      positions: {
-        commander: { x: 0, y: 0 },
-        palette: { x: 0, y: 80 },
-        tool: { x: 300, y: 80 },
-        info: { x: 0, y: 700 },
-      },
-    });
-
-    // Fullscreen layout
-    this.registerLayout({
-      id: 'fullscreen',
-      name: 'Fullscreen Layout',
-      positions: {
-        commander: { x: 0, y: 0 },
-        info: { x: 0, y: 700 },
-      },
-    });
+    console.log(`📐 Loaded ${Object.keys(layouts).length} layouts from config`);
   }
 
   /**

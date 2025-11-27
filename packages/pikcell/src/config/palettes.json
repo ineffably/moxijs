@@ -1,0 +1,114 @@
+{
+  "palettes": {
+    "pico8": {
+      "name": "PICO-8",
+      "description": "Standard palette used in PICO-8 fantasy console (16 colors)",
+      "source": "https://www.lexaloffle.com/pico-8.php",
+      "colors": [
+        { "hex": "000000", "name": "black" },
+        { "hex": "1d2b53", "name": "dark blue" },
+        { "hex": "7e2553", "name": "dark purple" },
+        { "hex": "008751", "name": "dark green" },
+        { "hex": "ab5236", "name": "brown" },
+        { "hex": "5f574f", "name": "dark gray" },
+        { "hex": "c2c3c7", "name": "light gray" },
+        { "hex": "fff1e8", "name": "white" },
+        { "hex": "ff004d", "name": "red" },
+        { "hex": "ffa300", "name": "orange" },
+        { "hex": "ffec27", "name": "yellow" },
+        { "hex": "00e436", "name": "green" },
+        { "hex": "29adff", "name": "blue" },
+        { "hex": "83769c", "name": "lavender" },
+        { "hex": "ff77a8", "name": "pink" },
+        { "hex": "ffccaa", "name": "peach" }
+      ]
+    },
+    "tic80": {
+      "name": "TIC-80",
+      "description": "Standard palette used in TIC-80 fantasy console (16 colors)",
+      "source": "https://tic80.com",
+      "colors": [
+        { "hex": "140c1c", "name": "black" },
+        { "hex": "442434", "name": "dark purple" },
+        { "hex": "30346d", "name": "dark blue" },
+        { "hex": "4e4a4e", "name": "dark gray" },
+        { "hex": "854c30", "name": "brown" },
+        { "hex": "346524", "name": "dark green" },
+        { "hex": "d04648", "name": "red" },
+        { "hex": "757161", "name": "gray" },
+        { "hex": "597dce", "name": "blue" },
+        { "hex": "d27d2c", "name": "orange" },
+        { "hex": "8595a1", "name": "light gray" },
+        { "hex": "6daa2c", "name": "green" },
+        { "hex": "d2aa99", "name": "tan" },
+        { "hex": "6dc2ca", "name": "cyan" },
+        { "hex": "dad45e", "name": "yellow" },
+        { "hex": "deeed6", "name": "white" }
+      ]
+    },
+    "cc29": {
+      "name": "CC-29",
+      "description": "CC-29 palette from Lospec (29 colors)",
+      "source": "https://lospec.com/palette-list/cc-29",
+      "colors": [
+        { "hex": "f2f0e5", "name": "light cream" },
+        { "hex": "b8b5b9", "name": "light gray" },
+        { "hex": "868188", "name": "medium gray" },
+        { "hex": "646365", "name": "dark gray" },
+        { "hex": "45444f", "name": "darker gray" },
+        { "hex": "3a3858", "name": "dark blue-gray" },
+        { "hex": "212123", "name": "very dark" },
+        { "hex": "352b42", "name": "dark purple" },
+        { "hex": "43436a", "name": "medium blue" },
+        { "hex": "4b80ca", "name": "blue" },
+        { "hex": "68c2d3", "name": "light blue" },
+        { "hex": "a2dcc7", "name": "mint green" },
+        { "hex": "ede19e", "name": "light yellow" },
+        { "hex": "d3a068", "name": "tan" },
+        { "hex": "b45252", "name": "red" },
+        { "hex": "6a536e", "name": "purple-gray" },
+        { "hex": "4b4158", "name": "dark purple-gray" },
+        { "hex": "80493a", "name": "brown" },
+        { "hex": "a77b5b", "name": "light brown" },
+        { "hex": "e5ceb4", "name": "beige" },
+        { "hex": "c2d368", "name": "yellow-green" },
+        { "hex": "8ab060", "name": "green" },
+        { "hex": "567b79", "name": "teal" },
+        { "hex": "4e584a", "name": "dark green" },
+        { "hex": "7b7243", "name": "olive" },
+        { "hex": "b2b47e", "name": "light olive" },
+        { "hex": "edc8c4", "name": "light pink" },
+        { "hex": "cf8acb", "name": "pink" },
+        { "hex": "5f556a", "name": "dark purple-gray" }
+      ]
+    },
+    "aerugo": {
+      "name": "Aerugo",
+      "description": "The editor's UI palette (32 colors)",
+      "source": "https://lospec.com/palette-list/aerugo",
+      "colors": [
+        { "hex": "2f1e1a" }, { "hex": "4f3322" }, { "hex": "723627" }, { "hex": "95392c" },
+        { "hex": "c75533" }, { "hex": "e76d46" }, { "hex": "934e28" }, { "hex": "a2663c" },
+        { "hex": "c87d40" }, { "hex": "f5a95b" }, { "hex": "6b8b8c" }, { "hex": "81a38e" },
+        { "hex": "aac39e" }, { "hex": "ffffff" }, { "hex": "d1d0ce" }, { "hex": "bab7b2" },
+        { "hex": "898a8a" }, { "hex": "686461" }, { "hex": "554d4b" }, { "hex": "3c3d3b" },
+        { "hex": "343230" }, { "hex": "87d1ef" }, { "hex": "64a1c2" }, { "hex": "466480" },
+        { "hex": "2f485c" }, { "hex": "242e35" }, { "hex": "1b2026" }, { "hex": "aa9c8a" },
+        { "hex": "917f6d" }, { "hex": "86624a" }, { "hex": "715b48" }, { "hex": "5e4835" }
+      ]
+    }
+  },
+  "spriteSheets": {
+    "PICO-8": {
+      "palette": "pico8",
+      "width": 128,
+      "height": 128
+    },
+    "TIC-80": {
+      "palette": "tic80",
+      "width": 256,
+      "height": 256
+    }
+  }
+}
+

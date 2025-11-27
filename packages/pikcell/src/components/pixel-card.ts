@@ -1,9 +1,13 @@
 /**
  * Pixel-perfect card component with drag, resize, and triple border
+ *
+ * Refactored to use CardDragHandler and CardResizeHandler for cleaner SRP.
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
 import { GRID, BORDER, px } from 'moxi';
+import { CardDragHandler } from '../logic/card-drag-logic';
+import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
 
 // Re-export for backwards compatibility with editor code
 export { GRID, BORDER, px };
@@ -48,27 +52,15 @@ export interface PixelCardResizeState {
 export class PixelCard {
   public container: PIXI.Container;
   public contentContainer: PIXI.Container;
-  private titleBarHeightPx: number; // Calculated based on font size + padding
-
-  private isDragging = false;
-  private dragStartX = 0;
-  private dragStartY = 0;
-  private cardStartX = 0;
-  private cardStartY = 0;
-
-  private isResizing = false;
-  private resizeStartX = 0;
-  private resizeStartY = 0;
-  private resizeStartWidth = 0;
-  private resizeStartHeight = 0;
-  private resizeDirection: 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw' | null = null;
-
-  private capturedPointerId: number | null = null;
+  private titleBarHeightPx: number;
 
   private options: PixelCardOptions;
   private state: PixelCardResizeState;
 
-  private scaleIndicator: PIXI.Container | null = null;
+  // Extracted handlers
+  private dragHandler: CardDragHandler;
+  private resizeHandler: CardResizeHandler;
+
   private pairedCard: PixelCard | null = null;
   private onFocus: (() => void) | null = null;
   private onStateChange: (() => void) | null = null;
@@ -90,132 +82,56 @@ export class PixelCard {
     };
 
     // Calculate title bar height based on font size
-    // Font renders at 64px * GRID.fontScale, plus vertical padding
     const fontHeight = 64 * GRID.fontScale;
-    const verticalPadding = px(GRID.padding * 2); // Top and bottom padding
+    const verticalPadding = px(GRID.padding * 2);
     this.titleBarHeightPx = Math.ceil(fontHeight + verticalPadding);
 
-    this.setupEventListeners();
-    this.redraw();
-  }
-
-  private setupEventListeners() {
-    const renderer = this.options.renderer;
-
-    const handleGlobalMove = (e: PointerEvent) => {
-      if (this.isDragging) {
-        const canvas = renderer.canvas as HTMLCanvasElement;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        const deltaScreenX = e.clientX - this.dragStartX;
-        const deltaScreenY = e.clientY - this.dragStartY;
-
-        const deltaX = deltaScreenX * scaleX;
-        const deltaY = deltaScreenY * scaleY;
-
-        this.container.x = this.cardStartX + deltaX;
-        this.container.y = this.cardStartY + deltaY;
-      } else if (this.isResizing && this.resizeDirection) {
-        const canvas = renderer.canvas as HTMLCanvasElement;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        const deltaScreenX = e.clientX - this.resizeStartX;
-        const deltaScreenY = e.clientY - this.resizeStartY;
-        const deltaX = deltaScreenX * scaleX;
-        const deltaY = deltaScreenY * scaleY;
-
-        // Calculate size changes based on direction
-        const deltaGridUnitsX = Math.round(deltaX / px(1));
-        const deltaGridUnitsY = Math.round(deltaY / px(1));
-
-        // Determine minimum sizes
-        const minWidth = this.state.minContentWidth ?? 10;
-        const minHeight = this.state.minContentHeight ?? 10;
-
-        // Horizontal resizing
-        if (this.resizeDirection.includes('e')) {
-          // East: resize right edge (width changes, position stays)
-          this.state.contentWidth = Math.max(minWidth, this.resizeStartWidth + deltaGridUnitsX);
-        } else if (this.resizeDirection.includes('w')) {
-          // West: resize left edge (position and width both change)
-          const newWidth = Math.max(minWidth, this.resizeStartWidth - deltaGridUnitsX);
-          const widthDelta = newWidth - this.resizeStartWidth; // negative when shrinking
-
-          // Position moves opposite to width change, calculated from start position
-          const newX = Math.max(0, this.cardStartX - px(widthDelta));
-          this.container.x = newX;
-          this.state.contentWidth = newWidth;
+    // Initialize drag handler
+    this.dragHandler = new CardDragHandler({
+      renderer: options.renderer,
+      container: this.container,
+      onDragEnd: () => {
+        if (this.onStateChange) {
+          this.onStateChange();
         }
+      },
+    });
 
-        // Vertical resizing
-        if (this.resizeDirection.includes('s')) {
-          // South: resize bottom edge (height changes, position stays)
-          this.state.contentHeight = Math.max(minHeight, this.resizeStartHeight + deltaGridUnitsY);
-        } else if (this.resizeDirection.includes('n')) {
-          // North: resize top edge (position and height both change)
-          const newHeight = Math.max(minHeight, this.resizeStartHeight - deltaGridUnitsY);
-          const heightDelta = newHeight - this.resizeStartHeight; // negative when shrinking
-
-          // Position moves opposite to height change, calculated from start position
-          const newY = Math.max(0, this.cardStartY - px(heightDelta));
-          this.container.y = newY;
-          this.state.contentHeight = newHeight;
+    // Initialize resize handler
+    this.resizeHandler = new CardResizeHandler({
+      renderer: options.renderer,
+      container: this.container,
+      getContentSize: () => ({
+        width: this.state.contentWidth,
+        height: this.state.contentHeight,
+      }),
+      setContentSize: (width, height) => {
+        this.state.contentWidth = width;
+        this.state.contentHeight = height;
+      },
+      getCardStartPosition: () => this.dragHandler.getCardStartPosition(),
+      setCardStartPosition: (x, y) => this.dragHandler.setCardStartPosition(x, y),
+      onResize: this.options.onResize,
+      onResizeEnd: () => {
+        if (this.onStateChange) {
+          this.onStateChange();
         }
+      },
+      redraw: () => this.redraw(),
+    });
 
-        this.redraw();
-
-        // Show scale indicator
-        this.showScaleIndicator(e.clientX, e.clientY);
-
-        if (this.options.onResize) {
-          this.options.onResize(this.state.contentWidth, this.state.contentHeight);
-        }
-      }
-    };
-
-    const handleGlobalUp = () => {
-      const wasDragging = this.isDragging;
-      const wasResizing = this.isResizing;
-
-      this.isDragging = false;
-      this.isResizing = false;
-      this.resizeDirection = null;
-
-      // Release pointer capture
-      if (this.capturedPointerId !== null) {
-        const canvas = renderer.canvas as HTMLCanvasElement;
-        if (canvas) {
-          try {
-            canvas.releasePointerCapture(this.capturedPointerId);
-          } catch (e) {
-            // Ignore errors if pointer was already released
-          }
-        }
-        this.capturedPointerId = null;
-      }
-
-      // Hide scale indicator
-      this.hideScaleIndicator();
-
-      // Trigger state change callback if position or size changed
-      if ((wasDragging || wasResizing) && this.onStateChange) {
-        this.onStateChange();
-      }
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('pointermove', handleGlobalMove);
-      window.addEventListener('pointerup', handleGlobalUp);
-
-      this.container.on('destroyed', () => {
-        window.removeEventListener('pointermove', handleGlobalMove);
-        window.removeEventListener('pointerup', handleGlobalUp);
-      });
+    // Set initial constraints
+    if (this.state.minContentWidth !== undefined && this.state.minContentHeight !== undefined) {
+      this.resizeHandler.setConstraints(this.state.minContentWidth, this.state.minContentHeight);
     }
+
+    // Register cleanup
+    this.container.on('destroyed', () => {
+      this.dragHandler.destroy();
+      this.resizeHandler.destroy();
+    });
+
+    this.redraw();
   }
 
   private redraw() {
@@ -225,17 +141,36 @@ export class PixelCard {
     const cardWidth = BORDER.total * 2 + GRID.padding * 2 + this.state.contentWidth;
     const cardHeight = px(BORDER.total * 2) + this.titleBarHeightPx + px(GRID.padding * 2) + px(this.state.contentHeight);
 
-    // Card background with triple border
+    // Draw card background with triple border
+    this.drawBackground(cardWidth, cardHeight);
+
+    // Draw title bar
+    this.drawTitleBar(cardWidth);
+
+    // Position content container
+    this.contentContainer.position.set(
+      px(BORDER.total + GRID.padding),
+      px(BORDER.total) + this.titleBarHeightPx + px(GRID.padding)
+    );
+
+    // Setup content clipping if enabled
+    this.setupContentMask();
+
+    this.container.addChild(this.contentContainer);
+
+    // Add resize handles
+    this.addResizeHandles(cardWidth, cardHeight);
+  }
+
+  private drawBackground(cardWidth: number, cardHeight: number) {
     const bg = new PIXI.Graphics();
     bg.roundPixels = true;
 
-    // Shadow offset
     const shadowOffset = px(1);
-    const shadowColor = 0x000000;
 
-    // Drop shadow (below and to the right)
+    // Drop shadow
     bg.rect(shadowOffset, shadowOffset, px(cardWidth), cardHeight);
-    bg.fill({ color: shadowColor, alpha: 0.3 });
+    bg.fill({ color: 0x000000, alpha: 0.3 });
 
     // Layer 1: Outer black border
     bg.rect(0, 0, px(cardWidth), cardHeight);
@@ -258,8 +193,9 @@ export class PixelCard {
     bg.fill({ color: this.options.backgroundColor ?? UI_COLORS.cardBg });
 
     this.container.addChild(bg);
+  }
 
-    // Title bar
+  private drawTitleBar(cardWidth: number) {
     const titleBar = new PIXI.Graphics();
     titleBar.roundPixels = true;
     titleBar.eventMode = 'static';
@@ -268,28 +204,12 @@ export class PixelCard {
                   px(cardWidth - BORDER.total * 2), this.titleBarHeightPx);
     titleBar.fill({ color: UI_COLORS.titleBar });
 
-    // Title bar dragging and focus
+    // Title bar dragging
     titleBar.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
-      // Trigger focus callback to bring this card to front
       if (this.onFocus) {
         this.onFocus();
       }
-
-      this.isDragging = true;
-      this.cardStartX = this.container.x;
-      this.cardStartY = this.container.y;
-
-      const canvas = this.options.renderer.canvas as HTMLCanvasElement;
-      const rect = canvas.getBoundingClientRect();
-      this.dragStartX = e.client.x;
-      this.dragStartY = e.client.y;
-
-      // Capture pointer to continue receiving events even outside the window
-      if (canvas && e.pointerId !== undefined) {
-        canvas.setPointerCapture(e.pointerId);
-        this.capturedPointerId = e.pointerId;
-      }
-
+      this.dragHandler.startDrag(e);
       e.stopPropagation();
     });
 
@@ -306,44 +226,37 @@ export class PixelCard {
       }
     });
     titleText.roundPixels = true;
-    titleText.scale.set(GRID.fontScale); // Scale 64px down based on GRID.fontScale
+    titleText.scale.set(GRID.fontScale);
 
     const textHeight = titleText.height;
     const verticalCenter = px(BORDER.total) + (this.titleBarHeightPx - textHeight) / 2;
     titleText.position.set(px(BORDER.total) + 2, Math.floor(verticalCenter));
     this.container.addChild(titleText);
 
-    // ALPHA! stamp for PIKCELL title (temporary fun branding)
+    // ALPHA! stamp for PIKCELL title
     if (this.options.title === 'PIKCELL') {
       const alphaStamp = new PIXI.BitmapText({
         text: 'ALPHA!',
         style: {
           fontFamily: 'KennyBlocksBitmap',
           fontSize: 64,
-          fill: 0x29adff, // Cyan from PICO-8 palette
+          fill: 0x29adff,
         }
       });
       alphaStamp.roundPixels = true;
-      alphaStamp.anchor.set(0.5); // Center origin for rotation
-      alphaStamp.scale.set(GRID.fontScale * 1.2); // Scale up a bit
-      alphaStamp.angle = -8; // Slight counter-clockwise rotation
+      alphaStamp.anchor.set(0.5);
+      alphaStamp.scale.set(GRID.fontScale * 1.2);
+      alphaStamp.angle = -8;
 
-      // Position after PIKCELL text with some spacing, adjusted for centered anchor
       const stampX = titleText.x + titleText.width + px(2) + px(8) + px(2);
       const stampY = verticalCenter - px(2) + px(4) - px(1);
       alphaStamp.position.set(stampX, stampY);
       this.container.addChild(alphaStamp);
     }
+  }
 
-    // Position content container
-    this.contentContainer.position.set(
-      px(BORDER.total + GRID.padding),
-      px(BORDER.total) + this.titleBarHeightPx + px(GRID.padding)
-    );
-
-    // Create mask to clip content (like CSS overflow: hidden) - only if enabled
+  private setupContentMask() {
     if (this.options.clipContent) {
-      // Reuse existing mask or create new one
       if (!this.contentMask) {
         this.contentMask = new PIXI.Graphics();
       }
@@ -361,11 +274,6 @@ export class PixelCard {
     } else {
       this.contentContainer.mask = null;
     }
-
-    this.container.addChild(this.contentContainer);
-
-    // Add resize handles
-    this.addResizeHandles(cardWidth, cardHeight);
   }
 
   private addResizeHandles(cardWidth: number, cardHeight: number) {
@@ -378,7 +286,7 @@ export class PixelCard {
       width: number,
       height: number,
       cursor: string,
-      direction: 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw'
+      direction: ResizeDirection
     ) => {
       const handle = new PIXI.Graphics();
       handle.roundPixels = true;
@@ -389,22 +297,7 @@ export class PixelCard {
       handle.position.set(x, y);
 
       handle.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
-        this.isResizing = true;
-        this.resizeDirection = direction;
-        this.resizeStartX = e.client.x;
-        this.resizeStartY = e.client.y;
-        this.resizeStartWidth = this.state.contentWidth;
-        this.resizeStartHeight = this.state.contentHeight;
-        this.cardStartX = this.container.x;
-        this.cardStartY = this.container.y;
-
-        // Capture pointer to continue receiving events even outside the window
-        const canvas = this.options.renderer.canvas as HTMLCanvasElement;
-        if (canvas && e.pointerId !== undefined) {
-          canvas.setPointerCapture(e.pointerId);
-          this.capturedPointerId = e.pointerId;
-        }
-
+        this.resizeHandler.startResize(e, direction);
         e.stopPropagation();
       });
 
@@ -423,6 +316,8 @@ export class PixelCard {
     createResizeHandle(0, cornerSize, handleThickness, cardHeight - cornerSize * 2, 'ew-resize', 'w');
     createResizeHandle(px(cardWidth) - handleThickness, cornerSize, handleThickness, cardHeight - cornerSize * 2, 'ew-resize', 'e');
   }
+
+  // ============ Public API ============
 
   /**
    * Get the content container to add custom content
@@ -449,7 +344,6 @@ export class PixelCard {
     this.state.contentHeight = height;
     this.redraw();
 
-    // Trigger onResize callback so content can adapt to new size
     if (this.options.onResize) {
       this.options.onResize(width, height);
     }
@@ -457,7 +351,6 @@ export class PixelCard {
 
   /**
    * Get total card width in pixels
-   * Formula: cardWidth = px(contentWidth + BORDER.total * 2 + GRID.padding * 2)
    */
   public getPixelWidth(): number {
     const cardWidthGridUnits = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
@@ -466,19 +359,17 @@ export class PixelCard {
 
   /**
    * Get total card height in pixels
-   * Formula: cardHeight = px(contentHeight) + px(BORDER.total * 2) + titleBarHeight + px(GRID.padding * 2)
    */
   public getPixelHeight(): number {
     return px(this.state.contentHeight) + px(BORDER.total * 2) + this.titleBarHeightPx + px(GRID.padding * 2);
   }
 
   /**
-   * Manually trigger a redraw (useful after adding/changing content)
+   * Manually trigger a redraw
    */
   public refresh() {
     this.redraw();
 
-    // Trigger content refresh callback if provided
     if (this.options.onRefresh) {
       this.options.onRefresh();
     }
@@ -496,10 +387,8 @@ export class PixelCard {
    * Set custom title bar content with left and right aligned text
    */
   public setTitleContent(leftText: string, rightText: string) {
-    // Store custom title content
-    this.options.title = ''; // Clear standard title
+    this.options.title = '';
 
-    // Remove existing title text children (they have BitmapText type)
     const titleTextChildren = this.container.children.filter(
       child => child instanceof PIXI.BitmapText
     );
@@ -534,7 +423,6 @@ export class PixelCard {
     rightBitmapText.roundPixels = true;
     rightBitmapText.scale.set(GRID.fontScale);
 
-    // Calculate card width for right alignment
     const cardWidth = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
     const rightX = px(cardWidth - BORDER.total) - rightBitmapText.width - 2;
     rightBitmapText.position.set(rightX, Math.floor(textY));
@@ -542,7 +430,7 @@ export class PixelCard {
   }
 
   /**
-   * Set the paired card (usually set after both cards are created)
+   * Set the paired card
    */
   public setPairedCard(card: PixelCard) {
     this.pairedCard = card;
@@ -591,108 +479,23 @@ export class PixelCard {
 
   /**
    * Updates minimum content size based on actual content bounds
-   * Call this after adding content to the content container when minContentSize is enabled
    */
   public updateMinContentSize() {
     if (!this.options.minContentSize) return;
 
     const bounds = this.contentContainer.getLocalBounds();
 
-    // Convert pixel bounds to grid units (round up to ensure content fits)
     const minWidth = Math.ceil((bounds.x + bounds.width) / px(1));
     const minHeight = Math.ceil((bounds.y + bounds.height) / px(1));
 
     this.state.minContentWidth = minWidth;
     this.state.minContentHeight = minHeight;
+    this.resizeHandler.setConstraints(minWidth, minHeight);
 
-    // Ensure current size is at least the minimum
     if (this.state.contentWidth < minWidth || this.state.contentHeight < minHeight) {
       this.state.contentWidth = Math.max(this.state.contentWidth, minWidth);
       this.state.contentHeight = Math.max(this.state.contentHeight, minHeight);
       this.redraw();
-    }
-  }
-
-  /**
-   * Shows the scale indicator near the mouse
-   */
-  private showScaleIndicator(screenX: number, screenY: number) {
-    const canvas = this.options.renderer.canvas as HTMLCanvasElement;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const canvasX = (screenX - rect.left) * scaleX;
-    const canvasY = (screenY - rect.top) * scaleY;
-
-    if (!this.scaleIndicator) {
-      this.scaleIndicator = new PIXI.Container();
-    }
-
-    // Clear and rebuild
-    this.scaleIndicator.removeChildren();
-
-    const scaleText = `${this.state.contentWidth}x${this.state.contentHeight}`;
-
-    const theme = getTheme();
-    const text = new PIXI.BitmapText({
-      text: scaleText,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: theme.textPrimary,
-      }
-    });
-    text.roundPixels = true;
-    text.scale.set(GRID.fontScale); // Scale 64px down based on GRID.fontScale
-
-    const padding = px(2);
-    const borderWidth = px(BORDER.outer);
-    const shadowOffset = px(1);
-    const indicatorWidth = text.width + padding * 2 + borderWidth * 2;
-    const indicatorHeight = text.height + padding * 2 + borderWidth * 2;
-
-    const bg = new PIXI.Graphics();
-    bg.roundPixels = true;
-
-    // Gray drop shadow
-    bg.rect(shadowOffset, shadowOffset, indicatorWidth, indicatorHeight);
-    bg.fill({ color: UI_COLORS.titleBar });
-
-    // White outer border
-    bg.rect(0, 0, indicatorWidth, indicatorHeight);
-    bg.fill({ color: 0xffffff });
-
-    // Black background
-    bg.rect(borderWidth, borderWidth,
-            indicatorWidth - borderWidth * 2,
-            indicatorHeight - borderWidth * 2);
-    bg.fill({ color: 0x000000 });
-
-    this.scaleIndicator.addChild(bg);
-    text.position.set(borderWidth + padding, borderWidth + padding);
-    this.scaleIndicator.addChild(text);
-
-    // Position above and to the right of mouse
-    this.scaleIndicator.position.set(
-      canvasX + 10,
-      canvasY - indicatorHeight - 10
-    );
-
-    // Add to container parent (scene) not the card itself
-    if (this.container.parent) {
-      this.container.parent.addChild(this.scaleIndicator);
-    }
-  }
-
-  /**
-   * Hides the scale indicator
-   */
-  private hideScaleIndicator() {
-    if (this.scaleIndicator && this.scaleIndicator.parent) {
-      this.scaleIndicator.parent.removeChild(this.scaleIndicator);
-      this.scaleIndicator.destroy();
-      this.scaleIndicator = null;
     }
   }
 }

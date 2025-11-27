@@ -1,288 +1,346 @@
 /**
- * CardResizeLogic - Moxi Logic component for resizable card behavior
+ * CardResizeHandler - Handles card resizing logic
  *
- * Implements resize functionality following the Moxi ECS pattern.
- * Handles edge and corner resize with visual feedback.
+ * Extracted from PixelCard to follow Single Responsibility Principle.
+ * Manages 8-direction resizing, minimum size constraints, and scale indicator.
  */
 import * as PIXI from 'pixi.js';
-import { Logic, ActionManager } from 'moxi';
-import { CARD_CONSTANTS } from '../config/constants';
+import { getTheme } from '../theming/theme';
+import { GRID, BORDER, px } from 'moxi';
+import { UI_COLORS } from '../components/pixel-card';
 
-export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw' | null;
+export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw';
 
-export interface CardResizeOptions {
-  /** Whether resizing is enabled */
-  enabled?: boolean;
+export interface ResizeState {
+  isResizing: boolean;
+  resizeStartX: number;
+  resizeStartY: number;
+  resizeStartWidth: number;
+  resizeStartHeight: number;
+  resizeDirection: ResizeDirection | null;
+}
 
-  /** Size of resize handles in pixels */
-  handleSize?: number;
+export interface ResizeConstraints {
+  minContentWidth: number;
+  minContentHeight: number;
+}
 
-  /** Size of corner resize handles in pixels */
-  cornerHandleSize?: number;
-
-  /** Minimum width in pixels */
-  minWidth?: number;
-
-  /** Minimum height in pixels */
-  minHeight?: number;
-
-  /** Callback when resize starts */
-  onResizeStart?: (direction: ResizeDirection) => void;
-
-  /** Callback during resize */
-  onResize?: (width: number, height: number, direction: ResizeDirection) => void;
-
-  /** Callback when resize ends */
-  onResizeEnd?: (width: number, height: number) => void;
+export interface ResizeHandlerOptions {
+  renderer: PIXI.Renderer;
+  container: PIXI.Container;
+  getContentSize: () => { width: number; height: number };
+  setContentSize: (width: number, height: number) => void;
+  getCardStartPosition: () => { x: number; y: number };
+  setCardStartPosition: (x: number, y: number) => void;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
+  onResize?: (width: number, height: number) => void;
+  redraw: () => void;
 }
 
 /**
- * Logic component for card resize behavior
+ * Handles resize operations for a card container
  */
-export class CardResizeLogic extends Logic<PIXI.Container> {
-  name = 'CardResizeLogic';
+export class CardResizeHandler {
+  private renderer: PIXI.Renderer;
+  private container: PIXI.Container;
+  private state: ResizeState;
+  private constraints: ResizeConstraints;
+  private capturedPointerId: number | null = null;
+  private scaleIndicator: PIXI.Container | null = null;
 
-  private options: Required<CardResizeOptions>;
-  private actionManager: ActionManager;
+  // Callbacks
+  private getContentSize: () => { width: number; height: number };
+  private setContentSize: (width: number, height: number) => void;
+  private getCardStartPosition: () => { x: number; y: number };
+  private setCardStartPosition: (x: number, y: number) => void;
+  private onResizeStart?: () => void;
+  private onResizeEnd?: () => void;
+  private onResize?: (width: number, height: number) => void;
+  private redraw: () => void;
 
-  // Resize state
-  private isResizing = false;
-  private resizeDirection: ResizeDirection = null;
-  private resizeStartX = 0;
-  private resizeStartY = 0;
-  private resizeStartWidth = 0;
-  private resizeStartHeight = 0;
+  // Bound event handlers for cleanup
+  private boundHandleMove: (e: PointerEvent) => void;
+  private boundHandleUp: () => void;
 
-  // Entity references
-  private entity: PIXI.Container | null = null;
-  private renderer: PIXI.Renderer | null = null;
+  constructor(options: ResizeHandlerOptions) {
+    this.renderer = options.renderer;
+    this.container = options.container;
+    this.getContentSize = options.getContentSize;
+    this.setContentSize = options.setContentSize;
+    this.getCardStartPosition = options.getCardStartPosition;
+    this.setCardStartPosition = options.setCardStartPosition;
+    this.onResizeStart = options.onResizeStart;
+    this.onResizeEnd = options.onResizeEnd;
+    this.onResize = options.onResize;
+    this.redraw = options.redraw;
 
-  constructor(options: CardResizeOptions = {}) {
-    super();
-
-    this.options = {
-      enabled: options.enabled ?? true,
-      handleSize: options.handleSize ?? CARD_CONSTANTS.RESIZE_HANDLE_SIZE,
-      cornerHandleSize: options.cornerHandleSize ?? CARD_CONSTANTS.CORNER_RESIZE_HANDLE_SIZE,
-      minWidth: options.minWidth ?? 50,
-      minHeight: options.minHeight ?? 50,
-      onResizeStart: options.onResizeStart ?? (() => {}),
-      onResize: options.onResize ?? (() => {}),
-      onResizeEnd: options.onResizeEnd ?? (() => {})
+    this.state = {
+      isResizing: false,
+      resizeStartX: 0,
+      resizeStartY: 0,
+      resizeStartWidth: 0,
+      resizeStartHeight: 0,
+      resizeDirection: null,
     };
 
-    this.actionManager = new ActionManager();
-  }
+    this.constraints = {
+      minContentWidth: 10,
+      minContentHeight: 10,
+    };
 
-  /**
-   * Initialize resize logic on the entity
-   */
-  init(entity?: PIXI.Container, renderer?: PIXI.Renderer) {
-    if (!entity || !renderer) return;
+    // Bind handlers
+    this.boundHandleMove = this.handleMove.bind(this);
+    this.boundHandleUp = this.handleUp.bind(this);
 
-    this.entity = entity;
-    this.renderer = renderer;
-
-    // Make entity interactive
-    entity.eventMode = 'static';
-
-    // Setup resize handlers
-    entity.on('pointermove', this.handlePointerMove.bind(this));
-    entity.on('pointerdown', this.handlePointerDown.bind(this));
-
-    // Register global listeners
-    this.actionManager.add(
-      window as any,
-      'pointermove',
-      this.handleGlobalPointerMove.bind(this) as EventListener
-    );
-
-    this.actionManager.add(
-      window as any,
-      'pointerup',
-      this.handlePointerUp.bind(this) as EventListener
-    );
-  }
-
-  /**
-   * Update resize logic (called every frame)
-   */
-  update(entity?: PIXI.Container, deltaTime?: number) {
-    // Resize logic is event-driven
-  }
-
-  /**
-   * Enable resizing
-   */
-  enable() {
-    this.options.enabled = true;
-  }
-
-  /**
-   * Disable resizing
-   */
-  disable() {
-    this.options.enabled = false;
-    this.isResizing = false;
+    // Setup global listeners
+    this.setupEventListeners();
   }
 
   /**
    * Check if currently resizing
    */
-  isActive(): boolean {
-    return this.isResizing;
+  get isResizing(): boolean {
+    return this.state.isResizing;
   }
 
   /**
-   * Cleanup event listeners
+   * Set minimum content size constraints
    */
-  destroy() {
-    this.actionManager.removeAll();
+  setConstraints(minWidth: number, minHeight: number): void {
+    this.constraints.minContentWidth = minWidth;
+    this.constraints.minContentHeight = minHeight;
   }
 
   /**
-   * Detect which resize handle is under the pointer
+   * Start a resize operation
+   * Call this from resize handle pointerdown event
    */
-  private detectResizeHandle(localX: number, localY: number, bounds: PIXI.Bounds): ResizeDirection {
-    const { handleSize, cornerHandleSize } = this.options;
-    const width = bounds.width;
-    const height = bounds.height;
+  startResize(event: PIXI.FederatedPointerEvent, direction: ResizeDirection): void {
+    const contentSize = this.getContentSize();
 
-    // Check corners first (higher priority)
-    if (localX >= width - cornerHandleSize && localY >= height - cornerHandleSize) {
-      return 'se'; // Southeast corner
-    }
-    if (localX <= cornerHandleSize && localY >= height - cornerHandleSize) {
-      return 'sw'; // Southwest corner
-    }
-    if (localX >= width - cornerHandleSize && localY <= cornerHandleSize) {
-      return 'ne'; // Northeast corner
-    }
-    if (localX <= cornerHandleSize && localY <= cornerHandleSize) {
-      return 'nw'; // Northwest corner
+    this.state.isResizing = true;
+    this.state.resizeDirection = direction;
+    this.state.resizeStartX = event.client.x;
+    this.state.resizeStartY = event.client.y;
+    this.state.resizeStartWidth = contentSize.width;
+    this.state.resizeStartHeight = contentSize.height;
+
+    // Store card start position for west/north resizing
+    this.setCardStartPosition(this.container.x, this.container.y);
+
+    // Capture pointer
+    const canvas = this.renderer.canvas as HTMLCanvasElement;
+    if (canvas && event.pointerId !== undefined) {
+      canvas.setPointerCapture(event.pointerId);
+      this.capturedPointerId = event.pointerId;
     }
 
-    // Check edges
-    if (localX >= width - handleSize) return 'e'; // East edge
-    if (localX <= handleSize) return 'w'; // West edge
-    if (localY >= height - handleSize) return 's'; // South edge
-    if (localY <= handleSize) return 'n'; // North edge
-
-    return null;
-  }
-
-  /**
-   * Get cursor for resize direction
-   */
-  private getCursorForDirection(direction: ResizeDirection): string {
-    switch (direction) {
-      case 'e':
-      case 'w':
-        return 'ew-resize';
-      case 'n':
-      case 's':
-        return 'ns-resize';
-      case 'ne':
-      case 'sw':
-        return 'nesw-resize';
-      case 'nw':
-      case 'se':
-        return 'nwse-resize';
-      default:
-        return 'default';
+    if (this.onResizeStart) {
+      this.onResizeStart();
     }
   }
 
   /**
-   * Handle pointer move over entity
+   * Handle pointer move during resize
    */
-  private handlePointerMove(event: PIXI.FederatedPointerEvent) {
-    if (!this.options.enabled || this.isResizing || !this.entity) return;
+  private handleMove(e: PointerEvent): void {
+    if (!this.state.isResizing || !this.state.resizeDirection) return;
 
-    const bounds = this.entity.getBounds();
-    const local = event.getLocalPosition(this.entity);
+    const canvas = this.renderer.canvas as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-    const direction = this.detectResizeHandle(local.x, local.y, bounds);
-    this.entity.cursor = direction ? this.getCursorForDirection(direction) : 'default';
-  }
+    const deltaScreenX = e.clientX - this.state.resizeStartX;
+    const deltaScreenY = e.clientY - this.state.resizeStartY;
+    const deltaX = deltaScreenX * scaleX;
+    const deltaY = deltaScreenY * scaleY;
 
-  /**
-   * Handle pointer down on entity
-   */
-  private handlePointerDown(event: PIXI.FederatedPointerEvent) {
-    if (!this.options.enabled || !this.entity) return;
+    // Calculate size changes based on direction
+    const deltaGridUnitsX = Math.round(deltaX / px(1));
+    const deltaGridUnitsY = Math.round(deltaY / px(1));
 
-    const bounds = this.entity.getBounds();
-    const local = event.getLocalPosition(this.entity);
+    const cardStart = this.getCardStartPosition();
+    let newWidth = this.getContentSize().width;
+    let newHeight = this.getContentSize().height;
 
-    const direction = this.detectResizeHandle(local.x, local.y, bounds);
-
-    if (direction) {
-      this.isResizing = true;
-      this.resizeDirection = direction;
-      this.resizeStartX = event.global.x;
-      this.resizeStartY = event.global.y;
-      this.resizeStartWidth = bounds.width;
-      this.resizeStartHeight = bounds.height;
-
-      this.options.onResizeStart(direction);
-      event.stopPropagation(); // Prevent drag
-    }
-  }
-
-  /**
-   * Handle global pointer move during resize
-   */
-  private handleGlobalPointerMove(event: PointerEvent) {
-    if (!this.isResizing || !this.entity || !this.resizeDirection) return;
-
-    const deltaX = event.clientX - this.resizeStartX;
-    const deltaY = event.clientY - this.resizeStartY;
-
-    let newWidth = this.resizeStartWidth;
-    let newHeight = this.resizeStartHeight;
-
-    // Calculate new dimensions based on direction
-    switch (this.resizeDirection) {
-      case 'e':
-      case 'se':
-      case 'ne':
-        newWidth = Math.max(this.options.minWidth, this.resizeStartWidth + deltaX);
-        break;
-      case 'w':
-      case 'sw':
-      case 'nw':
-        newWidth = Math.max(this.options.minWidth, this.resizeStartWidth - deltaX);
-        break;
+    // Horizontal resizing
+    if (this.state.resizeDirection.includes('e')) {
+      // East: resize right edge (width changes, position stays)
+      newWidth = Math.max(this.constraints.minContentWidth, this.state.resizeStartWidth + deltaGridUnitsX);
+    } else if (this.state.resizeDirection.includes('w')) {
+      // West: resize left edge (position and width both change)
+      newWidth = Math.max(this.constraints.minContentWidth, this.state.resizeStartWidth - deltaGridUnitsX);
+      const widthDelta = newWidth - this.state.resizeStartWidth;
+      const newX = Math.max(0, cardStart.x - px(widthDelta));
+      this.container.x = newX;
     }
 
-    switch (this.resizeDirection) {
-      case 's':
-      case 'se':
-      case 'sw':
-        newHeight = Math.max(this.options.minHeight, this.resizeStartHeight + deltaY);
-        break;
-      case 'n':
-      case 'ne':
-      case 'nw':
-        newHeight = Math.max(this.options.minHeight, this.resizeStartHeight - deltaY);
-        break;
+    // Vertical resizing
+    if (this.state.resizeDirection.includes('s')) {
+      // South: resize bottom edge (height changes, position stays)
+      newHeight = Math.max(this.constraints.minContentHeight, this.state.resizeStartHeight + deltaGridUnitsY);
+    } else if (this.state.resizeDirection.includes('n')) {
+      // North: resize top edge (position and height both change)
+      newHeight = Math.max(this.constraints.minContentHeight, this.state.resizeStartHeight - deltaGridUnitsY);
+      const heightDelta = newHeight - this.state.resizeStartHeight;
+      const newY = Math.max(0, cardStart.y - px(heightDelta));
+      this.container.y = newY;
     }
 
-    this.options.onResize(newWidth, newHeight, this.resizeDirection);
+    // Apply new size
+    this.setContentSize(newWidth, newHeight);
+    this.redraw();
+
+    // Show scale indicator
+    this.showScaleIndicator(e.clientX, e.clientY, newWidth, newHeight);
+
+    if (this.onResize) {
+      this.onResize(newWidth, newHeight);
+    }
   }
 
   /**
    * Handle pointer up to end resize
    */
-  private handlePointerUp(event: PointerEvent) {
-    if (!this.isResizing || !this.entity) return;
+  private handleUp(): void {
+    if (!this.state.isResizing) return;
 
-    const bounds = this.entity.getBounds();
-    this.options.onResizeEnd(bounds.width, bounds.height);
+    const wasResizing = this.state.isResizing;
+    this.state.isResizing = false;
+    this.state.resizeDirection = null;
 
-    this.isResizing = false;
-    this.resizeDirection = null;
-    this.entity.cursor = 'default';
+    // Release pointer capture
+    this.releasePointerCapture();
+
+    // Hide scale indicator
+    this.hideScaleIndicator();
+
+    if (wasResizing && this.onResizeEnd) {
+      this.onResizeEnd();
+    }
+  }
+
+  /**
+   * Release pointer capture
+   */
+  private releasePointerCapture(): void {
+    if (this.capturedPointerId !== null) {
+      const canvas = this.renderer.canvas as HTMLCanvasElement;
+      if (canvas) {
+        try {
+          canvas.releasePointerCapture(this.capturedPointerId);
+        } catch {
+          // Ignore errors if pointer was already released
+        }
+      }
+      this.capturedPointerId = null;
+    }
+  }
+
+  /**
+   * Show the scale indicator near the mouse
+   */
+  private showScaleIndicator(screenX: number, screenY: number, width: number, height: number): void {
+    const canvas = this.renderer.canvas as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const canvasX = (screenX - rect.left) * scaleX;
+    const canvasY = (screenY - rect.top) * scaleY;
+
+    if (!this.scaleIndicator) {
+      this.scaleIndicator = new PIXI.Container();
+    }
+
+    // Clear and rebuild
+    this.scaleIndicator.removeChildren();
+
+    const scaleText = `${width}x${height}`;
+
+    const theme = getTheme();
+    const text = new PIXI.BitmapText({
+      text: scaleText,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: theme.textPrimary,
+      }
+    });
+    text.roundPixels = true;
+    text.scale.set(GRID.fontScale);
+
+    const padding = px(2);
+    const borderWidth = px(BORDER.outer);
+    const shadowOffset = px(1);
+    const indicatorWidth = text.width + padding * 2 + borderWidth * 2;
+    const indicatorHeight = text.height + padding * 2 + borderWidth * 2;
+
+    const bg = new PIXI.Graphics();
+    bg.roundPixels = true;
+
+    // Gray drop shadow
+    bg.rect(shadowOffset, shadowOffset, indicatorWidth, indicatorHeight);
+    bg.fill({ color: UI_COLORS.titleBar });
+
+    // White outer border
+    bg.rect(0, 0, indicatorWidth, indicatorHeight);
+    bg.fill({ color: 0xffffff });
+
+    // Black background
+    bg.rect(borderWidth, borderWidth,
+            indicatorWidth - borderWidth * 2,
+            indicatorHeight - borderWidth * 2);
+    bg.fill({ color: 0x000000 });
+
+    this.scaleIndicator.addChild(bg);
+    text.position.set(borderWidth + padding, borderWidth + padding);
+    this.scaleIndicator.addChild(text);
+
+    // Position above and to the right of mouse
+    this.scaleIndicator.position.set(
+      canvasX + 10,
+      canvasY - indicatorHeight - 10
+    );
+
+    // Add to container parent (scene) not the card itself
+    if (this.container.parent) {
+      this.container.parent.addChild(this.scaleIndicator);
+    }
+  }
+
+  /**
+   * Hide the scale indicator
+   */
+  private hideScaleIndicator(): void {
+    if (this.scaleIndicator && this.scaleIndicator.parent) {
+      this.scaleIndicator.parent.removeChild(this.scaleIndicator);
+      this.scaleIndicator.destroy();
+      this.scaleIndicator = null;
+    }
+  }
+
+  /**
+   * Setup global event listeners
+   */
+  private setupEventListeners(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pointermove', this.boundHandleMove);
+      window.addEventListener('pointerup', this.boundHandleUp);
+    }
+  }
+
+  /**
+   * Cleanup event listeners and resources
+   */
+  destroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pointermove', this.boundHandleMove);
+      window.removeEventListener('pointerup', this.boundHandleUp);
+    }
+    this.releasePointerCapture();
+    this.hideScaleIndicator();
   }
 }

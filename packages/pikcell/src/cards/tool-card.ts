@@ -28,7 +28,9 @@ const TOOL_NAMES: Record<ToolType, string> = {
   pencil: 'Pencil',
   eraser: 'Eraser',
   fill: 'Fill Bucket',
-  eyedrop: 'Eye Dropper'
+  eyedrop: 'Eye Dropper',
+  selection: 'Selection',
+  shape: 'Shapes'
 };
 
 /**

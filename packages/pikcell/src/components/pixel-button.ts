@@ -68,6 +68,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
   // Track state
   let isSelectedState = selected;
   let tooltipContainer: PIXI.Container | null = null;
+  let buttonText: PIXI.BitmapText | null = null;
 
   // Auto-calculate width for text labels if not explicitly provided
   let buttonWidth = width ?? size ?? 10;
@@ -164,11 +165,25 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
       }
     }
 
-    // Re-add icon if it exists
-    if (icon && !button.children.includes(icon)) {
-      const yOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
-      icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2 + yOffset);
-      button.addChild(icon);
+    // Update content position
+    // Press offset: when pressed, content moves down with button
+    const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
+
+    // Icons: shift up 1px to center in visible area (above bevel)
+    if (icon) {
+      const iconBaseY = (selectionMode === 'press') ? -px(1) : 0;
+      icon.position.set(
+        px(buttonWidth) / 2 - icon.width / 2,
+        px(buttonHeight) / 2 - icon.height / 2 + iconBaseY + pressOffset
+      );
+      if (!button.children.includes(icon)) {
+        button.addChild(icon);
+      }
+    }
+
+    // Labels: no base offset, just move down when pressed
+    if (buttonText) {
+      buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + pressOffset);
     }
   }
 
@@ -249,14 +264,18 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
   // Add icon if provided
   if (icon) {
-    const yOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
-    icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2 + yOffset);
+    const iconBaseY = (selectionMode === 'press') ? -px(1) : 0;
+    const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
+    icon.position.set(
+      px(buttonWidth) / 2 - icon.width / 2,
+      px(buttonHeight) / 2 - icon.height / 2 + iconBaseY + pressOffset
+    );
     button.addChild(icon);
   }
   // Add label if provided (and no icon)
   else if (label) {
     const theme = getTheme();
-    const buttonText = new PIXI.BitmapText({
+    buttonText = new PIXI.BitmapText({
       text: label,
       style: {
         fontFamily: 'PixelOperator8Bitmap',
@@ -267,7 +286,9 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     buttonText.roundPixels = true;
     buttonText.scale.set(GRID.fontScale);
     buttonText.anchor.set(0.5);
-    buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2);
+    // Labels: no base offset, just move down when pressed
+    const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
+    buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + pressOffset);
     button.addChild(buttonText);
   }
 

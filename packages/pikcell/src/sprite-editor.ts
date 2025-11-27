@@ -25,6 +25,8 @@ import { GRID, BORDER, px } from 'moxi';
 import { createPaletteCard, PaletteCardResult } from './cards/palette-card';
 import { createInfoBarCard, InfoBarCardResult } from './cards/info-bar-card';
 import { createCommanderBarCard, CommanderBarCardResult } from './cards/commander-bar-card';
+import { createToolbarCard, ToolbarCardResult, MainToolType } from './cards/toolbar-card';
+import { ShapeType } from './theming/tool-icons';
 
 // Manager imports
 import { SpriteSheetManager } from './managers/sprite-sheet-manager';
@@ -64,6 +66,11 @@ export class SpriteEditor {
   private commanderBarCard?: CommanderBarCardResult;
   private paletteCard?: PaletteCardResult;
   private infoBarCard?: InfoBarCardResult;
+  private toolbarCard?: ToolbarCardResult;
+
+  // Current tool state
+  private currentTool: MainToolType = 'pencil';
+  private currentShapeType: ShapeType = 'square';
 
   // Editor state
   private currentPalette: number[] = PICO8_PALETTE;
@@ -194,15 +201,27 @@ export class SpriteEditor {
       }
     });
 
-    // Center sprite cards
+    // Center sprite cards and position toolbar to their right
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+    let spriteCardRight = this.renderer.width / 2; // Default if no sprite card
+    let spriteCardY = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
+
     this.uiManager.getAllCards().forEach((card, id) => {
       if (isSpriteCard(id)) {
         const x = (this.renderer.width - card.getPixelWidth()) / 2;
-        const y = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
+        const y = spriteCardY;
         card.container.position.set(x, y);
+        // Track rightmost edge of sprite card for toolbar positioning
+        spriteCardRight = x + card.getPixelWidth();
       }
     });
+
+    // Position toolbar to the right of sprite card
+    const toolCard = this.uiManager.getCard(CARD_IDS.TOOL);
+    if (toolCard) {
+      const toolX = spriteCardRight + px(GRID.gap);
+      toolCard.container.position.set(toolX, spriteCardY);
+    }
 
     this.saveUIState();
     console.log('✅ Default layout applied');
@@ -258,7 +277,6 @@ export class SpriteEditor {
     // Function to make this sprite sheet active
     const makeThisSheetActive = () => {
       this.activateInstance(instance);
-      console.log(`Activated ${type} sprite sheet`);
     };
 
     // Helper to create sprite card for a cell - delegates to factory
@@ -346,6 +364,7 @@ export class SpriteEditor {
     if (this.commanderBarCard) this.commanderBarCard.card.refresh();
     if (this.paletteCard) this.paletteCard.card.refresh();
     if (this.infoBarCard) this.infoBarCard.card.refresh();
+    if (this.toolbarCard) this.toolbarCard.card.refresh();
 
     this.spriteSheetManager.getAll().forEach(instance => {
       if (instance.sheetCard) instance.sheetCard.card.refresh();
@@ -400,6 +419,24 @@ export class SpriteEditor {
     });
     this.scene.addChild(this.paletteCard.card.container);
     this.registerCard(CARD_IDS.PALETTE, this.paletteCard.card);
+
+    // Create toolbar card (default position - will be repositioned in applyDefaultLayout)
+    this.toolbarCard = createToolbarCard({
+      x: this.renderer.width / 2 + 200, // Temporary - repositioned by layout
+      y: topOffset,
+      renderer: this.renderer,
+      selectedTool: this.currentTool,
+      selectedShape: this.currentShapeType,
+      onToolSelect: (tool, shapeType) => {
+        this.currentTool = tool;
+        if (shapeType) {
+          this.currentShapeType = shapeType;
+        }
+        console.log(`Tool selected: ${tool}${shapeType ? ` (${shapeType})` : ''}`);
+      }
+    });
+    this.scene.addChild(this.toolbarCard.card.container);
+    this.registerCard(CARD_IDS.TOOL, this.toolbarCard.card);
 
     // Create info bar using LayoutManager
     const barHeight = 8;
@@ -468,17 +505,30 @@ export class SpriteEditor {
    */
   private loadProjectState(): void {
     if (this.projectState.spriteSheets.length === 0) {
-      console.log('No sprite sheets in project state');
       return;
     }
 
     this.selectedColorIndex = this.projectState.selectedColorIndex ?? 0;
 
+    // Track loaded IDs to prevent duplicates from corrupted state
+    const loadedIds = new Set<string>();
+
     this.projectState.spriteSheets.forEach(sheetState => {
+      // Skip if this ID was already loaded (prevents duplicates from corrupted state)
+      if (loadedIds.has(sheetState.id)) {
+        console.warn(`Skipping duplicate sprite sheet ID: ${sheetState.id}`);
+        return;
+      }
+      loadedIds.add(sheetState.id);
+
+      // Skip if instance already exists in the manager
+      if (this.spriteSheetManager.has(sheetState.id)) {
+        console.warn(`Sprite sheet instance already exists: ${sheetState.id}`);
+        return;
+      }
+
       this.createNewSpriteSheet(sheetState.type, sheetState.showGrid, sheetState);
     });
-
-    console.log('📂 Project state loaded');
   }
 
   /**
@@ -520,19 +570,35 @@ export class SpriteEditor {
    * Create a new project
    */
   private createNewProject(): void {
-    // Clear using managers - destroy controllers to prevent memory leaks
-    this.spriteSheetManager.getAll().forEach(instance => {
+    // Cancel any pending save timers to prevent race conditions
+    if (this.projectSaveTimer) {
+      clearTimeout(this.projectSaveTimer);
+      this.projectSaveTimer = null;
+    }
+
+    // Clear using managers - destroy controllers and unregister cards
+    this.spriteSheetManager.getAll().forEach((instance, index) => {
+      // Clean up zoom handlers via factory
+      this.spriteCardFactory.remove(instance);
+
       if (instance.sheetCard) {
         instance.sheetCard.controller.destroy();
         this.scene.removeChild(instance.sheetCard.card.container);
+        // Unregister from UIManager
+        this.uiManager.unregisterCard(getSpriteSheetCardId(index));
       }
       if (instance.spriteCard) {
         this.scene.removeChild(instance.spriteCard.card.container);
+        // Unregister from UIManager
+        this.uiManager.unregisterCard(getSpriteCardId(index));
       }
     });
 
     this.spriteSheetManager.clear();
     this.projectState = ProjectStateManager.createEmptyProject();
+
+    // Clear localStorage immediately to prevent stale state on reload
+    ProjectStateManager.saveProject(this.projectState);
     this.hasUnsavedChanges = false;
 
     // Show sprite sheet type dialog
@@ -636,14 +702,25 @@ export class SpriteEditor {
       return;
     }
 
-    // Clear existing work - destroy controllers to prevent memory leaks
-    this.spriteSheetManager.getAll().forEach(instance => {
+    // Cancel any pending save timers
+    if (this.projectSaveTimer) {
+      clearTimeout(this.projectSaveTimer);
+      this.projectSaveTimer = null;
+    }
+
+    // Clear existing work - destroy controllers, unregister cards, clean up handlers
+    this.spriteSheetManager.getAll().forEach((instance, index) => {
+      // Clean up zoom handlers via factory
+      this.spriteCardFactory.remove(instance);
+
       if (instance.sheetCard) {
         instance.sheetCard.controller.destroy();
         this.scene.removeChild(instance.sheetCard.card.container);
+        this.uiManager.unregisterCard(getSpriteSheetCardId(index));
       }
       if (instance.spriteCard) {
         this.scene.removeChild(instance.spriteCard.card.container);
+        this.uiManager.unregisterCard(getSpriteCardId(index));
       }
     });
 

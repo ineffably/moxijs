@@ -161,4 +161,18 @@ export class SpriteController {
   public getSpriteSheetController(): SpriteSheetController {
     return this.spriteSheetController;
   }
+
+  /**
+   * Clean up resources
+   */
+  public destroy(): void {
+    if (this.texture) {
+      this.texture.destroy(true);
+      this.texture = null;
+    }
+    if (this.sprite) {
+      this.sprite.destroy();
+      this.sprite = null;
+    }
+  }
 }

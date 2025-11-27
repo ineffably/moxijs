@@ -2,8 +2,16 @@
  * Pixel-perfect button component for the sprite editor
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px, UI_COLORS } from './pixel-card';
+import { GRID, px } from 'moxi';
 import { getTheme } from '../theming/theme';
+import { ComponentResult } from '../interfaces/components';
+
+// Re-export UI_COLORS for backward compatibility
+export const UI_COLORS = {
+  buttonBg: 0x3c3d3b,
+  buttonBgHover: 0x4a4b49,
+  buttonBgPressed: 0x2a2b29,
+};
 
 export type SelectionMode = 'highlight' | 'press';
 export type ActionMode = 'click' | 'toggle';
@@ -22,6 +30,15 @@ export interface PixelButtonOptions {
   tooltip?: string;       // Optional tooltip text
 }
 
+export interface PixelButtonResult extends ComponentResult {
+  /** The button graphics (alias for container) */
+  button: PIXI.Graphics;
+  /** Get the current selected state */
+  isSelected(): boolean;
+  /** Set the selected state (for toggle buttons) */
+  setSelected(selected: boolean): void;
+}
+
 /**
  * Creates a pixel-perfect button with optional label
  *
@@ -33,7 +50,7 @@ export interface PixelButtonOptions {
  * - 'click': Simple click action, no visual state change
  * - 'toggle': Toggleable selection state (for swatches, tool groups)
  */
-export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
+export function createPixelButton(options: PixelButtonOptions): PixelButtonResult {
   const {
     size,
     width,
@@ -47,6 +64,10 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     actionMode = 'click',
     tooltip
   } = options;
+
+  // Track state
+  let isSelectedState = selected;
+  let tooltipContainer: PIXI.Container | null = null;
 
   // Auto-calculate width for text labels if not explicitly provided
   let buttonWidth = width ?? size ?? 10;
@@ -65,9 +86,6 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     tempText.scale.set(GRID.fontScale);
 
     // Calculate text width in grid units
-    // Need to account for:
-    // - 2 border layers on each side (GRID.border * 2 on each side = 4 total)
-    // - 1 grid unit padding on each side (2 total)
     const textWidthInGridUnits = Math.ceil(tempText.width / px(1));
     const bordersWidth = GRID.border * 4; // 2 borders on each side
     const paddingWidth = 2; // 1 grid unit on each side
@@ -81,12 +99,83 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
   button.eventMode = (onClick || tooltip) ? 'static' : 'auto';
   button.cursor = onClick ? 'pointer' : 'default';
 
+  // Draw function to render button state
+  function drawButton() {
+    button.clear();
+
+    const theme = getTheme();
+
+    if (selectionMode === 'highlight') {
+      // Highlight mode (for swatches)
+      if (isSelectedState) {
+        // Selected: accent border, then strong border, then background/color
+        button.rect(0, 0, px(buttonWidth), px(buttonHeight));
+        button.fill({ color: theme.accentPrimary });
+
+        button.rect(px(GRID.border), px(GRID.border),
+                    px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
+        button.fill({ color: theme.borderStrong });
+
+        button.rect(px(GRID.border * 2), px(GRID.border * 2),
+                    px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4));
+        button.fill({ color: backgroundColor });
+      } else {
+        // Unselected: border, then background/color
+        button.rect(0, 0, px(buttonWidth), px(buttonHeight));
+        button.fill({ color: theme.borderStrong });
+
+        button.rect(px(GRID.border), px(GRID.border),
+                    px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
+        button.fill({ color: backgroundColor });
+      }
+    } else {
+      // Press mode (for tool buttons)
+      if (isSelectedState) {
+        // Pressed: starts 1px lower, strong border, subtle border, background (no bevel)
+        button.rect(0, px(1), px(buttonWidth), px(buttonHeight) - px(1));
+        button.fill({ color: theme.borderStrong });
+
+        button.rect(px(GRID.border), px(GRID.border + 1),
+                    px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2 - 1));
+        button.fill({ color: theme.borderSubtle });
+
+        button.rect(px(GRID.border * 2), px(GRID.border * 2 + 1),
+                    px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4 - 1));
+        button.fill({ color: backgroundColor });
+      } else {
+        // Unpressed: strong border, bevel at bottom, subtle border, background
+        button.rect(0, 0, px(buttonWidth), px(buttonHeight));
+        button.fill({ color: theme.borderStrong });
+
+        // Bevel strip at bottom
+        button.rect(px(GRID.border), px(buttonHeight - GRID.border * 2),
+                    px(buttonWidth - GRID.border * 2), px(GRID.border));
+        button.fill({ color: theme.backgroundOverlay });
+
+        // Inner border
+        button.rect(px(GRID.border), px(GRID.border),
+                    px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 3));
+        button.fill({ color: theme.borderSubtle });
+
+        // Background
+        button.rect(px(GRID.border * 2), px(GRID.border * 2),
+                    px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 5));
+        button.fill({ color: backgroundColor });
+      }
+    }
+
+    // Re-add icon if it exists
+    if (icon && !button.children.includes(icon)) {
+      const yOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
+      icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2 + yOffset);
+      button.addChild(icon);
+    }
+  }
+
   // Tooltip support
   if (tooltip) {
-    let tooltipContainer: PIXI.Container | null = null;
-
     const createTooltip = () => {
-      const tooltipContainer = new PIXI.Container();
+      const container = new PIXI.Container();
 
       const text = new PIXI.BitmapText({
         text: tooltip,
@@ -97,9 +186,9 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
         }
       });
       text.roundPixels = true;
-      text.scale.set(GRID.fontScale); // Scale 64px down based on GRID.fontScale
+      text.scale.set(GRID.fontScale);
 
-      const padding = px(2); // Same padding as cards
+      const padding = px(2);
       const borderWidth = px(GRID.border);
       const tooltipWidth = text.width + padding * 2 + borderWidth * 2;
       const tooltipHeight = text.height + padding * 2 + borderWidth * 2;
@@ -111,7 +200,7 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
 
       // Gray drop shadow
       bg.rect(shadowOffset, shadowOffset, tooltipWidth, tooltipHeight);
-      bg.fill({ color: 0x686461 }); // Same gray as title bar
+      bg.fill({ color: 0x686461 });
 
       // White outer border
       bg.rect(0, 0, tooltipWidth, tooltipHeight);
@@ -123,28 +212,24 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
               tooltipHeight - borderWidth * 2);
       bg.fill({ color: 0x000000 });
 
-      tooltipContainer.addChild(bg);
+      container.addChild(bg);
       text.position.set(borderWidth + padding, borderWidth + padding);
-      tooltipContainer.addChild(text);
+      container.addChild(text);
 
-      return tooltipContainer;
+      return container;
     };
 
     button.on('pointerover', (e: PIXI.FederatedPointerEvent) => {
-      if (tooltipContainer) return; // Already showing
+      if (tooltipContainer) return;
 
       tooltipContainer = createTooltip();
-
-      // Position tooltip relative to local mouse position
       const local = e.getLocalPosition(button);
       tooltipContainer.position.set(local.x, local.y - tooltipContainer.height - 2);
-
       button.addChild(tooltipContainer);
     });
 
     button.on('pointermove', (e: PIXI.FederatedPointerEvent) => {
       if (tooltipContainer) {
-        // Update tooltip position to follow mouse
         const local = e.getLocalPosition(button);
         tooltipContainer.position.set(local.x, local.y - tooltipContainer.height - 2);
       }
@@ -159,80 +244,18 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     });
   }
 
-  const theme = getTheme();
-
-  if (selectionMode === 'highlight') {
-    // Highlight mode (for swatches)
-    if (selected) {
-      // Selected: accent border, then strong border, then background/color
-      button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: theme.accentPrimary });
-
-      button.rect(px(GRID.border), px(GRID.border),
-                  px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
-      button.fill({ color: theme.borderStrong });
-
-      button.rect(px(GRID.border * 2), px(GRID.border * 2),
-                  px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4));
-      button.fill({ color: backgroundColor });
-    } else {
-      // Unselected: border, then background/color
-      button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: theme.borderStrong });
-
-      button.rect(px(GRID.border), px(GRID.border),
-                  px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
-      button.fill({ color: backgroundColor });
-    }
-  } else {
-    // Press mode (for tool buttons)
-    if (selected) {
-      // Pressed: starts 1px lower, strong border, subtle border, background (no bevel)
-      // Shift everything down by 1px and reduce height by 1px
-      button.rect(0, px(1), px(buttonWidth), px(buttonHeight) - px(1));
-      button.fill({ color: theme.borderStrong });
-
-      button.rect(px(GRID.border), px(GRID.border + 1),
-                  px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2 - 1));
-      button.fill({ color: theme.borderSubtle });
-
-      button.rect(px(GRID.border * 2), px(GRID.border * 2 + 1),
-                  px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4 - 1));
-      button.fill({ color: backgroundColor });
-    } else {
-      // Unpressed: strong border, bevel at bottom (overlay layer), subtle border, background
-      button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-      button.fill({ color: theme.borderStrong });
-
-      // Bevel strip at bottom (between border and inner border)
-      button.rect(px(GRID.border), px(buttonHeight - GRID.border * 2),
-                  px(buttonWidth - GRID.border * 2), px(GRID.border));
-      button.fill({ color: theme.backgroundOverlay });
-
-      // Inner border (on top, sides, and covers most of bottom except bevel)
-      button.rect(px(GRID.border), px(GRID.border),
-                  px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 3));
-      button.fill({ color: theme.borderSubtle });
-
-      // Background
-      button.rect(px(GRID.border * 2), px(GRID.border * 2),
-                  px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 5));
-      button.fill({ color: backgroundColor });
-    }
-  }
+  // Initial draw
+  drawButton();
 
   // Add icon if provided
   if (icon) {
-    // When pressed in 'press' mode, shift icon down 1px with the button
-    const yOffset = (selectionMode === 'press' && selected) ? px(1) : 0;
+    const yOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
     icon.position.set(px(buttonWidth) / 2 - icon.width / 2, px(buttonHeight) / 2 - icon.height / 2 + yOffset);
     button.addChild(icon);
   }
   // Add label if provided (and no icon)
   else if (label) {
-    // When pressed, the whole button shifts down 1px, no additional offset needed
-    const yOffset = 0;
-
+    const theme = getTheme();
     const buttonText = new PIXI.BitmapText({
       text: label,
       style: {
@@ -242,9 +265,9 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
       }
     });
     buttonText.roundPixels = true;
-    buttonText.scale.set(GRID.fontScale); // Scale 64px down based on GRID.fontScale
+    buttonText.scale.set(GRID.fontScale);
     buttonText.anchor.set(0.5);
-    buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + yOffset);
+    buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2);
     button.addChild(buttonText);
   }
 
@@ -256,5 +279,21 @@ export function createPixelButton(options: PixelButtonOptions): PIXI.Graphics {
     });
   }
 
-  return button;
+  return {
+    container: button,
+    button,
+    isSelected: () => isSelectedState,
+    setSelected: (selected: boolean) => {
+      isSelectedState = selected;
+      drawButton();
+    },
+    destroy: () => {
+      if (tooltipContainer) {
+        tooltipContainer.destroy();
+        tooltipContainer = null;
+      }
+      button.removeAllListeners();
+      button.destroy({ children: true });
+    }
+  };
 }

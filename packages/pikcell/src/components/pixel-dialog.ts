@@ -2,10 +2,12 @@
  * Pixel-perfect dialog component built on top of PixelCard
  */
 import * as PIXI from 'pixi.js';
-import { PixelCard, GRID, px } from './pixel-card';
-import { createPixelButton } from './pixel-button';
-import { createPixelCheckbox } from './pixel-checkbox';
+import { PixelCard } from './pixel-card';
+import { GRID, px } from 'moxi';
+import { createPixelButton, PixelButtonResult } from './pixel-button';
+import { createPixelCheckbox, PixelCheckboxResult } from './pixel-checkbox';
 import { getTheme } from '../theming/theme';
+import { ComponentResult } from '../interfaces/components';
 
 export interface DialogButton {
   label: string;
@@ -26,12 +28,23 @@ export interface PixelDialogOptions {
   renderer: PIXI.Renderer;
 }
 
+export interface PixelDialogResult extends ComponentResult {
+  /** Close and destroy the dialog */
+  close(): void;
+  /** Get checkbox states */
+  getCheckboxStates(): Record<string, boolean>;
+}
+
 /**
  * Creates a pixel-perfect dialog centered on screen
- * Returns a container with the dialog and a semi-transparent backdrop
+ * Returns a result object with the container, close method, and destroy method
  */
-export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
+export function createPixelDialog(options: PixelDialogOptions): PixelDialogResult {
   const { title, message, buttons, checkboxes = [], renderer } = options;
+
+  // Track created components for cleanup
+  const createdButtons: PixelButtonResult[] = [];
+  const createdCheckboxes: PixelCheckboxResult[] = [];
 
   // Create overlay container
   const overlay = new PIXI.Container();
@@ -97,30 +110,43 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
   messageText.position.set(px(2), messageY);
   contentContainer.addChild(messageText);
 
+  // Cleanup function
+  const cleanup = () => {
+    // Destroy all created buttons
+    createdButtons.forEach(btn => btn.destroy());
+    createdButtons.length = 0;
+
+    // Destroy all created checkboxes
+    createdCheckboxes.forEach(cb => cb.destroy());
+    createdCheckboxes.length = 0;
+
+    // Destroy the overlay
+    overlay.destroy({ children: true });
+  };
+
   // Add checkboxes
-  let checkboxY = messageY + messageText.height + px(4); // message position + message height + 4 grid units (16px at 4x scale)
+  let checkboxY = messageY + messageText.height + px(4);
   checkboxes.forEach((checkboxConfig) => {
-    const checkbox = createPixelCheckbox({
+    const checkboxResult = createPixelCheckbox({
       label: checkboxConfig.label,
       checked: checkboxStates[checkboxConfig.name],
       onChange: (checked) => {
         checkboxStates[checkboxConfig.name] = checked;
       }
     });
-    checkbox.position.set(px(2), checkboxY);
-    contentContainer.addChild(checkbox);
+    createdCheckboxes.push(checkboxResult);
+    checkboxResult.container.position.set(px(2), checkboxY);
+    contentContainer.addChild(checkboxResult.container);
 
-    // Get actual height of checkbox container for proper spacing
-    const checkboxContainer = checkbox as PIXI.Container;
-    checkboxY += checkboxContainer.height + px(1); // Add spacing between checkboxes
+    checkboxY += checkboxResult.container.height + px(1);
   });
 
   // Add buttons
   const buttonY = px(messageHeightInGridUnits + checkboxesHeightInGridUnits + verticalSpacing + 2);
   let currentX = px((contentWidth - buttonsWidthInGridUnits) / 2); // Center buttons
 
-  buttons.forEach((buttonConfig, index) => {
-    const button = createPixelButton({
+  buttons.forEach((buttonConfig) => {
+    const buttonResult = createPixelButton({
       width: buttonWidth,
       height: buttonHeight,
       label: buttonConfig.label,
@@ -129,11 +155,12 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
       onClick: () => {
         buttonConfig.onClick(checkboxStates);
         // Close dialog when button is clicked
-        overlay.destroy();
+        cleanup();
       }
     });
-    button.position.set(currentX, buttonY);
-    contentContainer.addChild(button);
+    createdButtons.push(buttonResult);
+    buttonResult.container.position.set(currentX, buttonY);
+    contentContainer.addChild(buttonResult.container);
     currentX += px(buttonWidth) + buttonSpacing;
   });
 
@@ -146,5 +173,10 @@ export function createPixelDialog(options: PixelDialogOptions): PIXI.Container {
 
   overlay.addChild(dialogCard.container);
 
-  return overlay;
+  return {
+    container: overlay,
+    close: cleanup,
+    getCheckboxStates: () => ({ ...checkboxStates }),
+    destroy: cleanup
+  };
 }

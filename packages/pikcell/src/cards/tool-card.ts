@@ -3,10 +3,11 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { createPixelButton } from '../components/pixel-button';
+import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
 import { GRID, px } from 'moxi';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { ToolType } from '../theming/tool-icons';
+import { CardResult } from '../interfaces/components';
 
 export interface ToolCardOptions {
   x: number;
@@ -17,8 +18,7 @@ export interface ToolCardOptions {
   onToolSelect?: (toolIndex: number, tool: ToolType) => void;
 }
 
-export interface ToolCardResult {
-  card: PixelCard;
+export interface ToolCardResult extends CardResult {
   getSelectedToolIndex: () => number;
   getSelectedTool: () => ToolType;
   setSelectedToolIndex: (index: number) => void;
@@ -36,6 +36,10 @@ const TOOL_NAMES: Record<ToolType, string> = {
  */
 export function createToolCard(options: ToolCardOptions): ToolCardResult {
   const { x, y, renderer, onToolSelect } = options;
+
+  // Track created buttons for cleanup
+  const createdButtons: PixelButtonResult[] = [];
+  let wheelHandler: ((e: WheelEvent) => void) | null = null;
 
   // Tool state
   let selectedToolIndex = options.selectedToolIndex ?? 0;
@@ -82,6 +86,9 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
 
   // Draw tools
   function drawTools() {
+    // Cleanup old buttons
+    createdButtons.forEach(btn => btn.destroy());
+    createdButtons.length = 0;
     contentContainer.removeChildren();
 
     for (let i = 0; i < tools.length; i++) {
@@ -108,14 +115,15 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
           }
         }
       });
+      createdButtons.push(toolButton);
 
-      toolButton.position.set(toolX, toolY);
-      contentContainer.addChild(toolButton);
+      toolButton.container.position.set(toolX, toolY);
+      contentContainer.addChild(toolButton.container);
     }
   }
 
   // Mouse wheel zoom for tool size
-  const handleWheel = createCardZoomHandler(renderer, card, (delta) => {
+  wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
     // Adjust both width and height proportionally
     toolWidth = Math.max(23, Math.min(86, toolWidth + delta * 2));
     toolHeight = Math.max(4, Math.min(20, toolHeight + delta));
@@ -132,10 +140,12 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
   });
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('wheel', wheelHandler, { passive: false });
 
     card.container.on('destroyed', () => {
-      window.removeEventListener('wheel', handleWheel);
+      if (wheelHandler) {
+        window.removeEventListener('wheel', wheelHandler);
+      }
     });
   }
 
@@ -144,6 +154,7 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
 
   return {
     card,
+    container: card.container,
     getSelectedToolIndex: () => selectedToolIndex,
     getSelectedTool: () => tools[selectedToolIndex],
     setSelectedToolIndex: (index: number) => {
@@ -151,6 +162,20 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
         selectedToolIndex = index;
         drawTools();
       }
+    },
+    destroy: () => {
+      // Cleanup buttons
+      createdButtons.forEach(btn => btn.destroy());
+      createdButtons.length = 0;
+
+      // Remove wheel handler
+      if (wheelHandler && typeof window !== 'undefined') {
+        window.removeEventListener('wheel', wheelHandler);
+        wheelHandler = null;
+      }
+
+      // Destroy card
+      card.container.destroy({ children: true });
     }
   };
 }

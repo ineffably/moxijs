@@ -5,6 +5,7 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { GRID, BORDER, px } from 'moxi';
 import { getTheme } from '../theming/theme';
+import { CardResult } from '../interfaces/components';
 
 export interface InfoSection {
   label: string;
@@ -19,8 +20,7 @@ export interface InfoBarCardOptions {
   sections?: InfoSection[];
 }
 
-export interface InfoBarCardResult {
-  card: PixelCard;
+export interface InfoBarCardResult extends CardResult {
   updateSections: (sections: InfoSection[]) => void;
 }
 
@@ -114,10 +114,14 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
 
   return {
     card,
+    container: card.container,
     updateSections: (newSections: InfoSection[]) => {
       sections = newSections;
       updateInfoSections();
       card.updateMinContentSize();
+    },
+    destroy: () => {
+      card.container.destroy({ children: true });
     }
   };
 }

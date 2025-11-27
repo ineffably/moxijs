@@ -3,8 +3,9 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { createPixelButton } from '../components/pixel-button';
+import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
 import { GRID, px } from 'moxi';
+import { CardResult } from '../interfaces/components';
 
 export interface ScaleCardOptions {
   x: number;
@@ -13,8 +14,7 @@ export interface ScaleCardOptions {
   onScaleChange?: (scale: number) => void;
 }
 
-export interface ScaleCardResult {
-  card: PixelCard;
+export interface ScaleCardResult extends CardResult {
 }
 
 /**
@@ -22,6 +22,9 @@ export interface ScaleCardResult {
  */
 export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
   const { x, y, renderer, onScaleChange } = options;
+
+  // Track created buttons for cleanup
+  const createdButtons: PixelButtonResult[] = [];
 
   const buttonHeight = 12; // Grid units
   const buttonSpacing = px(1);
@@ -47,6 +50,9 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
   const contentContainer = card.getContentContainer();
 
   function drawContent() {
+    // Cleanup old buttons
+    createdButtons.forEach(btn => btn.destroy());
+    createdButtons.length = 0;
     contentContainer.removeChildren();
 
     let currentX = 0;
@@ -79,9 +85,10 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
           }
         }
       });
-      scaleButton.position.set(currentX, 0);
-      contentContainer.addChild(scaleButton);
-      currentX += scaleButton.width + buttonSpacing;
+      createdButtons.push(scaleButton);
+      scaleButton.container.position.set(currentX, 0);
+      contentContainer.addChild(scaleButton.container);
+      currentX += scaleButton.container.width + buttonSpacing;
     });
   }
 
@@ -92,6 +99,12 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
   card.updateMinContentSize();
 
   return {
-    card
+    card,
+    container: card.container,
+    destroy: () => {
+      createdButtons.forEach(btn => btn.destroy());
+      createdButtons.length = 0;
+      card.container.destroy({ children: true });
+    }
   };
 }

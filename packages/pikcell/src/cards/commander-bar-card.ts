@@ -33,6 +33,8 @@ export interface CommanderBarCardOptions {
 
 export interface CommanderBarCardResult {
   card: PixelCard;
+  container: PIXI.Container;
+  destroy: () => void;
 }
 
 /**
@@ -40,6 +42,9 @@ export interface CommanderBarCardResult {
  */
 export function createCommanderBarCard(options: CommanderBarCardOptions): CommanderBarCardResult {
   const { x, y, renderer, scene, width, callbacks } = options;
+
+  // Track created buttons for cleanup
+  let createdButtons: Array<{ destroy: () => void }> = [];
 
   const canvasWidth = renderer.width;
   const barHeight = 12; // Grid units for PIKCELL bar
@@ -69,6 +74,9 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
   const contentContainer = card.getContentContainer();
 
   function drawCommands() {
+    // Cleanup old buttons
+    createdButtons.forEach(btn => btn.destroy());
+    createdButtons = [];
     contentContainer.removeChildren();
 
     const buttonHeight = 12; // Grid units (same as bar height for full height button)
@@ -89,9 +97,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
         }
       }
     });
-    newButton.position.set(currentX, 0);
-    contentContainer.addChild(newButton);
-    currentX += newButton.width + buttonSpacing;
+    createdButtons.push(newButton);
+    newButton.container.position.set(currentX, 0);
+    contentContainer.addChild(newButton.container);
+    currentX += newButton.container.width + buttonSpacing;
 
     // Save button
     const saveButton = createPixelButton({
@@ -105,9 +114,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
         }
       }
     });
-    saveButton.position.set(currentX, 0);
-    contentContainer.addChild(saveButton);
-    currentX += saveButton.width + buttonSpacing;
+    createdButtons.push(saveButton);
+    saveButton.container.position.set(currentX, 0);
+    contentContainer.addChild(saveButton.container);
+    currentX += saveButton.container.width + buttonSpacing;
 
     // Load button
     const loadButton = createPixelButton({
@@ -121,9 +131,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
         }
       }
     });
-    loadButton.position.set(currentX, 0);
-    contentContainer.addChild(loadButton);
-    currentX += loadButton.width + buttonSpacing;
+    createdButtons.push(loadButton);
+    loadButton.container.position.set(currentX, 0);
+    contentContainer.addChild(loadButton.container);
+    currentX += loadButton.container.width + buttonSpacing;
 
     // Export button
     const exportButton = createPixelButton({
@@ -137,9 +148,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
         }
       }
     });
-    exportButton.position.set(currentX, 0);
-    contentContainer.addChild(exportButton);
-    currentX += exportButton.width + buttonSpacing;
+    createdButtons.push(exportButton);
+    exportButton.container.position.set(currentX, 0);
+    contentContainer.addChild(exportButton.container);
+    currentX += exportButton.container.width + buttonSpacing;
 
     // Right side buttons - positioned at the far right
     const rightButtonsSpacing = px(2);
@@ -199,9 +211,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
           buttons,
           renderer
         });
-        scene.addChild(dialog);
+        scene.addChild(dialog.container);
       }
     });
+    createdButtons.push(layoutButton);
 
     // Theme button (auto-sized based on text)
     const themeButton = createPixelButton({
@@ -228,21 +241,22 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
           })),
           renderer
         });
-        scene.addChild(dialog);
+        scene.addChild(dialog.container);
       }
     });
+    createdButtons.push(themeButton);
 
     // Position right-side buttons (get their widths after creation)
-    const layoutButtonWidth = layoutButton.width / px(1); // Convert from pixels to grid units
-    const themeButtonWidth = themeButton.width / px(1);
+    const layoutButtonWidth = layoutButton.container.width / px(1); // Convert from pixels to grid units
+    const themeButtonWidth = themeButton.container.width / px(1);
 
     // Position before theme button (content width - both buttons - spacing)
-    layoutButton.position.set(px(barWidth - layoutButtonWidth - themeButtonWidth) - rightButtonsSpacing, 0);
-    contentContainer.addChild(layoutButton);
+    layoutButton.container.position.set(px(barWidth - layoutButtonWidth - themeButtonWidth) - rightButtonsSpacing, 0);
+    contentContainer.addChild(layoutButton.container);
 
     // Position at far right (content width - button width)
-    themeButton.position.set(px(barWidth - themeButtonWidth), 0);
-    contentContainer.addChild(themeButton);
+    themeButton.container.position.set(px(barWidth - themeButtonWidth), 0);
+    contentContainer.addChild(themeButton.container);
   }
 
   // Initial draw
@@ -252,6 +266,12 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
   card.updateMinContentSize();
 
   return {
-    card
+    card,
+    container: card.container,
+    destroy: () => {
+      createdButtons.forEach(btn => btn.destroy());
+      createdButtons = [];
+      card.container.destroy({ children: true });
+    }
   };
 }

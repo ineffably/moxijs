@@ -247,7 +247,7 @@ export class SpriteEditor {
           buttons: [{ label: 'OK', onClick: () => {} }],
           renderer: this.renderer
         });
-        this.scene.addChild(dialog);
+        this.scene.addChild(dialog.container);
         return;
       }
     }
@@ -510,7 +510,7 @@ export class SpriteEditor {
         ],
         renderer: this.renderer
       });
-      this.scene.addChild(dialog);
+      this.scene.addChild(dialog.container);
     } else {
       this.createNewProject();
     }
@@ -562,7 +562,7 @@ export class SpriteEditor {
       ],
       renderer: this.renderer
     });
-    this.scene.addChild(dialog);
+    this.scene.addChild(dialog.container);
   }
 
   /**
@@ -619,7 +619,7 @@ export class SpriteEditor {
         ],
         renderer: this.renderer
       });
-      this.scene.addChild(dialog);
+      this.scene.addChild(dialog.container);
     } else {
       await this.loadProjectFile();
     }
@@ -670,7 +670,7 @@ export class SpriteEditor {
         buttons: [{ label: 'OK', onClick: () => {} }],
         renderer: this.renderer
       });
-      this.scene.addChild(dialog);
+      this.scene.addChild(dialog.container);
       return;
     }
 
@@ -742,7 +742,7 @@ export class SpriteEditor {
       ],
       renderer: this.renderer
     });
-    this.scene.addChild(dialog);
+    this.scene.addChild(dialog.container);
   }
 
   /**

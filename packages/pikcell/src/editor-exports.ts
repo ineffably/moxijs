@@ -42,6 +42,17 @@ export type { SVGToTextureOptions } from 'moxi';
 export { UIStateManager, CardState, UIState } from './state/ui-state-manager';
 export { ProjectStateManager, ProjectState, SpriteSheetState, OperationResult } from './state/project-state-manager';
 
+// Card IDs
+export {
+  CARD_IDS,
+  getSpriteSheetCardId,
+  getSpriteCardId,
+  isSpriteSheetCard,
+  isSpriteCard,
+  getCardIndex
+} from './config/card-ids';
+export type { CardId } from './config/card-ids';
+
 // Theming System
 export {
   Theme,

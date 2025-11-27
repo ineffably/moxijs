@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "packages/moxi",
-    "packages/moxi-examples"
+    "packages/moxi-examples",
+    "packages/pikcell"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
@@ -17,7 +18,8 @@
     "examples": "npm run local --workspace=moxi-examples",
     "test": "npm run test --workspace=moxi",
     "test:watch": "npm run test:watch --workspace=moxi",
-    "test:ci": "npm run test:ci --workspace=moxi"
+    "test:ci": "npm run test:ci --workspace=moxi",
+    "pikcell": "npm run dev --workspace=pikcell"
   },
   "keywords": [],
   "author": "",

@@ -232,6 +232,389 @@ Text (1000 instances):    ~15 FPS
 BitmapText (1000 instances): ~58 FPS
 ```
 
+### Pixel-Perfect BitmapText Rendering
+
+For retro-style games and pixel art UIs, you need **pixel-perfect rendering** to avoid blurry text. This requires specific configuration at three levels: renderer, canvas, and font installation.
+
+#### Why Pixel-Perfect Rendering Matters
+
+Without proper configuration, bitmap text can appear blurry due to:
+1. **Anti-aliasing** - Smooths edges, creating blur
+2. **Subpixel positioning** - Positions text between pixels
+3. **Browser scaling** - Default bilinear filtering creates blur when scaling
+
+**Blurry vs Crisp:**
+```
+❌ Blurry: Default rendering with antialiasing
+✅ Crisp: Pixel-perfect with nearest-neighbor scaling
+```
+
+#### Step 1: Configure Renderer
+
+Set up the renderer for pixel-perfect rendering:
+
+```typescript
+const { scene, engine, renderer } = await setupMoxi({
+  hostElement: root,
+  renderOptions: {
+    width: 1280,
+    height: 720,
+    backgroundColor: 0x1a1a2e,
+    resolution: 1,        // CRITICAL: No upscaling
+    antialias: false,     // CRITICAL: Disable anti-aliasing
+    roundPixels: true     // CRITICAL: Round all positions
+  }
+});
+```
+
+**Key settings:**
+- `resolution: 1` - Prevents texture upscaling
+- `antialias: false` - Disables smoothing
+- `roundPixels: true` - Snaps positions to whole pixels
+
+#### Step 2: Configure Canvas CSS
+
+Tell the browser to use nearest-neighbor scaling:
+
+```typescript
+const canvas = renderer.canvas as HTMLCanvasElement;
+canvas.style.imageRendering = 'pixelated';
+canvas.style.imageRendering = '-moz-crisp-edges';  // Firefox
+canvas.style.imageRendering = 'crisp-edges';        // Others
+```
+
+This prevents the browser from applying bilinear filtering when the canvas is displayed.
+
+#### Step 3: Install Bitmap Font
+
+Use `BitmapFont.install()` to generate bitmap fonts from TTF at specific sizes:
+
+```typescript
+import { Assets, BitmapFont } from 'pixi.js';
+
+// Load the TTF font first
+await Assets.load('fonts/PixelOperator8.ttf');
+
+// Install bitmap font for pixel-perfect rendering
+BitmapFont.install({
+  name: 'PixelOperator8Bitmap',
+  style: {
+    fontFamily: 'PixelOperator8',
+    fontSize: 16,           // Base size (will be scaled by 3x in UI)
+    fill: 0xffffff,
+  }
+});
+```
+
+**Important:** The `fontSize` in `BitmapFont.install()` is the base size used to generate the texture. You can scale it when creating text.
+
+#### Step 4: Create Pixel-Perfect Text
+
+Create bitmap text using the installed font:
+
+```typescript
+const pixelText = new BitmapText({
+  text: 'PIXEL PERFECT',
+  style: {
+    fontFamily: 'PixelOperator8Bitmap',
+    fontSize: 48,        // 3x scale of base 16px
+    fill: 0x00ff00
+  }
+});
+```
+
+#### Using with MOXI's asBitmapText Helper
+
+MOXI provides a `pixelPerfect` flag for convenience:
+
+```typescript
+import { asBitmapText } from 'moxi';
+
+const label = asBitmapText(
+  {
+    text: 'CRISP TEXT',
+    style: {
+      fontFamily: 'PixelOperator8Bitmap',
+      fontSize: 24,
+      fill: 0xffffff
+    },
+    pixelPerfect: true  // Enables roundPixels automatically
+  },
+  { x: 100, y: 50, anchor: 0.5 }
+);
+```
+
+The `pixelPerfect: true` flag automatically sets `roundPixels` on the BitmapText instance.
+
+#### Grid-Based UI System
+
+For pixel-perfect UIs, use a consistent grid system:
+
+```typescript
+export const GRID = {
+  unit: 1,        // Base pixel unit at 1x scale
+  scale: 3,       // Scale everything by 3x for visibility
+  border: 1,      // Border width in grid units (3px at 3x)
+  padding: 2,     // Standard padding (6px at 3x)
+  gap: 1,         // Gap between elements (3px at 3x)
+};
+
+// Helper to convert grid units to pixels
+export const px = (units: number) => units * GRID.unit * GRID.scale;
+
+// Usage:
+const titleText = new BitmapText({
+  text: 'HP: 250/300',
+  style: {
+    fontFamily: 'PixelOperator8Bitmap',
+    fontSize: px(3),  // 3 grid units = 9px
+    fill: 0xff4444
+  }
+});
+titleText.position.set(px(2), px(1)); // Position on grid
+```
+
+#### Complete Pixel-Perfect Setup
+
+Here's a complete example combining all steps:
+
+```typescript
+import { setupMoxi, asBitmapText } from 'moxi';
+import { Assets, BitmapFont } from 'pixi.js';
+
+async function initPixelPerfectUI() {
+  // Step 1: Configure renderer
+  const { scene, engine, renderer } = await setupMoxi({
+    hostElement: document.getElementById('app')!,
+    renderOptions: {
+      width: 1280,
+      height: 720,
+      backgroundColor: 0x1a1a2e,
+      resolution: 1,
+      antialias: false,
+      roundPixels: true
+    }
+  });
+
+  // Step 2: Configure canvas
+  const canvas = renderer.canvas as HTMLCanvasElement;
+  canvas.style.imageRendering = 'pixelated';
+  canvas.style.imageRendering = '-moz-crisp-edges';
+  canvas.style.imageRendering = 'crisp-edges';
+
+  // Step 3: Load and install bitmap font
+  await Assets.load('fonts/PixelOperator8.ttf');
+  BitmapFont.install({
+    name: 'PixelOperator8Bitmap',
+    style: {
+      fontFamily: 'PixelOperator8',
+      fontSize: 16,
+      fill: 0xffffff,
+    }
+  });
+
+  // Step 4: Create pixel-perfect UI
+  const title = asBitmapText(
+    {
+      text: 'PIXEL PERFECT GAME',
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 48,
+        fill: 0x00ff00
+      },
+      pixelPerfect: true
+    },
+    { x: 640, y: 20, anchor: 0.5 }
+  );
+  scene.addChild(title);
+
+  const hpLabel = asBitmapText(
+    {
+      text: 'HP: 250/300',
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 24,
+        fill: 0xff4444
+      },
+      pixelPerfect: true
+    },
+    { x: 20, y: 20 }
+  );
+  scene.addChild(hpLabel);
+
+  scene.init();
+  engine.start();
+}
+```
+
+#### Scaling Guidelines
+
+**Font size relationships for pixel-perfect rendering:**
+```typescript
+// Base font generated at 16px
+BitmapFont.install({
+  name: 'PixelFont',
+  style: { fontSize: 16 }
+});
+
+// Text at different scales:
+fontSize: 16  // 1x scale (original size)
+fontSize: 32  // 2x scale (double size)
+fontSize: 48  // 3x scale (triple size)
+fontSize: 64  // 4x scale (quadruple size)
+```
+
+**Rule:** Always use multiples of the base size to maintain pixel-perfect alignment.
+
+#### Common Pitfalls
+
+**❌ Pitfall 1: Forgetting roundPixels**
+```typescript
+// Will be blurry even with correct renderer settings
+const text = new BitmapText({ text: 'Blurry' });
+text.position.set(100.5, 50.3); // Subpixel position!
+```
+
+**✅ Solution: Enable roundPixels**
+```typescript
+text.roundPixels = true; // Or use pixelPerfect: true in asBitmapText
+```
+
+**❌ Pitfall 2: Non-integer font sizes**
+```typescript
+// Breaks pixel alignment
+fontSize: 23.5  // Not a clean multiple
+```
+
+**✅ Solution: Use multiples of base size**
+```typescript
+fontSize: 24  // Clean 1.5x multiple of 16px base
+```
+
+**❌ Pitfall 3: Missing canvas CSS**
+```typescript
+// Renderer is configured but canvas still applies bilinear filtering
+```
+
+**✅ Solution: Always set imageRendering**
+```typescript
+canvas.style.imageRendering = 'pixelated';
+```
+
+#### Visual Comparison
+
+**Example from text-rendering demo (Example 10):**
+
+The demo showcases pixel-perfect text at multiple scales:
+```typescript
+// 1x scale (16px)
+'PIXEL PERFECT 1x' - Green, sharp edges
+
+// 2x scale (32px)
+'PIXEL PERFECT 2x' - Orange, crisp scaling
+
+// Retro game UI example
+HP: 250/300  (red, 24px)
+MP: 80/100   (blue, 24px)
+LV: 42       (orange, 24px)
+```
+
+All text maintains perfectly crisp edges with no anti-aliasing blur.
+
+#### When to Use Pixel-Perfect Rendering
+
+✅ **Perfect for:**
+- Retro/pixel art games
+- 8-bit/16-bit style UIs
+- Pixel art fonts
+- Grid-based interfaces
+- Games with intentional low-resolution aesthetic
+
+❌ **Not ideal for:**
+- Modern smooth UIs
+- High-resolution photorealistic games
+- When you need anti-aliased text
+- Mixed-resolution interfaces
+
+#### Performance Notes
+
+Pixel-perfect rendering actually **improves performance**:
+- Simpler rendering (no anti-aliasing)
+- Smaller textures (lower resolution fonts)
+- Faster blitting (nearest-neighbor vs bilinear)
+- Better for mobile devices
+
+#### Advanced Technique: Supersampling for Ultra-Crisp Text
+
+For the **crispest possible pixel font rendering**, use this supersampling technique discovered during the sprite editor development:
+
+**The Problem:** Even with pixel-perfect settings, fonts can look slightly soft or lose detail when scaled.
+
+**The Solution:** Install the BitmapFont at 4x the desired display size, then scale down:
+
+```typescript
+// Install bitmap font at 4x the target size (64px for 16px display)
+PIXI.BitmapFont.install({
+  name: 'PixelOperator8Bitmap',
+  style: {
+    fontFamily: 'PixelOperator8',
+    fontSize: 64,  // 4x supersampling
+    fill: 0xffffff,
+  }
+});
+
+// Create text and scale down to target size
+const text = new PIXI.BitmapText({
+  text: 'Super Crisp!',
+  style: {
+    fontFamily: 'PixelOperator8Bitmap',
+    fontSize: 64,
+  }
+});
+text.roundPixels = true;
+text.scale.set(0.25);  // Scale 64px down to 16px
+```
+
+**Why this works:**
+1. Font rasterizes at high resolution (64px) with clean pixel boundaries
+2. Downscaling with nearest-neighbor filtering (from `imageRendering: 'pixelated'`) preserves sharp edges
+3. Result is significantly crisper than rendering directly at 16px
+4. Works especially well for pixel fonts like PixelOperator8, Minecraft, Dogica Pixel, etc.
+
+**Recommendations:**
+- Use 2x-4x supersampling (32px-64px for 8px-16px display)
+- Store scale factor in a constant for dynamic UI scaling
+- Essential for pixel fonts that need to scale with UI elements
+- Test with different pixel fonts to find optimal supersampling ratio
+
+**Dynamic Font Scaling Example:**
+```typescript
+// Store font scale in a shared constant
+export const GRID = {
+  scale: 4,
+  fontScale: 0.25  // 64px * 0.25 = 16px
+};
+
+// Use in text creation
+const text = new PIXI.BitmapText({
+  text: 'Scales with UI',
+  style: {
+    fontFamily: 'PixelOperator8Bitmap',
+    fontSize: 64,
+  }
+});
+text.scale.set(GRID.fontScale);
+
+// Adjust font scale when resizing UI
+function onResize(newHeight) {
+  // Scale font proportionally with UI
+  GRID.fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (newHeight / 12)));
+  // Redraw text with new scale...
+}
+```
+
+This technique was battle-tested in the sprite editor (Example 17) and produces noticeably sharper text than direct rendering.
+
 ---
 
 ## 3. HTMLText: Formatted Markup

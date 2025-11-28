@@ -4,16 +4,14 @@ import type { CollisionTag, CollisionEvent } from './physics-types';
 import type { PhysicsWorld } from './physics-world';
 
 /**
- * Collision category registry - converts tags to bit masks
- * Auto-registers tags as they're used (no configuration needed)
+ * Tag-to-bitmask converter for collision filtering.
+ * Auto-registers tags on first use. Max 16 unique tags.
  *
- * Modern tag-based collision system (converted to bit masks internally for Planck.js)
- *
- * Instead of old-school bit masks, we use strings for better DX:
- * - collisionTags: ['player'] instead of bitmask 0x0002
- * - collidesWith: ['terrain', 'enemy'] instead of mask operations
- *
- * This is converted to bit masks under the hood for Planck.js efficiency.
+ * @example
+ * ```ts
+ * // Tags are auto-registered, no config needed
+ * const bits = registry.tagsToBits(['player', 'enemy']);
+ * ```
  */
 export class CollisionRegistry {
   private tagToBit: Map<CollisionTag, number> = new Map();
@@ -25,9 +23,7 @@ export class CollisionRegistry {
     this.register('default');
   }
 
-  /**
-   * Register a collision tag (called automatically when needed)
-   */
+  /** Register tag manually. Called automatically by getBit(). */
   register(tag: CollisionTag): void {
     if (this.tagToBit.has(tag)) return;
 
@@ -40,9 +36,7 @@ export class CollisionRegistry {
     this.nextBit <<= 1;
   }
 
-  /**
-   * Get bit value for a tag (auto-registers if new)
-   */
+  /** Get bitmask for tag. Auto-registers new tags. */
   getBit(tag: CollisionTag): number {
     if (!this.tagToBit.has(tag)) {
       this.register(tag);
@@ -50,16 +44,12 @@ export class CollisionRegistry {
     return this.tagToBit.get(tag)!;
   }
 
-  /**
-   * Get tag from bit value
-   */
+  /** Reverse lookup: bit → tag. */
   getTag(bit: number): CollisionTag | undefined {
     return this.bitToTag.get(bit);
   }
 
-  /**
-   * Convert array of tags to bit mask
-   */
+  /** Convert ['player', 'enemy'] → combined bitmask. */
   tagsToBits(tags: CollisionTag[]): number {
     if (!tags || tags.length === 0) {
       return this.getBit('default');
@@ -67,9 +57,7 @@ export class CollisionRegistry {
     return tags.reduce((bits, tag) => bits | this.getBit(tag), 0);
   }
 
-  /**
-   * Convert bit mask to array of tags
-   */
+  /** Convert bitmask → tag array. */
   bitsToTags(bits: number): CollisionTag[] {
     const tags: CollisionTag[] = [];
     for (const [bit, tag] of this.bitToTag) {
@@ -81,8 +69,46 @@ export class CollisionRegistry {
   }
 }
 
+/** @internal Physics body user data structure. */
+interface PhysicsBodyUserData {
+  options: {
+    collisionTags?: CollisionTag[];
+  };
+  onCollisionBegin?: (other: PhysicsBodyUserData, contact: planck.Contact) => void;
+  onCollisionEnd?: (other: PhysicsBodyUserData, contact: planck.Contact) => void;
+}
+
+/** @internal Type guard for body user data. */
+function isPhysicsBodyUserData(obj: unknown): obj is PhysicsBodyUserData {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'options' in obj &&
+    typeof (obj as any).options === 'object'
+  );
+}
+
 /**
- * Collision manager - handles callbacks
+ * Manages tag-based collision callbacks between physics bodies.
+ * Register callbacks for specific tag pairs to handle collisions.
+ *
+ * @example
+ * ```ts
+ * // Register collision handler
+ * physicsWorld.collisionManager.onCollision('player', 'enemy', (event) => {
+ *   console.log('Player hit enemy!');
+ *   const playerBody = event.bodyA;
+ *   const enemyBody = event.bodyB;
+ * });
+ *
+ * // Multiple tag combinations
+ * physicsWorld.collisionManager.onCollision('projectile', 'enemy', (e) => {
+ *   e.bodyB.destroy(); // Destroy enemy
+ * });
+ *
+ * // Remove callback
+ * physicsWorld.collisionManager.offCollision('player', 'enemy', handler);
+ * ```
  */
 export class CollisionManager {
   private world: PhysicsWorld;
@@ -105,14 +131,7 @@ export class CollisionManager {
     });
   }
 
-  /**
-   * Register collision callback between two tag categories
-   *
-   * @example
-   * collisionManager.onCollision('player', 'enemy', (event) => {
-   *   console.log('Player hit enemy!');
-   * });
-   */
+  /** Register callback for collisions between two tags. */
   onCollision(
     tagA: CollisionTag,
     tagB: CollisionTag,
@@ -125,9 +144,7 @@ export class CollisionManager {
     this.callbacks.get(key)!.add(callback);
   }
 
-  /**
-   * Remove collision callback
-   */
+  /** Remove collision callback. */
   offCollision(
     tagA: CollisionTag,
     tagB: CollisionTag,
@@ -144,10 +161,10 @@ export class CollisionManager {
 
   // Trigger callbacks
   private handleBeginContact(contact: planck.Contact): void {
-    const bodyA = contact.getFixtureA().getBody().getUserData() as any;
-    const bodyB = contact.getFixtureB().getBody().getUserData() as any;
+    const bodyA = contact.getFixtureA().getBody().getUserData();
+    const bodyB = contact.getFixtureB().getBody().getUserData();
 
-    if (!bodyA || !bodyB) return;
+    if (!isPhysicsBodyUserData(bodyA) || !isPhysicsBodyUserData(bodyB)) return;
 
     // Call entity-level callbacks
     bodyA.onCollisionBegin?.(bodyB, contact);
@@ -158,18 +175,18 @@ export class CollisionManager {
   }
 
   private handleEndContact(contact: planck.Contact): void {
-    const bodyA = contact.getFixtureA().getBody().getUserData() as any;
-    const bodyB = contact.getFixtureB().getBody().getUserData() as any;
+    const bodyA = contact.getFixtureA().getBody().getUserData();
+    const bodyB = contact.getFixtureB().getBody().getUserData();
 
-    if (!bodyA || !bodyB) return;
+    if (!isPhysicsBodyUserData(bodyA) || !isPhysicsBodyUserData(bodyB)) return;
 
     bodyA.onCollisionEnd?.(bodyB, contact);
     bodyB.onCollisionEnd?.(bodyA, contact);
   }
 
   private triggerTagCallbacks(
-    bodyA: any,
-    bodyB: any,
+    bodyA: PhysicsBodyUserData,
+    bodyB: PhysicsBodyUserData,
     contact: planck.Contact
   ): void {
     // Get tags from both bodies

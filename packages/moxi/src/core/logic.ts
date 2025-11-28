@@ -1,72 +1,53 @@
 import PIXI from 'pixi.js';
 
 /**
- * Base abstract class for all logic in the Moxi engine.
- * Logic components can be attached to entities to add functionality.
- * 
- * @category Logic
- * @template T - The type of entity this logic can be attached to
- * 
+ * Base class for entity behavior. Extend to add custom logic.
+ *
  * @example
- * ```typescript
- * class MyLogic extends Logic<Sprite> {
- *   update(entity: Sprite, deltaTime: number) {
- *     entity.rotation += deltaTime;
- *   }
+ * ```ts
+ * class MoveRight extends Logic<PIXI.Sprite> {
+ *   speed = 100;
+ *   update(entity, dt) { entity.x += this.speed * dt; }
  * }
+ *
+ * sprite.moxiEntity.addLogic(new MoveRight());
  * ```
  */
 export abstract class Logic<T> {
-  /**
-   * The name of this logic component
-   * Used to identify and retrieve logic components
-   * Defaults to constructor name but should be set explicitly for production builds
-   */
+  /** Identifier for getLogic(). Defaults to class name. */
   name?: string;
-  
-  /**
-   * Whether this logic is currently active and should be updated
-   * @default true
-   */
+
+  /** Set false to skip update() calls. */
   active: boolean = true;
-  
-  /**
-   * Initializes the logic with the entity it's attached to
-   * @param entity - The entity this logic is attached to
-   * @param renderer - The PIXI renderer instance
-   * @param args - Additional initialization arguments
-   */
-  init(entity?: T, renderer?: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]) {
-    // Implement in subclass
-  }
 
   /**
-   * Updates the logic's state
-   * @param entity - The entity this logic is attached to
-   * @param deltaTime - Time elapsed since last update in seconds
+   * Called once when scene.init() is invoked. Override for setup.
+   * @param entity - The PIXI object this logic is attached to
+   * @param renderer - The PIXI renderer
+   * @param args - Additional arguments passed to scene.init()
    */
-  update(entity?: T, deltaTime?: number) {
-    // Implement in subclass
-  }
+  init(entity?: T, renderer?: PIXI.Renderer<HTMLCanvasElement>, ...args: any[]) {}
+
+  /**
+   * Called every frame while active. Override for behavior.
+   * @param entity - The PIXI object this logic is attached to
+   * @param deltaTime - Time since last frame in frames (1 = 1/60s at 60fps)
+   */
+  update(entity?: T, deltaTime?: number) {}
 }
 
 /**
- * Logic that can be instantiated multiple times with different configurations
- * 
- * @category Logic
- * @template T - The type of entity this logic can be attached to
- * 
+ * Same as Logic but semantically indicates multiple instances expected.
+ *
  * @example
- * ```typescript
- * class MyInstancedLogic extends InstancedLogic<Sprite> {
- *   constructor(public speed: number) {
- *     super();
- *   }
- *   
- *   update(entity: Sprite, deltaTime: number) {
- *     entity.rotation += this.speed * deltaTime;
- *   }
+ * ```ts
+ * class Orbit extends InstancedLogic<PIXI.Sprite> {
+ *   constructor(public radius: number, public speed: number) { super(); }
+ *   update(entity, dt) { /* orbit logic *\/ }
  * }
+ *
+ * sprite1.moxiEntity.addLogic(new Orbit(50, 1));
+ * sprite2.moxiEntity.addLogic(new Orbit(100, 0.5));
  * ```
  */
 export class InstancedLogic<T> extends Logic<T> {}

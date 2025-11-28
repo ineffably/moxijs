@@ -2,11 +2,7 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 
-/**
- * 9-slice configuration for scalable sprites
- *
- * @category UI
- */
+/** 9-slice configuration for scalable sprites. */
 export interface NineSliceConfig {
   /** Width of left edge that doesn't scale */
   leftWidth: number;
@@ -18,11 +14,7 @@ export interface NineSliceConfig {
   bottomHeight: number;
 }
 
-/**
- * Props for configuring a UIPanel
- *
- * @category UI
- */
+/** UIPanel configuration. */
 export interface UIPanelProps {
   /** Background texture */
   texture?: PIXI.Texture;
@@ -41,14 +33,12 @@ export interface UIPanelProps {
 }
 
 /**
- * A panel component with optional 9-slice background
- * Can use either a texture or solid color background
- *
- * @category UI
+ * Panel component with 9-slice sprite or solid color background.
+ * Use for containers, windows, cards, and other UI backgrounds.
  *
  * @example
- * ```typescript
- * // With texture and 9-slice
+ * ```ts
+ * // 9-slice sprite background (scales without distorting corners)
  * const panel = new UIPanel({
  *   texture: panelTexture,
  *   nineSlice: { leftWidth: 16, topHeight: 16, rightWidth: 16, bottomHeight: 16 },
@@ -56,13 +46,17 @@ export interface UIPanelProps {
  *   height: 200
  * });
  *
- * // With solid color
- * const panel = new UIPanel({
+ * // Solid color background
+ * const colorPanel = new UIPanel({
  *   backgroundColor: 0x2c3e50,
+ *   backgroundAlpha: 0.9,
  *   width: 300,
  *   height: 200,
  *   borderRadius: 8
  * });
+ *
+ * // Update at runtime
+ * panel.setBackgroundColor(0xff0000);
  * ```
  */
 export class UIPanel extends UIComponent {
@@ -89,9 +83,7 @@ export class UIPanel extends UIComponent {
     this.createBackground();
   }
 
-  /**
-   * Creates the background (either 9-slice sprite or graphics)
-   */
+  /** @internal */
   private createBackground(): void {
     if (this.props.texture && this.props.nineSlice) {
       // Use 9-slice sprite
@@ -112,9 +104,7 @@ export class UIPanel extends UIComponent {
     }
   }
 
-  /**
-   * Measures the size needed for this panel
-   */
+  /** @internal */
   measure(): MeasuredSize {
     const padding = this.boxModel.padding;
 
@@ -139,9 +129,7 @@ export class UIPanel extends UIComponent {
     };
   }
 
-  /**
-   * Performs layout for this panel
-   */
+  /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
     const padding = this.boxModel.padding;
@@ -177,9 +165,7 @@ export class UIPanel extends UIComponent {
     this.render();
   }
 
-  /**
-   * Renders the panel background
-   */
+  /** @internal */
   protected render(): void {
     if (!this.background) return;
 
@@ -208,9 +194,7 @@ export class UIPanel extends UIComponent {
     }
   }
 
-  /**
-   * Updates the background color (only works for solid color panels)
-   */
+  /** Update background color (solid color panels only). */
   setBackgroundColor(color: number, alpha: number = 1): void {
     if (this.background instanceof PIXI.Graphics) {
       this.props.backgroundColor = color;
@@ -219,9 +203,7 @@ export class UIPanel extends UIComponent {
     }
   }
 
-  /**
-   * Updates the texture (only works for texture-based panels)
-   */
+  /** Update texture (texture-based panels only). */
   setTexture(texture: PIXI.Texture): void {
     if (this.background instanceof PIXI.NineSliceSprite) {
       this.background.texture = texture;

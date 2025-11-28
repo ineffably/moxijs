@@ -4,10 +4,9 @@
  * Displays sprites from both space-shooter series in a grid layout
  * Features: Grid placement top-left to bottom-right, sprite pooling, starfield background
  */
-import { setupMoxi, asEntity } from 'moxi';
+import { setupMoxi, asEntity, Logic } from 'moxi';
+import type { AsEntity } from 'moxi';
 import { Sprite, Graphics, Container } from 'pixi.js';
-import { Logic } from 'moxi';
-import type { AsEntity } from 'moxi/lib/types/core/moxi-entity';
 import { ASSETS } from '../assets-config';
 
 class FadeLogic extends Logic<Sprite> {

@@ -33,9 +33,12 @@ import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
+import { svgToTexture } from './library/svg-utils/svg-to-texture';
+import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pixel-grid';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
-import { LoadingScene } from './library/loading-scene';
+import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
+import { ActionManager, OnAction } from './library/action-manager';
 import {
   PhysicsWorld,
   PhysicsBodyLogic,
@@ -56,7 +59,8 @@ export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
 export type { ParallaxLayerOptions, TilingParallaxLayerOptions } from './library/parallax-layer';
-export type { LoadingSceneOptions } from './library/loading-scene';
+export type { LoadingSceneOptions, LoadingAnimation, LoadingAnimationContext, FallingSquaresOptions } from './library/loading-scene';
+export type { OnAction } from './library/action-manager';
 export type {
   BodyType,
   SyncMode,
@@ -79,6 +83,8 @@ export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
 export type { UILayerOptions } from './ui/UILayer';
+export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
+export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 
 export type Asset = { src: string, alias?: string };
 
@@ -135,6 +141,7 @@ const exportedObjects = {
   ParallaxBackgroundLogic,
   ParallaxLayer,
   LoadingScene,
+  FallingSquaresAnimation,
   setupMoxi,
   RenderManager,
   Scene,
@@ -173,7 +180,15 @@ const exportedObjects = {
   UIScrollContainer,
   UITabs,
   UILayer,
-  UIScaleMode
+  UIScaleMode,
+  svgToTexture,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig,
+  ActionManager
 };
 
 export default exportedObjects;
@@ -204,6 +219,7 @@ export {
   ParallaxBackgroundLogic,
   ParallaxLayer,
   LoadingScene,
+  FallingSquaresAnimation,
   setupMoxi,
   RenderManager,
   Scene,
@@ -242,6 +258,14 @@ export {
   UIScrollContainer,
   UITabs,
   UILayer,
-  UIScaleMode
+  UIScaleMode,
+  svgToTexture,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig,
+  ActionManager
 };
 

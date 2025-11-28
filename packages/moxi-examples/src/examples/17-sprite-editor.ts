@@ -1,75 +1,68 @@
 /**
- * Example 17: Sprite Editor
- * Edit and manipulate sprites
+ * Example 17: Sprite Editor - Scaled Pixel Perfect UI
+ * Uses the PIKCELL sprite editor package from the monorepo
  */
-import { setupMoxi, asBitmapText } from 'moxi';
-import { Assets, BitmapFont } from 'pixi.js';
+import { setupMoxi } from 'moxi';
+import * as PIXI from 'pixi.js';
+import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';
+import { SpriteEditor, getTheme } from 'pikcell';
 
+/**
+ * Initialize and run the sprite editor
+ */
 export async function initSpriteEditor() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
-  const { scene, engine, renderer } = await setupMoxi({ 
+  // Setup with pixel-perfect rendering
+  const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
-    showLoadingScene: true
-  });
-  
-  renderer.background.color = 0x1a1a2e;
-
-  // Load PixelOperator fonts
-  await Assets.load([
-    ASSETS.PIXEL_OPERATOR_FONT,
-    ASSETS.PIXEL_OPERATOR_BOLD_FONT
-  ]);
-
-  // Install bitmap fonts
-  BitmapFont.install({
-    name: 'PixelOperator',
-    style: {
-      fontFamily: 'PixelOperator',
-      fontSize: 16,
-      fill: 0xffffff
+    showLoadingScene: false,
+    pixelPerfect: true,
+    renderOptions: {
+      width: 1280,
+      height: 720,
+      backgroundColor: getTheme().backgroundRoot,
     }
   });
 
-  BitmapFont.install({
-    name: 'PixelOperatorBold',
+  // Load pixel fonts
+  await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT, ASSETS.KENNEY_BLOCKS_FONT]);
+
+  // Install bitmap font at 64px for high quality, will scale down to 16px
+  PIXI.BitmapFont.install({
+    name: 'PixelOperator8Bitmap',
     style: {
-      fontFamily: 'PixelOperator-Bold',
-      fontSize: 16,
-      fill: 0xffffff
+      fontFamily: 'PixelOperator8',
+      fontSize: 64,
+      fill: 0xffffff,
     }
   });
 
-  // Example usage of the fonts
-  const pixelOperatorRegular = asBitmapText(
-    {
-      text: 'PixelOperator Regular',
-      style: {
-        fontFamily: 'PixelOperator',
-        fontSize: 16
-      }
-    },
-    { x: 20, y: 20 }
-  );
-  scene.addChild(pixelOperatorRegular);
+  // Install Kenney Blocks bitmap font for ALPHA! stamp
+  PIXI.BitmapFont.install({
+    name: 'KennyBlocksBitmap',
+    style: {
+      fontFamily: 'Kenney Blocks',
+      fontSize: 64,
+      fill: 0xffffff,
+    }
+  });
 
-  const pixelOperatorBold = asBitmapText(
-    {
-      text: 'PixelOperator Bold',
-      style: {
-        fontFamily: 'PixelOperatorBold',
-        fontSize: 16
-      }
-    },
-    { x: 20, y: 50 }
-  );
-  scene.addChild(pixelOperatorBold);
+  // Create the sprite editor using PIKCELL
+  const spriteEditor = new SpriteEditor({
+    renderer,
+    scene,
+    maxSpriteSheets: 2
+  });
 
+  // Initialize the editor (creates all UI)
+  await spriteEditor.initialize();
+
+  // Start the engine
   scene.init();
   engine.start();
 
-  console.log('✅ Sprite Editor loaded');
+  console.log('PIKCELL Sprite Editor loaded');
 }
-

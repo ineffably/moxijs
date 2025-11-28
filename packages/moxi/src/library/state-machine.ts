@@ -1,6 +1,6 @@
 import { StateLogic } from './state-logic';
 
-// Define the custom event type for state changes
+/** Emitted on state transitions. */
 export type StateChangeEvent = {
   prevState: string | null;
   newState: string;
@@ -9,6 +9,35 @@ export type StateChangeEvent = {
 type StateChangeEventListener = (event: StateChangeEvent) => void;
 type StateLogicRecords = Record<string, StateLogic>;
 
+/**
+ * Finite State Machine for managing entity states.
+ * States are StateLogic instances with onEnter/onExit/update methods.
+ *
+ * @example
+ * ```ts
+ * // Create states
+ * class IdleState extends StateLogic { ... }
+ * class RunState extends StateLogic { ... }
+ *
+ * // Create FSM with states
+ * const fsm = new StateMachine({
+ *   idle: new IdleState(),
+ *   run: new RunState()
+ * });
+ *
+ * // Change state
+ * fsm.setState('idle');
+ * fsm.setState('run');
+ *
+ * // Listen for state changes
+ * fsm.addEventListener('stateChange', (e) => {
+ *   console.log(`${e.detail.prevState} -> ${e.detail.newState}`);
+ * });
+ *
+ * // Call in update loop
+ * fsm.update(deltaTime);
+ * ```
+ */
 export class StateMachine extends EventTarget {
   private _states: StateLogicRecords = {};
   private _currentState: StateLogic | null = null;

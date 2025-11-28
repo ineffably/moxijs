@@ -12,7 +12,10 @@
     "declaration": false,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "pikcell": ["../pikcell/src/index.ts"]
+    }
   },
   "include": [
     "src/**/*"

@@ -17,7 +17,7 @@ module.exports = {
     '!src/index.ts', // Exclude main entry point from coverage
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   moduleNameMapper: {
     '^moxi$': '<rootDir>/src/index.ts',
   },

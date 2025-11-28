@@ -1,0 +1,176 @@
+{
+  "name": "Vita the Dinosaur",
+  "spritesheet": "vita.png",
+  "frameWidth": 24,
+  "frameHeight": 24,
+  "frames": [
+    {
+      "index": 0,
+      "row": 0,
+      "col": 0,
+      "animation": "idle",
+      "description": "Idle stand, facing right"
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "col": 1,
+      "animation": "idle",
+      "description": "Idle blink"
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "col": 2,
+      "animation": "idle",
+      "description": "Idle stand, eyes open"
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "col": 3,
+      "animation": "idle",
+      "description": "Idle blink repeated"
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "col": 4,
+      "animation": "walk",
+      "description": "Walk cycle start"
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "col": 5,
+      "animation": "walk",
+      "description": "Walk mid-stride left foot"
+    },
+    {
+      "index": 6,
+      "row": 0,
+      "col": 6,
+      "animation": "walk",
+      "description": "Walk passing stance"
+    },
+    {
+      "index": 7,
+      "row": 0,
+      "col": 7,
+      "animation": "walk",
+      "description": "Walk mid-stride right foot"
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "col": 0,
+      "animation": "run",
+      "description": "Run lean forward"
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "col": 1,
+      "animation": "run",
+      "description": "Run left leg extended"
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "col": 2,
+      "animation": "run",
+      "description": "Run airborne"
+    },
+    {
+      "index": 11,
+      "row": 1,
+      "col": 3,
+      "animation": "run",
+      "description": "Run right leg extended"
+    },
+    {
+      "index": 12,
+      "row": 1,
+      "col": 4,
+      "animation": "jump",
+      "description": "Jump crouch prep"
+    },
+    {
+      "index": 13,
+      "row": 1,
+      "col": 5,
+      "animation": "jump",
+      "description": "Jump launch"
+    },
+    {
+      "index": 14,
+      "row": 1,
+      "col": 6,
+      "animation": "jump",
+      "description": "Jump airborne peak"
+    },
+    {
+      "index": 15,
+      "row": 1,
+      "col": 7,
+      "animation": "jump",
+      "description": "Jump descent"
+    },
+    {
+      "index": 16,
+      "row": 2,
+      "col": 0,
+      "animation": "fall",
+      "description": "Fall start"
+    },
+    {
+      "index": 17,
+      "row": 2,
+      "col": 1,
+      "animation": "fall",
+      "description": "Fall flailing"
+    },
+    {
+      "index": 18,
+      "row": 2,
+      "col": 2,
+      "animation": "hurt",
+      "description": "Hit reaction recoil"
+    },
+    {
+      "index": 19,
+      "row": 2,
+      "col": 3,
+      "animation": "hurt",
+      "description": "Hit recovery"
+    },
+    {
+      "index": 20,
+      "row": 2,
+      "col": 4,
+      "animation": "kick",
+      "description": "Kick wind-up"
+    },
+    {
+      "index": 21,
+      "row": 2,
+      "col": 5,
+      "animation": "kick",
+      "description": "Kick strike"
+    },
+    {
+      "index": 22,
+      "row": 2,
+      "col": 6,
+      "animation": "kick",
+      "description": "Kick follow-through"
+    },
+    {
+      "index": 23,
+      "row": 2,
+      "col": 7,
+      "animation": "kick",
+      "description": "Kick recovery"
+    }
+  ]
+}

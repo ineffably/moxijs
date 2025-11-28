@@ -68,6 +68,10 @@ export class UIScrollContainer extends UIComponent {
   private dragStartScrollY: number = 0;
   private isHoveringThumb: boolean = false;
 
+  // Bound handlers for proper cleanup
+  private boundGlobalPointerMove: ((e: PointerEvent) => void) | null = null;
+  private boundGlobalPointerUp: (() => void) | null = null;
+
   constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
@@ -180,10 +184,12 @@ export class UIScrollContainer extends UIComponent {
     // Track click for jumping
     this.scrollbarTrack.on('pointerdown', this.handleTrackPointerDown.bind(this));
 
-    // Global pointer events for dragging
+    // Global pointer events for dragging - store bound references for cleanup
     if (typeof window !== 'undefined') {
-      window.addEventListener('pointermove', this.handleGlobalPointerMove.bind(this));
-      window.addEventListener('pointerup', this.handleGlobalPointerUp.bind(this));
+      this.boundGlobalPointerMove = this.handleGlobalPointerMove.bind(this);
+      this.boundGlobalPointerUp = this.handleGlobalPointerUp.bind(this);
+      window.addEventListener('pointermove', this.boundGlobalPointerMove);
+      window.addEventListener('pointerup', this.boundGlobalPointerUp);
     }
   }
 
@@ -351,9 +357,11 @@ export class UIScrollContainer extends UIComponent {
     let maxHeight = 0;
 
     this.contentContainer.children.forEach((child: any) => {
-      const childBottom = child.y + child.height;
-      if (childBottom > maxHeight) {
-        maxHeight = childBottom;
+      if (child && typeof child.y === 'number' && typeof child.height === 'number') {
+        const childBottom = child.y + child.height;
+        if (childBottom > maxHeight) {
+          maxHeight = childBottom;
+        }
       }
     });
 
@@ -503,8 +511,14 @@ export class UIScrollContainer extends UIComponent {
    */
   destroy(): void {
     if (typeof window !== 'undefined') {
-      window.removeEventListener('pointermove', this.handleGlobalPointerMove.bind(this));
-      window.removeEventListener('pointerup', this.handleGlobalPointerUp.bind(this));
+      if (this.boundGlobalPointerMove) {
+        window.removeEventListener('pointermove', this.boundGlobalPointerMove);
+        this.boundGlobalPointerMove = null;
+      }
+      if (this.boundGlobalPointerUp) {
+        window.removeEventListener('pointerup', this.boundGlobalPointerUp);
+        this.boundGlobalPointerUp = null;
+      }
     }
     super.destroy();
   }

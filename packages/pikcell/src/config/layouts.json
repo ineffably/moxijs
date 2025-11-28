@@ -1,0 +1,101 @@
+{
+  "layouts": {
+    "default": {
+      "id": "default",
+      "name": "Default Layout",
+      "description": "Standard layout with commander bar at top, palette on left, info bar at bottom",
+      "positions": {
+        "commander": {
+          "anchor": "top-left",
+          "dock": "top",
+          "x": 0,
+          "y": 0
+        },
+        "palette": {
+          "anchor": "top-left",
+          "below": "commander",
+          "gapMultiplier": 2
+        },
+        "info": {
+          "anchor": "bottom-left",
+          "dock": "bottom"
+        }
+      }
+    },
+    "compact": {
+      "id": "compact",
+      "name": "Compact Layout",
+      "description": "Compact layout with reduced spacing",
+      "positions": {
+        "commander": {
+          "anchor": "top-left",
+          "dock": "top",
+          "x": 0,
+          "y": 0
+        },
+        "palette": {
+          "anchor": "top-left",
+          "x": 0,
+          "y": 80
+        },
+        "tool": {
+          "anchor": "top-left",
+          "x": 300,
+          "y": 80
+        },
+        "info": {
+          "anchor": "bottom-left",
+          "dock": "bottom"
+        }
+      }
+    },
+    "fullscreen": {
+      "id": "fullscreen",
+      "name": "Fullscreen Layout",
+      "description": "Minimal UI for maximum canvas space",
+      "positions": {
+        "commander": {
+          "anchor": "top-left",
+          "dock": "top",
+          "x": 0,
+          "y": 0
+        },
+        "info": {
+          "anchor": "bottom-left",
+          "dock": "bottom"
+        }
+      }
+    },
+    "right-panel": {
+      "id": "right-panel",
+      "name": "Right Panel Layout",
+      "description": "Tools and palette docked to right side",
+      "positions": {
+        "commander": {
+          "anchor": "top-left",
+          "dock": "top",
+          "x": 0,
+          "y": 0
+        },
+        "palette": {
+          "anchor": "top-right",
+          "below": "commander",
+          "gapMultiplier": 2
+        },
+        "info": {
+          "anchor": "bottom-left",
+          "dock": "bottom"
+        }
+      }
+    }
+  },
+  "constants": {
+    "commanderBarHeight": {
+      "baseHeight": 12,
+      "titleBarOffset": 24
+    },
+    "infoBarHeight": 8,
+    "defaultGap": 2
+  }
+}
+

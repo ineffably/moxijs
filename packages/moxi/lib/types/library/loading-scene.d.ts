@@ -1,25 +1,38 @@
 import PIXI from 'pixi.js';
-import { Container } from 'pixi.js';
+import { Container, Text } from 'pixi.js';
+import { FallingSquaresAnimation, FallingSquaresOptions } from './falling-squares-animation';
+export { FallingSquaresAnimation };
+export type { FallingSquaresOptions };
+export interface LoadingAnimation {
+    init(container: Container): void;
+    update(context: LoadingAnimationContext): void;
+    reset(): void;
+    destroy(): void;
+}
+export interface LoadingAnimationContext {
+    time: number;
+    deltaTime: number;
+    width: number;
+    height: number;
+    textElement: Text;
+}
 export interface LoadingSceneOptions {
     backgroundColor?: number;
-    squareSize?: number;
-    numSquares?: number;
     text?: string;
     textStyle?: Partial<PIXI.TextStyle>;
+    animation?: LoadingAnimation;
+    fallingSquaresOptions?: FallingSquaresOptions;
 }
 export declare class LoadingScene extends Container {
-    private particles;
     private text;
     private background;
+    private animationContainer;
+    private animation;
     private ticker;
     private renderer;
     private time;
-    private nextSpawn;
-    private maxParticles;
-    private baseSize;
     private backgroundColor;
     constructor(options?: LoadingSceneOptions);
-    private spawnParticle;
     private update;
     init(renderer: PIXI.Renderer): void;
     show(): void;

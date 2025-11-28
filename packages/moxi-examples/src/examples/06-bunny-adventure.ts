@@ -1,4 +1,4 @@
-import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange } from 'moxi';
+import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
 import { PlayerMovementLogic } from './behavior-logic/player-movement-logic';

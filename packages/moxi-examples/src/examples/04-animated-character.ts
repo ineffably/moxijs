@@ -1,4 +1,4 @@
-import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange, asBitmapText, asContainer } from 'moxi';
+import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange, asBitmapText, asContainer } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
 

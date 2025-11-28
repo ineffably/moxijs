@@ -6,7 +6,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
-import { GRID, BORDER, px } from 'moxi';
+import { GRID, BORDER, px } from 'moxi-kit';
 import { UI_COLORS } from '../components/pixel-card';
 
 export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw';

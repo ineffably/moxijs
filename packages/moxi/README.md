@@ -5,7 +5,7 @@ Game framework built on PIXI.js with Entity-Component-System (ECS) architecture,
 ## Quick Start
 
 ```typescript
-import { setupMoxi, asEntity, Logic } from 'moxi';
+import { setupMoxi, asEntity, Logic } from 'moxi-kit';
 
 // Initialize
 const { scene, engine, renderer } = await setupMoxi({
@@ -118,7 +118,7 @@ shape: { type: 'polygon', vertices: [{x,y}...] }
 ### Physics Helpers
 
 ```typescript
-import { asPhysicsEntity, hasPhysics, getPhysicsBody } from 'moxi';
+import { asPhysicsEntity, hasPhysics, getPhysicsBody } from 'moxi-kit';
 
 const entity = asPhysicsEntity(sprite, physicsWorld, options);
 if (hasPhysics(entity)) {
@@ -134,7 +134,7 @@ Flexbox-based UI system with pixel grid alignment.
 ### Pixel Grid
 
 ```typescript
-import { px, units, GRID } from 'moxi';
+import { px, units, GRID } from 'moxi-kit';
 
 px(10);        // 10 grid units -> 40 pixels (at 4x scale)
 units(40);     // 40 pixels -> 10 grid units
@@ -144,7 +144,7 @@ GRID.scale;    // Current scale (default 4)
 ### FlexContainer
 
 ```typescript
-import { FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets } from 'moxi';
+import { FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets } from 'moxi-kit';
 
 const container = new FlexContainer({
   direction: FlexDirection.Row,      // Row | Column
@@ -163,7 +163,7 @@ container.layout(400, 300);  // Available width, height
 ### UIButton
 
 ```typescript
-import { UIButton } from 'moxi';
+import { UIButton } from 'moxi-kit';
 
 const button = new UIButton({
   label: 'Click Me',
@@ -280,7 +280,7 @@ camera.shake(10, 500);  // intensity, duration
 ### State Machine
 
 ```typescript
-import { StateMachine, StateLogic } from 'moxi';
+import { StateMachine, StateLogic } from 'moxi-kit';
 
 class IdleState extends StateLogic<Player> {
   name = 'idle';
@@ -299,7 +299,7 @@ stateMachine.start('idle');
 ### Parallax Backgrounds
 
 ```typescript
-import { ParallaxBackground } from 'moxi';
+import { ParallaxBackground } from 'moxi-kit';
 
 const parallax = new ParallaxBackground({
   layers: [
@@ -314,7 +314,7 @@ scene.addChild(parallax);
 ### Texture Utilities
 
 ```typescript
-import { asTextureFrames, TextureFrameSequences } from 'moxi';
+import { asTextureFrames, TextureFrameSequences } from 'moxi-kit';
 
 // Split spritesheet into frames
 const frames = asTextureFrames(spritesheet.source, {
@@ -334,7 +334,7 @@ const walkFrames = sequences.get('walk');
 ### PIXI Helpers
 
 ```typescript
-import { asSprite, asText, asGraphics, asContainer } from 'moxi';
+import { asSprite, asText, asGraphics, asContainer } from 'moxi-kit';
 
 // Create configured PIXI objects
 const sprite = asSprite(texture, { x: 100, y: 50, scale: 2, anchor: 0.5 });
@@ -345,7 +345,7 @@ const graphics = asGraphics({ x: 0, y: 0 });
 ### SVG to Texture
 
 ```typescript
-import { svgToTexture } from 'moxi';
+import { svgToTexture } from 'moxi-kit';
 
 const texture = await svgToTexture(renderer, svgString, {
   width: 64,
@@ -356,7 +356,7 @@ const texture = await svgToTexture(renderer, svgString, {
 ### Input Handling
 
 ```typescript
-import { ClientEvents } from 'moxi';
+import { ClientEvents } from 'moxi-kit';
 
 const input = ClientEvents.getInstance();
 
@@ -372,7 +372,7 @@ const isMouseDown = input.mouseDownEvent !== null;
 ### Event System
 
 ```typescript
-import { EventEmitter } from 'moxi';
+import { EventEmitter } from 'moxi-kit';
 
 interface GameEvents {
   'player:death': (player: Player) => void;
@@ -388,17 +388,17 @@ events.emit('player:death', player);
 
 ```typescript
 // Core
-export type { AsEntity, MoxiLogic } from 'moxi';
+export type { AsEntity, MoxiLogic } from 'moxi-kit';
 
 // Physics
 export type {
   BodyType, ShapeType, CollisionTag, ShapeConfig,
   PhysicsWorldOptions, PhysicsBodyOptions, CollisionEvent
-} from 'moxi';
+} from 'moxi-kit';
 
 // UI
 export type {
   BoxModel, FlexContainerProps, UIButtonProps, UILabelProps,
   UIPanelProps, UISelectProps, SelectOption
-} from 'moxi';
+} from 'moxi-kit';
 ```

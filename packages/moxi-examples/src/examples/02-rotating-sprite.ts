@@ -1,4 +1,4 @@
-import { utils, setupMoxi, Logic, asEntity, asBitmapText, asSprite } from 'moxi';
+import { utils, setupMoxi, Logic, asEntity, asBitmapText, asSprite } from 'moxi-kit';
 import { Sprite, BitmapText, Renderer } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 

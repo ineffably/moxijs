@@ -1,5 +1,12 @@
 /**
  * Sprite sheet card component for displaying and editing sprite sheets
+ * 
+ * ⚠️ IMPORTANT: This component bridges pixel-based sprite sheet content and grid-based UI
+ * - Sprite sheet dimensions are in ACTUAL PIXELS (128x128, 256x256, etc.)
+ * - Card UI wrapper uses GRID UNITS (converted from pixels for content size)
+ * - The sprite sheet content itself is rendered at pixel scale, not grid scale
+ * 
+ * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';

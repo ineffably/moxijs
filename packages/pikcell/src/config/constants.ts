@@ -4,6 +4,53 @@
  * Centralized configuration for all magic numbers and constants used throughout
  * the sprite editor. This promotes maintainability and makes it easy to tune
  * editor behavior from a single location.
+ * 
+ * ⚠️ CRITICAL: GRID-BASED UI SYSTEM
+ * =================================
+ * 
+ * THIS CODEBASE USES GRID UNITS FOR UI, BUT ACTUAL PIXELS FOR SPRITE CONTENT!
+ * 
+ * GRID UNITS are used for:
+ *   - UI elements (cards, buttons, spacing, margins, padding, borders)
+ *   - Card dimensions and positioning
+ *   - Layout spacing between UI components
+ * 
+ * ACTUAL PIXELS are used for:
+ *   - Sprite dimensions (8x8 pixels per sprite)
+ *   - Sprite sheet dimensions (128x128, 256x256 pixels)
+ *   - Pixel art content itself
+ *   - Canvas/texture dimensions for sprite rendering
+ * 
+ * All UI dimensions, spacing, margins, and padding should be specified in GRID UNITS
+ * and converted to pixels using the px() function from 'moxi'.
+ * 
+ * Examples:
+ *   ✅ CORRECT (UI): const spacing = px(GRID.gap);        // Uses grid units
+ *   ✅ CORRECT (UI): const margin = px(2);                 // 2 grid units
+ *   ✅ CORRECT (Sprite): const spriteWidth = 8;            // 8 actual pixels
+ *   ✅ CORRECT (Sprite): const sheetWidth = 128;            // 128 actual pixels
+ *   ❌ WRONG (UI):   const spacing = 8;                   // Raw pixels - DON'T DO THIS for UI
+ *   ❌ WRONG (UI):   const margin = 20;                    // Raw pixels - DON'T DO THIS for UI
+ * 
+ * Grid units scale with GRID.scale (configurable, default: 4x)
+ * - The scale is NOT hardcoded - it can be 1x, 2x, 3x, or 4x
+ * - Scale is configured at the outer layer (PixelGrid initialization)
+ * - px(1) = 1 grid unit = 4 pixels (at 4x scale) = 3px (at 3x) = 2px (at 2x) = 1px (at 1x)
+ * - px(2) = 2 grid units = 8 pixels (at 4x) = 6px (at 3x) = 4px (at 2x) = 2px (at 1x)
+ * - Changing GRID.scale scales the entire UI proportionally
+ * 
+ * When displaying sprite content in cards:
+ *   - Sprite content is measured in actual pixels (e.g., 8x8 sprite)
+ *   - Card content size converts: Math.ceil(pixelWidth / px(1))
+ * 
+ * Why grid units for UI?
+ * - Ensures pixel-perfect rendering
+ * - Maintains consistent spacing
+ * - Makes UI scalable (change GRID.scale to scale entire UI)
+ * - Prevents sub-pixel rendering issues
+ * 
+ * If you see hardcoded pixel values in UI code (cards, buttons, spacing), they are bugs!
+ * But pixel values for sprite/sprite sheet dimensions are correct and expected.
  */
 
 /**

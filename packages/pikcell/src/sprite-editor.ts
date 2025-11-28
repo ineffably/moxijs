@@ -8,6 +8,17 @@
  * - FileOperationsManager: Save/load/export
  *
  * This reduces the class from 1040 lines to ~400 lines with clear responsibilities.
+ * 
+ * ⚠️ CRITICAL: GRID-BASED UI SYSTEM
+ * =================================
+ * 
+ * This codebase uses GRID UNITS for all UI measurements, not raw pixels!
+ * - Always use px(gridUnits) to convert grid units to pixels
+ * - Example: px(1) = 1 grid unit = 4 pixels (at default 4x scale)
+ * - Example: px(GRID.gap) = standard gap in grid units
+ * - NEVER use hardcoded pixel values like 24, 16, etc. for UI
+ * 
+ * @see ./utilities/README.md for detailed grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './components/pixel-card';
@@ -39,6 +50,9 @@ import { SpriteSheetInstance } from './interfaces/managers';
 // Constants
 import { PERFORMANCE_CONSTANTS, INTERACTION_CONSTANTS } from './config/constants';
 import { CARD_IDS, getSpriteSheetCardId, getSpriteCardId, isSpriteCard } from './config/card-ids';
+
+// Utilities
+import { calculateCommanderBarHeight } from './utilities/card-utils';
 
 export interface SpriteEditorOptions {
   renderer: PIXI.Renderer;
@@ -202,9 +216,10 @@ export class SpriteEditor {
     });
 
     // Center sprite cards and position toolbar to their right
-    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+    const commanderBarHeight = calculateCommanderBarHeight();
     let spriteCardRight = this.renderer.width / 2; // Default if no sprite card
-    let spriteCardY = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
+    // Position sprite cards below commander bar with 1 grid unit margin
+    let spriteCardY = commanderBarHeight + px(1);
 
     this.uiManager.getAllCards().forEach((card, id) => {
       if (isSpriteCard(id)) {
@@ -338,12 +353,7 @@ export class SpriteEditor {
     const cellY = savedState?.selectedCellY ?? 0;
     spriteSheetResult.controller.selectCell(cellX, cellY);
 
-    if (savedState) {
-      const contentState = spriteSheetResult.card.getContentSize();
-      const contentWidthPx = px(contentState.width);
-      const contentHeightPx = px(contentState.height);
-      spriteSheetResult.controller.centerCell(cellX, cellY, contentWidthPx, contentHeightPx);
-    }
+    // Note: centerCell() is called separately after layout is applied via centerActiveSheetCell()
 
     // Restore sprite card scale if saved
     if (savedState?.spriteCardScale && instance.spriteController) {
@@ -352,6 +362,21 @@ export class SpriteEditor {
 
     console.log(`Created ${type} sprite sheet`);
     this.saveProjectState();
+  }
+
+  /**
+   * Center the selected cell in the active spritesheet's viewport
+   * Should be called after layout is applied so the content size is correct
+   */
+  private centerActiveSheetCell(): void {
+    const activeInstance = this.spriteSheetManager.getActive();
+    if (!activeInstance?.sheetCard) return;
+
+    const cell = activeInstance.sheetCard.controller.getSelectedCell();
+    const contentState = activeInstance.sheetCard.card.getContentSize();
+    const contentWidthPx = px(contentState.width);
+    const contentHeightPx = px(contentState.height);
+    activeInstance.sheetCard.controller.centerCell(cell.x, cell.y, contentWidthPx, contentHeightPx);
   }
 
   /**
@@ -404,7 +429,7 @@ export class SpriteEditor {
     this.registerCard(CARD_IDS.COMMANDER, this.commanderBarCard.card);
 
     // Create palette card
-    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+    const commanderBarHeight = calculateCommanderBarHeight();
     const topOffset = px(GRID.margin) + commanderBarHeight + px(GRID.gap * 2);
 
     this.paletteCard = createPaletteCard({
@@ -461,6 +486,9 @@ export class SpriteEditor {
     if (!stateRestored) {
       this.applyDefaultLayout();
     }
+
+    // Center the selected cell after layout is applied
+    this.centerActiveSheetCell();
   }
 
   /**
@@ -578,19 +606,20 @@ export class SpriteEditor {
 
     // Clear using managers - destroy controllers and unregister cards
     this.spriteSheetManager.getAll().forEach((instance, index) => {
-      // Clean up zoom handlers via factory
+      // Remove sprite card FIRST (before factory.remove sets it to null)
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+        this.uiManager.unregisterCard(getSpriteCardId(index));
+      }
+
+      // Clean up zoom handlers via factory (this sets spriteCard to null)
       this.spriteCardFactory.remove(instance);
 
+      // Remove spritesheet card
       if (instance.sheetCard) {
         instance.sheetCard.controller.destroy();
         this.scene.removeChild(instance.sheetCard.card.container);
-        // Unregister from UIManager
         this.uiManager.unregisterCard(getSpriteSheetCardId(index));
-      }
-      if (instance.spriteCard) {
-        this.scene.removeChild(instance.spriteCard.card.container);
-        // Unregister from UIManager
-        this.uiManager.unregisterCard(getSpriteCardId(index));
       }
     });
 
@@ -617,12 +646,24 @@ export class SpriteEditor {
           label: 'PICO-8',
           onClick: (checkboxStates) => {
             this.createNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
+            // Try to restore saved UI layout, fall back to default
+            if (!this.restoreUIState()) {
+              this.applyDefaultLayout();
+            }
+            // Center the selected cell after layout is applied
+            this.centerActiveSheetCell();
           }
         },
         {
           label: 'TIC-80',
           onClick: (checkboxStates) => {
             this.createNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
+            // Try to restore saved UI layout, fall back to default
+            if (!this.restoreUIState()) {
+              this.applyDefaultLayout();
+            }
+            // Center the selected cell after layout is applied
+            this.centerActiveSheetCell();
           }
         }
       ],
@@ -710,17 +751,20 @@ export class SpriteEditor {
 
     // Clear existing work - destroy controllers, unregister cards, clean up handlers
     this.spriteSheetManager.getAll().forEach((instance, index) => {
-      // Clean up zoom handlers via factory
+      // Remove sprite card FIRST (before factory.remove sets it to null)
+      if (instance.spriteCard) {
+        this.scene.removeChild(instance.spriteCard.card.container);
+        this.uiManager.unregisterCard(getSpriteCardId(index));
+      }
+
+      // Clean up zoom handlers via factory (this sets spriteCard to null)
       this.spriteCardFactory.remove(instance);
 
+      // Remove spritesheet card
       if (instance.sheetCard) {
         instance.sheetCard.controller.destroy();
         this.scene.removeChild(instance.sheetCard.card.container);
         this.uiManager.unregisterCard(getSpriteSheetCardId(index));
-      }
-      if (instance.spriteCard) {
-        this.scene.removeChild(instance.spriteCard.card.container);
-        this.uiManager.unregisterCard(getSpriteCardId(index));
       }
     });
 
@@ -733,6 +777,9 @@ export class SpriteEditor {
       console.warn('Failed to save loaded project to localStorage:', saveResult.error);
     }
     this.loadProjectState();
+
+    // Center the selected cell after loading
+    this.centerActiveSheetCell();
   }
 
   /**

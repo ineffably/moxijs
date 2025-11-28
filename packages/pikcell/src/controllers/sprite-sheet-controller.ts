@@ -8,8 +8,10 @@ export type SpriteSheetType = 'PICO-8' | 'TIC-80';
 
 export interface SpriteSheetConfig {
   type: SpriteSheetType;
-  width: number;   // In pixels
-  height: number;  // In pixels
+  /** Width in ACTUAL PIXELS (not grid units) - e.g., 128, 256 */
+  width: number;
+  /** Height in ACTUAL PIXELS (not grid units) - e.g., 128, 256 */
+  height: number;
   palette: number[]; // Array of color values
 }
 

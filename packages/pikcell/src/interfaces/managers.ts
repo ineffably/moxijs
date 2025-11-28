@@ -13,7 +13,7 @@ import { CardState } from '../state/ui-state-manager';
 import { ProjectState, SpriteSheetState } from '../state/project-state-manager';
 import { LayoutSlotState } from '../state/layout-state-manager';
 import { SpriteSheetCardResult } from '../components/spritesheet-card';
-import { SpriteCardResult } from '../components/sprite-card';
+import { SpriteEditorCardResult } from '../components/sprite-editor-card';
 
 /**
  * Sprite sheet instance that combines UI and data concerns
@@ -26,7 +26,7 @@ export interface SpriteSheetInstance {
   sheetCard: SpriteSheetCardResult;
 
   /** UI card for individual sprite editing (optional) */
-  spriteCard: SpriteCardResult | null;
+  spriteCard: SpriteEditorCardResult | null;
 
   /** Controller for individual sprite editing (optional) */
   spriteController: SpriteController | null;

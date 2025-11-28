@@ -1,5 +1,12 @@
 /**
  * PIKCELL Bar Card - Main action bar with commands
+ * 
+ * ⚠️ CRITICAL: This component uses GRID UNITS for all measurements!
+ * - Button spacing: px(2) = 2 grid units (NOT 2 pixels!)
+ * - Bar height: 12 grid units (converted internally)
+ * - All spacing/margins use px() to convert grid units to pixels
+ * 
+ * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';

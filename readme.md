@@ -18,7 +18,7 @@ MOXI wraps PixiJS with an Entity-Component-System architecture. You get all the 
 
 Think of it like this: PixiJS handles the "draw stuff fast" part. MOXI handles the "organize your game logic so it doesn't turn into spaghetti" part.
 
-🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)** to see it in action.
+🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)** to see it in action.
 
 ## Why would I use this?
 
@@ -247,7 +247,7 @@ const gridX = units(sprite.x);
 ### Install it
 
 ```bash
-npm install moxi pixi.js
+npm install moxijs pixi.js
 ```
 
 ### Basic example
@@ -340,13 +340,13 @@ initPhysics();
 
 ## Examples
 
-### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)
+### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)
 
 Interactive examples with source code viewer - see MOXI in action right in your browser.
 
 ### All Examples
 
-Check out [`packages/moxi-examples`](packages/moxi-examples/) for working demos:
+Check out [`packages/moxijs-examples`](packages/moxijs-examples/) for working demos:
 
 - **01 - Basic Sprite** - The absolute basics with a single sprite
 - **02 - Rotating Sprite** - Animation and text rendering
@@ -359,12 +359,12 @@ Check out [`packages/moxi-examples`](packages/moxi-examples/) for working demos:
 - **09 - Dino AI Behaviors** - AI systems with state machines (Follow, Flee, Patrol, Wander)
 - **10 - Text Rendering** - Comprehensive text showcase (BitmapText, counters, floating damage numbers)
 
-**📚 [Full Examples Documentation](packages/moxi-examples/README.md)** | **📖 [Text Rendering Guide](packages/moxi-examples/guides/text-rendering.md)**
+**📚 [Full Examples Documentation](packages/moxijs-examples/README.md)** | **📖 [Text Rendering Guide](packages/moxijs-examples/guides/text-rendering.md)**
 
 ### Run Locally
 
 ```bash
-cd packages/moxi-examples
+cd packages/moxijs-examples
 npm install
 npm start
 ```
@@ -454,7 +454,7 @@ npm run build:clean
 npm run watch
 
 # Run the examples
-cd packages/moxi-examples
+cd packages/moxijs-examples
 npm start
 ```
 

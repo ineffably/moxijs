@@ -4,7 +4,7 @@
     {
       "name": "Dark",
       "description": "Classic dark theme",
-      "backgroundRoot": "0x212123",
+      "backgroundRoot": "0x2b2b2e",
       "backgroundSurface": "0x212123",
       "backgroundRaised": "0x646365",
       "backgroundOverlay": "0x45444f",

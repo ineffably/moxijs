@@ -11,7 +11,7 @@
  * - Can swap out behaviors dynamically
  */
 import * as PIXI from 'pixi.js';
-import { asEntity } from 'moxi-kit';
+import { asEntity } from 'moxijs';
 import { ZoomPanLogic } from '../logic/zoom-pan-logic';
 import { CellSelectionLogic } from '../logic/cell-selection-logic';
 import { PixelRenderer } from '../utilities/pixel-renderer';

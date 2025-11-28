@@ -157,7 +157,7 @@ const walkFrames = TextureFrameSequences.getFrameSequence('hero', 'walk');
 ## Getting Started
 
 ```typescript
-import Moxi from 'moxi-kit';
+import Moxi from 'moxijs';
 
 const { scene, engine, loadAssets } = await Moxi.setupMoxi({
   width: 800,

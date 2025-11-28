@@ -12,7 +12,7 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
 import { createPixelDialog } from '../components/pixel-dialog';
-import { GRID, BORDER, px } from 'moxi-kit';
+import { GRID, BORDER, px } from 'moxijs';
 import { getAllThemes, setThemeByMetadata } from '../theming/theme';
 import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
 

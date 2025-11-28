@@ -10,7 +10,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { px, GRID } from 'moxi';
+import { px, GRID } from 'moxi-kit';
 import { SpriteController } from '../controllers/sprite-controller';
 import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
 

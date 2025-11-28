@@ -5,7 +5,7 @@ import {
   UILayer,
   UIScaleMode,
   UIFocusManager
-} from 'moxi';
+} from 'moxi-kit';
 import { createButtonsShowcase } from './ui/buttons-showcase';
 import { createTextInputsShowcase } from './ui/text-inputs-showcase';
 

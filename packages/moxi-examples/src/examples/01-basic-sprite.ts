@@ -4,8 +4,8 @@
  * Displays sprites from both space-shooter series in a grid layout
  * Features: Grid placement top-left to bottom-right, sprite pooling, starfield background
  */
-import { setupMoxi, asEntity, Logic } from 'moxi';
-import type { AsEntity } from 'moxi';
+import { setupMoxi, asEntity, Logic } from 'moxi-kit';
+import type { AsEntity } from 'moxi-kit';
 import { Sprite, Graphics, Container } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 

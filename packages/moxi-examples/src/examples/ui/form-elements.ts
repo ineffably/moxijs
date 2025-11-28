@@ -14,7 +14,7 @@ import {
   UITextInput,
   SelectOption,
   UIComponent
-} from 'moxi';
+} from 'moxi-kit';
 
 export function createFormElementsTab(): UIComponent {
   // Main container

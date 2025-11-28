@@ -1,4 +1,4 @@
-import { Logic, asEntity, setupMoxi } from 'moxi';
+import { Logic, asEntity, setupMoxi } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapFont } from 'pixi.js';
 import { ASSETS } from '../assets-config';

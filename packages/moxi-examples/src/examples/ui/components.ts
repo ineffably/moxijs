@@ -2,7 +2,7 @@
  * UI Components Tab
  * Demonstrates labels, panels, and interactive buttons with state management
  */
-import { FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets, UIBox, UILabel, UIPanel, UIButton, UIComponent } from 'moxi';
+import { FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets, UIBox, UILabel, UIPanel, UIButton, UIComponent } from 'moxi-kit';
 
 export function createComponentsTab(): UIComponent {
   // Main container with column layout

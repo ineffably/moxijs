@@ -6,10 +6,10 @@ import {
   TilingParallaxLayer,
   Logic,
   asSprite
-} from 'moxi';
+} from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { ClientEvents } from 'moxi';
+import { ClientEvents } from 'moxi-kit';
 
 /**
  * Parallax Space Shooter Example

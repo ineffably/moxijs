@@ -33,11 +33,11 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       
-      - name: Build moxi package
-        run: npm run build --workspace=moxi
-      
+      - name: Build moxi-kit package
+        run: npm run build --workspace=moxi-kit
+
       - name: Run tests
-        run: npm run test:ci --workspace=moxi
+        run: npm run test:ci --workspace=moxi-kit
       
       - name: Version package
         working-directory: packages/moxi
@@ -55,7 +55,7 @@ jobs:
       - name: Commit version bump
         run: |
           git add packages/moxi/package.json
-          git commit -m "chore: release moxi@${{ env.NEW_VERSION }}"
+          git commit -m "chore: release moxi-kit@${{ env.NEW_VERSION }}"
           git tag "v${{ env.NEW_VERSION }}"
       
       - name: Publish to NPM

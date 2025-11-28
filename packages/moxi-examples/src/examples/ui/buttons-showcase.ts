@@ -13,7 +13,7 @@ import {
   UIButton,
   UILabel,
   UIComponent
-} from 'moxi';
+} from 'moxi-kit';
 import { ASSETS } from '../../assets-config';
 
 export async function createButtonsShowcase(): Promise<UIComponent> {

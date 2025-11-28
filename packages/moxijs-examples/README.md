@@ -2,7 +2,7 @@
 
 Working demos that show you what MOXI can do. Each example is self-contained and builds on the previous ones, so you can see how things actually work instead of just reading about it.
 
-## 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)
+## 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)
 
 Click the link above to explore all examples in an interactive viewer on GitHub Pages, or build locally and open `dist/index.html` in your browser.
 
@@ -172,7 +172,7 @@ In-depth guides for specific topics:
 - **Webpack 5** for bundling with hot reload
 - **TypeScript 5** with strict mode
 - **PixiJS 8** for rendering
-- **MOXI** (local build from `../moxi`)
+- **MOXI** (local build from `../moxijs`)
 - **Planck.js** for physics (example 08)
 - **CodeMirror 6** for interactive source code viewer
 - **Vite's ?raw loader** for bundling source code as strings

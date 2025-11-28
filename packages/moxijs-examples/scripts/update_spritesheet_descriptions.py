@@ -7,7 +7,7 @@ from PIL import Image
 
 
 ASSET_JSON = Path(
-    "/Users/chadneff/git/moxi/packages/moxi-examples/assets/space-sprite-sheets/space-shooter.json"
+    "/Users/chadneff/git/moxi/packages/moxijs-examples/assets/space-sprite-sheets/space-shooter.json"
 )
 ASSET_IMAGE = ASSET_JSON.with_suffix(".png")
 

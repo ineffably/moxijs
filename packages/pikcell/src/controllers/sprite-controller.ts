@@ -14,6 +14,11 @@ export interface SpriteControllerOptions {
 /**
  * Controller for managing a single 8x8 sprite cell
  * References the sprite sheet controller and updates it directly
+ * 
+ * ⚠️ IMPORTANT: Sprite dimensions are in ACTUAL PIXELS, not grid units
+ * - Sprites are 8x8 pixels
+ * - Scale is applied to pixels (e.g., scale 4 = 32x32 pixel display)
+ * - UI cards convert these pixel dimensions to grid units for content sizing
  */
 export class SpriteController {
   private spriteSheetController: SpriteSheetController;

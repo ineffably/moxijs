@@ -7,9 +7,10 @@
 import * as PIXI from 'pixi.js';
 import { GRID, BORDER, px } from 'moxi';
 import { SpriteController } from '../controllers/sprite-controller';
-import { createSpriteCard, SpriteCardResult } from '../components/sprite-card';
+import { createSpriteEditorCard, SpriteEditorCardResult } from '../components/sprite-editor-card';
 import { PixelCard } from '../components/pixel-card';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
+import { calculateCommanderBarHeight } from '../utilities/card-utils';
 import { SpriteSheetInstance } from '../interfaces/managers';
 import { getSpriteCardId } from '../config/card-ids';
 
@@ -116,7 +117,7 @@ export class SpriteCardFactory {
     }
 
     // Create the sprite card
-    const spriteCardResult = createSpriteCard({
+    const spriteCardResult = createSpriteEditorCard({
       x: position.x,
       y: position.y,
       renderer: this.renderer,
@@ -169,7 +170,7 @@ export class SpriteCardFactory {
 
     // Calculate default center position
     const dims = spriteController.getScaledDimensions();
-    const commanderBarHeight = px(12) + px(BORDER.total * 2) + 24;
+    const commanderBarHeight = calculateCommanderBarHeight();
 
     return {
       x: (this.renderer.width - dims.width) / 2,
@@ -183,7 +184,7 @@ export class SpriteCardFactory {
   private setupZoomHandler(
     instance: SpriteSheetInstance,
     spriteController: SpriteController,
-    spriteCardResult: SpriteCardResult
+    spriteCardResult: SpriteEditorCardResult
   ): void {
     const handleZoom = createCardZoomHandler(this.renderer, spriteCardResult.card, (delta) => {
       const currentScale = spriteController.getScale();

@@ -2,6 +2,13 @@
  * Pixel-perfect card component with drag, resize, and triple border
  *
  * Refactored to use CardDragHandler and CardResizeHandler for cleaner SRP.
+ * 
+ * ⚠️ CRITICAL: This component uses GRID UNITS for all dimensions!
+ * - contentWidth/contentHeight are in GRID UNITS (not pixels)
+ * - Internal calculations convert to pixels using px()
+ * - All spacing, borders, padding use GRID constants
+ * 
+ * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';

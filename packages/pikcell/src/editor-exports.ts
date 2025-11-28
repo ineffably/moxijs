@@ -21,7 +21,7 @@ export { createPixelButton, PixelButtonOptions, PixelButtonResult, SelectionMode
 export { createPixelDialog, PixelDialogOptions, PixelDialogResult } from './components/pixel-dialog';
 export { createPixelCheckbox, PixelCheckboxOptions, PixelCheckboxResult } from './components/pixel-checkbox';
 export { createSpriteSheetCard, SPRITESHEET_CONFIGS, SpriteSheetCardOptions, SpriteSheetCardResult } from './components/spritesheet-card';
-export { createSpriteCard, SpriteCardOptions, SpriteCardResult } from './components/sprite-card';
+export { createSpriteEditorCard, SpriteEditorCardOptions, SpriteEditorCardResult } from './components/sprite-editor-card';
 export { createPopupToolbar, PopupToolbarOptions, PopupToolbarResult, PopupToolbarButton } from './components/popup-toolbar';
 
 // Component Interfaces

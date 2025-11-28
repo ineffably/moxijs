@@ -1,5 +1,12 @@
 /**
- * Sprite card - displays and allows editing of a single 8x8 sprite
+ * Sprite editor card - displays and allows editing of a single 8x8 sprite
+ * 
+ * ⚠️ IMPORTANT: This component bridges pixel-based sprite content and grid-based UI
+ * - Sprite dimensions are in ACTUAL PIXELS (8x8 pixels)
+ * - Card UI wrapper uses GRID UNITS (converted from pixels for content size)
+ * - The sprite content itself is rendered at pixel scale, not grid scale
+ * 
+ * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
@@ -7,7 +14,7 @@ import { px, GRID } from 'moxi';
 import { SpriteController } from '../controllers/sprite-controller';
 import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
 
-export interface SpriteCardOptions {
+export interface SpriteEditorCardOptions {
   x: number;
   y: number;
   renderer: PIXI.Renderer;
@@ -16,13 +23,13 @@ export interface SpriteCardOptions {
   onFocus?: () => void;
 }
 
-export interface SpriteCardResult extends CardResult, ControllableComponent<SpriteController>, RefreshableComponent {
+export interface SpriteEditorCardResult extends CardResult, ControllableComponent<SpriteController>, RefreshableComponent {
 }
 
 /**
- * Creates a sprite card for editing a single 8x8 sprite
+ * Creates a sprite editor card for editing a single 8x8 sprite
  */
-export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
+export function createSpriteEditorCard(options: SpriteEditorCardOptions): SpriteEditorCardResult {
   const { x, y, renderer, spriteController, onPixelClick, onFocus } = options;
 
   // Get scaled dimensions
@@ -91,17 +98,14 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
       }
     });
 
-    spriteContainer.on('pointerup', () => {
+    const drawFalse = () => {
       isDrawing = false;
       lastPixelX = -1;
       lastPixelY = -1;
-    });
+    }
 
-    spriteContainer.on('pointerupoutside', () => {
-      isDrawing = false;
-      lastPixelX = -1;
-      lastPixelY = -1;
-    });
+    spriteContainer.on('pointerup', drawFalse);
+    spriteContainer.on('pointerupoutside', drawFalse);
   }
 
   // Initial draw
@@ -118,3 +122,4 @@ export function createSpriteCard(options: SpriteCardOptions): SpriteCardResult {
     }
   };
 }
+

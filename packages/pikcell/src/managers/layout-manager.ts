@@ -5,6 +5,18 @@
  * Handles layout presets, card positioning, dimension calculations, and viewport resizing.
  *
  * Now data-driven: loads layout definitions from layouts.json
+ * 
+ * ⚠️ CRITICAL: GRID-BASED POSITIONING
+ * ===================================
+ * 
+ * All positioning and spacing in this class uses GRID UNITS converted to pixels via px().
+ * 
+ * Examples:
+ *   ✅ const topOffset = commanderBarHeight + px(1);     // 1 grid unit margin
+ *   ✅ const gap = px(GRID.gap);                         // Standard gap in grid units
+ *   ❌ const topOffset = commanderBarHeight + 4;         // Raw pixels - WRONG!
+ * 
+ * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
@@ -59,7 +71,9 @@ export class LayoutManager implements ILayoutManager {
     // Calculate key dimensions
     const titleBarHeight = this.calculateTitleBarHeight();
     const commanderBarHeight = px(12) + px(BORDER.total * 2) + titleBarHeight;
-    const topOffset = commanderBarHeight + px(GRID.gap * 2);
+    const margin = px(GRID.margin);
+    // Position cards below commander bar with 1 grid unit margin
+    const topOffset = commanderBarHeight + px(1);
 
     // Position commander bar at top
     const commanderCard = cards.get('commander');
@@ -67,7 +81,24 @@ export class LayoutManager implements ILayoutManager {
       commanderCard.container.position.set(0, 0);
     }
 
-    // Position palette below commander, docked to left
+    // Position toolbar below commander bar, at left edge with margin
+    const toolCard = cards.get('tool');
+    if (toolCard) {
+      toolCard.container.position.set(margin, topOffset);
+    }
+
+    // Position sprite card to the right of toolbar, same vertical position
+    const spriteCard = cards.get('sprite-card-0');
+    if (spriteCard && toolCard) {
+      const toolWidth = toolCard.getPixelWidth();
+      const gap = px(GRID.gap);
+      spriteCard.container.position.set(margin + toolWidth + gap, topOffset);
+    } else if (spriteCard) {
+      // Fallback if no toolbar
+      spriteCard.container.position.set(margin, topOffset);
+    }
+
+    // Position palette below commander, docked to left (bump against commander bar)
     const paletteCard = cards.get('palette');
     if (paletteCard) {
       paletteCard.container.position.set(0, topOffset);

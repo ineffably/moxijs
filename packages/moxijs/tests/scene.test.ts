@@ -25,7 +25,7 @@ describe('Scene', () => {
   });
 
   describe('init', () => {
-    it('should initialize all moxi entities', () => {
+    it('should initialize all moxijs entities', () => {
       const renderer = createMockRenderer();
       const scene = new Scene(renderer);
       
@@ -66,7 +66,7 @@ describe('Scene', () => {
   });
 
   describe('update', () => {
-    it('should update all moxi entities', () => {
+    it('should update all moxijs entities', () => {
       const renderer = createMockRenderer();
       const scene = new Scene(renderer);
       

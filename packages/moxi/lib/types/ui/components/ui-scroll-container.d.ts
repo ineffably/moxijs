@@ -28,6 +28,8 @@ export declare class UIScrollContainer extends UIComponent {
     private dragStartY;
     private dragStartScrollY;
     private isHoveringThumb;
+    private boundGlobalPointerMove;
+    private boundGlobalPointerUp;
     constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>);
     private updateBackground;
     private updateMask;

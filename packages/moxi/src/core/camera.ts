@@ -5,54 +5,27 @@ import { AsEntity, MoxiLogic, MoxiEntity } from './moxi-entity';
 import { lerp } from '../library/utils';
 
 /**
- * Logic that handles camera movement, following targets, and smooth transitions.
- * 
- * @category Logic
- * @implements {Logic<PIXI.Container>}
+ * Logic handling camera following and smooth transitions.
+ * Attached automatically to Camera. Access via camera.moxiEntity.getLogic('CameraLogic').
  */
 export class CameraLogic extends Logic<PIXI.Container> {
-  /**
-   * Explicit name for the logic component (survives minification)
-   */
   name = 'CameraLogic';
-  
-  /**
-   * Speed at which the camera transitions to its target position and scale
-   * @default 0.1
-   */
+
+  /** Interpolation speed (0-1). Higher = snappier. */
   public speed: number = 0.1;
-  
-  /**
-   * The entity that the camera will follow
-   * @default null
-   */
+
+  /** Entity to follow. Set to enable tracking. */
   public target: PIXI.Container = null;
-  
-  /**
-   * The entity this logic is attached to
-   */
+
   entity: PIXI.Container<PIXI.ContainerChild>;
-  
-  /**
-   * Reference to the renderer for viewport calculations
-   */
   renderer: PIXI.Renderer<HTMLCanvasElement>;
 
-  /**
-   * Initialize the camera logic
-   * @param entity - The container (camera) this logic is attached to
-   * @param renderer - The PIXI renderer instance
-   */
   init(entity: PIXI.Container, renderer: PIXI.Renderer) {
     this.entity = entity;
     this.renderer = renderer;
   }
 
-  /**
-   * Updates the camera position and scale based on targets and desired values
-   * @param entity - The Camera entity
-   * @param deltaTime - Time elapsed since last update in seconds
-   */
+  /** @internal Smoothly updates camera position/scale each frame. */
   update(entity: Camera, deltaTime: number) {
     const { speed } = this;
     const deltaSpeed = Math.min(deltaTime * speed, 1);
@@ -110,61 +83,41 @@ export class CameraLogic extends Logic<PIXI.Container> {
 }
 
 /**
- * Camera entity for controlling the viewport and following game objects.
- * The Camera applies transformations to the scene to simulate camera movement.
- * 
- * @category Core
- * @implements {AsEntity<PIXI.Container>}
- * 
+ * Viewport camera with smooth following and zoom.
+ *
  * @example
- * ```typescript
- * // Make the camera follow a player entity
+ * ```ts
+ * const { camera } = await setupMoxi({...});
+ *
+ * // Follow a target
  * camera.moxiEntity.getLogic<CameraLogic>('CameraLogic').target = player;
- * 
- * // Set the camera zoom level
- * camera.desiredScale.set(2, 2); // 2x zoom
+ *
+ * // Zoom to 2x
+ * camera.desiredScale.set(2, 2);
+ *
+ * // Pan to position
+ * camera.desiredPosition.set(500, 300);
  * ```
  */
 export class Camera extends PIXI.Container implements AsEntity<PIXI.Container> {
-  /**
-   * Reference to the scene being viewed by this camera
-   */
+  /** Scene being viewed. */
   public scene: Scene;
-  
-  /**
-   * Reference to the renderer
-   */
+
+  /** Renderer reference. */
   public renderer: PIXI.Renderer;
-  
-  /**
-   * Speed at which the camera transitions
-   * @default 0.1
-   */
+
+  /** Transition speed (0-1). */
   public speed: number = 0.1;
-  
-  /**
-   * MoxiEntity reference as required by the AsEntity interface
-   */
+
+  /** MoxiEntity for attaching logic. */
   public moxiEntity: MoxiEntity<PIXI.Container>;
-  
-  /**
-   * The target scale (zoom) for the camera
-   * @default new Point(1, 1)
-   */
+
+  /** Target zoom level. Set to animate zoom. */
   public desiredScale: Point = new Point(1, 1);
-  
-  /**
-   * The target position for the camera
-   * @default new Point(0, 0)
-   */
-  public desiredPosition: Point = new Point(0, 0); 
-  
-  /**
-   * Creates a new Camera instance
-   * @param scene - The scene being viewed by this camera
-   * @param renderer - The PIXI renderer
-   * @param logic - Additional logic to attach to this camera
-   */
+
+  /** Target position. Set to animate pan. */
+  public desiredPosition: Point = new Point(0, 0);
+
   constructor(scene: Scene, renderer: PIXI.Renderer, logic: MoxiLogic<PIXI.Container> = {}) {
     super();
     this.scene = scene;

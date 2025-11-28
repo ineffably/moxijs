@@ -1,8 +1,10 @@
 # MOXI
 
-**A TypeScript game engine built on PixiJS**
+**A game framework written in TypeScript built to work with PixiJS**
 
-Look, PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXI. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
+Moxi is designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
+
+PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXI. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
 
 ![Prototype Status](https://img.shields.io/badge/Status-Prototype-orange)
 
@@ -197,6 +199,47 @@ setupResponsiveCanvas(renderer, {
 });
 ```
 
+### UI System
+
+Production-ready UI components with flexbox layout.
+
+```typescript
+import { FlexContainer, FlexDirection, UIButton, UILabel, UIPanel } from 'moxi';
+
+const menu = new FlexContainer({
+  direction: FlexDirection.Column,
+  justify: FlexJustify.Center,
+  gap: 16
+});
+
+menu.addChild(new UILabel({ text: 'Main Menu', fontSize: 24 }));
+menu.addChild(new UIButton({
+  text: 'Start Game',
+  onClick: () => startGame()
+}));
+menu.addChild(new UIButton({
+  text: 'Options',
+  onClick: () => showOptions()
+}));
+```
+
+Includes: `UIButton`, `UILabel`, `UIPanel`, `UITextInput`, `UITextArea`, `UISelect`, `UITabs`, `UIScrollContainer`, and `FlexContainer` for layout.
+
+### Pixel Grid System
+
+Pixel-perfect positioning for retro-style games.
+
+```typescript
+import { px, units, GRID } from 'moxi';
+
+// Position sprites in grid units (default 4x scale)
+sprite.x = px(10);  // 10 grid units = 40 pixels
+sprite.y = px(5);
+
+// Convert pixels back to grid units
+const gridX = units(sprite.x);
+```
+
 ---
 
 ## Getting started
@@ -366,6 +409,23 @@ Open http://localhost:9000 for live examples with hot reload.
 | Thing | What it does |
 |-------|--------------|
 | `ClientEvents` | Manages keyboard, mouse, and wheel events |
+| `ActionManager` | Tracks DOM event listeners for automatic cleanup |
+
+### UI Components
+
+| Thing | What it does |
+|-------|--------------|
+| `FlexContainer` | Flexbox-style layout container |
+| `UIButton` | Interactive button with states |
+| `UILabel` | Text display |
+| `UIPanel` | Container with optional 9-slice backgrounds |
+| `UITextInput` | Single-line text input |
+| `UITextArea` | Multi-line text input |
+| `UISelect` | Dropdown selection |
+| `UITabs` | Tabbed interface |
+| `UIScrollContainer` | Scrollable content area |
+| `UILayer` | Responsive scaling container |
+| `px()` / `units()` | Pixel grid positioning helpers |
 
 ### Utilities
 

@@ -11,11 +11,7 @@ import {
   SpriteBackgroundConfig
 } from './button-background-strategy';
 
-/**
- * Button visual states
- *
- * @category UI
- */
+/** Button visual states. */
 export enum ButtonState {
   Normal = 'normal',
   Hover = 'hover',
@@ -26,11 +22,7 @@ export enum ButtonState {
 // Re-export SpriteBackgroundConfig for convenience
 export type { SpriteBackgroundConfig } from './button-background-strategy';
 
-/**
- * Props for configuring a UIButton
- *
- * @category UI
- */
+/** UIButton configuration. */
 export interface UIButtonProps {
   /** Button label text */
   label?: string;
@@ -63,20 +55,29 @@ export interface UIButtonProps {
 }
 
 /**
- * An interactive button component
- * Supports hover, press, and disabled states
- *
- * @category UI
+ * Interactive button component with hover, press, and disabled states.
+ * Supports solid color or sprite-based backgrounds, bitmap text, and keyboard focus.
  *
  * @example
- * ```typescript
- * const button = new UIButton({
+ * ```ts
+ * // Basic button
+ * const btn = new UIButton({
  *   label: 'Click Me',
  *   width: 150,
  *   height: 40,
  *   backgroundColor: 0x4a90e2,
  *   textColor: 0xffffff,
- *   onClick: () => console.log('Button clicked!')
+ *   onClick: () => console.log('clicked')
+ * });
+ *
+ * // Sprite-based button
+ * const spriteBtn = new UIButton({
+ *   label: 'Play',
+ *   spriteBackground: {
+ *     normal: normalTexture,
+ *     hover: hoverTexture,
+ *     pressed: pressedTexture
+ *   }
  * });
  * ```
  */
@@ -172,9 +173,7 @@ export class UIButton extends UIComponent {
     }
   }
 
-  /**
-   * Creates a BitmapText label
-   */
+  /** @internal */
   private createBitmapLabel(): void {
     if (!this.bitmapFontFamily) return;
 
@@ -190,9 +189,7 @@ export class UIButton extends UIComponent {
     this.container.addChild(this.bitmapLabel);
   }
 
-  /**
-   * Sets up mouse/touch event handlers
-   */
+  /** @internal */
   private setupInteractivity(): void {
     this.container.eventMode = 'static';
     this.container.cursor = 'pointer';
@@ -243,28 +240,18 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerDown(): void {
-    console.log('🔵 Button handlePointerDown called');
-    console.log('  - enabled:', this.props.enabled);
-    console.log('  - canFocus:', this.canFocus());
-    console.log('  - tabIndex:', this.tabIndex);
-
     if (this.props.enabled) {
       this.setState(ButtonState.Pressed);
 
       // Request focus through the focus manager
       if (this.canFocus()) {
         const focusManager = UIFocusManager.getInstance();
-        console.log('  - focusManager:', focusManager);
         if (focusManager) {
-          console.log('  - Calling requestFocus');
           focusManager.requestFocus(this);
         } else {
-          console.log('  - No focus manager, calling onFocus directly');
           // Fallback if no focus manager
           this.onFocus();
         }
-      } else {
-        console.log('  - canFocus returned false, NOT focusing');
       }
     }
   }
@@ -282,17 +269,13 @@ export class UIButton extends UIComponent {
     }
   }
 
-  /**
-   * Updates the button's visual state
-   */
+  /** @internal */
   private setState(newState: ButtonState): void {
     this.state = newState;
     this.updateVisuals();
   }
 
-  /**
-   * Updates visuals based on current state
-   */
+  /** @internal */
   private updateVisuals(): void {
     // Update background using strategy
     this.backgroundStrategy.updateState(this.state);
@@ -316,9 +299,7 @@ export class UIButton extends UIComponent {
     }
   }
 
-  /**
-   * Measures the size needed for this button
-   */
+  /** @internal */
   measure(): MeasuredSize {
     return {
       width: this.props.width,
@@ -326,9 +307,7 @@ export class UIButton extends UIComponent {
     };
   }
 
-  /**
-   * Performs layout for this button
-   */
+  /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
 
@@ -359,16 +338,12 @@ export class UIButton extends UIComponent {
     this.render();
   }
 
-  /**
-   * Renders the button (called after layout)
-   */
+  /** @internal */
   protected render(): void {
     // Rendering is handled by background and label
   }
 
-  /**
-   * Sets the button label
-   */
+  /** Update button text. */
   setLabel(text: string): void {
     if (this.label) {
       this.label.setText(text);
@@ -379,24 +354,18 @@ export class UIButton extends UIComponent {
     }
   }
 
-  /**
-   * Sets the enabled state
-   */
+  /** Enable or disable the button. */
   setEnabled(enabled: boolean): void {
     this.props.enabled = enabled;
     this.setState(enabled ? ButtonState.Normal : ButtonState.Disabled);
   }
 
-  /**
-   * Gets the current state
-   */
+  /** Get current visual state. */
   getState(): ButtonState {
     return this.state;
   }
 
-  /**
-   * Cleanup when destroying the button
-   */
+  /** Clean up event listeners. */
   destroy(): void {
     if (typeof window !== 'undefined' && this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);

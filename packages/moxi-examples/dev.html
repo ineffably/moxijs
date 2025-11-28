@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moxi Examples (Dev)</title>
+  <meta name="description" content="Interactive examples and demos for the Moxi game engine">
+  <!-- Load PIXI.js from CDN - MUST load before bundle.js -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.14.0/dist/pixi.min.js" crossorigin="anonymous"></script>
+  <script>
+    // Verify PIXI loaded
+    if (typeof PIXI === 'undefined') {
+      console.error('PIXI.js failed to load from CDN!');
+    } else {
+      console.log('PIXI.js loaded successfully:', PIXI.VERSION);
+    }
+  </script>
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="dev.css">
+</head>
+<body>
+  <div class="container">
+    <div id="sidebar">
+      <div class="header">
+        <h1>Moxi Examples</h1>
+      </div>
+      <!-- Example buttons will be injected here -->
+    </div>
+    <div id="app">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="game" id="game-tab">Game</button>
+        <button class="tab-btn" data-tab="code" id="code-tab">Code</button>
+      </div>
+
+      <!-- Canvas Container -->
+      <div id="canvas-container"></div>
+
+      <!-- Resize Handle -->
+      <div class="resize-handle" id="resize-handle"></div>
+
+      <!-- Code Viewer Container -->
+      <div id="code-container">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-header-title">Source Code</div>
+          </div>
+          <button class="copy-btn" id="copy-btn" title="Copy code to clipboard">
+            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6ZM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1H2Z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-editor-wrapper" id="code-editor-wrapper">
+          <!-- CodeMirror will mount here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="dist/bundle.js"></script>
+</body>
+</html>

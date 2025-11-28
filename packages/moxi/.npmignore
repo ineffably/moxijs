@@ -1,0 +1,25 @@
+# Source files
+src/
+
+# Tests
+tests/
+coverage/
+test-results/
+jest.config.js
+
+# Build config
+tsconfig.json
+tsconfig.tsbuildinfo
+webpack.config.js
+
+# Documentation source (docs are generated separately)
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+.DS_Store
+

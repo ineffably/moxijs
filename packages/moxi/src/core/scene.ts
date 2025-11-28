@@ -5,6 +5,17 @@ function isMoxiEntity<T extends PIXI.Container>(entity: unknown): entity is AsEn
   return entity != null && typeof entity === 'object' && 'moxiEntity' in entity;
 }
 
+/**
+ * Root container for game objects. Extends PIXI.Container.
+ * Automatically calls init/update on child entities created with asEntity().
+ *
+ * @example
+ * ```ts
+ * const scene = new Scene(renderer);
+ * scene.addChild(asEntity(sprite));
+ * scene.init();  // Calls init() on all entity logic
+ * ```
+ */
 export class Scene extends PIXI.Container {
   renderer: PIXI.Renderer<HTMLCanvasElement>;
 
@@ -13,6 +24,7 @@ export class Scene extends PIXI.Container {
     this.renderer = renderer;
   }
 
+  /** Initialize all entity logic. Call once after adding entities. */
   init() {
     this.children.forEach((child) => {
       if (isMoxiEntity(child)) {
@@ -21,7 +33,7 @@ export class Scene extends PIXI.Container {
     });
   }
 
-
+  /** Update all entity logic. Called automatically by Engine each frame. */
   update(deltaTime: number) {
     this.children.forEach((child) => {
       if (isMoxiEntity(child)) {
@@ -30,6 +42,7 @@ export class Scene extends PIXI.Container {
     });
   }
 
+  /** Render the scene. Called automatically by Engine each frame. */
   draw(deltaTime: number) {
     this.renderer.render(this);
   }

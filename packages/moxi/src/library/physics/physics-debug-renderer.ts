@@ -5,16 +5,12 @@ import type { PhysicsWorld } from './physics-world';
 import type { PhysicsDebugOptions } from './physics-types';
 
 /**
- * PhysicsDebugRenderer - Visualizes collision shapes, velocity vectors, and physics state
+ * Renders physics collision shapes, velocities, AABBs for debugging.
  *
  * @example
- * ```typescript
- * const debugRenderer = physicsWorld.enableDebugRenderer(scene);
- *
- * // Toggle with keyboard
- * document.addEventListener('keydown', (e) => {
- *   if (e.key === 'p') debugRenderer.toggle();
- * });
+ * ```ts
+ * const debug = physicsWorld.enableDebugRenderer(scene);
+ * debug.toggle(); // Toggle visibility
  * ```
  */
 export class PhysicsDebugRenderer extends Logic<PIXI.Graphics> {
@@ -295,9 +291,7 @@ export class PhysicsDebugRenderer extends Logic<PIXI.Graphics> {
     }
   }
 
-  /**
-   * Set visibility of debug renderer
-   */
+  /** Show or hide debug visualization. */
   setVisible(visible: boolean): void {
     this.isVisible = visible;
     if (!visible) {
@@ -305,16 +299,12 @@ export class PhysicsDebugRenderer extends Logic<PIXI.Graphics> {
     }
   }
 
-  /**
-   * Toggle debug renderer visibility
-   */
+  /** Toggle visibility. */
   toggle(): void {
     this.setVisible(!this.isVisible);
   }
 
-  /**
-   * Check if debug renderer is visible
-   */
+  /** Check current visibility. */
   getVisible(): boolean {
     return this.isVisible;
   }

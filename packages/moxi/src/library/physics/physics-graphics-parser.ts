@@ -2,14 +2,13 @@ import * as PIXI from 'pixi.js';
 import * as planck from 'planck';
 import type { PhysicsWorld } from './physics-world';
 
+/** Result from parseGraphicsShape(). */
 export interface ParsedShape {
   type: 'circle' | 'rectangle' | 'polygon';
   shape: planck.Shape;
 }
 
-/**
- * Shape metadata stored on Graphics for physics parsing
- */
+/** @internal Metadata stored on Graphics for physics extraction. */
 export interface PhysicsShapeMetadata {
   type: 'circle' | 'rectangle' | 'polygon';
   radius?: number;
@@ -20,17 +19,12 @@ export interface PhysicsShapeMetadata {
 
 const PHYSICS_SHAPE_KEY = '__physicsShape__';
 
-/**
- * Store shape metadata on Graphics object
- */
+/** @internal Attach shape metadata to Graphics. */
 export function setGraphicsPhysicsShape(graphics: PIXI.Graphics, metadata: PhysicsShapeMetadata): void {
   (graphics as any)[PHYSICS_SHAPE_KEY] = metadata;
 }
 
-/**
- * Extend PIXI Graphics to automatically track shape data for physics
- * This patches Graphics methods to store metadata for physics collision shapes
- */
+/** @internal Patches PIXI.Graphics.rect/circle/poly to auto-track shapes. Called once by PhysicsWorld. */
 export function initGraphicsPhysicsTracking(): void {
   // Save original methods
   const originalRect = PIXI.Graphics.prototype.rect;
@@ -67,11 +61,7 @@ export function initGraphicsPhysicsTracking(): void {
   };
 }
 
-/**
- * Parse PIXI Graphics geometry to extract collision shape for physics
- *
- * Uses metadata stored by helper functions or falls back to bounds-based rectangle
- */
+/** Extract Planck shape from PIXI.Graphics. Uses stored metadata or falls back to bounds. */
 export function parseGraphicsShape(graphics: PIXI.Graphics, world: PhysicsWorld): ParsedShape {
   // Check if shape metadata was stored
   const metadata = (graphics as any)[PHYSICS_SHAPE_KEY] as PhysicsShapeMetadata | undefined;

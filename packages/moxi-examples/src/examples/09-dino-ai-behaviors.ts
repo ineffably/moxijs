@@ -1,10 +1,10 @@
 import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange, Logic } from 'moxi';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { PlayerMovementLogic } from '../behavior-logic/player-movement-logic';
+import { PlayerMovementLogic } from './behavior-logic/player-movement-logic';
 import { DinoAIStateMachine } from '../utils/dino-ai-state-machine';
-import { DinoAnimationLogic } from '../behavior-logic/dino-animation-logic';
-import { HideLogic } from '../behavior-logic/hide-logic';
+import { DinoAnimationLogic } from './behavior-logic/dino-animation-logic';
+import { HideLogic } from './behavior-logic/hide-logic';
 
 /**
  * Dino AI Behaviors Example

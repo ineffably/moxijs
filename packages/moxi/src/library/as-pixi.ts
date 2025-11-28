@@ -12,6 +12,7 @@ export interface BitmapTextOptions {
     fill?: number | string;
     [key: string]: any;
   };
+  pixelPerfect?: boolean; // Enable pixel-perfect rendering (roundPixels)
   [key: string]: any;
 }
 
@@ -116,11 +117,11 @@ function applyProps<T extends PIXI.Container>(obj: T, props?: PixiProps): T {
 
 /**
  * Creates a BitmapText instance with constructor args and optional properties
- * 
+ *
  * @example
  * ```typescript
  * const label = asBitmapText(
- *   { text: 'Hello', style: { fontFamily: 'Arial', fontSize: 24 } },
+ *   { text: 'Hello', style: { fontFamily: 'Arial', fontSize: 24 }, pixelPerfect: true },
  *   { x: 100, y: 50, anchor: 0.5 }
  * );
  * ```
@@ -129,7 +130,14 @@ export function asBitmapText(
   constructorArgs: BitmapTextOptions,
   props?: PixiProps
 ): PIXI.BitmapText {
-  const text = new PIXI.BitmapText(constructorArgs as any);
+  const { pixelPerfect, ...textArgs } = constructorArgs;
+  const text = new PIXI.BitmapText(textArgs as any);
+
+  // Apply pixel-perfect rendering if requested
+  if (pixelPerfect) {
+    text.roundPixels = true;
+  }
+
   return applyProps(text, props);
 }
 

@@ -1,0 +1,70 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build moxi package
+        run: npm run build --workspace=moxi
+      
+      - name: Run tests with coverage
+        run: npm run test:ci --workspace=moxi
+        
+      - name: Extract Coverage Percentage
+        if: matrix.node-version == '20.x'
+        id: extract_coverage
+        run: |
+          COVERAGE=$(node -e "const fs=require('fs'); const coverage = JSON.parse(fs.readFileSync('./packages/moxi/coverage/coverage-summary.json')); console.log(coverage.total.statements.pct)")
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+          echo "Coverage: $COVERAGE%"
+          
+      - name: Output Coverage Summary
+        if: matrix.node-version == '20.x'
+        run: |
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Total Statement Coverage: ${{ env.COVERAGE }}%" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload build artifacts
+        if: matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: moxi-lib
+          path: packages/moxi/lib
+          retention-days: 7
+      
+      - name: Upload coverage reports
+        if: matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: packages/moxi/coverage/
+          retention-days: 7
+

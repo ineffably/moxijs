@@ -14,7 +14,7 @@
     "clean": "npm run clean --workspaces --if-present",
     "build:dev": "npm run build:dev --workspaces --if-present",
     "watch": "concurrently \"npm run watch --workspace=moxijs-examples\" \"npm run watch --workspace=moxijs\"",
-    "watch:moxi": "npm run watch --workspace=moxijs",
+    "watch:moxijs": "npm run watch --workspace=moxijs",
     "examples": "npm run local --workspace=moxijs-examples",
     "test": "npm run test --workspace=moxijs",
     "test:watch": "npm run test:watch --workspace=moxijs",

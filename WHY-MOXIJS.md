@@ -17,8 +17,8 @@ Building games with raw PixiJS requires:
 
 ```typescript
 const { scene, engine, renderer, camera, loadAssets } = await setupMoxi({
-  width: 800,
-  height: 600,
+  width: 1280,
+  height: 720,
   pixelPerfect: true,
   physics: { gravity: { x: 0, y: 9.8 } }
 });

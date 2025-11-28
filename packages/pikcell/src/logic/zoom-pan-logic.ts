@@ -5,7 +5,7 @@
  * following the Moxi ECS pattern.
  */
 import * as PIXI from 'pixi.js';
-import { Logic, ActionManager } from 'moxi-kit';
+import { Logic, ActionManager } from 'moxijs';
 import { SPRITE_SHEET_CONSTANTS } from '../config/constants';
 
 export interface ZoomPanOptions {

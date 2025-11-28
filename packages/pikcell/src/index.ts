@@ -2,7 +2,7 @@
  * PIKCELL - Pixel-Perfect Sprite Editor
  * Built on Moxi and PIXI.js
  */
-import { setupMoxi, setupResponsiveCanvas } from 'moxi-kit';
+import { setupMoxi, setupResponsiveCanvas } from 'moxijs';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { SpriteEditor } from './sprite-editor';

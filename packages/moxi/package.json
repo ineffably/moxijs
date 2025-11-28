@@ -44,6 +44,9 @@
   },
   "homepage": "https://github.com/ineffably/moxi#readme",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "bundle-stats-webpack-plugin": "^4.21.6",

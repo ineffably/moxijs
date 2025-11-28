@@ -2,7 +2,7 @@
  * Pixel-perfect button component for the sprite editor
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from 'moxi';
+import { GRID, px } from 'moxi-kit';
 import { getTheme } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 

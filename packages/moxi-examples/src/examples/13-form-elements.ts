@@ -10,7 +10,7 @@ import {
   UISelect,
   UITextInput,
   SelectOption
-} from 'moxi';
+} from 'moxi-kit';
 
 /**
  * Example 13: Form Elements

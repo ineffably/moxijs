@@ -1,4 +1,4 @@
-import { setupMoxi, FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets, UIBox, UILabel, UIPanel, UIButton } from 'moxi';
+import { setupMoxi, FlexContainer, FlexDirection, FlexJustify, FlexAlign, EdgeInsets, UIBox, UILabel, UIPanel, UIButton } from 'moxi-kit';
 
 export async function initUIComponents() {
   const root = document.getElementById('canvas-container');

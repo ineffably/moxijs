@@ -2,7 +2,7 @@
  * Example 11: UI Basics
  * Demonstrates the new UI system with FlexBox layouts and colored boxes
  */
-import { setupMoxi, EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox } from 'moxi';
+import { setupMoxi, EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox } from 'moxi-kit';
 
 export async function initUIBasics() {
   const root = document.getElementById('canvas-container');

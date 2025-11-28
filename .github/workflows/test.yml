@@ -23,11 +23,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Build moxi package
-        run: npm run build --workspace=moxi
-      
-      - name: Run moxi tests
-        run: npm run test --workspace=moxi
+      - name: Build moxi-kit package
+        run: npm run build --workspace=moxi-kit
+
+      - name: Run moxi-kit tests
+        run: npm run test --workspace=moxi-kit
       
       - name: Upload coverage reports
         if: matrix.node-version == '20.x'

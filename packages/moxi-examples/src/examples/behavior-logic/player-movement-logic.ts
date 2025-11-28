@@ -1,4 +1,4 @@
-import { Logic, ClientEvents, TextureFrameSequences } from 'moxi';
+import { Logic, ClientEvents, TextureFrameSequences } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 
 // Define animation directions

@@ -22,7 +22,7 @@
  *   - Canvas/texture dimensions for sprite rendering
  * 
  * All UI dimensions, spacing, margins, and padding should be specified in GRID UNITS
- * and converted to pixels using the px() function from 'moxi'.
+ * and converted to pixels using the px() function from 'moxi-kit'.
  * 
  * Examples:
  *   ✅ CORRECT (UI): const spacing = px(GRID.gap);        // Uses grid units

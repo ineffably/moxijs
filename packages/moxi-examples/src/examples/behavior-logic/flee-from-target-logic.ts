@@ -1,4 +1,4 @@
-import { Logic } from 'moxi';
+import { Logic } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 
 /**

@@ -10,7 +10,7 @@ import {
   FlexJustify,
   FlexAlign,
   UIComponent
-} from 'moxi';
+} from 'moxi-kit';
 import { ASSETS } from '../../assets-config';
 
 /**

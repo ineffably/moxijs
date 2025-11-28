@@ -2,7 +2,7 @@
  * Example 16: Sprite Library
  * Browse all available sprites and textures loaded in the examples app
  */
-import { setupMoxi, asEntity, UITextInput, UILabel, FlexContainer, FlexDirection, FlexAlign, UILayer, UIScrollContainer, EdgeInsets, UIComponent, asTextureFrames } from 'moxi';
+import { setupMoxi, asEntity, UITextInput, UILabel, FlexContainer, FlexDirection, FlexAlign, UILayer, UIScrollContainer, EdgeInsets, UIComponent, asTextureFrames } from 'moxi-kit';
 import { Sprite, Container, Graphics, BitmapText, Assets, BitmapFont } from 'pixi.js';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';

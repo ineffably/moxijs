@@ -2,7 +2,7 @@
  * Example 17: Sprite Editor - Scaled Pixel Perfect UI
  * Uses the PIKCELL sprite editor package from the monorepo
  */
-import { setupMoxi } from 'moxi';
+import { setupMoxi } from 'moxi-kit';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';

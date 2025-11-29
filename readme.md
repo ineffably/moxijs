@@ -4,7 +4,7 @@
 
 MoxiJS is designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
 
-PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXIJS. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
+PixiJS handles rendering beautifully, but game logic can get messy fast. MoxiJS adds structure - an ECS architecture, reusable components, and game-ready utilities - so you can focus on building instead of boilerplate.
 
 ![Alpha Status](https://img.shields.io/badge/Status-ALPHA-blue)
 [![npm version](https://img.shields.io/npm/v/@moxijs/core.svg)](https://www.npmjs.com/package/@moxijs/core)

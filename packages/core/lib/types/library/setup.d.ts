@@ -12,6 +12,7 @@ export interface PixelPerfectOptions {
 export interface SetupMoxiArgs {
     hostElement: HTMLElement;
     renderOptions?: Partial<PIXI.AutoDetectOptions>;
+    backgroundColor?: number;
     physics?: PhysicsWorldOptions | boolean;
     showLoadingScene?: boolean;
     loadingSceneOptions?: LoadingSceneOptions;
@@ -28,7 +29,7 @@ export interface SetupMoxiResult {
     loadingScene?: LoadingScene;
 }
 export declare const defaultRenderOptions: Partial<PIXI.AutoDetectOptions>;
-export declare function setupMoxi({ hostElement, renderOptions, physics, showLoadingScene, loadingSceneOptions, pixelPerfect }?: SetupMoxiArgs): Promise<{
+export declare function setupMoxi({ hostElement, renderOptions, backgroundColor, physics, showLoadingScene, loadingSceneOptions, pixelPerfect }?: SetupMoxiArgs): Promise<{
     scene: Scene;
     engine: Engine;
     PIXIAssets: PIXI.AssetsClass;

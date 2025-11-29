@@ -15,13 +15,17 @@ import { initTextRendering } from './examples/02-ui/text-rendering';
 import { initFontRenderingComparison } from './examples/02-ui/font-rendering-comparison';
 import { initUIShowcase } from './examples/02-ui/ui-showcase';
 
-// === GAMEPLAY & PHYSICS ===
+// === GAMEPLAY ===
 import { initBunnyAdventure } from './examples/03-gameplay/bunny-adventure';
 import { initParallaxSpaceShooter } from './examples/03-gameplay/parallax-shooter';
-import { initPhysicsBasic } from './examples/03-gameplay/physics-basic';
 
 // === NPC BEHAVIORS ===
 import { initDinoAIBehaviors } from './examples/04-npc-behaviors/dino-behaviors';
+
+// === PHYSICS ===
+import { initPhysicsBasic } from './examples/06-physics/physics-basic';
+import { initStackingTower } from './examples/06-physics/stacking-tower';
+import { initNewtonsCradle } from './examples/06-physics/newtons-cradle';
 
 // === TOOLS ===
 import { initSpriteLibrary } from './examples/05-tools/sprite-library';
@@ -46,13 +50,17 @@ import textRenderingSource from './examples/02-ui/text-rendering.ts?raw';
 import fontRenderingComparisonSource from './examples/02-ui/font-rendering-comparison.ts?raw';
 import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
 
-// === GAMEPLAY & PHYSICS ===
+// === GAMEPLAY ===
 import bunnyAdventureSource from './examples/03-gameplay/bunny-adventure.ts?raw';
 import parallaxShooterSource from './examples/03-gameplay/parallax-shooter.ts?raw';
-import physicsBasicSource from './examples/03-gameplay/physics-basic.ts?raw';
 
 // === NPC BEHAVIORS ===
 import dinoBehaviorsSource from './examples/04-npc-behaviors/dino-behaviors.ts?raw';
+
+// === PHYSICS ===
+import physicsBasicSource from './examples/06-physics/physics-basic.ts?raw';
+import stackingTowerSource from './examples/06-physics/stacking-tower.ts?raw';
+import newtonsCradleSource from './examples/06-physics/newtons-cradle.ts?raw';
 
 // === TOOLS ===
 import spriteLibrarySource from './examples/05-tools/sprite-library.ts?raw';
@@ -137,7 +145,7 @@ const categories: Record<string, Category> = {
     }
   },
   'gameplay': {
-    name: 'Gameplay & Physics',
+    name: 'Gameplay',
     collapsed: true,
     examples: {
       'bunny-adventure': {
@@ -151,12 +159,6 @@ const categories: Record<string, Category> = {
         description: 'Asteroids-style space shooter with parallax',
         init: initParallaxSpaceShooter,
         source: parallaxShooterSource
-      },
-      'physics-basic': {
-        name: 'Physics Basic',
-        description: 'Planck.js physics with boxes and balls',
-        init: initPhysicsBasic,
-        source: physicsBasicSource
       }
     }
   },
@@ -169,6 +171,30 @@ const categories: Record<string, Category> = {
         description: 'FSM behaviors: Follow, Flee, Patrol, Wander',
         init: initDinoAIBehaviors,
         source: dinoBehaviorsSource
+      }
+    }
+  },
+  'physics': {
+    name: 'Physics',
+    collapsed: true,
+    examples: {
+      'physics-basic': {
+        name: 'Physics Basics',
+        description: 'Planck.js physics with boxes and balls',
+        init: initPhysicsBasic,
+        source: physicsBasicSource
+      },
+      'stacking-tower': {
+        name: 'Stacking Tower',
+        description: 'Drop shapes to build the tallest tower',
+        init: initStackingTower,
+        source: stackingTowerSource
+      },
+      'newtons-cradle': {
+        name: "Newton's Cradle",
+        description: 'Classic momentum transfer pendulum',
+        init: initNewtonsCradle,
+        source: newtonsCradleSource
       }
     }
   },

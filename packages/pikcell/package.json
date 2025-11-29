@@ -29,6 +29,6 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "moxijs": "file:../moxijs"
+    "moxijs": "^0.1.0"
   }
 }

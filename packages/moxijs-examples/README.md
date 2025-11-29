@@ -1,8 +1,8 @@
-# MOXI Examples
+# MOXIJS Examples
 
-Working demos that show you what MOXI can do. Each example is self-contained and builds on the previous ones, so you can see how things actually work instead of just reading about it.
+Working demos that show you what MOXIJS can do. Each example is self-contained and builds on the previous ones, so you can see how things actually work instead of just reading about it.
 
-## 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)
+## 🎮 [**View Live Examples**](https://ineffably.github.io/moxijs/packages/moxijs-examples/dist/)
 
 Click the link above to explore all examples in an interactive viewer on GitHub Pages, or build locally and open `dist/index.html` in your browser.
 
@@ -25,13 +25,13 @@ open dist/index.html  # macOS
 ## What's in here
 
 ### 01 - Basic Sprite
-The absolute basics. Displays a single sprite using MOXI. If you're new, start here.
+The absolute basics. Displays a single sprite using MOXIJS. If you're new, start here.
 
 ### 02 - Rotating Sprite
 Sprite rotation with a label showing the current angle. Demonstrates continuous animation and text rendering.
 
 ### 03 - PIXI.js Only
-Pure PixiJS example without MOXI - rotating bunny grid. Shows the difference between vanilla PixiJS and MOXI.
+Pure PixiJS example without MOXIJS - rotating bunny grid. Shows the difference between vanilla PixiJS and MOXIJS.
 
 ### 04 - Animated Character
 Sprite animation with camera following. Uses sprite sheets and frame sequences from the Sproutlands pack.
@@ -69,7 +69,7 @@ Comprehensive text rendering showcase featuring:
 - **Floating damage numbers**: MMO-style damage/heal numbers with physics
 - **Styled text examples**: Gradients, strokes, shadows, word wrapping
 
-Demonstrates MOXI Logic components for text behaviors. Click the character to spawn damage numbers.
+Demonstrates MOXIJS Logic components for text behaviors. Click the character to spawn damage numbers.
 
 **📚 See [guides/text-rendering.md](./guides/text-rendering.md) for the complete text rendering guide.**
 
@@ -145,7 +145,7 @@ That's it. No webpack config changes, no complex setup, just write code.
 ## What this shows you
 
 These examples demonstrate:
-- **Entity-Component System**: MOXI's core architecture with Logic components
+- **Entity-Component System**: MOXIJS's core architecture with Logic components
 - **Sprite rendering**: Basic sprites, rotation, animation, sprite sheets
 - **Text rendering**: BitmapText, styled text, gradients, shadows, performance
 - **Text behaviors**: Counters, FPS display, fading, floating numbers, mechanical odometers
@@ -165,14 +165,14 @@ Each example is meant to be readable and educational. If you see something confu
 ## Guides
 
 In-depth guides for specific topics:
-- **[Text Rendering Guide](./guides/text-rendering.md)**: Complete guide to PixiJS text rendering (Text, BitmapText, HTMLText) and creating text behaviors with MOXI Logic components. Includes practical patterns for counters, FPS displays, fading text, floating damage numbers, and more.
+- **[Text Rendering Guide](./guides/text-rendering.md)**: Complete guide to PixiJS text rendering (Text, BitmapText, HTMLText) and creating text behaviors with MOXIJS Logic components. Includes practical patterns for counters, FPS displays, fading text, floating damage numbers, and more.
 
 ## Stack
 
 - **Webpack 5** for bundling with hot reload
 - **TypeScript 5** with strict mode
 - **PixiJS 8** for rendering
-- **MOXI** (local build from `../moxijs`)
+- **MOXIJS** (local build from `../moxijs`)
 - **Planck.js** for physics (example 08)
 - **CodeMirror 6** for interactive source code viewer
 - **Vite's ?raw loader** for bundling source code as strings

@@ -323,9 +323,9 @@ const pixelText = new BitmapText({
 });
 ```
 
-#### Using with MOXI's asBitmapText Helper
+#### Using with MOXIJS's asBitmapText Helper
 
-MOXI provides a `pixelPerfect` flag for convenience:
+MOXIJS provides a `pixelPerfect` flag for convenience:
 
 ```typescript
 import { asBitmapText } from 'moxijs';
@@ -1027,9 +1027,9 @@ fontFamily: 'ExactFontName'
 
 ---
 
-## Text Behaviors with MOXI Logic
+## Text Behaviors with MOXIJS Logic
 
-MOXI's entity-component architecture provides an elegant way to encapsulate text animations and behaviors. By extending the `Logic<T>` class, you can create reusable components that update text in response to game state, time, or user input.
+MOXIJS's entity-component architecture provides an elegant way to encapsulate text animations and behaviors. By extending the `Logic<T>` class, you can create reusable components that update text in response to game state, time, or user input.
 
 ### Core Concept: Logic Components
 
@@ -1573,7 +1573,7 @@ See `examples/10-text-rendering.ts` for a complete implementation featuring:
 - [PixiJS Examples - Text](https://pixijs.com/8.x/examples/text)
 - [BMFont Generator](https://www.angelcode.com/products/bmfont/)
 - [MSDF Bitmap Font Generator](https://github.com/soimy/msdf-bmfont-xml)
-- [MOXI Documentation](../../README.md)
+- [MOXIJS Documentation](../../README.md)
 
 ---
 
@@ -1582,8 +1582,8 @@ See `examples/10-text-rendering.ts` for a complete implementation featuring:
 - **Use Text** for UI elements with rich styling that don't update frequently
 - **Use BitmapText** for performance-critical text, counters, and large volumes
 - **Use HTMLText** for complex formatted content and markup
-- **Use MOXI Logic components** to encapsulate text behaviors and animations
+- **Use MOXIJS Logic components** to encapsulate text behaviors and animations
 - **Always set resolution** appropriately to prevent blurriness in scaled scenes
 - **Profile your application** to identify text rendering bottlenecks
 
-Remember: The best method depends on your specific use case. Start with Text for prototyping, optimize with BitmapText for performance, and use MOXI Logic to organize complex behaviors.
+Remember: The best method depends on your specific use case. Start with Text for prototyping, optimize with BitmapText for performance, and use MOXIJS Logic to organize complex behaviors.

@@ -1,10 +1,10 @@
-# MOXI
+# MOXIJS
 
 **A game framework written in TypeScript built to work with PixiJS**
 
 Moxi is designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
 
-PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXI. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
+PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXIJS. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
 
 ![Prototype Status](https://img.shields.io/badge/Status-Prototype-orange)
 
@@ -14,15 +14,15 @@ PixiJS is great for rendering, but sometimes you just want to make a game withou
 
 ## What is this thing?
 
-MOXI wraps PixiJS with an Entity-Component-System architecture. You get all the rendering performance of PixiJS, but with reusable components, a built-in game loop, and utilities for physics, camera work, parallax, input handling, and all that stuff you'd end up writing yourself anyway.
+MOXIJS wraps PixiJS with an Entity-Component-System architecture. You get all the rendering performance of PixiJS, but with reusable components, a built-in game loop, and utilities for physics, camera work, parallax, input handling, and all that stuff you'd end up writing yourself anyway.
 
-Think of it like this: PixiJS handles the "draw stuff fast" part. MOXI handles the "organize your game logic so it doesn't turn into spaghetti" part.
+Think of it like this: PixiJS handles the "draw stuff fast" part. MOXIJS handles the "organize your game logic so it doesn't turn into spaghetti" part.
 
-🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)** to see it in action.
+🎮 **[View Live Examples](https://ineffably.github.io/moxijs/packages/moxijs-examples/dist/)** to see it in action.
 
 ## Why would I use this?
 
-- If you know PixiJS, you'll feel right at home with MOXI
+- If you know PixiJS, you'll feel right at home with MOXIJS
 - The Entity-Component pattern keeps your code modular instead of one giant pile
 - Comes with physics (Planck.js), camera system, parallax scrolling, state machines
 - Full TypeScript support with autocomplete
@@ -32,7 +32,7 @@ Think of it like this: PixiJS handles the "draw stuff fast" part. MOXI handles t
 
 ## The basics
 
-Here's what MOXI gives you out of the box:
+Here's what MOXIJS gives you out of the box:
 
 ### Entity-Component System
 
@@ -55,7 +55,7 @@ entity.moxiEntity.addLogic(new RotateLogic());
 
 ### Physics Engine
 
-Real physics via Planck.js. The cool part? If you draw a box with Graphics, MOXI automatically figures out the collision shape. No manual setup.
+Real physics via Planck.js. The cool part? If you draw a box with Graphics, MOXIJS automatically figures out the collision shape. No manual setup.
 
 ```typescript
 import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxijs';
@@ -340,9 +340,9 @@ initPhysics();
 
 ## Examples
 
-### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)
+### 🎮 [**View Live Examples**](https://ineffably.github.io/moxijs/packages/moxijs-examples/dist/)
 
-Interactive examples with source code viewer - see MOXI in action right in your browser.
+Interactive examples with source code viewer - see MOXIJS in action right in your browser.
 
 ### All Examples
 
@@ -350,7 +350,7 @@ Check out [`packages/moxijs-examples`](packages/moxijs-examples/) for working de
 
 - **01 - Basic Sprite** - The absolute basics with a single sprite
 - **02 - Rotating Sprite** - Animation and text rendering
-- **03 - PIXI.js Only** - Pure PixiJS example (no MOXI) for comparison
+- **03 - PIXI.js Only** - Pure PixiJS example (no MOXIJS) for comparison
 - **04 - Animated Character** - Sprite sheets and camera following
 - **05 - Progress Bar** - Custom Logic components
 - **06 - Bunny Adventure** - Tilemap platformer with keyboard controls
@@ -380,7 +380,7 @@ Open http://localhost:9000 for live examples with hot reload.
 | Thing | What it does |
 |-------|--------------|
 | `setupMoxi()` | Sets up your engine, scene, renderer, and optionally physics |
-| `asEntity()` | Converts a PixiJS Container into a MOXI entity |
+| `asEntity()` | Converts a PixiJS Container into a MOXIJS entity |
 | `Logic<T>` | Base class for your game logic components |
 | `Engine` | The game loop that updates everything |
 | `Scene` | A PixiJS Container that manages entity lifecycles |
@@ -493,7 +493,7 @@ Prototype stage - not ready for contributions yet.
 
 A few principles I'm trying to stick to:
 
-**PixiJS first** - You're working with actual PixiJS objects, not some abstraction layer that fights you. If you know PixiJS, you know most of MOXI already.
+**PixiJS first** - You're working with actual PixiJS objects, not some abstraction layer that fights you. If you know PixiJS, you know most of MOXIJS already.
 
 **Opt-in complexity** - Start simple. Add the stuff you need when you need it. Don't want physics? Don't use physics. Don't need parallax? Skip it.
 

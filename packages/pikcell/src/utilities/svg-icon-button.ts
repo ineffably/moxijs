@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { createPixelButton, PixelButtonOptions, PixelButtonResult } from '../components/pixel-button';
-import { svgToTexture, px } from 'moxijs';
+import { svgToTexture, px } from '@moxijs/core';
 
 export interface SVGIconButtonOptions extends Omit<PixelButtonOptions, 'icon'> {
   svgString: string;

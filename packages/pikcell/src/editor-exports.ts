@@ -28,8 +28,8 @@ export { createPopupToolbar, PopupToolbarOptions, PopupToolbarResult, PopupToolb
 export { ComponentResult, CardResult, RefreshableComponent, SelectableComponent, ControllableComponent, hasDestroy, isCardResult } from './interfaces/components';
 
 // Re-export pixel grid utilities from moxi
-export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from 'moxijs';
-export type { PixelGridConfig, BorderConfig } from 'moxijs';
+export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from '@moxijs/core';
+export type { PixelGridConfig, BorderConfig } from '@moxijs/core';
 
 // Controllers
 export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions, SpriteSheetType } from './controllers/sprite-sheet-controller';
@@ -40,8 +40,8 @@ export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilitie
 export { createCardZoomHandler } from './utilities/card-zoom-handler';
 
 // Re-export SVG utilities from moxi
-export { svgToTexture } from 'moxijs';
-export type { SVGToTextureOptions } from 'moxijs';
+export { svgToTexture } from '@moxijs/core';
+export type { SVGToTextureOptions } from '@moxijs/core';
 
 // State Management
 export { UIStateManager, CardState, UIState } from './state/ui-state-manager';

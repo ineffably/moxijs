@@ -10,7 +10,7 @@ import {
   FlexJustify,
   FlexAlign,
   UIComponent
-} from 'moxijs';
+} from '@moxijs/core';
 import { ASSETS } from '../../assets-config';
 
 /**

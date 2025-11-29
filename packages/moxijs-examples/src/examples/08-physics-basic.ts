@@ -10,7 +10,7 @@ import {
   getPhysicsBody,
   asGraphics,
   asSprite
-} from 'moxijs';
+} from '@moxijs/core';
 import { Graphics, Point, Assets } from 'pixi.js';
 import * as planck from 'planck';
 import { ASSETS } from '../assets-config';

@@ -10,7 +10,7 @@ import {
   UISelect,
   UITextInput,
   SelectOption
-} from 'moxijs';
+} from '@moxijs/core';
 
 /**
  * Example 13: Form Elements

@@ -33,11 +33,11 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       
-      - name: Build moxijs package
-        run: npm run build --workspace=moxijs
+      - name: Build @moxijs/core package
+        run: npm run build --workspace=@moxijs/core
 
       - name: Run tests
-        run: npm run test:ci --workspace=moxijs
+        run: npm run test:ci --workspace=@moxijs/core
       
       - name: Version package
         working-directory: packages/moxijs

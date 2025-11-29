@@ -30,7 +30,7 @@ import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/pro
 import { LayoutStateManager, LayoutSlotState } from './state/layout-state-manager';
 import { getTheme } from './theming/theme';
 import { PICO8_PALETTE } from './theming/palettes';
-import { GRID, BORDER, px } from 'moxijs';
+import { GRID, BORDER, px } from '@moxijs/core';
 
 // Card imports
 import { createPaletteCard, PaletteCardResult } from './cards/palette-card';

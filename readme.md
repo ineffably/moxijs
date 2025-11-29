@@ -6,9 +6,12 @@ MoxiJS is designed for rapid development of WebGL-based games, POCs, and prototy
 
 PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXIJS. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
 
-![Prototype Status](https://img.shields.io/badge/Status-Prototype-orange)
+![Alpha Status](https://img.shields.io/badge/Status-ALPHA-blue)
+[![npm version](https://img.shields.io/npm/v/@moxijs/core.svg)](https://www.npmjs.com/package/@moxijs/core)
+[![Build & Test](https://github.com/ineffably/moxi/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/ineffably/moxi/actions/workflows/build-and-test.yml)
+[![Coverage](https://img.shields.io/badge/coverage-check%20CI-brightgreen)](https://github.com/ineffably/moxi/actions/workflows/build-and-test.yml)
 
-> **Fair warning**: This thing is still in prototype mode. The API might change. Things might break. If you're building something critical, maybe wait. If you're experimenting and don't mind things being a little rough around the edges, let's go.
+> **Fair warning**: This thing is still in alpha. The API might change. Things might break. If you're building something critical, maybe wait. If you're experimenting and don't mind things being a little rough around the edges, let's go.
 
 ---
 
@@ -501,7 +504,7 @@ A few principles I'm trying to stick to:
 
 **Pragmatic** - If it works and the code reads clearly, it's good enough. This isn't a dissertation.
 
-**Experimental** - It's a prototype. We're trying stuff. Some things will stick, some won't.
+**Experimental** - It's in alpha. We're trying stuff. Some things will stick, some won't.
 
 ---
 

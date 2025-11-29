@@ -1,7 +1,7 @@
 import { Logic, asEntity, setupMoxi } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapFont } from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 /**
  * Progress Bar Example

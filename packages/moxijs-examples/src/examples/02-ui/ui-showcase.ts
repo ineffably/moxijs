@@ -6,8 +6,8 @@ import {
   UIScaleMode,
   UIFocusManager
 } from '@moxijs/core';
-import { createButtonsShowcase } from './ui/buttons-showcase';
-import { createTextInputsShowcase } from './ui/text-inputs-showcase';
+import { createButtonsShowcase } from '../ui/buttons-showcase';
+import { createTextInputsShowcase } from '../ui/text-inputs-showcase';
 
 /**
  * Example 14: UI Showcase - Buttons

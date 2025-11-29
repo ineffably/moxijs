@@ -14,6 +14,7 @@ module.exports = {
     alias: {
       // Use local moxi source for development so webpack can properly handle externals
       'moxi': path.resolve(__dirname, '../core/src/index.ts'),
+      '@moxijs/core': path.resolve(__dirname, '../core/src/index.ts'),
       // Use local pikcell source for development
       'pikcell': path.resolve(__dirname, '../pikcell/src/index.ts')
     }

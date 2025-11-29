@@ -8,7 +8,7 @@ import {
   asSprite
 } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 import { ClientEvents } from '@moxijs/core';
 
 /**
@@ -115,12 +115,21 @@ class CameraZoomLogic extends Logic<any> {
 }
 
 /**
- * Simple ship movement logic for top-down space shooter
+ * Asteroids-style ship movement with thrust and drag
  */
 class ShipMovementLogic extends Logic<PIXI.Sprite> {
   name = 'ShipMovementLogic';
   private clientEvents: ClientEvents;
-  private speed: number = 5; // Increased for more responsive feel
+
+  // Physics parameters
+  private thrust: number = 0.25;        // Acceleration force when thrusting
+  private drag: number = 0.98;          // Velocity multiplier per frame (0.98 = 2% drag)
+  private maxSpeed: number = 12;        // Maximum velocity magnitude
+  private rotationSpeed: number = 0.08; // How fast ship rotates (radians per frame * deltaTime)
+
+  // Persistent velocity
+  private velocityX: number = 0;
+  private velocityY: number = 0;
 
   init(entity: PIXI.Sprite, renderer: PIXI.Renderer) {
     this.clientEvents = new ClientEvents();
@@ -130,43 +139,52 @@ class ShipMovementLogic extends Logic<PIXI.Sprite> {
     entity.x = 0;
     entity.y = 0;
 
-    console.log('🚀 Ship initialized - Use arrow keys to fly!');
+    console.log('🚀 Ship initialized - Asteroids controls!');
   }
 
   update(entity: PIXI.Sprite, deltaTime: number) {
-    const velocity = new PIXI.Point(0, 0);
-
-    // Read keyboard input
-    if (this.clientEvents.isKeyDown('ArrowUp') || this.clientEvents.isKeyDown('w')) {
-      velocity.y -= 1;
-    }
-    if (this.clientEvents.isKeyDown('ArrowDown') || this.clientEvents.isKeyDown('s')) {
-      velocity.y += 1;
-    }
+    // Rotation: Left/Right or A/D rotates the ship
     if (this.clientEvents.isKeyDown('ArrowLeft') || this.clientEvents.isKeyDown('a')) {
-      velocity.x -= 1;
+      entity.rotation -= this.rotationSpeed * deltaTime;
     }
     if (this.clientEvents.isKeyDown('ArrowRight') || this.clientEvents.isKeyDown('d')) {
-      velocity.x += 1;
+      entity.rotation += this.rotationSpeed * deltaTime;
     }
 
-    // Normalize diagonal movement
-    if (velocity.x !== 0 && velocity.y !== 0) {
-      const length = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-      velocity.x /= length;
-      velocity.y /= length;
+    // Thrust: Up/W applies force in the direction the ship is facing
+    if (this.clientEvents.isKeyDown('ArrowUp') || this.clientEvents.isKeyDown('w')) {
+      // Ship sprite faces up (negative Y), so rotation 0 = facing up
+      // Convert rotation to thrust direction (subtract PI/2 because sprite faces up)
+      const thrustAngle = entity.rotation - Math.PI / 2;
+      this.velocityX += Math.cos(thrustAngle) * this.thrust * deltaTime;
+      this.velocityY += Math.sin(thrustAngle) * this.thrust * deltaTime;
     }
 
-    // Apply movement
-    entity.x += velocity.x * this.speed * deltaTime;
-    entity.y += velocity.y * this.speed * deltaTime;
-
-    // Rotate ship to face movement direction
-    if (velocity.x !== 0 || velocity.y !== 0) {
-      const angle = Math.atan2(velocity.y, velocity.x);
-      // Ship sprite faces right by default, so add PI/2 to point up
-      entity.rotation = angle + Math.PI / 2;
+    // Optional: Reverse thrust with Down/S
+    if (this.clientEvents.isKeyDown('ArrowDown') || this.clientEvents.isKeyDown('s')) {
+      const thrustAngle = entity.rotation - Math.PI / 2;
+      this.velocityX -= Math.cos(thrustAngle) * this.thrust * 0.5 * deltaTime;
+      this.velocityY -= Math.sin(thrustAngle) * this.thrust * 0.5 * deltaTime;
     }
+
+    // Clamp to max speed
+    const speed = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
+    if (speed > this.maxSpeed) {
+      this.velocityX = (this.velocityX / speed) * this.maxSpeed;
+      this.velocityY = (this.velocityY / speed) * this.maxSpeed;
+    }
+
+    // Apply drag (friction)
+    this.velocityX *= this.drag;
+    this.velocityY *= this.drag;
+
+    // Stop completely if very slow (prevents infinite micro-drift)
+    if (Math.abs(this.velocityX) < 0.01) this.velocityX = 0;
+    if (Math.abs(this.velocityY) < 0.01) this.velocityY = 0;
+
+    // Apply velocity to position
+    entity.x += this.velocityX * deltaTime;
+    entity.y += this.velocityY * deltaTime;
   }
 }
 
@@ -243,7 +261,7 @@ export async function initParallaxSpaceShooter() {
   camera.desiredScale.set(1.5); // Slight zoom
   const cameraLogic = camera.moxiEntity.getLogic<CameraLogic>('CameraLogic');
   cameraLogic.target = playerShip;
-  cameraLogic.speed = 0.05; // Smooth camera following
+  cameraLogic.speed = 0.15; // Tighter camera following
 
   // Add zoom control with mouse wheel
   camera.moxiEntity.addLogic(new CameraZoomLogic());
@@ -263,7 +281,8 @@ export async function initParallaxSpaceShooter() {
   engine.start();
 
   console.log('✅ Parallax Space Shooter loaded!');
-  console.log('   🎮 Controls: Arrow keys or WASD to move');
+  console.log('   🎮 Controls: Left/Right or A/D to rotate');
+  console.log('   🚀 Up/W to thrust forward, Down/S for reverse');
   console.log('   🖱️  Mouse wheel: Zoom in/out (0.5x - 3x)');
   console.log('   🌌 Watch the parallax effect as you move!');
   console.log('   📊 Nebula layer: 0.3x speed (far)');

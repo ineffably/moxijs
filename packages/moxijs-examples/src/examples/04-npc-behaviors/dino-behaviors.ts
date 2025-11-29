@@ -1,11 +1,11 @@
 import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange, Logic } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { BitmapFont } from 'pixi.js';
-import { ASSETS } from '../assets-config';
-import { PlayerMovementLogic } from './behavior-logic/player-movement-logic';
-import { DinoAIStateMachine } from '../utils/dino-ai-state-machine';
-import { DinoAnimationLogic } from './behavior-logic/dino-animation-logic';
-import { HideLogic } from './behavior-logic/hide-logic';
+import { ASSETS } from '../../assets-config';
+import { PlayerMovementLogic } from '../behavior-logic/player-movement-logic';
+import { DinoAIStateMachine } from '../../utils/dino-ai-state-machine';
+import { DinoAnimationLogic } from '../behavior-logic/dino-animation-logic';
+import { HideLogic } from '../behavior-logic/hide-logic';
 
 // ============================================================================
 // Helper Types & Interfaces

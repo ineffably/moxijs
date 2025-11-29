@@ -7,7 +7,7 @@
 import { setupMoxi, asEntity, Logic } from '@moxijs/core';
 import type { AsEntity } from '@moxijs/core';
 import { Sprite, Graphics, Container } from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 class FadeLogic extends Logic<Sprite> {
   private age = 0;

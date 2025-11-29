@@ -1,9 +1,9 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { setupMoxi } from '@moxijs/core';
-import { EmitterConfig, Particle } from './particle-emitter/types';
-import { createAllTextures } from './particle-emitter/textures';
-import { createEnhancedControls, applyPreset } from './particle-emitter/ui-controls';
-import defaultPresets from './particle-emitter/presets.json';
+import { EmitterConfig, Particle } from '../particle-emitter/types';
+import { createAllTextures } from '../particle-emitter/textures';
+import { createEnhancedControls, applyPreset } from '../particle-emitter/ui-controls';
+import defaultPresets from '../particle-emitter/presets.json';
 
 /**
  * Particle Emitter Sandbox

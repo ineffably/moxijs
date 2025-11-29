@@ -18,7 +18,7 @@ MOXIJS wraps PixiJS with an Entity-Component-System architecture. You get all th
 
 Think of it like this: PixiJS handles the "draw stuff fast" part. MOXIJS handles the "organize your game logic so it doesn't turn into spaghetti" part.
 
-🎮 **[View Live Examples](https://ineffably.github.io/moxijs/packages/moxijs-examples/dist/)** to see it in action.
+🎮 **[View Live Examples](https://ineffably.github.io/moxijs/packages/moxijs-examples/)** to see it in action.
 
 ## Why would I use this?
 
@@ -340,7 +340,7 @@ initPhysics();
 
 ## Examples
 
-### 🎮 [**View Live Examples**](https://ineffably.github.io/moxijs/packages/moxijs-examples/dist/)
+### 🎮 [**View Live Examples**](https://ineffably.github.io/moxijs/packages/moxijs-examples/)
 
 Interactive examples with source code viewer - see MOXIJS in action right in your browser.
 

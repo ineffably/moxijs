@@ -18,7 +18,7 @@ MOXI wraps PixiJS with an Entity-Component-System architecture. You get all the 
 
 Think of it like this: PixiJS handles the "draw stuff fast" part. MOXI handles the "organize your game logic so it doesn't turn into spaghetti" part.
 
-🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)** to see it in action.
+🎮 **[View Live Examples](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)** to see it in action.
 
 ## Why would I use this?
 
@@ -39,7 +39,7 @@ Here's what MOXI gives you out of the box:
 Attach logic components to PixiJS objects. No inheritance hierarchy nonsense.
 
 ```typescript
-import { asEntity, Logic } from 'moxi-kit';
+import { asEntity, Logic } from 'moxijs';
 import { Sprite } from 'pixi.js';
 
 class RotateLogic extends Logic<Sprite> {
@@ -58,7 +58,7 @@ entity.moxiEntity.addLogic(new RotateLogic());
 Real physics via Planck.js. The cool part? If you draw a box with Graphics, MOXI automatically figures out the collision shape. No manual setup.
 
 ```typescript
-import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxi-kit';
+import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxijs';
 import { Graphics } from 'pixi.js';
 
 const { scene, physicsWorld } = await setupMoxi({
@@ -80,7 +80,7 @@ scene.addChild(boxEntity);
 Multi-layer backgrounds with different scroll speeds. Handles zoom compensation automatically.
 
 ```typescript
-import { ParallaxBackground, TilingParallaxLayer } from 'moxi-kit';
+import { ParallaxBackground, TilingParallaxLayer } from 'moxijs';
 
 const background = new ParallaxBackground(camera);
 
@@ -99,7 +99,7 @@ background.addLayer(new TilingParallaxLayer(cloudsTexture, {
 Camera that follows your player, with smooth movement and boundaries.
 
 ```typescript
-import { Camera, CameraLogic } from 'moxi-kit';
+import { Camera, CameraLogic } from 'moxijs';
 
 const camera = new Camera(renderer);
 camera.setTarget(player);
@@ -114,7 +114,7 @@ scene.addChild(asEntity(camera).moxiEntity.addLogic(new CameraLogic()));
 One place for all your keyboard, mouse, and wheel input.
 
 ```typescript
-import { ClientEvents } from 'moxi-kit';
+import { ClientEvents } from 'moxijs';
 
 const input = new ClientEvents();
 
@@ -131,7 +131,7 @@ const zoom = input.wheelOffsets.y;
 For character AI, game states, UI flows, whatever.
 
 ```typescript
-import { StateMachine, StateLogic } from 'moxi-kit';
+import { StateMachine, StateLogic } from 'moxijs';
 
 const fsm = new StateMachine('idle');
 fsm.addTransition('idle', 'jump', 'jumping');
@@ -148,7 +148,7 @@ fsm.transition('jump'); // idle → jumping
 Slice up spritesheets and manage frame sequences.
 
 ```typescript
-import { asTextureFrames, TextureFrameSequences } from 'moxi-kit';
+import { asTextureFrames, TextureFrameSequences } from 'moxijs';
 
 const frames = asTextureFrames(texture.source, {
   frameWidth: 64,
@@ -169,7 +169,7 @@ const sprite = new Sprite(sequences.getFrame('walk', 0));
 Generate tile maps from spritesheets.
 
 ```typescript
-import { createTileGrid } from 'moxi-kit';
+import { createTileGrid } from 'moxijs';
 
 const grid = createTileGrid({
   gridWidth: 10,
@@ -190,7 +190,7 @@ scene.addChild(grid);
 Keep your aspect ratio when the window resizes.
 
 ```typescript
-import { setupResponsiveCanvas } from 'moxi-kit';
+import { setupResponsiveCanvas } from 'moxijs';
 
 setupResponsiveCanvas(renderer, {
   onResize: (width, height) => {
@@ -204,7 +204,7 @@ setupResponsiveCanvas(renderer, {
 Production-ready UI components with flexbox layout.
 
 ```typescript
-import { FlexContainer, FlexDirection, UIButton, UILabel, UIPanel } from 'moxi-kit';
+import { FlexContainer, FlexDirection, UIButton, UILabel, UIPanel } from 'moxijs';
 
 const menu = new FlexContainer({
   direction: FlexDirection.Column,
@@ -230,7 +230,7 @@ Includes: `UIButton`, `UILabel`, `UIPanel`, `UITextInput`, `UITextArea`, `UISele
 Pixel-perfect positioning for retro-style games.
 
 ```typescript
-import { px, units, GRID } from 'moxi-kit';
+import { px, units, GRID } from 'moxijs';
 
 // Position sprites in grid units (default 4x scale)
 sprite.x = px(10);  // 10 grid units = 40 pixels
@@ -247,13 +247,13 @@ const gridX = units(sprite.x);
 ### Install it
 
 ```bash
-npm install moxi pixi.js
+npm install moxijs pixi.js
 ```
 
 ### Basic example
 
 ```typescript
-import { setupMoxi, asEntity, Logic } from 'moxi-kit';
+import { setupMoxi, asEntity, Logic } from 'moxijs';
 import { Sprite, Assets } from 'pixi.js';
 
 class RotateLogic extends Logic<Sprite> {
@@ -290,7 +290,7 @@ init();
 ### Physics example
 
 ```typescript
-import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxi-kit';
+import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxijs';
 import { Graphics } from 'pixi.js';
 
 async function initPhysics() {
@@ -340,13 +340,13 @@ initPhysics();
 
 ## Examples
 
-### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxi-examples/dist/)
+### 🎮 [**View Live Examples**](https://ineffably.github.io/moxi/packages/moxijs-examples/dist/)
 
 Interactive examples with source code viewer - see MOXI in action right in your browser.
 
 ### All Examples
 
-Check out [`packages/moxi-examples`](packages/moxi-examples/) for working demos:
+Check out [`packages/moxijs-examples`](packages/moxijs-examples/) for working demos:
 
 - **01 - Basic Sprite** - The absolute basics with a single sprite
 - **02 - Rotating Sprite** - Animation and text rendering
@@ -359,12 +359,12 @@ Check out [`packages/moxi-examples`](packages/moxi-examples/) for working demos:
 - **09 - Dino AI Behaviors** - AI systems with state machines (Follow, Flee, Patrol, Wander)
 - **10 - Text Rendering** - Comprehensive text showcase (BitmapText, counters, floating damage numbers)
 
-**📚 [Full Examples Documentation](packages/moxi-examples/README.md)** | **📖 [Text Rendering Guide](packages/moxi-examples/guides/text-rendering.md)**
+**📚 [Full Examples Documentation](packages/moxijs-examples/README.md)** | **📖 [Text Rendering Guide](packages/moxijs-examples/guides/text-rendering.md)**
 
 ### Run Locally
 
 ```bash
-cd packages/moxi-examples
+cd packages/moxijs-examples
 npm install
 npm start
 ```
@@ -454,7 +454,7 @@ npm run build:clean
 npm run watch
 
 # Run the examples
-cd packages/moxi-examples
+cd packages/moxijs-examples
 npm start
 ```
 

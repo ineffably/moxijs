@@ -1,0 +1,70 @@
+{
+  "name": "moxijs",
+  "version": "0.1.0",
+  "description": "Game framework built on PIXI.js with Entity-Component-System architecture, physics integration, and UI components.",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rimraf ./lib && webpack --mode production",
+    "clean": "rimraf ./lib",
+    "build:dev:clean": "npm run clean && npm run build",
+    "build:dev": "webpack --mode development",
+    "watch": "webpack watch --mode development",
+    "test": "jest --config ./jest.config.js --collect-coverage",
+    "test:watch": "jest --config ./jest.config.js --watch",
+    "test:ci": "jest --config ./jest.config.js --ci --coverage --maxWorkers=2",
+    "gendocs": "typedoc --out ./docs ./src",
+    "docs": "typedoc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "pixi",
+    "pixijs",
+    "game",
+    "game-engine",
+    "game-framework",
+    "ecs",
+    "entity-component-system",
+    "physics",
+    "ui",
+    "2d"
+  ],
+  "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ineffably/moxi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ineffably/moxi/issues"
+  },
+  "homepage": "https://github.com/ineffably/moxi#readme",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "bundle-stats-webpack-plugin": "^4.21.6",
+    "jest": "^30.2.0",
+    "pixi.js": "^8.14.0",
+    "ts-jest": "^29.4.5",
+    "ts-loader": "^9.5.4",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typescript": "^5.9.3",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "peerDependencies": {
+    "pixi.js": "^8.14.0"
+  },
+  "dependencies": {
+    "fontfaceobserver": "^2.3.0",
+    "planck": "^1.4.2"
+  }
+}

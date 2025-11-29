@@ -12,7 +12,7 @@ import { createPixelButton, PixelButtonResult } from '../components/pixel-button
 import { createPopupToolbar, PopupToolbarResult } from '../components/popup-toolbar';
 import { createShapeIcon, ShapeType } from '../theming/tool-icons';
 import { getTheme } from '../theming/theme';
-import { GRID, px, svgToTexture } from 'moxi-kit';
+import { GRID, px, svgToTexture } from 'moxijs';
 import { CardResult } from '../interfaces/components';
 
 /** SVG icons for toolbar tools */

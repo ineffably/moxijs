@@ -1,10 +1,136 @@
 import { setupMoxi, asEntity, CameraLogic, asTextureFrames, TextureFrameSequences, SequenceInfo, createTileGrid, getTextureRange, Logic } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
+import { BitmapFont } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 import { PlayerMovementLogic } from './behavior-logic/player-movement-logic';
 import { DinoAIStateMachine } from '../utils/dino-ai-state-machine';
 import { DinoAnimationLogic } from './behavior-logic/dino-animation-logic';
 import { HideLogic } from './behavior-logic/hide-logic';
+
+// ============================================================================
+// Helper Types & Interfaces
+// ============================================================================
+
+interface DinoConfig {
+  name: string;
+  frames: PIXI.Texture[];
+  position: { x: number; y: number };
+  initialLabel: string;
+}
+
+/** Label type with setText helper for outlined text */
+type OutlinedLabel = PIXI.Container & { setText: (text: string) => void };
+
+interface DinoInstance {
+  sprite: PIXI.AnimatedSprite;
+  entity: ReturnType<typeof asEntity<PIXI.AnimatedSprite>>;
+  animLogic: DinoAnimationLogic;
+  label: OutlinedLabel;
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Creates dino animation frames from a texture source
+ */
+function createDinoFrames(texture: PIXI.TextureSource): PIXI.Texture[] {
+  return asTextureFrames(PIXI, texture, {
+    frameWidth: 24,
+    frameHeight: 24,
+    columns: 24,
+    rows: 1
+  });
+}
+
+/**
+ * Creates a BitmapText state label for a dino with pixel-perfect outline
+ * Uses shadow copies technique for clean pixel-art outlines
+ */
+function createStateLabel(initialText: string): PIXI.Container & { setText: (text: string) => void } {
+  const container = new PIXI.Container() as PIXI.Container & { setText: (text: string) => void };
+  container.position.set(0, -20);
+
+  const labelScale = 0.15;
+
+  // Create outline by rendering text offset in 8 directions
+  const outlineOffsets = [
+    { x: -1, y: -1 }, { x: 0, y: -1 }, { x: 1, y: -1 },
+    { x: -1, y: 0 },                    { x: 1, y: 0 },
+    { x: -1, y: 1 },  { x: 0, y: 1 },  { x: 1, y: 1 }
+  ];
+
+  const outlineTexts: PIXI.BitmapText[] = [];
+  outlineOffsets.forEach(offset => {
+    const shadow = new PIXI.BitmapText({
+      text: initialText,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: 0x000000
+      }
+    });
+    shadow.scale.set(labelScale);
+    shadow.anchor.set(0.5);
+    shadow.position.set(offset.x, offset.y);
+    container.addChild(shadow);
+    outlineTexts.push(shadow);
+  });
+
+  // Main text on top
+  const mainText = new PIXI.BitmapText({
+    text: initialText,
+    style: {
+      fontFamily: 'PixelOperator8Bitmap',
+      fontSize: 64,
+      fill: 0xffffff
+    }
+  });
+  mainText.scale.set(labelScale);
+  mainText.anchor.set(0.5);
+  container.addChild(mainText);
+
+  // Helper to update all text layers at once
+  container.setText = (text: string) => {
+    mainText.text = text;
+    outlineTexts.forEach(t => t.text = text);
+  };
+
+  return container;
+}
+
+/**
+ * Creates a dino entity with sprite, animation logic, and label
+ */
+function createDino(
+  config: DinoConfig,
+  scene: PIXI.Container,
+  renderer: PIXI.Renderer
+): DinoInstance {
+  const sprite = new PIXI.AnimatedSprite(config.frames);
+  sprite.anchor.set(0.5);
+  sprite.position.set(config.position.x, config.position.y);
+
+  const entity = asEntity<PIXI.AnimatedSprite>(sprite);
+
+  const animLogic = new DinoAnimationLogic(config.frames);
+  animLogic.init(sprite, renderer);
+  entity.moxiEntity.addLogic(animLogic);
+
+  const label = createStateLabel(config.initialLabel);
+  sprite.addChild(label);
+
+  return { sprite, entity, animLogic, label };
+}
+
+/**
+ * Updates a label's text and ensures it faces forward regardless of sprite flip
+ */
+function updateLabel(label: OutlinedLabel, text: string, spriteScaleX: number): void {
+  label.setText(text);
+  label.scale.x = Math.abs(label.scale.x) * Math.sign(spriteScaleX);
+}
 
 /**
  * Dino AI Behaviors Example
@@ -29,7 +155,7 @@ export async function initDinoAIBehaviors() {
 
   scene.renderer.background.color = 0x88c070; // Gameboy-inspired green
 
-  // Load character, dino, grass tiles, and object spritesheets
+  // Load character, dino, grass tiles, object spritesheets, and fonts
   await loadAssets([
     { src: ASSETS.GRASS_TILES, alias: 'grass_sheet' },
     { src: ASSETS.GRASS_BIOME_THINGS, alias: 'grass_biome_things' },
@@ -37,7 +163,8 @@ export async function initDinoAIBehaviors() {
     { src: ASSETS.DINO_DOUX, alias: 'dino_doux' },
     { src: ASSETS.DINO_MORT, alias: 'dino_mort' },
     { src: ASSETS.DINO_TARD, alias: 'dino_tard' },
-    { src: ASSETS.DINO_VITA, alias: 'dino_vita' }
+    { src: ASSETS.DINO_VITA, alias: 'dino_vita' },
+    { src: ASSETS.PIXEL_OPERATOR8_FONT, alias: 'pixel_operator8_font' }
   ]);
 
   // Set up camera
@@ -63,34 +190,21 @@ export async function initDinoAIBehaviors() {
   dinoTardTexture.source.scaleMode = 'nearest';
   dinoVitaTexture.source.scaleMode = 'nearest';
 
-  // Create dino animation frames (24x24 pixels, 24 frames in a row)
-  const dinoDouxFrames = asTextureFrames(PIXI, dinoDouxTexture, {
-    frameWidth: 24,
-    frameHeight: 24,
-    columns: 24,
-    rows: 1
+  // Install BitmapFont for pixel-perfect text rendering
+  BitmapFont.install({
+    name: 'PixelOperator8Bitmap',
+    style: {
+      fontFamily: 'PixelOperator8',
+      fontSize: 64,
+      fill: 0xffffff
+    }
   });
 
-  const dinoMortFrames = asTextureFrames(PIXI, dinoMortTexture, {
-    frameWidth: 24,
-    frameHeight: 24,
-    columns: 24,
-    rows: 1
-  });
-
-  const dinoTardFrames = asTextureFrames(PIXI, dinoTardTexture, {
-    frameWidth: 24,
-    frameHeight: 24,
-    columns: 24,
-    rows: 1
-  });
-
-  const dinoVitaFrames = asTextureFrames(PIXI, dinoVitaTexture, {
-    frameWidth: 24,
-    frameHeight: 24,
-    columns: 24,
-    rows: 1
-  });
+  // Create dino animation frames using helper function
+  const dinoDouxFrames = createDinoFrames(dinoDouxTexture);
+  const dinoMortFrames = createDinoFrames(dinoMortTexture);
+  const dinoTardFrames = createDinoFrames(dinoTardTexture);
+  const dinoVitaFrames = createDinoFrames(dinoVitaTexture);
 
   // Create character animation frames
   const characterFrames = asTextureFrames(PIXI, characterTexture, {
@@ -234,56 +348,36 @@ export async function initDinoAIBehaviors() {
   const cameraLogic = camera.moxiEntity.getLogic<CameraLogic>('CameraLogic');
   cameraLogic.target = bunny;
 
-  // Create Dino 1: Doux (Follow behavior - chases player)
-  const dinoDoux = new PIXI.AnimatedSprite(dinoDouxFrames);
-  dinoDoux.anchor.set(0.5);
-  dinoDoux.position.set(-120, -80);
-  const dinoDouxEntity = asEntity<PIXI.AnimatedSprite>(dinoDoux);
+  // ============================================================================
+  // Create Dinos using helper function
+  // ============================================================================
 
-  // Add animation logic
-  const douxAnimLogic = new DinoAnimationLogic(dinoDouxFrames);
-  douxAnimLogic.init(dinoDoux, scene.renderer);
-  dinoDouxEntity.moxiEntity.addLogic(douxAnimLogic);
+  // Dino 1: Doux (Chase behavior - chases player)
+  const doux = createDino({
+    name: 'Doux',
+    frames: dinoDouxFrames,
+    position: { x: -120, y: -80 },
+    initialLabel: 'Wander'
+  }, scene, scene.renderer);
 
-  // Add Chase AI - Doux will chase the player when detected
   const douxAI = DinoAIStateMachine.createChaseAI({
     speed: 1.2,
     detectionRadius: 200,
     chaseRange: 200,
     attackRange: 30,
     targetFilter: (e) => e.name === 'player'
-  }, douxAnimLogic);
-  dinoDouxEntity.moxiEntity.addLogic(douxAI);
+  }, doux.animLogic);
+  doux.entity.moxiEntity.addLogic(douxAI);
+  scene.addChild(doux.entity);
 
-  // Add state label above Doux's head
-  const douxLabel = new PIXI.Text({
-    text: 'Wander',
-    style: {
-      fontSize: 10,
-      fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 },
-      padding: 4  // Prevent stroke from being cut off
-    },
-    resolution: 3  // Match camera scale for crisp text
-  });
-  douxLabel.anchor.set(0.5);
-  douxLabel.position.set(0, -20);
-  dinoDoux.addChild(douxLabel);
+  // Dino 2: Mort (Hide behavior - sneaks to hiding spots)
+  const mort = createDino({
+    name: 'Mort',
+    frames: dinoMortFrames,
+    position: { x: 120, y: -80 },
+    initialLabel: 'Idle'
+  }, scene, scene.renderer);
 
-  scene.addChild(dinoDouxEntity);
-
-  // Create Dino 2: Mort (Hide behavior - sneaks to nearest tree/bush when player approaches)
-  const dinoMort = new PIXI.AnimatedSprite(dinoMortFrames);
-  dinoMort.anchor.set(0.5);
-  dinoMort.position.set(120, -80);
-  const dinoMortEntity = asEntity<PIXI.AnimatedSprite>(dinoMort);
-
-  // Add animation logic
-  const mortAnimLogic = new DinoAnimationLogic(dinoMortFrames);
-  mortAnimLogic.init(dinoMort, scene.renderer);
-  dinoMortEntity.moxiEntity.addLogic(mortAnimLogic);
-
-  // Add Hide logic - Mort will sneak to nearest tree/bush when player gets close
   const mortHideLogic = new HideLogic({
     speed: 1.2,
     threatDistance: 150,
@@ -292,67 +386,18 @@ export async function initDinoAIBehaviors() {
     target: bunny,
     hideReachedDistance: 15
   });
-  mortHideLogic.init(dinoMort, scene.renderer);
-  dinoMortEntity.moxiEntity.addLogic(mortHideLogic);
+  mortHideLogic.init(mort.sprite, scene.renderer);
+  mort.entity.moxiEntity.addLogic(mortHideLogic);
+  scene.addChild(mort.entity);
 
-  // Add state label above Mort's head
-  const mortLabel = new PIXI.Text({
-    text: 'Idle',
-    style: {
-      fontSize: 10,
-      fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 },
-      padding: 4  // Prevent stroke from being cut off
-    },
-    resolution: 3  // Match camera scale for crisp text
-  });
-  mortLabel.anchor.set(0.5);
-  mortLabel.position.set(0, -20);
-  dinoMort.addChild(mortLabel);
+  // Dino 3: Tard (Patrol behavior - walks pattern, chases if close)
+  const tard = createDino({
+    name: 'Tard',
+    frames: dinoTardFrames,
+    position: { x: -120, y: 80 },
+    initialLabel: 'Patrol'
+  }, scene, scene.renderer);
 
-  // Create a custom logic to control animation based on hide state
-  const mortHideAnimController = new (class extends Logic<PIXI.AnimatedSprite> {
-    name = 'MortHideAnimController';
-
-    update(entity: PIXI.AnimatedSprite, deltaTime: number) {
-      // Update label based on hide state
-      if (mortHideLogic.isCurrentlyHidden()) {
-        mortLabel.text = 'Hidden';
-      } else if (mortHideLogic.isSeekingHide()) {
-        mortLabel.text = 'Sneaking';
-      } else {
-        mortLabel.text = 'Idle';
-      }
-
-      // Counter-flip label so it always faces forward
-      mortLabel.scale.x = Math.abs(mortLabel.scale.x) * Math.sign(dinoMort.scale.x);
-
-      // Play sneak animation when seeking hide or hidden
-      if (mortHideLogic.isSeekingHide() || mortHideLogic.isCurrentlyHidden()) {
-        if (mortAnimLogic.getCurrentAnimation() !== 'sneak') {
-          mortAnimLogic.playAnimation('sneak');
-        }
-      }
-      // Otherwise let the normal animation logic handle it
-    }
-  })();
-  mortHideAnimController.init(dinoMort, scene.renderer);
-  dinoMortEntity.moxiEntity.addLogic(mortHideAnimController);
-
-  scene.addChild(dinoMortEntity);
-
-  // Create Dino 3: Tard (Patrol behavior - walks pattern, chases if close)
-  const dinoTard = new PIXI.AnimatedSprite(dinoTardFrames);
-  dinoTard.anchor.set(0.5);
-  dinoTard.position.set(-120, 80);
-  const dinoTardEntity = asEntity<PIXI.AnimatedSprite>(dinoTard);
-
-  // Add animation logic
-  const tardAnimLogic = new DinoAnimationLogic(dinoTardFrames);
-  tardAnimLogic.init(dinoTard, scene.renderer);
-  dinoTardEntity.moxiEntity.addLogic(tardAnimLogic);
-
-  // Add Patrol AI - Tard patrols waypoints and chases if player gets close
   const tardAI = DinoAIStateMachine.createPatrolAI({
     speed: 1.0,
     detectionRadius: 120,
@@ -365,92 +410,66 @@ export async function initDinoAIBehaviors() {
       new PIXI.Point(-120, 120)
     ],
     targetFilter: (e) => e.name === 'player'
-  }, tardAnimLogic);
-  dinoTardEntity.moxiEntity.addLogic(tardAI);
+  }, tard.animLogic);
+  tard.entity.moxiEntity.addLogic(tardAI);
+  scene.addChild(tard.entity);
 
-  // Add state label above Tard's head
-  const tardLabel = new PIXI.Text({
-    text: 'Patrol',
-    style: {
-      fontSize: 10,
-      fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 },
-      padding: 4  // Prevent stroke from being cut off
-    },
-    resolution: 3  // Match camera scale for crisp text
-  });
-  tardLabel.anchor.set(0.5);
-  tardLabel.position.set(0, -20);
-  dinoTard.addChild(tardLabel);
+  // Dino 4: Vita (Wander behavior - random movement, attacks if close)
+  const vita = createDino({
+    name: 'Vita',
+    frames: dinoVitaFrames,
+    position: { x: 120, y: 80 },
+    initialLabel: 'Wander'
+  }, scene, scene.renderer);
 
-  scene.addChild(dinoTardEntity);
-
-  // Create Dino 4: Vita (Wander behavior - random movement, attacks if close)
-  const dinoVita = new PIXI.AnimatedSprite(dinoVitaFrames);
-  dinoVita.anchor.set(0.5);
-  dinoVita.position.set(120, 80);
-  const dinoVitaEntity = asEntity<PIXI.AnimatedSprite>(dinoVita);
-
-  // Add animation logic
-  const vitaAnimLogic = new DinoAnimationLogic(dinoVitaFrames);
-  vitaAnimLogic.init(dinoVita, scene.renderer);
-  dinoVitaEntity.moxiEntity.addLogic(vitaAnimLogic);
-
-  // Add Wander/Attack AI - Vita wanders randomly and attacks if player gets very close
   const vitaAI = DinoAIStateMachine.createWanderAttackAI({
     speed: 0.8,
     detectionRadius: 80,
     chaseRange: 80,
     attackRange: 40,
     targetFilter: (e) => e.name === 'player'
-  }, vitaAnimLogic);
-  dinoVitaEntity.moxiEntity.addLogic(vitaAI);
+  }, vita.animLogic);
+  vita.entity.moxiEntity.addLogic(vitaAI);
+  scene.addChild(vita.entity);
 
-  // Add state label above Vita's head
-  const vitaLabel = new PIXI.Text({
-    text: 'Wander',
-    style: {
-      fontSize: 10,
-      fill: 0xffffff,
-      stroke: { color: 0x000000, width: 2 },
-      padding: 4  // Prevent stroke from being cut off
-    },
-    resolution: 3  // Match camera scale for crisp text
-  });
-  vitaLabel.anchor.set(0.5);
-  vitaLabel.position.set(0, -20);
-  dinoVita.addChild(vitaLabel);
+  // ============================================================================
+  // Consolidated Label Updater - handles all dino labels in one place
+  // ============================================================================
 
-  scene.addChild(dinoVitaEntity);
-
-  // Add logic to update labels for Doux, Tard, and Vita based on their AI states
   const labelUpdater = new (class extends Logic<PIXI.Container> {
-    name = 'LabelUpdater';
+    name = 'DinoLabelUpdater';
 
     update(entity: PIXI.Container, deltaTime: number) {
-      // Update Doux label
+      // Update Doux (uses AI state machine)
       const douxState = douxAI.getCurrentState();
       if (douxState) {
-        douxLabel.text = douxState;
+        updateLabel(doux.label, douxState, doux.sprite.scale.x);
       }
-      // Counter-flip label so it always faces forward
-      douxLabel.scale.x = Math.abs(douxLabel.scale.x) * Math.sign(dinoDoux.scale.x);
 
-      // Update Tard label
+      // Update Mort (uses HideLogic - different state source)
+      let mortState = 'Idle';
+      if (mortHideLogic.isCurrentlyHidden()) {
+        mortState = 'Hidden';
+      } else if (mortHideLogic.isSeekingHide()) {
+        mortState = 'Sneaking';
+        // Play sneak animation when seeking hide
+        if (mort.animLogic.getCurrentAnimation() !== 'sneak') {
+          mort.animLogic.playAnimation('sneak');
+        }
+      }
+      updateLabel(mort.label, mortState, mort.sprite.scale.x);
+
+      // Update Tard (uses AI state machine)
       const tardState = tardAI.getCurrentState();
       if (tardState) {
-        tardLabel.text = tardState;
+        updateLabel(tard.label, tardState, tard.sprite.scale.x);
       }
-      // Counter-flip label so it always faces forward
-      tardLabel.scale.x = Math.abs(tardLabel.scale.x) * Math.sign(dinoTard.scale.x);
 
-      // Update Vita label
+      // Update Vita (uses AI state machine)
       const vitaState = vitaAI.getCurrentState();
       if (vitaState) {
-        vitaLabel.text = vitaState;
+        updateLabel(vita.label, vitaState, vita.sprite.scale.x);
       }
-      // Counter-flip label so it always faces forward
-      vitaLabel.scale.x = Math.abs(vitaLabel.scale.x) * Math.sign(dinoVita.scale.x);
     }
   })();
   labelUpdater.init(bunnyEntity, scene.renderer);
@@ -473,50 +492,56 @@ export async function initDinoAIBehaviors() {
   // Create HUD background panel
   const hudBg = new PIXI.Graphics();
   hudBg.beginFill(0x000000, 0.7);
-  hudBg.drawRoundedRect(0, 0, 320, 50, 5);
+  hudBg.drawRoundedRect(0, 0, 280, 40, 4);
   hudBg.endFill();
   hud.addChild(hudBg);
 
-  // Create dino info panels in the HUD
+  // Dino info data (data-driven approach)
   const dinoInfos = [
-    { name: 'Doux', behavior: 'Chase', color: 0xff6b35, x: 10 },
-    { name: 'Mort', behavior: 'Hide', color: 0x9b59b6, x: 90 },
-    { name: 'Tard', behavior: 'Patrol', color: 0x3498db, x: 170 },
-    { name: 'Vita', behavior: 'Wander', color: 0x2ecc71, x: 250 }
+    { name: 'Doux', behavior: 'Chase', color: 0xff6b35 },
+    { name: 'Mort', behavior: 'Hide', color: 0x9b59b6 },
+    { name: 'Tard', behavior: 'Patrol', color: 0x3498db },
+    { name: 'Vita', behavior: 'Wander', color: 0x2ecc71 }
   ];
 
-  dinoInfos.forEach(info => {
+  const hudItemWidth = 65;
+  const hudPadding = 8;
+
+  dinoInfos.forEach((info, index) => {
+    const xOffset = hudPadding + index * hudItemWidth;
+
     // Color indicator
     const indicator = new PIXI.Graphics();
     indicator.beginFill(info.color);
-    indicator.drawCircle(0, 0, 6);
+    indicator.drawCircle(0, 0, 4);
     indicator.endFill();
-    indicator.position.set(info.x + 8, 15);
+    indicator.position.set(xOffset + 4, 12);
     hud.addChild(indicator);
 
-    // Dino name
-    const nameText = new PIXI.Text({
+    // Dino name (BitmapText)
+    const nameText = new PIXI.BitmapText({
       text: info.name,
       style: {
-        fontSize: 11,
-        fill: 0xffffff,
-        fontWeight: 'bold'
-      },
-      resolution: 2  // Higher resolution for HUD text
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: 0xffffff
+      }
     });
-    nameText.position.set(info.x + 18, 8);
+    nameText.scale.set(0.12);
+    nameText.position.set(xOffset + 12, 6);
     hud.addChild(nameText);
 
-    // Behavior label
-    const behaviorText = new PIXI.Text({
+    // Behavior label (BitmapText)
+    const behaviorText = new PIXI.BitmapText({
       text: info.behavior,
       style: {
-        fontSize: 9,
-        fill: 0xcccccc
-      },
-      resolution: 2  // Higher resolution for HUD text
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: 0xaaaaaa
+      }
     });
-    behaviorText.position.set(info.x + 18, 24);
+    behaviorText.scale.set(0.10);
+    behaviorText.position.set(xOffset + 12, 20);
     hud.addChild(behaviorText);
   });
 
@@ -524,7 +549,6 @@ export async function initDinoAIBehaviors() {
   uiLayer.addChild(hud);
 
   // Modify the scene's draw method to render the stage instead
-  const originalDraw = scene.draw.bind(scene);
   scene.draw = function(deltaTime: number) {
     scene.renderer.render(stage);
   };

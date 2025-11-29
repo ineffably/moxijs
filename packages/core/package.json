@@ -37,12 +37,12 @@
   "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ineffably/moxi.git"
+    "url": "https://github.com/ineffably/moxijs.git"
   },
   "bugs": {
-    "url": "https://github.com/ineffably/moxi/issues"
+    "url": "https://github.com/ineffably/moxijs/issues"
   },
-  "homepage": "https://github.com/ineffably/moxi#readme",
+  "homepage": "https://github.com/ineffably/moxijs#readme",
   "license": "MIT",
   "publishConfig": {
     "access": "public"

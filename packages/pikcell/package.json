@@ -1,7 +1,7 @@
 {
   "name": "@moxijs/pikcell",
   "version": "0.1.0",
-  "description": "Pixel-perfect sprite editor built on Moxi and PIXI.js",
+  "description": "Pixel-perfect sprite editor built on MoxiJS and PIXI.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,6 +14,7 @@
     "pikcell",
     "sprite-editor",
     "pixel-art",
+    "moxijs",
     "moxi",
     "pixijs",
     "pico-8",
@@ -22,8 +23,10 @@
   "private": true,
   "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ineffably/moxijs.git",
+    "directory": "packages/pikcell"
   },
   "type": "commonjs",
   "devDependencies": {

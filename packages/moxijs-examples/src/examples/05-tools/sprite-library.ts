@@ -5,7 +5,7 @@
 import { setupMoxi, asEntity, UITextInput, UILabel, FlexContainer, FlexDirection, FlexAlign, UILayer, UIScrollContainer, EdgeInsets, UIComponent, asTextureFrames } from '@moxijs/core';
 import { Sprite, Container, Graphics, BitmapText, Assets, BitmapFont } from 'pixi.js';
 import * as PIXI from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 interface SpriteEntry {
   name: string;

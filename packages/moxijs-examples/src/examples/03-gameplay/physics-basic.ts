@@ -13,7 +13,7 @@ import {
 } from '@moxijs/core';
 import { Graphics, Point, Assets } from 'pixi.js';
 import * as planck from 'planck';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 export async function initPhysicsBasic() {
   const root = document.getElementById('canvas-container');

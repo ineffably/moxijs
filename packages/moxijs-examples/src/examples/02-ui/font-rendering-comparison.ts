@@ -11,7 +11,7 @@ import { setupMoxi, Logic, asEntity, UIScrollContainer, UIComponent, EdgeInsets 
 import type { MeasuredSize } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapText, Text } from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 export async function initFontRenderingComparison() {
   const root = document.getElementById('canvas-container');

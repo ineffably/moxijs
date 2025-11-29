@@ -110,6 +110,65 @@ body {
   color: #999;
 }
 
+/* Category Accordion */
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.category-header:first-of-type {
+  margin-top: 0;
+}
+
+.category-header:hover {
+  background: #383838;
+}
+
+.category-chevron {
+  font-size: 10px;
+  color: #888;
+  width: 12px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.category-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.category-count {
+  font-size: 11px;
+  color: #666;
+  background: #383838;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.category-examples {
+  overflow: hidden;
+  max-height: 1000px;
+  transition: max-height 0.3s ease-out, opacity 0.2s;
+  opacity: 1;
+  padding-left: 4px;
+}
+
+.category-examples.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
 #app {
   flex: 1;
   display: flex;

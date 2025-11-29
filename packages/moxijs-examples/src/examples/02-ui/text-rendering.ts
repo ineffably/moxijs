@@ -6,7 +6,7 @@
 import { setupMoxi } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 export async function initTextRendering() {
   const root = document.getElementById('canvas-container');

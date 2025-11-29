@@ -1,7 +1,7 @@
 {
   "name": "moxijs",
   "version": "0.1.0",
-  "description": "",
+  "description": "Monorepo for MoxiJS game framework and related packages",
   "private": true,
   "workspaces": [
     "packages/core",
@@ -21,9 +21,25 @@
     "test:ci": "npm run test:ci --workspace=@moxijs/core",
     "pikcell": "npm run dev --workspace=pikcell"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "moxijs",
+    "game-engine",
+    "game-framework",
+    "pixi",
+    "pixijs",
+    "ecs",
+    "monorepo"
+  ],
+  "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ineffably/moxijs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ineffably/moxijs/issues"
+  },
+  "homepage": "https://github.com/ineffably/moxijs#readme",
   "devDependencies": {
     "@playwright/test": "^1.48.0",
     "concurrently": "^9.2.1",

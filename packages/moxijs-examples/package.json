@@ -1,7 +1,7 @@
 {
   "name": "moxijs-examples",
   "version": "1.0.0",
-  "description": "Interactive examples for the Moxi game engine",
+  "description": "Interactive examples for the MoxiJS game framework",
   "main": "index.js",
   "scripts": {
     "dev": "webpack serve --mode development --open",
@@ -14,13 +14,25 @@
     "test:headed": "playwright test --headed"
   },
   "keywords": [
+    "moxijs",
     "moxi",
     "game-engine",
     "pixi",
-    "examples"
+    "pixijs",
+    "examples",
+    "demos"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ineffably/moxijs.git",
+    "directory": "packages/moxijs-examples"
+  },
+  "bugs": {
+    "url": "https://github.com/ineffably/moxijs/issues"
+  },
+  "homepage": "https://github.com/ineffably/moxijs#readme",
   "type": "commonjs",
   "devDependencies": {
     "html-webpack-plugin": "^5.6.3",

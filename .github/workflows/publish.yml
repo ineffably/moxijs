@@ -42,15 +42,20 @@ jobs:
       - name: Version package
         working-directory: packages/moxijs
         run: |
+          # Use npm version with flags to skip workspace updates and git operations
+          # --no-workspaces-update prevents npm from trying to resolve workspace dependencies
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
           if [[ "${{ github.event.inputs.version }}" =~ ^(patch|minor|major)$ ]]; then
-            npm version ${{ github.event.inputs.version }} --no-git-tag-version
+            npm version ${{ github.event.inputs.version }} --no-git-tag-version --no-commit-hooks --no-workspaces-update
           else
-            npm version ${{ github.event.inputs.version }} --no-git-tag-version
+            npm version ${{ github.event.inputs.version }} --no-git-tag-version --no-commit-hooks --no-workspaces-update
           fi
           
           # Get the new version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
       
       - name: Commit version bump
         run: |

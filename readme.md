@@ -2,7 +2,7 @@
 
 **A game framework written in TypeScript built to work with PixiJS**
 
-Moxi is designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
+MoxiJS is designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
 
 PixiJS is great for rendering, but sometimes you just want to make a game without writing the same boilerplate every time. That's MOXIJS. It's an Entity-Component-System wrapper around PixiJS that gives you the structure to build games faster while keeping all the PixiJS power under the hood.
 

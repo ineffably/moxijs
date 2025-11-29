@@ -1,6 +1,6 @@
-# Why Moxi?
+# Why MoxiJS?
 
-Moxi is a game framework written in TypeScript built to work with PixiJS, designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
+MoxiJS is a game framework written in TypeScript built to work with PixiJS, designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
 
 ## The Problem
 
@@ -11,7 +11,7 @@ Building games with raw PixiJS requires:
 - Building UI systems from scratch
 - Repetitive sprite/text setup code
 
-## What Moxi Provides
+## What MoxiJS Provides
 
 ### 1. One-Liner Initialization
 
@@ -123,7 +123,7 @@ sprite.y = px(5);
 const walkFrames = TextureFrameSequences.getFrameSequence('hero', 'walk');
 ```
 
-## Why Moxi for POCs & Prototypes
+## Why MoxiJS for POCs & Prototypes
 
 ### Speed
 - **Minutes to playable**: `setupMoxi()` gets you rendering immediately
@@ -132,15 +132,15 @@ const walkFrames = TextureFrameSequences.getFrameSequence('hero', 'walk');
 
 ### Flexibility
 - **Use what you need**: Physics, UI, parallax - all optional
-- **Full PIXI access**: Moxi wraps, doesn't hide. Drop to raw PIXI anytime
+- **Full PIXI access**: MoxiJS wraps, doesn't hide. Drop to raw PIXI anytime
 - **Swap behaviors**: Entity-component model makes iteration fast
 
 ### No Lock-In
 - **Standard PixiJS**: Your sprites, textures, and rendering knowledge transfers
-- **Clean abstractions**: Understand what Moxi does by reading the source
-- **Eject gradually**: Start with Moxi helpers, replace with custom code as needed
+- **Clean abstractions**: Understand what MoxiJS does by reading the source
+- **Eject gradually**: Start with MoxiJS helpers, replace with custom code as needed
 
-## When to Use Moxi
+## When to Use MoxiJS
 
 **Good fit:**
 - 2D games (platformers, top-down, puzzle)
@@ -157,16 +157,16 @@ const walkFrames = TextureFrameSequences.getFrameSequence('hero', 'walk');
 ## Getting Started
 
 ```typescript
-import Moxi from 'moxijs';
+import MoxiJS from 'moxijs';
 
-const { scene, engine, loadAssets } = await Moxi.setupMoxi({
+const { scene, engine, loadAssets } = await MoxiJS.setupMoxi({
   width: 800,
   height: 600
 });
 
 await loadAssets([{ src: 'sprites.json' }]);
 
-const sprite = Moxi.asSprite({ texture: 'hero', x: 400, y: 300 });
+const sprite = MoxiJS.asSprite({ texture: 'hero', x: 400, y: 300 });
 scene.addChild(sprite);
 
 // You're rendering. Now build your game.
@@ -174,6 +174,6 @@ scene.addChild(sprite);
 
 ## Summary
 
-Moxi removes the friction between "I have an idea" and "I have a playable prototype." It's not a game engine - it's a toolkit that handles the boring parts so you can focus on what makes your game unique.
+MoxiJS removes the friction between "I have an idea" and "I have a playable prototype." It's not a game engine - it's a toolkit that handles the boring parts so you can focus on what makes your game unique.
 
 Built for developers who know JavaScript/TypeScript and want to ship games, not fight boilerplate.

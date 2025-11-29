@@ -7,8 +7,8 @@
  *
  * This demo helps developers choose the right method for their use case.
  */
-import { setupMoxi, Logic, asEntity, UIScrollContainer, UIComponent, EdgeInsets } from 'moxijs';
-import type { MeasuredSize } from 'moxijs';
+import { setupMoxi, Logic, asEntity, UIScrollContainer, UIComponent, EdgeInsets } from '@moxijs/core';
+import type { MeasuredSize } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapText, Text } from 'pixi.js';
 import { ASSETS } from '../assets-config';

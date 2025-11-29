@@ -328,7 +328,7 @@ const pixelText = new BitmapText({
 MOXIJS provides a `pixelPerfect` flag for convenience:
 
 ```typescript
-import { asBitmapText } from 'moxijs';
+import { asBitmapText } from '@moxijs/core';
 
 const label = asBitmapText(
   {
@@ -379,7 +379,7 @@ titleText.position.set(px(2), px(1)); // Position on grid
 Here's a complete example combining all steps:
 
 ```typescript
-import { setupMoxi, asBitmapText } from 'moxijs';
+import { setupMoxi, asBitmapText } from '@moxijs/core';
 import { Assets, BitmapFont } from 'pixi.js';
 
 async function initPixelPerfectUI() {
@@ -1039,7 +1039,7 @@ The `Logic<T>` base class provides two key lifecycle methods:
 
 **Basic Pattern:**
 ```typescript
-import { Logic } from 'moxijs';
+import { Logic } from '@moxijs/core';
 import { BitmapText } from 'pixi.js';
 
 class MyTextLogic extends Logic<BitmapText> {

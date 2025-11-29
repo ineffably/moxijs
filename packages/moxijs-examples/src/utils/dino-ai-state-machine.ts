@@ -1,4 +1,4 @@
-import { StateLogic, StateMachine } from 'moxijs';
+import { StateLogic, StateMachine } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { RadarLogic } from '../examples/behavior-logic/radar-logic';
 import { FollowTargetLogic } from '../examples/behavior-logic/follow-target-logic';

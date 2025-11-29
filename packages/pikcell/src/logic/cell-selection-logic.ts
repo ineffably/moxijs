@@ -5,7 +5,7 @@
  * following the Moxi ECS pattern.
  */
 import * as PIXI from 'pixi.js';
-import { Logic } from 'moxijs';
+import { Logic } from '@moxijs/core';
 import { SPRITE_SHEET_CONSTANTS, COLOR_CONSTANTS } from '../config/constants';
 
 export interface CellSelectionOptions {

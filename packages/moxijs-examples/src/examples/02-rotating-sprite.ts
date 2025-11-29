@@ -1,4 +1,4 @@
-import { utils, setupMoxi, Logic, asEntity, asBitmapText, asSprite } from 'moxijs';
+import { utils, setupMoxi, Logic, asEntity, asBitmapText, asSprite } from '@moxijs/core';
 import { Sprite, BitmapText, Renderer } from 'pixi.js';
 import { ASSETS } from '../assets-config';
 

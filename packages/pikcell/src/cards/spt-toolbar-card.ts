@@ -4,7 +4,7 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createSVGIconButton } from '../utilities/svg-icon-button';
-import { GRID, px } from 'moxijs';
+import { GRID, px } from '@moxijs/core';
 
 export type SPTTool = 'pan' | 'zoom';
 

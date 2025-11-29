@@ -39,7 +39,7 @@ Here's what MOXIJS gives you out of the box:
 Attach logic components to PixiJS objects. No inheritance hierarchy nonsense.
 
 ```typescript
-import { asEntity, Logic } from 'moxijs';
+import { asEntity, Logic } from '@moxijs/core';
 import { Sprite } from 'pixi.js';
 
 class RotateLogic extends Logic<Sprite> {
@@ -58,7 +58,7 @@ entity.moxiEntity.addLogic(new RotateLogic());
 Real physics via Planck.js. The cool part? If you draw a box with Graphics, MOXIJS automatically figures out the collision shape. No manual setup.
 
 ```typescript
-import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxijs';
+import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from '@moxijs/core';
 import { Graphics } from 'pixi.js';
 
 const { scene, physicsWorld } = await setupMoxi({
@@ -80,7 +80,7 @@ scene.addChild(boxEntity);
 Multi-layer backgrounds with different scroll speeds. Handles zoom compensation automatically.
 
 ```typescript
-import { ParallaxBackground, TilingParallaxLayer } from 'moxijs';
+import { ParallaxBackground, TilingParallaxLayer } from '@moxijs/core';
 
 const background = new ParallaxBackground(camera);
 
@@ -99,7 +99,7 @@ background.addLayer(new TilingParallaxLayer(cloudsTexture, {
 Camera that follows your player, with smooth movement and boundaries.
 
 ```typescript
-import { Camera, CameraLogic } from 'moxijs';
+import { Camera, CameraLogic } from '@moxijs/core';
 
 const camera = new Camera(renderer);
 camera.setTarget(player);
@@ -114,7 +114,7 @@ scene.addChild(asEntity(camera).moxiEntity.addLogic(new CameraLogic()));
 One place for all your keyboard, mouse, and wheel input.
 
 ```typescript
-import { ClientEvents } from 'moxijs';
+import { ClientEvents } from '@moxijs/core';
 
 const input = new ClientEvents();
 
@@ -131,7 +131,7 @@ const zoom = input.wheelOffsets.y;
 For character AI, game states, UI flows, whatever.
 
 ```typescript
-import { StateMachine, StateLogic } from 'moxijs';
+import { StateMachine, StateLogic } from '@moxijs/core';
 
 const fsm = new StateMachine('idle');
 fsm.addTransition('idle', 'jump', 'jumping');
@@ -148,7 +148,7 @@ fsm.transition('jump'); // idle → jumping
 Slice up spritesheets and manage frame sequences.
 
 ```typescript
-import { asTextureFrames, TextureFrameSequences } from 'moxijs';
+import { asTextureFrames, TextureFrameSequences } from '@moxijs/core';
 
 const frames = asTextureFrames(texture.source, {
   frameWidth: 64,
@@ -169,7 +169,7 @@ const sprite = new Sprite(sequences.getFrame('walk', 0));
 Generate tile maps from spritesheets.
 
 ```typescript
-import { createTileGrid } from 'moxijs';
+import { createTileGrid } from '@moxijs/core';
 
 const grid = createTileGrid({
   gridWidth: 10,
@@ -190,7 +190,7 @@ scene.addChild(grid);
 Keep your aspect ratio when the window resizes.
 
 ```typescript
-import { setupResponsiveCanvas } from 'moxijs';
+import { setupResponsiveCanvas } from '@moxijs/core';
 
 setupResponsiveCanvas(renderer, {
   onResize: (width, height) => {
@@ -204,7 +204,7 @@ setupResponsiveCanvas(renderer, {
 Production-ready UI components with flexbox layout.
 
 ```typescript
-import { FlexContainer, FlexDirection, UIButton, UILabel, UIPanel } from 'moxijs';
+import { FlexContainer, FlexDirection, UIButton, UILabel, UIPanel } from '@moxijs/core';
 
 const menu = new FlexContainer({
   direction: FlexDirection.Column,
@@ -230,7 +230,7 @@ Includes: `UIButton`, `UILabel`, `UIPanel`, `UITextInput`, `UITextArea`, `UISele
 Pixel-perfect positioning for retro-style games.
 
 ```typescript
-import { px, units, GRID } from 'moxijs';
+import { px, units, GRID } from '@moxijs/core';
 
 // Position sprites in grid units (default 4x scale)
 sprite.x = px(10);  // 10 grid units = 40 pixels
@@ -253,7 +253,7 @@ npm install moxijs pixi.js
 ### Basic example
 
 ```typescript
-import { setupMoxi, asEntity, Logic } from 'moxijs';
+import { setupMoxi, asEntity, Logic } from '@moxijs/core';
 import { Sprite, Assets } from 'pixi.js';
 
 class RotateLogic extends Logic<Sprite> {
@@ -290,7 +290,7 @@ init();
 ### Physics example
 
 ```typescript
-import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from 'moxijs';
+import { setupMoxi, asPhysicsEntity, PhysicsMaterials } from '@moxijs/core';
 import { Graphics } from 'pixi.js';
 
 async function initPhysics() {

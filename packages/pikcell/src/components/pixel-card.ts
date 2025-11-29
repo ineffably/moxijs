@@ -12,7 +12,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
-import { GRID, BORDER, px } from 'moxijs';
+import { GRID, BORDER, px } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
 

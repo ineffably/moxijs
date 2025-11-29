@@ -6,10 +6,10 @@ import {
   TilingParallaxLayer,
   Logic,
   asSprite
-} from 'moxijs';
+} from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { ASSETS } from '../assets-config';
-import { ClientEvents } from 'moxijs';
+import { ClientEvents } from '@moxijs/core';
 
 /**
  * Parallax Space Shooter Example

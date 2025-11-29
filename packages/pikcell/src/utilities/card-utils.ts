@@ -11,7 +11,7 @@
  * 
  * @see ../README.md for grid system documentation
  */
-import { GRID, BORDER, px } from 'moxijs';
+import { GRID, BORDER, px } from '@moxijs/core';
 import { CARD_CONSTANTS } from '../config/constants';
 
 /**

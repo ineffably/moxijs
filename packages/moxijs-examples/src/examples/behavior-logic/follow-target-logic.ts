@@ -1,4 +1,4 @@
-import { Logic } from 'moxijs';
+import { Logic } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 
 /**

@@ -2,7 +2,7 @@
  * Sprite sheet controller - manages sprite data and interactions independently of the card
  */
 import * as PIXI from 'pixi.js';
-import { px } from 'moxijs';
+import { px } from '@moxijs/core';
 
 export type SpriteSheetType = 'PICO-8' | 'TIC-80';
 

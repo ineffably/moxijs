@@ -14,7 +14,7 @@ import {
   UITextInput,
   SelectOption,
   UIComponent
-} from 'moxijs';
+} from '@moxijs/core';
 
 export function createFormElementsTab(): UIComponent {
   // Main container

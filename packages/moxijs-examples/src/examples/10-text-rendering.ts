@@ -3,7 +3,7 @@
  * Showcases different ways to render text in PixiJS
  * Features: mechanical scrolling counter, BitmapText, styled text, and effects
  */
-import { setupMoxi } from 'moxijs';
+import { setupMoxi } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../assets-config';

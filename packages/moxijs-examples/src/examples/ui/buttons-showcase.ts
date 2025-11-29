@@ -13,7 +13,7 @@ import {
   UIButton,
   UILabel,
   UIComponent
-} from 'moxijs';
+} from '@moxijs/core';
 import { ASSETS } from '../../assets-config';
 
 export async function createButtonsShowcase(): Promise<UIComponent> {

@@ -172,7 +172,7 @@ In-depth guides for specific topics:
 - **Webpack 5** for bundling with hot reload
 - **TypeScript 5** with strict mode
 - **PixiJS 8** for rendering
-- **MOXIJS** (local build from `../moxijs`)
+- **MOXIJS** (local build from `../core`)
 - **Planck.js** for physics (example 08)
 - **CodeMirror 6** for interactive source code viewer
 - **Vite's ?raw loader** for bundling source code as strings

@@ -15,7 +15,9 @@
     "sprite-editor",
     "pixel-art",
     "moxi",
-    "pixi"
+    "pixijs",
+    "pico-8",
+    "tic-80"
   ],
   "author": "",
   "license": "ISC",
@@ -29,6 +31,6 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "@moxijs/core": "file:../moxijs"
+    "@moxijs/core": "file:../core"
   }
 }

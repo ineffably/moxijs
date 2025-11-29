@@ -10,7 +10,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { GRID, px } from 'moxi-kit';
+import { GRID, px } from 'moxijs';
 import { SpriteSheetController, SpriteSheetConfig, SpriteSheetType } from '../controllers/sprite-sheet-controller';
 import { createCheckerboardTexture } from '../utilities/texture-utils';
 import { PICO8_PALETTE, TIC80_PALETTE } from '../theming/palettes';

@@ -5,7 +5,7 @@
  * Used for tool sub-menus like shape selection.
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from 'moxi-kit';
+import { GRID, px } from 'moxijs';
 import { getTheme } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 import { createPixelButton, PixelButtonResult } from './pixel-button';

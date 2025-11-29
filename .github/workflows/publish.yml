@@ -33,14 +33,14 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       
-      - name: Build moxi-kit package
-        run: npm run build --workspace=moxi-kit
+      - name: Build moxijs package
+        run: npm run build --workspace=moxijs
 
       - name: Run tests
-        run: npm run test:ci --workspace=moxi-kit
+        run: npm run test:ci --workspace=moxijs
       
       - name: Version package
-        working-directory: packages/moxi
+        working-directory: packages/moxijs
         run: |
           if [[ "${{ github.event.inputs.version }}" =~ ^(patch|minor|major)$ ]]; then
             npm version ${{ github.event.inputs.version }} --no-git-tag-version
@@ -54,12 +54,12 @@ jobs:
       
       - name: Commit version bump
         run: |
-          git add packages/moxi/package.json
-          git commit -m "chore: release moxi-kit@${{ env.NEW_VERSION }}"
+          git add packages/moxijs/package.json
+          git commit -m "chore: release moxijs@${{ env.NEW_VERSION }}"
           git tag "v${{ env.NEW_VERSION }}"
       
       - name: Publish to NPM
-        working-directory: packages/moxi
+        working-directory: packages/moxijs
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,4 +1,5 @@
-import { Application, Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
+import { setupMoxi } from '@moxijs/core';
 import { EmitterConfig, Particle } from './particle-emitter/types';
 import { createAllTextures } from './particle-emitter/textures';
 import { createEnhancedControls, applyPreset } from './particle-emitter/ui-controls';
@@ -410,41 +411,68 @@ export async function initParticleEmitterSandbox() {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('Canvas container not found');
 
-  root.innerHTML = '';
-
-  // Create PIXI app
-  const app = new Application();
-  await app.init({
-    background: '#1a1a2e',
-    resizeTo: root,
+  // Setup MoxiJS with loading scene
+  const { scene, engine, renderer, loadingScene } = await setupMoxi({
+    hostElement: root,
+    renderOptions: {
+      background: '#1a1a2e'
+    },
+    showLoadingScene: true,
+    loadingSceneOptions: {
+      text: 'Loading Particle Textures...'
+    }
   });
 
-  root.appendChild(app.canvas);
+  // Show loading scene
+  if (loadingScene) {
+    loadingScene.show();
+  }
 
-  // Create all textures (async to load PNGs)
-  const textures = await createAllTextures(app);
+  // Create all textures (async to load PNGs) with progress tracking
+  const textures = await createAllTextures(renderer, (loaded, total) => {
+    // Loading scene doesn't expose text property, so we just show/hide it
+    // Progress is shown via the animation
+  });
+
+  // Hide loading scene
+  if (loadingScene) {
+    loadingScene.hide();
+  }
 
   // Use default config (localStorage removed for now)
   const config: EmitterConfig = { ...defaultConfig };
 
   // Create emitter
   const emitter = new EnhancedParticleEmitter(config, textures, 1000);
-  emitter.emitterX = app.screen.width / 2;
-  emitter.emitterY = app.screen.height / 2;
-  app.stage.addChild(emitter);
+  emitter.emitterX = renderer.width / 2;
+  emitter.emitterY = renderer.height / 2;
+  scene.addChild(emitter);
+
+  // Create a minimal app-like object for compatibility with UI controls
+  // They need screen.width, screen.height, and ticker
+  const appLike = {
+    screen: {
+      width: renderer.width,
+      height: renderer.height
+    },
+    renderer,
+    canvas: renderer.canvas,
+    ticker: engine.ticker
+  } as any;
 
   // Apply fire preset as default
-  applyPreset(app, emitter, config, 'fire');
+  applyPreset(appLike, emitter, config, 'fire');
 
-  // Update loop
-  app.ticker.add((ticker) => {
+  // Update loop using MoxiJS engine
+  engine.ticker.add((ticker) => {
     const deltaTime = ticker.deltaTime / 60;
     emitter.update(deltaTime);
   });
 
   // Mouse/touch interaction - click to reposition emitter
-  app.canvas.addEventListener('click', (e) => {
-    const rect = app.canvas.getBoundingClientRect();
+  const canvas = renderer.canvas as HTMLCanvasElement;
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
     emitter.emitterX = e.clientX - rect.left;
     emitter.emitterY = e.clientY - rect.top;
 
@@ -454,7 +482,11 @@ export async function initParticleEmitterSandbox() {
   });
 
   // Create comprehensive UI controls
-  createEnhancedControls(app, emitter, config, textures);
+  createEnhancedControls(appLike, emitter, config, textures);
+
+  // Initialize and start the engine
+  scene.init();
+  engine.start();
 
   console.log('✅ Particle Emitter Sandbox loaded');
   console.log('💡 Click to reposition emitter, use controls to adjust settings!');

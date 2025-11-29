@@ -1,4 +1,4 @@
-# Moxi
+# MoxiJS
 
 Game framework built on PIXI.js with Entity-Component-System (ECS) architecture, physics integration, and UI components.
 

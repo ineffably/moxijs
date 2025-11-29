@@ -489,10 +489,16 @@ export async function initDinoAIBehaviors() {
   hud.name = 'hud';
   hud.position.set(10, 10); // Fixed position in screen space
 
+  // HUD sizing (2x scale)
+  const hudItemWidth = 130;
+  const hudPadding = 16;
+  const hudWidth = hudPadding * 2 + hudItemWidth * 4;
+  const hudHeight = 80;
+
   // Create HUD background panel
   const hudBg = new PIXI.Graphics();
   hudBg.beginFill(0x000000, 0.7);
-  hudBg.drawRoundedRect(0, 0, 280, 40, 4);
+  hudBg.drawRoundedRect(0, 0, hudWidth, hudHeight, 8);
   hudBg.endFill();
   hud.addChild(hudBg);
 
@@ -504,18 +510,15 @@ export async function initDinoAIBehaviors() {
     { name: 'Vita', behavior: 'Wander', color: 0x2ecc71 }
   ];
 
-  const hudItemWidth = 65;
-  const hudPadding = 8;
-
   dinoInfos.forEach((info, index) => {
     const xOffset = hudPadding + index * hudItemWidth;
 
     // Color indicator
     const indicator = new PIXI.Graphics();
     indicator.beginFill(info.color);
-    indicator.drawCircle(0, 0, 4);
+    indicator.drawCircle(0, 0, 8);
     indicator.endFill();
-    indicator.position.set(xOffset + 4, 12);
+    indicator.position.set(xOffset + 8, 24);
     hud.addChild(indicator);
 
     // Dino name (BitmapText)
@@ -527,8 +530,8 @@ export async function initDinoAIBehaviors() {
         fill: 0xffffff
       }
     });
-    nameText.scale.set(0.12);
-    nameText.position.set(xOffset + 12, 6);
+    nameText.scale.set(0.25);
+    nameText.position.set(xOffset + 22, 12);
     hud.addChild(nameText);
 
     // Behavior label (BitmapText)
@@ -540,8 +543,8 @@ export async function initDinoAIBehaviors() {
         fill: 0xaaaaaa
       }
     });
-    behaviorText.scale.set(0.10);
-    behaviorText.position.set(xOffset + 12, 20);
+    behaviorText.scale.set(0.20);
+    behaviorText.position.set(xOffset + 22, 42);
     hud.addChild(behaviorText);
   });
 

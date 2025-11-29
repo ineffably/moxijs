@@ -21,6 +21,8 @@ export interface SetupMoxiArgs {
   hostElement: HTMLElement;
   /** PIXI render options (width, height, backgroundColor, etc). */
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
+  /** Background color (hex number like 0x1a1a2e). Convenience option. */
+  backgroundColor?: number;
   /** Enable physics. Pass true for defaults or PhysicsWorldOptions. */
   physics?: PhysicsWorldOptions | boolean;
   /** Show loading overlay during asset loading. */
@@ -74,6 +76,7 @@ export const defaultRenderOptions = {
 export async function setupMoxi({
   hostElement,
   renderOptions = defaultRenderOptions,
+  backgroundColor,
   physics,
   showLoadingScene = false,
   loadingSceneOptions = {},
@@ -102,6 +105,11 @@ export async function setupMoxi({
   }
 
   const { renderer } = await RenderManager.create(hostElement, finalRenderOptions);
+
+  // Apply background color if specified
+  if (backgroundColor !== undefined) {
+    renderer.background.color = backgroundColor;
+  }
 
   // Apply canvas CSS for pixel-perfect scaling if requested
   if (applyImageRendering) {

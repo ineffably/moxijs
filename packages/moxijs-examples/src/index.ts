@@ -1,22 +1,36 @@
 /**
  * Moxi Examples - Main Entry Point
- * Provides a simple UI to select and run different examples
+ * Provides a categorized UI with accordion navigation to select and run examples
  */
-import { initBasicSprite } from './examples/01-basic-sprite';
-import { initRotatingSprite } from './examples/02-rotating-sprite';
-import { initPixiOnly } from './examples/03-pixi-only';
-import { initAnimatedCharacter } from './examples/04-animated-character';
-import { initProgressBar } from './examples/05-progress-bar';
-import { initBunnyAdventure } from './examples/06-bunny-adventure';
-import { initParallaxSpaceShooter } from './examples/07-parallax-space-shooter';
-import { initPhysicsBasic } from './examples/08-physics-basic';
-import { initDinoAIBehaviors } from './examples/09-dino-ai-behaviors';
-import { initTextRendering } from './examples/10-text-rendering';
-import { initUIShowcase } from './examples/14-ui-showcase';
-import { initFontRenderingComparison } from './examples/12-font-rendering-comparison';
-import { initParticleEmitterSandbox } from './examples/15-particle-emitter-sandbox';
-import { initSpriteLibrary } from './examples/16-sprite-library';
-import { initSpriteEditor } from './examples/17-sprite-editor';
+
+// === BASICS ===
+import { initBasicSprite } from './examples/01-basics/basic-sprite';
+import { initRotatingSprite } from './examples/01-basics/rotating-sprite';
+import { initPixiOnly } from './examples/01-basics/pixi-integration';
+import { initAnimatedCharacter } from './examples/01-basics/animated-character';
+import { initProgressBar } from './examples/01-basics/progress-bar';
+
+// === UI & TEXT ===
+import { initTextRendering } from './examples/02-ui/text-rendering';
+import { initFontRenderingComparison } from './examples/02-ui/font-rendering-comparison';
+import { initUIShowcase } from './examples/02-ui/ui-showcase';
+
+// === GAMEPLAY ===
+import { initBunnyAdventure } from './examples/03-gameplay/bunny-adventure';
+import { initParallaxSpaceShooter } from './examples/03-gameplay/parallax-shooter';
+
+// === NPC BEHAVIORS ===
+import { initDinoAIBehaviors } from './examples/04-npc-behaviors/dino-behaviors';
+
+// === PHYSICS ===
+import { initPhysicsBasic } from './examples/06-physics/physics-basic';
+import { initStackingTower } from './examples/06-physics/stacking-tower';
+import { initNewtonsCradle } from './examples/06-physics/newtons-cradle';
+
+// === TOOLS ===
+import { initSpriteLibrary } from './examples/05-tools/sprite-library';
+import { initSpriteEditor } from './examples/05-tools/sprite-editor';
+import { initParticleEmitterSandbox } from './examples/05-tools/particle-sandbox';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -24,144 +38,212 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 // Import example source code using Vite's ?raw loader
-import basicSpriteSource from './examples/01-basic-sprite.ts?raw';
-import rotatingSpriteSource from './examples/02-rotating-sprite.ts?raw';
-import pixiOnlySource from './examples/03-pixi-only.ts?raw';
-import animatedCharacterSource from './examples/04-animated-character.ts?raw';
-import progressBarSource from './examples/05-progress-bar.ts?raw';
-import bunnyAdventureSource from './examples/06-bunny-adventure.ts?raw';
-import parallaxSpaceShooterSource from './examples/07-parallax-space-shooter.ts?raw';
-import physicsBasicSource from './examples/08-physics-basic.ts?raw';
-import dinoAIBehaviorsSource from './examples/09-dino-ai-behaviors.ts?raw';
-import textRenderingSource from './examples/10-text-rendering.ts?raw';
-import uiShowcaseSource from './examples/14-ui-showcase.ts?raw';
-import fontRenderingComparisonSource from './examples/12-font-rendering-comparison.ts?raw';
-import particleEmitterSandboxSource from './examples/15-particle-emitter-sandbox.ts?raw';
-import spriteLibrarySource from './examples/16-sprite-library.ts?raw';
-import spriteEditorSource from './examples/17-sprite-editor.ts?raw';
+// === BASICS ===
+import basicSpriteSource from './examples/01-basics/basic-sprite.ts?raw';
+import rotatingSpriteSource from './examples/01-basics/rotating-sprite.ts?raw';
+import pixiIntegrationSource from './examples/01-basics/pixi-integration.ts?raw';
+import animatedCharacterSource from './examples/01-basics/animated-character.ts?raw';
+import progressBarSource from './examples/01-basics/progress-bar.ts?raw';
 
-// Example registry
+// === UI & TEXT ===
+import textRenderingSource from './examples/02-ui/text-rendering.ts?raw';
+import fontRenderingComparisonSource from './examples/02-ui/font-rendering-comparison.ts?raw';
+import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
+
+// === GAMEPLAY ===
+import bunnyAdventureSource from './examples/03-gameplay/bunny-adventure.ts?raw';
+import parallaxShooterSource from './examples/03-gameplay/parallax-shooter.ts?raw';
+
+// === NPC BEHAVIORS ===
+import dinoBehaviorsSource from './examples/04-npc-behaviors/dino-behaviors.ts?raw';
+
+// === PHYSICS ===
+import physicsBasicSource from './examples/06-physics/physics-basic.ts?raw';
+import stackingTowerSource from './examples/06-physics/stacking-tower.ts?raw';
+import newtonsCradleSource from './examples/06-physics/newtons-cradle.ts?raw';
+
+// === TOOLS ===
+import spriteLibrarySource from './examples/05-tools/sprite-library.ts?raw';
+import spriteEditorSource from './examples/05-tools/sprite-editor.ts?raw';
+import particleSandboxSource from './examples/05-tools/particle-sandbox.ts?raw';
+
+// Example interface
 interface Example {
   name: string;
   description: string;
   init: () => Promise<void>;
-  source: string; // Source code as string (from ?raw import)
+  source: string;
 }
 
-const examples: Record<string, Example> = {
-  'basic-sprite': {
-    name: '01 - Sprites!',
-    description: 'Moxi sprite entities with a pooling example',
-    init: initBasicSprite,
-    source: basicSpriteSource
+// Category interface
+interface Category {
+  name: string;
+  collapsed: boolean;
+  examples: Record<string, Example>;
+}
+
+// Categorized examples registry
+const categories: Record<string, Category> = {
+  'basics': {
+    name: 'Basics',
+    collapsed: false,
+    examples: {
+      'basic-sprite': {
+        name: 'Sprites',
+        description: 'Loading and displaying sprite entities',
+        init: initBasicSprite,
+        source: basicSpriteSource
+      },
+      'rotating-sprite': {
+        name: 'Rotating Sprite',
+        description: 'Simple animation with Logic component',
+        init: initRotatingSprite,
+        source: rotatingSpriteSource
+      },
+      'pixi-integration': {
+        name: 'PIXI.js Integration',
+        description: 'Pure PIXI.js without Moxi wrapper',
+        init: initPixiOnly,
+        source: pixiIntegrationSource
+      },
+      'animated-character': {
+        name: 'Animated Character',
+        description: 'Spritesheet animations with camera follow',
+        init: initAnimatedCharacter,
+        source: animatedCharacterSource
+      },
+      'progress-bar': {
+        name: 'Progress Bar',
+        description: 'Animated progress bar Logic component',
+        init: initProgressBar,
+        source: progressBarSource
+      }
+    }
   },
-  'rotating-sprite': {
-    name: '02 - Rotating Sprite',
-    description: 'A sprite that rotates with a label showing the angle',
-    init: initRotatingSprite,
-    source: rotatingSpriteSource
+  'ui': {
+    name: 'UI & Text',
+    collapsed: true,
+    examples: {
+      'text-rendering': {
+        name: 'Text Rendering',
+        description: 'Text display options and styles',
+        init: initTextRendering,
+        source: textRenderingSource
+      },
+      'font-rendering-comparison': {
+        name: 'Font Comparison',
+        description: 'Text vs BitmapText vs HTMLText',
+        init: initFontRenderingComparison,
+        source: fontRenderingComparisonSource
+      },
+      'ui-showcase': {
+        name: 'UI Showcase',
+        description: 'Tabbed interface with all UI components',
+        init: initUIShowcase,
+        source: uiShowcaseSource
+      }
+    }
   },
-  'pixi-only': {
-    name: '03 - PIXI.js Only',
-    description: 'Pure PIXI.js example without Moxi - rotating bunny grid',
-    init: initPixiOnly,
-    source: pixiOnlySource
+  'gameplay': {
+    name: 'Gameplay',
+    collapsed: true,
+    examples: {
+      'bunny-adventure': {
+        name: 'Bunny Adventure',
+        description: 'Player movement, tile world, camera',
+        init: initBunnyAdventure,
+        source: bunnyAdventureSource
+      },
+      'parallax-shooter': {
+        name: 'Parallax Shooter',
+        description: 'Asteroids-style space shooter with parallax',
+        init: initParallaxSpaceShooter,
+        source: parallaxShooterSource
+      }
+    }
   },
-  'progress-bar': {
-    name: '04 - Progress Bar',
-    description: 'Custom Logic component creating an animated progress bar',
-    init: initProgressBar,
-    source: progressBarSource
+  'npc-behaviors': {
+    name: 'NPC Behaviors',
+    collapsed: true,
+    examples: {
+      'dino-behaviors': {
+        name: 'Dino NPC Behaviors',
+        description: 'FSM behaviors: Follow, Flee, Patrol, Wander',
+        init: initDinoAIBehaviors,
+        source: dinoBehaviorsSource
+      }
+    }
   },
-  'animated-character': {
-    name: '05 - Animated Character',
-    description: 'Sprite animation with camera following',
-    init: initAnimatedCharacter,
-    source: animatedCharacterSource
+  'physics': {
+    name: 'Physics',
+    collapsed: true,
+    examples: {
+      'physics-basic': {
+        name: 'Physics Basics',
+        description: 'Planck.js physics with boxes and balls',
+        init: initPhysicsBasic,
+        source: physicsBasicSource
+      },
+      'stacking-tower': {
+        name: 'Stacking Tower',
+        description: 'Drop shapes to build the tallest tower',
+        init: initStackingTower,
+        source: stackingTowerSource
+      },
+      'newtons-cradle': {
+        name: "Newton's Cradle",
+        description: 'Classic momentum transfer pendulum',
+        init: initNewtonsCradle,
+        source: newtonsCradleSource
+      }
+    }
   },
-  'bunny-adventure': {
-    name: '06 - Bunny Adventure',
-    description: 'Player movement with arrow keys, tile world, and camera',
-    init: initBunnyAdventure,
-    source: bunnyAdventureSource
-  },
-  'parallax-space-shooter': {
-    name: '07 - Parallax Space Shooter',
-    description: 'Parallax scrolling with multiple background layers at different speeds',
-    init: initParallaxSpaceShooter,
-    source: parallaxSpaceShooterSource
-  },
-  'physics-basic': {
-    name: '08 - Physics Basic',
-    description: 'Physics system with Planck.js - falling boxes, bouncing balls',
-    init: initPhysicsBasic,
-    source: physicsBasicSource
-  },
-  'dino-ai-behaviors': {
-    name: '09 - Dino AI Behaviors',
-    description: 'AI behaviors using FSM and Logic: Follow, Flee, Patrol, Wander',
-    init: initDinoAIBehaviors,
-    source: dinoAIBehaviorsSource
-  },
-  'text-rendering': {
-    name: '10 - Text Rendering',
-    description: 'Mechanical scrolling counter, BitmapText, and text styles',
-    init: initTextRendering,
-    source: textRenderingSource
-  },
-  'ui-showcase': {
-    name: '11 - UI Showcase',
-    description: 'Tabbed interface showcasing all UI components',
-    init: initUIShowcase,
-    source: uiShowcaseSource
-  },
-  'font-rendering-comparison': {
-    name: '12 - Font Rendering Comparison',
-    description: 'Side-by-side comparison of Text, BitmapText, and HTMLText',
-    init: initFontRenderingComparison,
-    source: fontRenderingComparisonSource
-  },
-  'particle-emitter-sandbox': {
-    name: '15 - Particle Emitter Sandbox',
-    description: 'Advanced particle system with presets, color gradients, and export/import',
-    init: initParticleEmitterSandbox,
-    source: particleEmitterSandboxSource
-  },
-  'sprite-library': {
-    name: '16 - Sprite Library',
-    description: 'Browse all available sprites and textures loaded in the examples app',
-    init: initSpriteLibrary,
-    source: spriteLibrarySource
-  },
-  'sprite-editor': {
-    name: '17 - Sprite Editor',
-    description: 'Edit and manipulate sprites with pixel-perfect rendering, palettes, and tools',
-    init: initSpriteEditor,
-    source: spriteEditorSource
+  'tools': {
+    name: 'Tools & Editors',
+    collapsed: true,
+    examples: {
+      'sprite-library': {
+        name: 'Sprite Library',
+        description: 'Browse all available sprites and textures',
+        init: initSpriteLibrary,
+        source: spriteLibrarySource
+      },
+      'sprite-editor': {
+        name: 'Sprite Editor',
+        description: 'Edit sprites with pixel-perfect rendering',
+        init: initSpriteEditor,
+        source: spriteEditorSource
+      },
+      'particle-sandbox': {
+        name: 'Particle Sandbox',
+        description: 'Particle system editor with presets',
+        init: initParticleEmitterSandbox,
+        source: particleSandboxSource
+      }
+    }
   }
 };
 
 let currentExample: string | null = null;
+let currentCategory: string | null = null;
 
 // Global CodeMirror instance
 let codeEditor: EditorView | null = null;
 
 // Initialize CodeMirror editor
 function initCodeEditor(container: HTMLElement, sourceCode: string) {
-  // Destroy previous instance if exists
   if (codeEditor) {
     codeEditor.destroy();
   }
 
-  // Create new CodeMirror instance
   codeEditor = new EditorView({
     doc: sourceCode,
     extensions: [
-      basicSetup, // Line numbers, syntax highlighting, etc.
-      javascript({ typescript: true }), // TypeScript support
-      oneDark, // VS Code-like dark theme
-      EditorView.editable.of(false), // Read-only mode
-      EditorView.lineWrapping // Wrap long lines
+      basicSetup,
+      javascript({ typescript: true }),
+      oneDark,
+      EditorView.editable.of(false),
+      EditorView.lineWrapping
     ],
     parent: container
   });
@@ -188,73 +270,38 @@ async function copyCodeToClipboard(sourceCode: string) {
     }
   } catch (err) {
     console.error('Failed to copy code:', err);
-    // Fallback for older browsers
-    const textArea = document.createElement('textarea');
-    textArea.value = sourceCode;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      const copyBtn = document.getElementById('copy-btn');
-      if (copyBtn) {
-        const originalText = copyBtn.innerHTML;
-        copyBtn.classList.add('copied');
-        copyBtn.innerHTML = `
-          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
-          </svg>
-          Copied!
-        `;
-        setTimeout(() => {
-          copyBtn.classList.remove('copied');
-          copyBtn.innerHTML = originalText;
-        }, 2000);
-      }
-    } catch (fallbackErr) {
-      console.error('Fallback copy also failed:', fallbackErr);
-    }
-    document.body.removeChild(textArea);
   }
+}
+
+// Find example by key across all categories
+function findExample(exampleKey: string): { category: string; example: Example } | null {
+  for (const [catKey, category] of Object.entries(categories)) {
+    if (category.examples[exampleKey]) {
+      return { category: catKey, example: category.examples[exampleKey] };
+    }
+  }
+  return null;
 }
 
 // Load and display source code
 function loadSourceCode(exampleKey: string) {
-  const example = examples[exampleKey];
-  if (!example) return;
+  const found = findExample(exampleKey);
+  if (!found) return;
 
   const codeEditorWrapper = document.getElementById('code-editor-wrapper');
   if (!codeEditorWrapper) return;
 
-  // Clear previous editor
   codeEditorWrapper.innerHTML = '';
+  initCodeEditor(codeEditorWrapper, found.example.source);
 
-  // Source code is already bundled via ?raw imports
-  initCodeEditor(codeEditorWrapper, example.source);
-
-  // Update copy button handler
   const copyBtn = document.getElementById('copy-btn');
   if (copyBtn) {
-    copyBtn.onclick = () => copyCodeToClipboard(example.source);
-  }
-}
-
-// Initialize copy button
-function initCopyButton() {
-  const copyBtn = document.getElementById('copy-btn');
-  if (copyBtn && currentExample) {
-    const example = examples[currentExample];
-    if (example) {
-      copyBtn.onclick = () => copyCodeToClipboard(example.source);
-    }
+    copyBtn.onclick = () => copyCodeToClipboard(found.example.source);
   }
 }
 
 // Trigger canvas resize
 function triggerCanvasResize() {
-  // Trigger a resize event to update canvas sizing
-  // This ensures the canvas recalculates its size when container dimensions change
   window.dispatchEvent(new Event('resize'));
 }
 
@@ -268,11 +315,9 @@ function initTabs() {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
 
-      // Update active states
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Update app class to show/hide appropriate views
       if (targetTab === 'code') {
         app.classList.remove('code-hidden');
         app.classList.add('code-view');
@@ -281,7 +326,6 @@ function initTabs() {
         app.classList.add('code-hidden');
       }
 
-      // Trigger canvas resize after tab switch
       setTimeout(() => {
         triggerCanvasResize();
       }, 100);
@@ -309,20 +353,17 @@ function initResizeHandle() {
 
   const doResize = (e: MouseEvent) => {
     if (!isResizing) return;
-    
+
     const appRect = app.getBoundingClientRect();
     const mouseY = e.clientY - appRect.top;
     const appHeight = appRect.height;
-    
-    // Use absolute pixel values - more direct and responsive
+
     const minHeight = 200;
     const maxHeight = appHeight - minHeight;
-    
-    // Constrain mouse position to valid range
+
     const canvasHeight = Math.max(minHeight, Math.min(maxHeight, mouseY));
     const codeHeight = appHeight - canvasHeight;
-    
-    // Set absolute pixel heights
+
     canvasContainer.style.flex = 'none';
     canvasContainer.style.height = `${canvasHeight}px`;
     codeContainer.style.flex = 'none';
@@ -342,52 +383,90 @@ function initResizeHandle() {
   document.addEventListener('mouseup', stopResize);
 }
 
+// Toggle category accordion
+function toggleCategory(categoryKey: string) {
+  const category = categories[categoryKey];
+  if (!category) return;
+
+  category.collapsed = !category.collapsed;
+
+  const categoryEl = document.querySelector(`[data-category="${categoryKey}"]`);
+  const examplesEl = document.querySelector(`[data-category-examples="${categoryKey}"]`);
+  const chevron = categoryEl?.querySelector('.category-chevron');
+
+  if (categoryEl && examplesEl && chevron) {
+    if (category.collapsed) {
+      categoryEl.classList.add('collapsed');
+      examplesEl.classList.add('collapsed');
+      chevron.textContent = '\u25B6'; // Right arrow
+    } else {
+      categoryEl.classList.remove('collapsed');
+      examplesEl.classList.remove('collapsed');
+      chevron.textContent = '\u25BC'; // Down arrow
+    }
+  }
+}
+
 // Load an example
 async function loadExample(exampleKey: string, updateHash: boolean = true) {
   const canvasContainer = document.getElementById('canvas-container');
   if (!canvasContainer) return;
 
-  // Check if example exists
-  if (!examples[exampleKey]) {
+  const found = findExample(exampleKey);
+  if (!found) {
     console.error(`Example "${exampleKey}" not found`);
     return;
   }
 
-  // Clear previous example from canvas container
+  // Clear previous example
   canvasContainer.innerHTML = '';
   currentExample = exampleKey;
+  currentCategory = found.category;
 
   // Update URL hash
   if (updateHash) {
     window.location.hash = exampleKey;
   }
 
-  // Update UI
+  // Update UI - remove active from all, add to current
   document.querySelectorAll('.example-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   document.querySelector(`[data-example="${exampleKey}"]`)?.classList.add('active');
 
-  // Reset to game view when loading a new example
+  // Collapse other categories, expand the one containing this example
+  Object.keys(categories).forEach(catKey => {
+    if (catKey === found.category) {
+      // Expand target category if collapsed
+      if (categories[catKey].collapsed) {
+        toggleCategory(catKey);
+      }
+    } else {
+      // Collapse other categories if expanded
+      if (!categories[catKey].collapsed) {
+        toggleCategory(catKey);
+      }
+    }
+  });
+
+  // Reset to game view
   const app = document.getElementById('app');
   const gameTab = document.getElementById('game-tab');
   const codeTab = document.getElementById('code-tab');
   const codeContainer = document.getElementById('code-container');
-  
+
   if (app) {
     app.classList.remove('code-view');
     app.classList.add('code-hidden');
   }
-  
-  // Reset container heights to default (remove explicit pixel heights)
+
   if (canvasContainer && codeContainer) {
     canvasContainer.style.height = '';
     canvasContainer.style.flex = '';
     codeContainer.style.height = '';
     codeContainer.style.flex = '';
   }
-  
-  // Update tab states
+
   if (gameTab && codeTab) {
     gameTab.classList.add('active');
     codeTab.classList.remove('active');
@@ -396,12 +475,9 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
   // Load source code
   loadSourceCode(exampleKey);
 
-  // Initialize copy button
-  initCopyButton();
-
   // Run the example
   try {
-    await examples[exampleKey].init();
+    await found.example.init();
   } catch (error) {
     console.error('Error loading example:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -411,53 +487,75 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
 
 // Get example key from URL hash
 function getExampleFromHash(): string | null {
-  const hash = window.location.hash.slice(1); // Remove the '#'
-  const exampleKey = hash.split('/')[0]; // Take first segment before any slash (for sub-paths like ui-showcase/basics)
-  return exampleKey && examples[exampleKey] ? exampleKey : null;
+  const hash = window.location.hash.slice(1);
+  const exampleKey = hash.split('/')[0];
+  return exampleKey && findExample(exampleKey) ? exampleKey : null;
 }
 
-// Initialize UI
+// Initialize UI with accordion categories
 function initUI() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  // Clear existing example buttons (preserve header)
+  // Clear existing content (preserve header)
   const header = sidebar.querySelector('.header');
   sidebar.innerHTML = '';
   if (header) {
     sidebar.appendChild(header);
   }
 
-  // Create example buttons
-  Object.entries(examples).forEach(([key, example]) => {
-    const button = document.createElement('button');
-    button.className = 'example-btn';
-    button.dataset.example = key;
-    button.innerHTML = `
-      <div class="example-title">${example.name}</div>
-      <div class="example-desc">${example.description}</div>
+  // Create accordion categories
+  Object.entries(categories).forEach(([catKey, category]) => {
+    // Category header
+    const categoryHeader = document.createElement('div');
+    categoryHeader.className = `category-header ${category.collapsed ? 'collapsed' : ''}`;
+    categoryHeader.dataset.category = catKey;
+    categoryHeader.innerHTML = `
+      <span class="category-chevron">${category.collapsed ? '\u25B6' : '\u25BC'}</span>
+      <span class="category-name">${category.name}</span>
+      <span class="category-count">${Object.keys(category.examples).length}</span>
     `;
-    button.addEventListener('click', () => loadExample(key));
-    sidebar.appendChild(button);
+    categoryHeader.addEventListener('click', () => toggleCategory(catKey));
+    sidebar.appendChild(categoryHeader);
+
+    // Examples container
+    const examplesContainer = document.createElement('div');
+    examplesContainer.className = `category-examples ${category.collapsed ? 'collapsed' : ''}`;
+    examplesContainer.dataset.categoryExamples = catKey;
+
+    // Create example buttons
+    Object.entries(category.examples).forEach(([key, example]) => {
+      const button = document.createElement('button');
+      button.className = 'example-btn';
+      button.dataset.example = key;
+      button.innerHTML = `
+        <div class="example-title">${example.name}</div>
+        <div class="example-desc">${example.description}</div>
+      `;
+      button.addEventListener('click', () => loadExample(key));
+      examplesContainer.appendChild(button);
+    });
+
+    sidebar.appendChild(examplesContainer);
   });
 
   // Load example from hash or default to first
   const hashExample = getExampleFromHash();
-  const exampleToLoad = hashExample || Object.keys(examples)[0];
-  loadExample(exampleToLoad, !hashExample); // Only update hash if we're loading default
+  const defaultExample = Object.keys(Object.values(categories)[0].examples)[0];
+  const exampleToLoad = hashExample || defaultExample;
+  loadExample(exampleToLoad, !hashExample);
 }
 
 // Handle hash changes (browser back/forward)
 function handleHashChange() {
   const hashExample = getExampleFromHash();
   if (hashExample && hashExample !== currentExample) {
-    loadExample(hashExample, false); // Don't update hash since it already changed
+    loadExample(hashExample, false);
   }
 }
 
 // Start the app
 document.addEventListener('DOMContentLoaded', () => {
-  // Hide code panel by default
   const app = document.getElementById('app');
   if (app) {
     app.classList.add('code-hidden');
@@ -468,4 +566,3 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   window.addEventListener('hashchange', handleHashChange);
 });
-

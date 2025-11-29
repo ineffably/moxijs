@@ -1,6 +1,6 @@
 import { setupMoxi, asEntity, asTextureFrames, createTileGrid, getTextureRange, asBitmapText, asContainer } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
-import { ASSETS } from '../assets-config';
+import { ASSETS } from '../../assets-config';
 
 /**
  * Animated Character Example

@@ -25,7 +25,7 @@ jobs:
       
       - name: Build @moxijs/core package
         run: npm run build --workspace=@moxijs/core
-
+      
       - name: Run @moxijs/core tests
         run: npm run test --workspace=@moxijs/core
       

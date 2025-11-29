@@ -1,5 +1,5 @@
 {
-  "name": "pikcell",
+  "name": "@moxijs/pikcell",
   "version": "0.1.0",
   "description": "Pixel-perfect sprite editor built on Moxi and PIXI.js",
   "main": "dist/index.js",
@@ -19,8 +19,12 @@
     "pico-8",
     "tic-80"
   ],
-  "author": "",
-  "license": "ISC",
+  "private": true,
+  "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "commonjs",
   "devDependencies": {
     "html-webpack-plugin": "^5.6.3",

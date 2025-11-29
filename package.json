@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "workspaces": [
-    "packages/moxijs",
+    "packages/core",
     "packages/moxijs-examples",
     "packages/pikcell"
   ],

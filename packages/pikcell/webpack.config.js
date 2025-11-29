@@ -21,7 +21,7 @@ const libraryConfig = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      'moxi': path.resolve(__dirname, '../moxijs/src/index.ts'),
+      'moxi': path.resolve(__dirname, '../core/src/index.ts'),
       'pixi.js': path.resolve(__dirname, '../../node_modules/pixi.js')
     }
   },
@@ -73,7 +73,7 @@ const devConfig = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      'moxi': path.resolve(__dirname, '../moxijs/src/index.ts'),
+      'moxi': path.resolve(__dirname, '../core/src/index.ts'),
       'pixi.js': path.resolve(__dirname, '../../node_modules/pixi.js')
     }
   },

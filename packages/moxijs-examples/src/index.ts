@@ -421,6 +421,13 @@ function initUI() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
+  // Clear existing example buttons (preserve header)
+  const header = sidebar.querySelector('.header');
+  sidebar.innerHTML = '';
+  if (header) {
+    sidebar.appendChild(header);
+  }
+
   // Create example buttons
   Object.entries(examples).forEach(([key, example]) => {
     const button = document.createElement('button');

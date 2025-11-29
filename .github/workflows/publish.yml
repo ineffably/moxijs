@@ -40,7 +40,7 @@ jobs:
         run: npm run test:ci --workspace=@moxijs/core
       
       - name: Version package
-        working-directory: packages/moxijs
+        working-directory: packages/core
         run: |
           # Use npm version with flags to skip workspace updates and git operations
           # --no-workspaces-update prevents npm from trying to resolve workspace dependencies
@@ -59,12 +59,12 @@ jobs:
       
       - name: Commit version bump
         run: |
-          git add packages/moxijs/package.json
-          git commit -m "chore: release moxijs@${{ env.NEW_VERSION }}"
+          git add packages/core/package.json
+          git commit -m "chore: release @moxijs/core@${{ env.NEW_VERSION }}"
           git tag "v${{ env.NEW_VERSION }}"
       
       - name: Publish to NPM
-        working-directory: packages/moxijs
+        working-directory: packages/core
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

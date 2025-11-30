@@ -175,8 +175,43 @@ export class SpriteEditor {
     // Use UIManager to import states
     this.uiManager.importStates(new Map(adjustedState.cards.map(cs => [cs.id, cs])));
 
+    // Reposition toolbar relative to sprite cards if they exist
+    this.repositionToolbar();
+
     console.log('✅ UI state restored');
     return true;
+  }
+
+  /**
+   * Reposition toolbar to the right of sprite cards and bring to front
+   */
+  private repositionToolbar(): void {
+    const toolCard = this.uiManager.getCard(CARD_IDS.TOOL);
+    if (!toolCard) return;
+
+    // Find rightmost edge of any sprite card
+    const commanderBarHeight = calculateCommanderBarHeight();
+    let spriteCardRight = -1;
+    let spriteCardY = commanderBarHeight + px(1);
+
+    this.uiManager.getAllCards().forEach((card, id) => {
+      if (isSpriteCard(id)) {
+        const cardRight = card.container.x + card.getPixelWidth();
+        if (cardRight > spriteCardRight) {
+          spriteCardRight = cardRight;
+          spriteCardY = card.container.y;
+        }
+      }
+    });
+
+    // Only reposition if sprite cards exist
+    if (spriteCardRight > 0) {
+      const toolX = spriteCardRight + px(GRID.gap);
+      toolCard.container.position.set(toolX, spriteCardY);
+    }
+
+    // Always bring toolbar to front
+    this.scene.setChildIndex(toolCard.container, this.scene.children.length - 1);
   }
 
   /**
@@ -236,6 +271,8 @@ export class SpriteEditor {
     if (toolCard) {
       const toolX = spriteCardRight + px(GRID.gap);
       toolCard.container.position.set(toolX, spriteCardY);
+      // Bring toolbar to front so it's above sprite cards
+      this.scene.setChildIndex(toolCard.container, this.scene.children.length - 1);
     }
 
     this.saveUIState();
@@ -337,9 +374,9 @@ export class SpriteEditor {
     // Set as active
     this.spriteSheetManager.setActive(instance.id);
 
-    // Default zoom if new
+    // Default zoom if new - use scale 2 to keep card reasonably sized
     if (!savedState) {
-      spriteSheetResult.controller.setScale(4);
+      spriteSheetResult.controller.setScale(2);
       const dims = spriteSheetResult.controller.getScaledDimensions();
       const newContentWidth = Math.ceil(dims.width / px(1));
       const newContentHeight = Math.ceil(dims.height / px(1));
@@ -358,6 +395,11 @@ export class SpriteEditor {
     // Restore sprite card scale if saved
     if (savedState?.spriteCardScale && instance.spriteController) {
       this.spriteCardFactory.restoreScale(instance, savedState.spriteCardScale);
+    }
+
+    // Show toolbar when sprite sheet is created
+    if (this.toolbarCard) {
+      this.toolbarCard.card.container.visible = true;
     }
 
     console.log(`Created ${type} sprite sheet`);
@@ -462,6 +504,9 @@ export class SpriteEditor {
     });
     this.scene.addChild(this.toolbarCard.card.container);
     this.registerCard(CARD_IDS.TOOL, this.toolbarCard.card);
+
+    // Hide toolbar by default - will be shown when a sprite sheet is created
+    this.toolbarCard.card.container.visible = false;
 
     // Create info bar using LayoutManager
     const barHeight = 8;
@@ -646,11 +691,8 @@ export class SpriteEditor {
           label: 'PICO-8',
           onClick: (checkboxStates) => {
             this.createNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
-            // Try to restore saved UI layout, fall back to default
-            if (!this.restoreUIState()) {
-              this.applyDefaultLayout();
-            }
-            // Center the selected cell after layout is applied
+            // Always apply default layout for new projects
+            this.applyDefaultLayout();
             this.centerActiveSheetCell();
           }
         },
@@ -658,11 +700,8 @@ export class SpriteEditor {
           label: 'TIC-80',
           onClick: (checkboxStates) => {
             this.createNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
-            // Try to restore saved UI layout, fall back to default
-            if (!this.restoreUIState()) {
-              this.applyDefaultLayout();
-            }
-            // Center the selected cell after layout is applied
+            // Always apply default layout for new projects
+            this.applyDefaultLayout();
             this.centerActiveSheetCell();
           }
         }

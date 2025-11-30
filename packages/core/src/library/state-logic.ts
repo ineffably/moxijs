@@ -1,4 +1,4 @@
-import { Logic } from '../core/logic';
+import { Logic } from '../main/logic';
 import { Container, Renderer } from 'pixi.js';
 
 export class StateLogic extends Logic<Container> {

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { MoxiEntity, AsEntity } from '../core/moxi-entity';
+import { MoxiEntity, AsEntity } from '../main/moxi-entity';
 export interface ParallaxLayerOptions {
     scrollScale?: PIXI.Point;
     scrollOffset?: PIXI.Point;

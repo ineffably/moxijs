@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
-import { MoxiEntity, AsEntity, asEntity } from '../core/moxi-entity';
-import { Logic } from '../core/logic';
-import { Camera } from '../core/camera';
+import { MoxiEntity, AsEntity, asEntity } from '../main/moxi-entity';
+import { Logic } from '../main/logic';
+import { Camera } from '../main/camera';
 import { ParallaxLayer } from './parallax-layer';
 
 export interface ParallaxBackgroundOptions {

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { MoxiEntity, AsEntity, asEntity } from '../core/moxi-entity';
+import { MoxiEntity, AsEntity, asEntity } from '../main/moxi-entity';
 
 export interface ParallaxLayerOptions {
   scrollScale?: PIXI.Point;      // Motion multiplier (0.5 = half speed, like Godot's motion_scale)

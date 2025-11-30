@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Logic } from '../../core/logic';
+import { Logic } from '../../main/logic';
 import type { PhysicsWorld } from './physics-world';
 import type { PhysicsDebugOptions } from './physics-types';
 export declare class PhysicsDebugRenderer extends Logic<PIXI.Graphics> {

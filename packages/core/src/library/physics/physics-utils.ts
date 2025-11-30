@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { asEntity, AsEntity } from '../../core/moxi-entity';
+import { asEntity, AsEntity } from '../../main/moxi-entity';
 import type { PhysicsWorld } from './physics-world';
 import { PhysicsBodyLogic } from './physics-body-logic';
 import type { PhysicsBodyOptions, ShapeConfig } from './physics-types';

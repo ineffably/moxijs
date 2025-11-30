@@ -1,4 +1,4 @@
-import { EventEmitter } from '../src/core/event-system';
+import { EventEmitter } from '../src/main/event-system';
 
 describe('EventEmitter', () => {
   interface TestEvents extends Record<string, (...args: any[]) => void> {

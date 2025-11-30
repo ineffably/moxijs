@@ -21,7 +21,7 @@ describe('Type Definitions', () => {
     });
 
     it('should have expected type definition directories', () => {
-      expect(fs.existsSync(path.join(libTypesDir, 'core'))).toBe(true);
+      expect(fs.existsSync(path.join(libTypesDir, 'main'))).toBe(true);
       expect(fs.existsSync(path.join(libTypesDir, 'library'))).toBe(true);
       expect(fs.existsSync(path.join(libTypesDir, 'ui'))).toBe(true);
     });
@@ -105,11 +105,11 @@ describe('Type Definitions', () => {
     });
 
     it('should import from relative paths (not from src/)', () => {
-      // Should import from './core/', './library/', './ui/' not './src/core/'
-      expect(indexDtsContent).toMatch(/from ['"]\.\/core\//);
+      // Should import from './main/', './library/', './ui/' not './src/main/'
+      expect(indexDtsContent).toMatch(/from ['"]\.\/main\//);
       expect(indexDtsContent).toMatch(/from ['"]\.\/library\//);
       expect(indexDtsContent).toMatch(/from ['"]\.\/ui\//);
-      
+
       // Should NOT import from './src/'
       expect(indexDtsContent).not.toMatch(/from ['"]\.\/src\//);
     });

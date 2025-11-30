@@ -3,10 +3,15 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
+import { createPixelButton } from '../components/pixel-button';
 import { GRID, px } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
+import { createManagedCard } from '../utilities/managed-card';
+import { layoutButtonRow } from '../utilities/button-layout';
 import { SCALE_CARD_CONFIG } from '../config/card-configs';
+
+/** Available scale options */
+const SCALE_OPTIONS = [1, 2, 3, 4] as const;
 
 export interface ScaleCardOptions {
   x: number;
@@ -24,39 +29,26 @@ export interface ScaleCardResult extends CardResult {
 export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
   const { x, y, renderer, onScaleChange } = options;
 
-  // Track created buttons for cleanup
-  const createdButtons: PixelButtonResult[] = [];
+  const buttonHeight = 12;
+  const buttonSpacing = SCALE_CARD_CONFIG.buttonSpacing;
 
-  const buttonHeight = 12; // Grid units
-  const buttonSpacing = px(SCALE_CARD_CONFIG.buttonSpacing);
-
-  // Calculate content size
-  const contentWidth = 8; // Enough for label + buttons
-  const contentHeight = buttonHeight;
-
-  // Create the card
-  const card = new PixelCard({
+  // Create the managed card
+  const managed = createManagedCard({
     title: 'Scale',
     x,
     y,
-    contentWidth,
-    contentHeight,
+    contentWidth: 8, // Will be updated after content drawn
+    contentHeight: buttonHeight,
     renderer,
     minContentSize: true,
-    onRefresh: () => {
-      drawContent();
-    }
+    onRefresh: () => drawContent()
   });
 
-  const contentContainer = card.getContentContainer();
+  const { card, contentContainer } = managed;
 
   function drawContent() {
-    // Cleanup old buttons
-    createdButtons.forEach(btn => btn.destroy());
-    createdButtons.length = 0;
+    managed.clearChildren();
     contentContainer.removeChildren();
-
-    let currentX = 0;
 
     // Scale label
     const scaleLabel = new PIXI.BitmapText({
@@ -69,43 +61,38 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
     });
     scaleLabel.roundPixels = true;
     scaleLabel.scale.set(GRID.fontScale);
-    scaleLabel.position.set(currentX, px(3));
+    scaleLabel.position.set(0, px(3));
     contentContainer.addChild(scaleLabel);
-    currentX += scaleLabel.width + buttonSpacing;
 
-    // Scale buttons (1, 2, 3, 4)
-    [1, 2, 3, 4].forEach(scale => {
-      const scaleButton = createPixelButton({
+    // Create scale buttons
+    const buttons = SCALE_OPTIONS.map(scale => {
+      const btn = createPixelButton({
         height: buttonHeight,
         label: `${scale}`,
         selectionMode: 'press',
         actionMode: 'click',
-        onClick: () => {
-          if (onScaleChange) {
-            onScaleChange(scale);
-          }
-        }
+        onClick: () => onScaleChange?.(scale)
       });
-      createdButtons.push(scaleButton);
-      scaleButton.container.position.set(currentX, 0);
-      contentContainer.addChild(scaleButton.container);
-      currentX += scaleButton.container.width + buttonSpacing;
+      managed.trackChild(btn);
+      contentContainer.addChild(btn.container);
+      return btn;
+    });
+
+    // Layout buttons in a row after the label
+    layoutButtonRow({
+      items: buttons,
+      spacing: buttonSpacing,
+      startX: Math.ceil((scaleLabel.width + px(buttonSpacing)) / px(1))
     });
   }
 
   // Initial draw
   drawContent();
-
-  // Update minimum content size based on actual content
   card.updateMinContentSize();
 
   return {
     card,
     container: card.container,
-    destroy: () => {
-      createdButtons.forEach(btn => btn.destroy());
-      createdButtons.length = 0;
-      card.container.destroy({ children: true });
-    }
+    destroy: managed.destroy
   };
 }

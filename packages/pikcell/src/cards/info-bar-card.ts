@@ -3,9 +3,10 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { GRID, BORDER, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/core';
 import { getTheme } from '../theming/theme';
 import { CardResult } from '../interfaces/components';
+import { createManagedCard } from '../utilities/managed-card';
 import { INFO_BAR_CONFIG } from '../config/card-configs';
 
 export interface InfoSection {
@@ -17,7 +18,7 @@ export interface InfoBarCardOptions {
   x: number;
   y: number;
   renderer: PIXI.Renderer;
-  width?: number;  // Optional width in grid units (defaults to auto-calculated)
+  width?: number;
   sections?: InfoSection[];
 }
 
@@ -25,92 +26,83 @@ export interface InfoBarCardResult extends CardResult {
   updateSections: (sections: InfoSection[]) => void;
 }
 
+/** Default sections */
+const DEFAULT_SECTIONS: InfoSection[] = [
+  { label: 'Tool:', value: 'Pencil' },
+  { label: 'Color:', value: '#000000' },
+  { label: 'Scale:', value: '1x' }
+];
+
+/** Layout constants */
+const SECTION_PADDING = 2;
+const SECTION_SPACING = 4;
+const LABEL_VALUE_GAP = 1;
+
 /**
- * Creates an info bar for displaying contextual information in horizontal sections
+ * Creates an info bar for displaying contextual information
  */
 export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResult {
   const { x, y, renderer, width } = options;
 
   const barHeight = INFO_BAR_CONFIG.barHeight;
-
-  // Default sections
-  let sections: InfoSection[] = options.sections ?? [
-    { label: 'Tool:', value: 'Pencil' },
-    { label: 'Color:', value: '#000000' },
-    { label: 'Scale:', value: '1x' }
-  ];
-
-  // Use provided width or estimate based on sections
+  let sections: InfoSection[] = options.sections ?? DEFAULT_SECTIONS;
   const barWidth = width ?? (sections.length * INFO_BAR_CONFIG.minSectionWidth);
 
-  // Create the card (uses default card background from theme)
-  const card = new PixelCard({
+  // Create the managed card
+  const managed = createManagedCard({
     title: 'Info',
     x,
     y,
     contentWidth: barWidth,
     contentHeight: barHeight,
     renderer,
-    minContentSize: true, // Prevent resizing below content's actual size
-    onResize: (newWidth, newHeight) => {
-      // Only update if the resize maintains horizontal layout
-      if (newWidth >= barHeight) {
-        updateInfoSections();
-      }
+    minContentSize: true,
+    onResize: (newWidth) => {
+      if (newWidth >= barHeight) updateInfoSections();
     },
-    onRefresh: () => {
-      // Redraw content when theme changes
-      updateInfoSections();
-    }
+    onRefresh: () => updateInfoSections()
   });
 
-  const contentContainer = card.getContentContainer();
+  const { card, contentContainer } = managed;
+
+  /** Create a text element */
+  function createText(text: string, color: number): PIXI.BitmapText {
+    const textEl = new PIXI.BitmapText({
+      text,
+      style: {
+        fontFamily: 'PixelOperator8Bitmap',
+        fontSize: 64,
+        fill: color
+      }
+    });
+    textEl.roundPixels = true;
+    textEl.scale.set(GRID.fontScale);
+    return textEl;
+  }
 
   function updateInfoSections() {
     contentContainer.removeChildren();
 
-    let currentX = px(2);
-    const sectionSpacing = px(4);
+    const theme = getTheme();
+    let currentX = px(SECTION_PADDING);
 
-    sections.forEach((section, index) => {
-      // Label text
-      const labelText = new PIXI.BitmapText({
-        text: section.label,
-        style: {
-          fontFamily: 'PixelOperator8Bitmap',
-          fontSize: 64,
-          fill: getTheme().textSecondary, // Use theme secondary text
-        }
-      });
-      labelText.roundPixels = true;
-      labelText.scale.set(GRID.fontScale);
-      labelText.position.set(currentX, px(2));
+    sections.forEach(section => {
+      const labelText = createText(section.label, theme.textSecondary);
+      labelText.position.set(currentX, px(SECTION_PADDING));
       contentContainer.addChild(labelText);
 
-      currentX += labelText.width + px(1);
+      currentX += labelText.width + px(LABEL_VALUE_GAP);
 
-      // Value text
-      const valueText = new PIXI.BitmapText({
-        text: section.value,
-        style: {
-          fontFamily: 'PixelOperator8Bitmap',
-          fontSize: 64,
-          fill: getTheme().textPrimary, // Use theme primary text
-        }
-      });
-      valueText.roundPixels = true;
-      valueText.scale.set(GRID.fontScale);
-      valueText.position.set(currentX, px(2));
+      const valueText = createText(section.value, theme.textPrimary);
+      valueText.position.set(currentX, px(SECTION_PADDING));
       contentContainer.addChild(valueText);
 
-      currentX += valueText.width + sectionSpacing;
+      currentX += valueText.width + px(SECTION_SPACING);
     });
   }
 
   // Initial draw
   updateInfoSections();
-
-  // Update minimum content size based on actual content
   card.updateMinContentSize();
 
   return {
@@ -121,8 +113,6 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
       updateInfoSections();
       card.updateMinContentSize();
     },
-    destroy: () => {
-      card.container.destroy({ children: true });
-    }
+    destroy: managed.destroy
   };
 }

@@ -3,9 +3,11 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
+import { createPixelButton } from '../components/pixel-button';
 import { GRID, px } from '@moxijs/core';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
+import { createManagedCard } from '../utilities/managed-card';
+import { layoutButtonColumn } from '../utilities/button-layout';
 import { ToolType } from '../theming/tool-icons';
 import { CardResult } from '../interfaces/components';
 import { TOOL_CARD_CONFIG } from '../config/card-configs';
@@ -25,6 +27,7 @@ export interface ToolCardResult extends CardResult {
   setSelectedToolIndex: (index: number) => void;
 }
 
+/** Tool display names */
 const TOOL_NAMES: Record<ToolType, string> = {
   pencil: 'Pencil',
   eraser: 'Eraser',
@@ -40,26 +43,21 @@ const TOOL_NAMES: Record<ToolType, string> = {
 export function createToolCard(options: ToolCardOptions): ToolCardResult {
   const { x, y, renderer, onToolSelect } = options;
 
-  // Track created buttons for cleanup
-  const createdButtons: PixelButtonResult[] = [];
-  let wheelHandler: ((e: WheelEvent) => void) | null = null;
-
   // Tool state
   let selectedToolIndex = options.selectedToolIndex ?? 0;
   const tools: ToolType[] = options.tools ?? ['pencil', 'eraser', 'fill', 'eyedrop'];
 
+  // Sizing state
   let toolWidth = TOOL_CARD_CONFIG.defaultWidth;
   let toolHeight = TOOL_CARD_CONFIG.defaultHeight;
-  let fontScale = GRID.fontScale; // Local font scale that can be modified
-  let toolsPerRow = 1; // One button per row (vertical layout)
-  let rows = 4; // Four tools stacked vertically
+  const rows = tools.length;
 
-  // Calculate content size
+  // Calculate initial content size
   const contentWidth = toolWidth;
   const contentHeight = rows * toolHeight + (rows - 1) * GRID.gap;
 
-  // Create the card
-  const card = new PixelCard({
+  // Create the managed card
+  const managed = createManagedCard({
     title: 'Tools',
     x,
     y,
@@ -67,42 +65,25 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
     contentHeight,
     renderer,
     onResize: (newWidth, newHeight) => {
-      // Update tool dimensions to fit the new size
-      // Keep vertical layout (1 column, 4 rows)
       const maxHeight = Math.floor((newHeight - (rows - 1) * GRID.gap) / rows);
       toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, maxHeight));
       toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, newWidth));
-
-      // Scale font proportionally with button height
-      fontScale = Math.max(
-        TOOL_CARD_CONFIG.minFontScale,
-        Math.min(TOOL_CARD_CONFIG.maxFontScale, TOOL_CARD_CONFIG.baseFontScale * (toolHeight / TOOL_CARD_CONFIG.fontScaleReferenceHeight))
-      );
-
       drawTools();
     },
-    onRefresh: () => {
-      drawTools();
-    }
+    onRefresh: () => drawTools()
   });
 
-  const contentContainer = card.getContentContainer();
+  const { card, contentContainer } = managed;
 
-  // Draw tools
+  /**
+   * Draw all tool buttons
+   */
   function drawTools() {
-    // Cleanup old buttons
-    createdButtons.forEach(btn => btn.destroy());
-    createdButtons.length = 0;
+    managed.clearChildren();
     contentContainer.removeChildren();
 
-    for (let i = 0; i < tools.length; i++) {
-      const tool = tools[i];
-      const row = i; // Vertical layout, one per row
-
-      const toolX = 0;
-      const toolY = px(row * (toolHeight + GRID.gap));
-
-      const toolButton = createPixelButton({
+    const buttons = tools.map((tool, i) => {
+      const btn = createPixelButton({
         width: toolWidth,
         height: toolHeight,
         selected: i === selectedToolIndex,
@@ -112,48 +93,32 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
         tooltip: TOOL_NAMES[tool],
         onClick: () => {
           selectedToolIndex = i;
-          console.log(`Selected tool: ${tool}`);
           drawTools();
-          if (onToolSelect) {
-            onToolSelect(i, tool);
-          }
+          onToolSelect?.(i, tool);
         }
       });
-      createdButtons.push(toolButton);
+      managed.trackChild(btn);
+      contentContainer.addChild(btn.container);
+      return btn;
+    });
 
-      toolButton.container.position.set(toolX, toolY);
-      contentContainer.addChild(toolButton.container);
-    }
+    layoutButtonColumn({
+      items: buttons,
+      spacing: GRID.gap
+    });
   }
 
-  // Mouse wheel zoom for tool size
-  wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
-    // Adjust both width and height proportionally
+  // Mouse wheel zoom handler
+  const wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
     toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, toolWidth + delta * 2));
     toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, toolHeight + delta));
 
-    // Scale font proportionally with button height
-    fontScale = Math.max(
-      TOOL_CARD_CONFIG.minFontScale,
-      Math.min(TOOL_CARD_CONFIG.maxFontScale, TOOL_CARD_CONFIG.baseFontScale * (toolHeight / TOOL_CARD_CONFIG.fontScaleReferenceHeight))
-    );
-
-    // Update card content size
-    const newContentWidth = toolWidth;
-    const newContentHeight = rows * toolHeight + (rows - 1) * GRID.gap;
-    card.setContentSize(newContentWidth, newContentHeight);
-
+    card.setContentSize(toolWidth, rows * toolHeight + (rows - 1) * GRID.gap);
     drawTools();
   });
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('wheel', wheelHandler, { passive: false });
-
-    card.container.on('destroyed', () => {
-      if (wheelHandler) {
-        window.removeEventListener('wheel', wheelHandler);
-      }
-    });
+    managed.addEventListenerTracked(window, 'wheel', wheelHandler, { passive: false });
   }
 
   // Initial draw
@@ -170,19 +135,6 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
         drawTools();
       }
     },
-    destroy: () => {
-      // Cleanup buttons
-      createdButtons.forEach(btn => btn.destroy());
-      createdButtons.length = 0;
-
-      // Remove wheel handler
-      if (wheelHandler && typeof window !== 'undefined') {
-        window.removeEventListener('wheel', wheelHandler);
-        wheelHandler = null;
-      }
-
-      // Destroy card
-      card.container.destroy({ children: true });
-    }
+    destroy: managed.destroy
   };
 }

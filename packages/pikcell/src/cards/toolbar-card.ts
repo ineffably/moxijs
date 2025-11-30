@@ -1,10 +1,5 @@
 /**
  * Toolbar Card - Main tool selection toolbar for the sprite editor
- *
- * Contains buttons for:
- * - Pencil tool
- * - Selection tool
- * - Shape tool (with popup submenu)
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
@@ -26,28 +21,45 @@ export interface ToolState {
   shapeType: ShapeType;
 }
 
+/** Tool definition */
+interface ToolDef {
+  id: MainToolType;
+  tooltip: string;
+  hasPopup?: boolean;
+}
+
+/** Tool definitions */
+const MAIN_TOOLS: ToolDef[] = [
+  { id: 'pencil', tooltip: 'Pencil (P)' },
+  { id: 'selection', tooltip: 'Selection (S)' },
+  { id: 'shape', tooltip: 'Shapes (U)', hasPopup: true }
+];
+
+/** Shape tooltips */
+const SHAPE_TOOLTIPS: Record<ShapeType, string> = {
+  'circle': 'Circle',
+  'circle-filled': 'Filled Circle',
+  'square': 'Rectangle',
+  'square-filled': 'Filled Rectangle'
+};
+
+/** Available shapes */
+const SHAPE_OPTIONS: ShapeType[] = ['circle', 'circle-filled', 'square', 'square-filled'];
+
 export interface ToolbarCardOptions {
   x: number;
   y: number;
   renderer: PIXI.Renderer;
-  /** Initial tool selection */
   selectedTool?: MainToolType;
-  /** Initial shape type */
   selectedShape?: ShapeType;
-  /** Callback when tool changes */
   onToolSelect?: (tool: MainToolType, shapeType?: ShapeType) => void;
 }
 
 export interface ToolbarCardResult extends CardResult {
-  /** Get the currently selected main tool */
   getSelectedTool: () => MainToolType;
-  /** Get the currently selected shape type */
   getSelectedShape: () => ShapeType;
-  /** Get the full tool state */
   getToolState: () => ToolState;
-  /** Set the selected tool */
   setSelectedTool: (tool: MainToolType) => void;
-  /** Set the selected shape */
   setSelectedShape: (shape: ShapeType) => void;
 }
 
@@ -58,12 +70,15 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
   const { x, y, renderer, onToolSelect } = options;
 
   const { buttonSize, buttonSpacing, numButtons } = TOOLBAR_CARD_CONFIG;
-
-  const barWidth = buttonSize; // Single column
+  const barWidth = buttonSize;
   const barHeight = numButtons * buttonSize + (numButtons - 1) * buttonSpacing;
 
   let selectedTool: MainToolType = options.selectedTool ?? 'pencil';
   let selectedShape: ShapeType = options.selectedShape ?? 'square';
+
+  // Button references for state updates
+  const buttonRefs: Map<MainToolType, PixelButtonResult> = new Map();
+  let shapePopup: PopupToolbarResult | null = null;
 
   // Create the card
   const card = new PixelCard({
@@ -74,104 +89,67 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
     contentHeight: barHeight,
     renderer,
     minContentSize: true,
-    onRefresh: () => {
-      updateButtons();
-    }
+    onRefresh: () => updateButtons()
   });
 
   const contentContainer = card.getContentContainer();
 
-  // Track buttons for state management
-  let pencilButton: PixelButtonResult | null = null;
-  let selectionButton: PixelButtonResult | null = null;
-  let shapeButton: PixelButtonResult | null = null;
-  let shapePopup: PopupToolbarResult | null = null;
-
-  /**
-   * Calculate icon pixel size for a given button size in grid units
-   */
+  /** Calculate icon pixel size */
   function getIconSizePx(btnSize: number): number {
-    // Button has 2 borders (outer + inner) on each side = GRID.border * 4 total
-    // Icons fill the content area (no extra margin - borders provide visual separation)
-    const iconSizeGridUnits = btnSize - GRID.border * 4;
-    return px(iconSizeGridUnits);
+    return px(btnSize - GRID.border * 4);
   }
 
-  /**
-   * Create icon sprite from SVG for a tool
-   */
+  /** Create icon sprite from SVG */
   async function createToolIconSprite(tool: MainToolType, btnSize: number = buttonSize): Promise<PIXI.Sprite> {
     const theme = getTheme();
     const size = getIconSizePx(btnSize);
-    const svgString = TOOL_ICONS[tool];
-
     const texture = await svgToTexture({
-      svgString,
+      svgString: TOOL_ICONS[tool],
       width: size,
       height: size,
       color: theme.textPrimary
     });
-
     const sprite = new PIXI.Sprite(texture);
     sprite.roundPixels = true;
     return sprite;
   }
 
-  /**
-   * Create icon for a shape
-   */
+  /** Create shape icon sprite */
   function createShapeIconSprite(shape: ShapeType, btnSize: number = buttonSize): PIXI.Sprite {
     const theme = getTheme();
     return createShapeIcon(shape, getIconSizePx(btnSize), theme.textPrimary, renderer);
   }
 
-  /**
-   * Select a tool and update button states
-   */
+  /** Select a tool */
   function selectTool(tool: MainToolType): void {
     selectedTool = tool;
     updateButtonStates();
-
-    if (onToolSelect) {
-      onToolSelect(tool, tool === 'shape' ? selectedShape : undefined);
-    }
+    onToolSelect?.(tool, tool === 'shape' ? selectedShape : undefined);
   }
 
-  /**
-   * Update button selected states
-   */
+  /** Update button selected states without recreating */
   function updateButtonStates(): void {
-    pencilButton?.setSelected(selectedTool === 'pencil');
-    selectionButton?.setSelected(selectedTool === 'selection');
-    shapeButton?.setSelected(selectedTool === 'shape');
+    buttonRefs.forEach((btn, tool) => btn.setSelected(selectedTool === tool));
   }
 
-  /**
-   * Show the shape popup toolbar
-   */
+  /** Show shape popup */
   function showShapePopup(): void {
+    const shapeButton = buttonRefs.get('shape');
+    if (!shapeButton) return;
+
     if (shapePopup?.isVisible()) {
       shapePopup.hide();
       return;
     }
 
-    // Get shape button position for popup placement
-    if (!shapeButton) return;
-
-    const theme = getTheme();
-    const shapeOptions: ShapeType[] = ['circle', 'circle-filled', 'square', 'square-filled'];
-
-    // Create popup with shape options
-    if (shapePopup) {
-      shapePopup.destroy();
-    }
+    if (shapePopup) shapePopup.destroy();
 
     const popupButtonSize = 14;
     shapePopup = createPopupToolbar({
-      buttons: shapeOptions.map(shape => ({
+      buttons: SHAPE_OPTIONS.map(shape => ({
         id: shape,
         createIcon: () => createShapeIconSprite(shape, popupButtonSize),
-        tooltip: getShapeTooltip(shape)
+        tooltip: SHAPE_TOOLTIPS[shape]
       })),
       buttonSize: popupButtonSize,
       buttonSpacing: 1,
@@ -179,147 +157,82 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
       selectedId: selectedShape,
       onSelect: (id) => {
         selectedShape = id as ShapeType;
-        // Update the shape button icon to show selected shape
-        updateShapeButtonIcon();
-        if (onToolSelect && selectedTool === 'shape') {
-          onToolSelect('shape', selectedShape);
+        updateButtons();
+        if (selectedTool === 'shape') {
+          onToolSelect?.('shape', selectedShape);
         }
       }
     });
 
-    // Add popup to card container (above content)
     card.container.addChild(shapePopup.container);
 
     // Position popup relative to shape button
-    const buttonGlobalPos = shapeButton.container.getGlobalPosition();
-    const cardGlobalPos = card.container.getGlobalPosition();
-    const relativeX = buttonGlobalPos.x - cardGlobalPos.x;
-    const relativeY = buttonGlobalPos.y - cardGlobalPos.y;
-
+    const buttonPos = shapeButton.container.getGlobalPosition();
+    const cardPos = card.container.getGlobalPosition();
     shapePopup.show(
-      relativeX,
-      relativeY,
+      buttonPos.x - cardPos.x,
+      buttonPos.y - cardPos.y,
       px(buttonSize),
       px(buttonSize)
     );
 
-    // Setup click-outside to close popup
-    setupPopupClickOutside();
+    setupPopupClickOutside(shapeButton);
   }
 
-  /**
-   * Get tooltip text for a shape
-   */
-  function getShapeTooltip(shape: ShapeType): string {
-    switch (shape) {
-      case 'circle': return 'Circle';
-      case 'circle-filled': return 'Filled Circle';
-      case 'square': return 'Rectangle';
-      case 'square-filled': return 'Filled Rectangle';
-    }
-  }
-
-  /**
-   * Update shape button icon to reflect selected shape
-   */
-  function updateShapeButtonIcon(): void {
-    // Recreate buttons to update icon
-    updateButtons();
-  }
-
-  /**
-   * Check if a point is within bounds
-   */
-  function boundsContains(bounds: PIXI.Bounds, x: number, y: number): boolean {
-    return x >= bounds.minX && x <= bounds.maxX && y >= bounds.minY && y <= bounds.maxY;
-  }
-
-  /**
-   * Setup click handler to close popup when clicking outside
-   */
-  function setupPopupClickOutside(): void {
-    // Add to stage after a brief delay to avoid immediate close
+  /** Setup click-outside handler */
+  function setupPopupClickOutside(shapeButton: PixelButtonResult): void {
     setTimeout(() => {
-      if (renderer.events && renderer.events.domElement) {
-        renderer.events.domElement.addEventListener('pointerdown', function handler(e: PointerEvent) {
-          if (shapePopup?.isVisible()) {
-            const popupBounds = shapePopup.container.getBounds();
-            if (!boundsContains(popupBounds, e.clientX, e.clientY)) {
-              if (shapeButton) {
-                const buttonBounds = shapeButton.container.getBounds();
-                if (!boundsContains(buttonBounds, e.clientX, e.clientY)) {
-                  shapePopup.hide();
-                  renderer.events.domElement?.removeEventListener('pointerdown', handler);
-                }
-              }
-            }
-          } else {
-            renderer.events.domElement?.removeEventListener('pointerdown', handler);
-          }
-        });
-      }
+      const handler = (e: PointerEvent) => {
+        if (!shapePopup?.isVisible()) {
+          renderer.events.domElement?.removeEventListener('pointerdown', handler);
+          return;
+        }
+
+        const popupBounds = shapePopup.container.getBounds();
+        const buttonBounds = shapeButton.container.getBounds();
+        const inPopup = e.clientX >= popupBounds.minX && e.clientX <= popupBounds.maxX &&
+                        e.clientY >= popupBounds.minY && e.clientY <= popupBounds.maxY;
+        const inButton = e.clientX >= buttonBounds.minX && e.clientX <= buttonBounds.maxX &&
+                         e.clientY >= buttonBounds.minY && e.clientY <= buttonBounds.maxY;
+
+        if (!inPopup && !inButton) {
+          shapePopup.hide();
+          renderer.events.domElement?.removeEventListener('pointerdown', handler);
+        }
+      };
+
+      renderer.events.domElement?.addEventListener('pointerdown', handler);
     }, 50);
   }
 
-  /**
-   * Create/recreate all buttons
-   */
+  /** Create/recreate all buttons */
   async function updateButtons(): Promise<void> {
-    // Clean up existing buttons
-    if (pencilButton) pencilButton.destroy();
-    if (selectionButton) selectionButton.destroy();
-    if (shapeButton) shapeButton.destroy();
-
+    // Cleanup existing
+    buttonRefs.forEach(btn => btn.destroy());
+    buttonRefs.clear();
     contentContainer.removeChildren();
 
-    // Create all icons in parallel
-    const [pencilIcon, selectionIcon, shapeIcon] = await Promise.all([
-      createToolIconSprite('pencil'),
-      createToolIconSprite('selection'),
-      createToolIconSprite('shape')
-    ]);
+    // Create icons in parallel
+    const icons = await Promise.all(MAIN_TOOLS.map(t => createToolIconSprite(t.id)));
 
-    // Pencil button
-    pencilButton = createPixelButton({
-      size: buttonSize,
-      icon: pencilIcon,
-      selected: selectedTool === 'pencil',
-      selectionMode: 'press',
-      actionMode: 'toggle',
-      tooltip: 'Pencil (P)',
-      onClick: () => selectTool('pencil')
+    // Create buttons
+    MAIN_TOOLS.forEach((toolDef, i) => {
+      const btn = createPixelButton({
+        size: buttonSize,
+        icon: icons[i],
+        selected: selectedTool === toolDef.id,
+        selectionMode: 'press',
+        actionMode: 'toggle',
+        tooltip: toolDef.tooltip,
+        onClick: () => {
+          selectTool(toolDef.id);
+          if (toolDef.hasPopup) showShapePopup();
+        }
+      });
+      btn.container.position.set(0, px((buttonSize + buttonSpacing) * i));
+      contentContainer.addChild(btn.container);
+      buttonRefs.set(toolDef.id, btn);
     });
-    pencilButton.container.position.set(0, 0);
-    contentContainer.addChild(pencilButton.container);
-
-    // Selection button
-    selectionButton = createPixelButton({
-      size: buttonSize,
-      icon: selectionIcon,
-      selected: selectedTool === 'selection',
-      selectionMode: 'press',
-      actionMode: 'toggle',
-      tooltip: 'Selection (S)',
-      onClick: () => selectTool('selection')
-    });
-    selectionButton.container.position.set(0, px(buttonSize + buttonSpacing));
-    contentContainer.addChild(selectionButton.container);
-
-    // Shape button - uses shape tool icon (popup shows specific shapes)
-    shapeButton = createPixelButton({
-      size: buttonSize,
-      icon: shapeIcon,
-      selected: selectedTool === 'shape',
-      selectionMode: 'press',
-      actionMode: 'toggle',
-      tooltip: 'Shapes (U)',
-      onClick: () => {
-        selectTool('shape');
-        showShapePopup();
-      }
-    });
-    shapeButton.container.position.set(0, px((buttonSize + buttonSpacing) * 2));
-    contentContainer.addChild(shapeButton.container);
   }
 
   // Initial creation
@@ -337,13 +250,12 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
     },
     setSelectedShape: (shape: ShapeType) => {
       selectedShape = shape;
-      updateShapeButtonIcon();
+      updateButtons();
     },
     destroy: () => {
-      if (pencilButton) pencilButton.destroy();
-      if (selectionButton) selectionButton.destroy();
-      if (shapeButton) shapeButton.destroy();
-      if (shapePopup) shapePopup.destroy();
+      buttonRefs.forEach(btn => btn.destroy());
+      buttonRefs.clear();
+      shapePopup?.destroy();
       card.container.destroy({ children: true });
     }
   };

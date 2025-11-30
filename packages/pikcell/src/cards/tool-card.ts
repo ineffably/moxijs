@@ -8,6 +8,7 @@ import { GRID, px } from '@moxijs/core';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { ToolType } from '../theming/tool-icons';
 import { CardResult } from '../interfaces/components';
+import { TOOL_CARD_CONFIG } from '../config/card-configs';
 
 export interface ToolCardOptions {
   x: number;
@@ -47,8 +48,8 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
   let selectedToolIndex = options.selectedToolIndex ?? 0;
   const tools: ToolType[] = options.tools ?? ['pencil', 'eraser', 'fill', 'eyedrop'];
 
-  let toolWidth = 46; // Grid units per tool button width (38 * 1.2 = 45.6, rounded to 46)
-  let toolHeight = 12; // Grid units per tool button height
+  let toolWidth = TOOL_CARD_CONFIG.defaultWidth;
+  let toolHeight = TOOL_CARD_CONFIG.defaultHeight;
   let fontScale = GRID.fontScale; // Local font scale that can be modified
   let toolsPerRow = 1; // One button per row (vertical layout)
   let rows = 4; // Four tools stacked vertically
@@ -69,13 +70,14 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
       // Update tool dimensions to fit the new size
       // Keep vertical layout (1 column, 4 rows)
       const maxHeight = Math.floor((newHeight - (rows - 1) * GRID.gap) / rows);
-      toolHeight = Math.max(4, Math.min(20, maxHeight));
-      toolWidth = Math.max(23, Math.min(86, newWidth)); // Updated min/max to reflect 44% wider (1.2 * 1.2)
+      toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, maxHeight));
+      toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, newWidth));
 
       // Scale font proportionally with button height
-      // Base: toolHeight=12 → fontScale=0.25 (16px)
-      // Scale font linearly: fontScale = 0.25 * (toolHeight / 12)
-      fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
+      fontScale = Math.max(
+        TOOL_CARD_CONFIG.minFontScale,
+        Math.min(TOOL_CARD_CONFIG.maxFontScale, TOOL_CARD_CONFIG.baseFontScale * (toolHeight / TOOL_CARD_CONFIG.fontScaleReferenceHeight))
+      );
 
       drawTools();
     },
@@ -127,11 +129,14 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
   // Mouse wheel zoom for tool size
   wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
     // Adjust both width and height proportionally
-    toolWidth = Math.max(23, Math.min(86, toolWidth + delta * 2));
-    toolHeight = Math.max(4, Math.min(20, toolHeight + delta));
+    toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, toolWidth + delta * 2));
+    toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, toolHeight + delta));
 
     // Scale font proportionally with button height
-    fontScale = Math.max(0.1, Math.min(0.5, 0.25 * (toolHeight / 12)));
+    fontScale = Math.max(
+      TOOL_CARD_CONFIG.minFontScale,
+      Math.min(TOOL_CARD_CONFIG.maxFontScale, TOOL_CARD_CONFIG.baseFontScale * (toolHeight / TOOL_CARD_CONFIG.fontScaleReferenceHeight))
+    );
 
     // Update card content size
     const newContentWidth = toolWidth;

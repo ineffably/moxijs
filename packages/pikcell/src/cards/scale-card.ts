@@ -6,6 +6,7 @@ import { PixelCard } from '../components/pixel-card';
 import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
 import { GRID, px } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
+import { SCALE_CARD_CONFIG } from '../config/card-configs';
 
 export interface ScaleCardOptions {
   x: number;
@@ -27,7 +28,7 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
   const createdButtons: PixelButtonResult[] = [];
 
   const buttonHeight = 12; // Grid units
-  const buttonSpacing = px(1);
+  const buttonSpacing = px(SCALE_CARD_CONFIG.buttonSpacing);
 
   // Calculate content size
   const contentWidth = 8; // Enough for label + buttons

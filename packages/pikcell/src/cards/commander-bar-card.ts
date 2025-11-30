@@ -15,6 +15,7 @@ import { createPixelDialog } from '../components/pixel-dialog';
 import { GRID, BORDER, px } from '@moxijs/core';
 import { getAllThemes, setThemeByMetadata } from '../theming/theme';
 import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
+import { COMMANDER_BAR_CONFIG } from '../config/card-configs';
 
 export interface CommanderBarCallbacks {
   onNew?: () => void;
@@ -54,7 +55,7 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
   let createdButtons: Array<{ destroy: () => void }> = [];
 
   const canvasWidth = renderer.width;
-  const barHeight = 12; // Grid units for PIKCELL bar
+  const barHeight = COMMANDER_BAR_CONFIG.barHeight;
 
   // IMPORTANT: Card adds BORDER.total * 2 + GRID.padding * 2 to contentWidth (in grid units)
   // So we must subtract those from the desired total width to get the correct contentWidth
@@ -86,8 +87,8 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     createdButtons = [];
     contentContainer.removeChildren();
 
-    const buttonHeight = 12; // Grid units (same as bar height for full height button)
-    const buttonSpacing = px(2);
+    const buttonHeight = COMMANDER_BAR_CONFIG.barHeight;
+    const buttonSpacing = px(COMMANDER_BAR_CONFIG.buttonSpacing);
 
     // Left side buttons (flush with content container left edge)
     let currentX = 0;
@@ -161,7 +162,7 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     currentX += exportButton.container.width + buttonSpacing;
 
     // Right side buttons - positioned at the far right
-    const rightButtonsSpacing = px(2);
+    const rightButtonsSpacing = px(COMMANDER_BAR_CONFIG.buttonSpacing);
 
     // Layout button (auto-sized based on text)
     const layoutButton = createPixelButton({

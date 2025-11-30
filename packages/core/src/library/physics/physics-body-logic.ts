@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as planck from 'planck';
-import { Logic } from '../../core/logic';
+import { Logic } from '../../main/logic';
 import type { PhysicsWorld } from './physics-world';
 import type { PhysicsBodyOptions, BodyType, ShapeType } from './physics-types';
 import { parseGraphicsShape } from './physics-graphics-parser';

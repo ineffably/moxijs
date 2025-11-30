@@ -1,9 +1,9 @@
 import PIXI from 'pixi.js';
-import { AssetLoader } from '../core/asset-loader';
-import { Camera } from '../core/camera';
-import { Engine } from '../core/engine';
-import { RenderManager } from '../core/render-manager';
-import { Scene } from '../core/scene';
+import { AssetLoader } from '../main/asset-loader';
+import { Camera } from '../main/camera';
+import { Engine } from '../main/engine';
+import { RenderManager } from '../main/render-manager';
+import { Scene } from '../main/scene';
 import { PhysicsWorld, type PhysicsWorldOptions } from './physics';
 import { LoadingScene, type LoadingSceneOptions } from './loading-scene';
 

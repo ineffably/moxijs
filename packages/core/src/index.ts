@@ -1,16 +1,16 @@
 import * as utils from './library/utils';
-import { RenderManager } from './core/render-manager';
-import { Scene } from './core/scene';
-import { Engine } from './core/engine';
-import { EventEmitter } from './core/event-system';
+import { RenderManager } from './main/render-manager';
+import { Scene } from './main/scene';
+import { Engine } from './main/engine';
+import { EventEmitter } from './main/event-system';
 import { ClientEvents } from './library/client-events';
-import { AssetLoader } from './core/asset-loader';
+import { AssetLoader } from './main/asset-loader';
 import { Point } from 'pixi.js';
-import { Logic } from './core/logic';
+import { Logic } from './main/logic';
 import { defaultRenderOptions, setupMoxi } from './library/setup';
 import { loadFonts } from './library/font-loader';
-import { asEntity, MoxiEntity } from './core/moxi-entity';
-import { Camera, CameraLogic } from './core/camera';
+import { asEntity, MoxiEntity } from './main/moxi-entity';
+import { Camera, CameraLogic } from './main/camera';
 import { asTextureFrames } from './library/texture-frames';
 import { asBitmapText, asSprite, asText, asGraphics, asContainer, PixiProps } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
@@ -54,7 +54,7 @@ import {
 } from './library/physics';
 
 export type { StateChangeEvent } from './library/state-machine';
-export type { AsEntity, MoxiLogic } from './core/moxi-entity';
+export type { AsEntity, MoxiLogic } from './main/moxi-entity';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';

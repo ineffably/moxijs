@@ -4,7 +4,7 @@ import type { PhysicsWorldOptions, RaycastCallback, PhysicsDebugOptions } from '
 import { CollisionRegistry, CollisionManager } from './physics-collision';
 import type { PhysicsBodyLogic } from './physics-body-logic';
 import { PhysicsDebugRenderer } from './physics-debug-renderer';
-import { asEntity } from '../../core/moxi-entity';
+import { asEntity } from '../../main/moxi-entity';
 import { initGraphicsPhysicsTracking } from './physics-graphics-parser';
 
 /**

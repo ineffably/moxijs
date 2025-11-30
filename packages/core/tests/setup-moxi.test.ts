@@ -11,17 +11,17 @@
 };
 
 import { setupMoxi } from '../src/library/setup';
-import { RenderManager } from '../src/core/render-manager';
+import { RenderManager } from '../src/main/render-manager';
 
 // Mock RenderManager
-jest.mock('../src/core/render-manager', () => ({
+jest.mock('../src/main/render-manager', () => ({
   RenderManager: {
     create: jest.fn()
   }
 }));
 
 // Mock AssetLoader
-jest.mock('../src/core/asset-loader', () => ({
+jest.mock('../src/main/asset-loader', () => ({
   AssetLoader: jest.fn().mockImplementation(() => ({
     PIXIAssets: {},
     loadAssets: jest.fn(),

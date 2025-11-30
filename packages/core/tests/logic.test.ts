@@ -1,5 +1,5 @@
-import { Logic, InstancedLogic } from '../src/core/logic';
-import { MoxiEntity, asEntity } from '../src/core/moxi-entity';
+import { Logic, InstancedLogic } from '../src/main/logic';
+import { MoxiEntity, asEntity } from '../src/main/moxi-entity';
 import PIXI from 'pixi.js';
 
 describe('Logic', () => {

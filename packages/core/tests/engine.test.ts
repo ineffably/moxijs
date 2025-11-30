@@ -1,5 +1,5 @@
-import { Engine } from '../src/core/engine';
-import { Scene } from '../src/core/scene';
+import { Engine } from '../src/main/engine';
+import { Scene } from '../src/main/scene';
 import PIXI from 'pixi.js';
 
 describe('Engine', () => {

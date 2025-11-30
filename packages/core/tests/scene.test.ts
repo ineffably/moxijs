@@ -1,6 +1,6 @@
-import { Scene } from '../src/core/scene';
-import { asEntity } from '../src/core/moxi-entity';
-import { Logic } from '../src/core/logic';
+import { Scene } from '../src/main/scene';
+import { asEntity } from '../src/main/moxi-entity';
+import { Logic } from '../src/main/logic';
 import PIXI from 'pixi.js';
 
 describe('Scene', () => {

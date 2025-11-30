@@ -388,8 +388,6 @@ export async function initSpriteLibrary() {
   // Preview state
   let currentHoveredEntry: SpriteEntry | null = null;
   let previewZoom = 1;
-  let previewPanX = 0;
-  let previewPanY = 0;
   
   // Add preview window to scene (after scroll container so it appears on top)
   // We'll add it after the scroll container is added
@@ -417,25 +415,31 @@ export async function initSpriteLibrary() {
       previewSprite.destroy();
       previewSprite = null;
     }
-    
+
     if (entry) {
       previewSprite = new Sprite(entry.texture);
       previewSprite.anchor.set(0.5);
       previewSpriteContainer.addChild(previewSprite);
-      // Keep zoom level, but reset pan when switching sprites
-      previewPanX = 0;
-      previewPanY = 0;
+
+      // Auto-fit the sprite to fill preview window with some padding
+      const padding = 20;
+      const maxWidth = previewSize - padding * 2;
+      const maxHeight = previewSize - padding * 2;
+      const fitScale = Math.min(maxWidth / previewSprite.width, maxHeight / previewSprite.height);
+      previewZoom = fitScale;
+
       updatePreviewTransform();
     }
   }
-  
-  // Update preview transform (zoom and pan)
+
+  // Update preview transform (zoom only, always centered)
   function updatePreviewTransform() {
     if (previewSprite) {
       previewSprite.scale.set(previewZoom);
-      previewSpriteContainer.x = previewSize / 2 + previewPanX;
-      previewSpriteContainer.y = previewSize / 2 + previewPanY;
-      
+      // Always keep sprite centered
+      previewSpriteContainer.x = previewSize / 2;
+      previewSpriteContainer.y = previewSize / 2;
+
       // Update scale label
       previewScaleLabel.text = `scale: ${previewZoom.toFixed(3)}`;
     }
@@ -600,25 +604,7 @@ export async function initSpriteLibrary() {
           const cardGlobalPos = card.getGlobalPosition();
           updatePreviewPosition(cardGlobalPos.x);
         });
-        
-        card.on('pointermove', (e: PIXI.FederatedPointerEvent) => {
-          if (currentHoveredEntry === entry) {
-            // Calculate pan based on mouse position relative to card
-            const localPos = e.getLocalPosition(card);
-            const normalizedX = (localPos.x / itemWidth) * 2 - 1; // -1 to 1
-            const normalizedY = (localPos.y / itemHeight) * 2 - 1; // -1 to 1
-            
-            // Pan based on normalized position and zoom
-            if (previewSprite) {
-              const maxPanX = (previewSprite.width * previewZoom - previewSize) / 2;
-              const maxPanY = (previewSprite.height * previewZoom - previewSize) / 2;
-              previewPanX = normalizedX * maxPanX; // Reversed x-axis direction
-              previewPanY = normalizedY * maxPanY; // Reversed y-axis direction
-              updatePreviewTransform();
-            }
-          }
-        });
-        
+
         card.on('pointerleave', () => {
           if (currentHoveredEntry === entry) {
             previewWindow.visible = false;

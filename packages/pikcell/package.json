@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "webpack serve --mode development --open",
     "build": "webpack --mode production",
+    "build:clean": "npm run clean && npm run build",
     "watch": "webpack --mode development --watch",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist node_modules/.cache"
   },
   "keywords": [
     "pikcell",

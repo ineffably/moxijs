@@ -14,13 +14,8 @@ import { createShapeIcon, ShapeType } from '../theming/tool-icons';
 import { getTheme } from '../theming/theme';
 import { GRID, px, svgToTexture } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
-
-/** SVG icons for toolbar tools */
-const TOOL_SVGS = {
-  pencil: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 2h-2v2h-2v2h-2v2h-2v2H8v2H6v2H4v2H2v6h6v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2V8h2V6h-2V4h-2V2zm0 8h-2v2h-2v2h-2v2h-2v2H8v-2H6v-2h2v-2h2v-2h2V8h2V6h2v2h2v2zM6 16H4v4h4v-2H6v-2z" fill="currentColor"/></svg>`,
-  selection: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm12 0h4v4h-2V6h-2V4zM6 16H4v4h4v-2H6v-2zm14 0v4h-4v-2h2v-2h2zM10 4h4v2h-4V4zm0 14h4v2h-4v-2zM4 10h2v4H4v-4zm14 0h2v4h-2v-4z" fill="currentColor"/></svg>`,
-  shape: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 2h12v2H4v10H2V2zm8 8h12v12H10V10zm2 2v8h8v-8h-8z" fill="currentColor"/></svg>`
-};
+import { TOOL_ICONS } from '../config/icons';
+import { TOOLBAR_CARD_CONFIG } from '../config/card-configs';
 
 /** Available main tools */
 export type MainToolType = 'pencil' | 'selection' | 'shape';
@@ -62,9 +57,7 @@ export interface ToolbarCardResult extends CardResult {
 export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResult {
   const { x, y, renderer, onToolSelect } = options;
 
-  const buttonSize = 16; // Grid units - square buttons
-  const buttonSpacing = 1; // Grid units between buttons
-  const numButtons = 3; // Pencil, Selection, Shape
+  const { buttonSize, buttonSpacing, numButtons } = TOOLBAR_CARD_CONFIG;
 
   const barWidth = buttonSize; // Single column
   const barHeight = numButtons * buttonSize + (numButtons - 1) * buttonSpacing;
@@ -110,7 +103,7 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
   async function createToolIconSprite(tool: MainToolType, btnSize: number = buttonSize): Promise<PIXI.Sprite> {
     const theme = getTheme();
     const size = getIconSizePx(btnSize);
-    const svgString = TOOL_SVGS[tool];
+    const svgString = TOOL_ICONS[tool];
 
     const texture = await svgToTexture({
       svgString,

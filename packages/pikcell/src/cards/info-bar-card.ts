@@ -6,6 +6,7 @@ import { PixelCard } from '../components/pixel-card';
 import { GRID, BORDER, px } from '@moxijs/core';
 import { getTheme } from '../theming/theme';
 import { CardResult } from '../interfaces/components';
+import { INFO_BAR_CONFIG } from '../config/card-configs';
 
 export interface InfoSection {
   label: string;
@@ -30,7 +31,7 @@ export interface InfoBarCardResult extends CardResult {
 export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResult {
   const { x, y, renderer, width } = options;
 
-  const barHeight = 8; // Grid units for a slim horizontal bar
+  const barHeight = INFO_BAR_CONFIG.barHeight;
 
   // Default sections
   let sections: InfoSection[] = options.sections ?? [
@@ -40,7 +41,7 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
   ];
 
   // Use provided width or estimate based on sections
-  const barWidth = width ?? (sections.length * 20);
+  const barWidth = width ?? (sections.length * INFO_BAR_CONFIG.minSectionWidth);
 
   // Create the card (uses default card background from theme)
   const card = new PixelCard({

@@ -36,8 +36,17 @@ export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions,
 export { SpriteController, SpriteControllerOptions } from './controllers/sprite-controller';
 
 // Utilities
-export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilities/svg-icon-button';
+export { createSVGIconButton, SVGIconButtonOptions, TOOL_ICONS, SPT_ICONS, ACTION_ICONS } from './utilities/svg-icon-button';
 export { createCardZoomHandler } from './utilities/card-zoom-handler';
+export { createManagedCard, ManagedCard, Destroyable, EventListenerRef } from './utilities/managed-card';
+export {
+  layoutButtonRow, layoutButtonColumn, layoutButtonGrid, calculateGridDimensions,
+  ButtonRowOptions, ButtonColumnOptions, ButtonGridOptions, LayoutResult, Positionable
+} from './utilities/button-layout';
+
+// Icons (consolidated)
+export { TOOL_ICONS as ToolIcons, SPT_ICONS as SPTIcons, ACTION_ICONS as ActionIcons, getIcon } from './config/icons';
+export type { ToolIconType, SPTIconType, ActionIconType } from './config/icons';
 
 // Re-export SVG utilities from moxi
 export { svgToTexture } from '@moxijs/core';

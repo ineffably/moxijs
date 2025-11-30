@@ -5,6 +5,9 @@ import * as PIXI from 'pixi.js';
 import { createPixelButton, PixelButtonOptions, PixelButtonResult } from '../components/pixel-button';
 import { svgToTexture, px } from '@moxijs/core';
 
+// Re-export icons from consolidated config for backward compatibility
+export { TOOL_ICONS, SPT_ICONS, ACTION_ICONS } from '../config/icons';
+
 export interface SVGIconButtonOptions extends Omit<PixelButtonOptions, 'icon'> {
   svgString: string;
   iconColor?: number;
@@ -49,16 +52,3 @@ export async function createSVGIconButton(options: SVGIconButtonOptions): Promis
     icon: iconSprite
   });
 }
-
-// Example SVG icons
-export const SVG_ICONS = {
-  // Zoom cursor icon
-  ZOOM_CURSOR: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M18 2h-2v2h-2v2h-2v2h-2v2H8v2H6v2H4v2H2v6h6v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2V8h2V6h-2V4h-2V2zm0 8h-2v2h-2v2h-2v2h-2v2H8v-2H6v-2h2v-2h2v-2h2V8h2V6h2v2h2v2zM6 16H4v4h4v-2H6v-2z" fill="currentColor"/>
-  </svg>`,
-
-  // Pan/Hand tool icon
-  PAN: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M13 0h-2v2H9v2H7v2h2V4h2v7H4V9h2V7H4v2H2v2H0v2h2v2h2v2h2v-2H4v-2h7v7H9v-2H7v2h2v2h2v2h2v-2h2v-2h2v-2h-2v2h-2v-7h7v2h-2v2h2v-2h2v-2h2v-2h-2V9h-2V7h-2v2h2v2h-7V4h2v2h2V4h-2V2h-2V0z" fill="currentColor"/>
-  </svg>`,
-};

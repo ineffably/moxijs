@@ -19,7 +19,7 @@
     "test": "npm run test --workspace=@moxijs/core",
     "test:watch": "npm run test:watch --workspace=@moxijs/core",
     "test:ci": "npm run test:ci --workspace=@moxijs/core",
-    "pikcell": "npm run dev --workspace=pikcell"
+    "pikcell": "npm run dev --workspace=@moxijs/pikcell"
   },
   "keywords": [
     "moxijs",

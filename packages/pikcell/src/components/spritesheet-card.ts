@@ -97,8 +97,11 @@ export function createSpriteSheetCard(options: SpriteSheetCardOptions): SpriteSh
   const cardPadding = px(GRID.padding * 2) + px(6); // padding + border
   const titleBarHeight = 24; // Title bar height in pixels
   const margin = 20; // Margin from edges
-  const defaultX = x ?? (renderer.width - px(contentWidth) - cardPadding - margin);
-  const defaultY = y ?? (renderer.height - px(contentHeight) - cardPadding - titleBarHeight - margin);
+  // Calculate default position with bounds checking to stay on screen
+  const calculatedX = renderer.width - px(contentWidth) - cardPadding - margin;
+  const calculatedY = renderer.height - px(contentHeight) - cardPadding - titleBarHeight - margin;
+  const defaultX = x ?? Math.max(margin, calculatedX);
+  const defaultY = y ?? Math.max(margin + titleBarHeight, calculatedY);
 
   card = new PixelCard({
     title: `grid-cell | ${controller.getScale().toFixed(2)}x`,

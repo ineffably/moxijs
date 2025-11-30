@@ -95,14 +95,30 @@ body {
 }
 
 .header {
-  margin-bottom: 20px;
+  background: #252526;
+  border-bottom: 1px solid #3a3a3a;
+  margin: -20px -20px 20px -20px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  height: 41px;
+}
+
+.header .npm-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.header .npm-badge img {
+  height: 20px;
 }
 
 .header h1 {
-  font-size: 24px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0;
   color: #00d4ff;
+  letter-spacing: 1px;
 }
 
 .header p {
@@ -186,6 +202,33 @@ body {
   border-bottom: 1px solid #3a3a3a;
   padding: 0 12px;
   flex-shrink: 0;
+}
+
+.tabs-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tabs-github {
+  display: flex;
+  align-items: center;
+  color: #969696;
+  transition: color 0.2s;
+}
+
+.tabs-github:hover {
+  color: #ffffff;
+}
+
+.tabs-npm-badge {
+  display: flex;
+  align-items: center;
+}
+
+.tabs-npm-badge img {
+  height: 18px;
 }
 
 .tab-btn {

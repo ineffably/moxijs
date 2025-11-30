@@ -492,17 +492,24 @@ function getExampleFromHash(): string | null {
   return exampleKey && findExample(exampleKey) ? exampleKey : null;
 }
 
+// Create shared header HTML
+function createHeader(): HTMLElement {
+  const header = document.createElement('div');
+  header.className = 'header';
+  header.innerHTML = `
+    <h1>MOXIJS EXAMPLES</h1>
+  `;
+  return header;
+}
+
 // Initialize UI with accordion categories
 function initUI() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  // Clear existing content (preserve header)
-  const header = sidebar.querySelector('.header');
+  // Clear existing content and create fresh header
   sidebar.innerHTML = '';
-  if (header) {
-    sidebar.appendChild(header);
-  }
+  sidebar.appendChild(createHeader());
 
   // Create accordion categories
   Object.entries(categories).forEach(([catKey, category]) => {

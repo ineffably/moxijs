@@ -43,6 +43,9 @@ export {
   ButtonRowOptions, ButtonColumnOptions, ButtonGridOptions, LayoutResult, Positionable
 } from './utilities/button-layout';
 
+// Effects
+export { createPixelExplosion, PixelExplosionOptions, PixelExplosionResult } from './effects/pixel-explosion';
+
 // Icons (consolidated)
 export { TOOL_ICONS as ToolIcons, SPT_ICONS as SPTIcons, ACTION_ICONS as ActionIcons, getIcon } from './config/icons';
 export type { ToolIconType, SPTIconType, ActionIconType } from './config/icons';

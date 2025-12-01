@@ -39,6 +39,8 @@ export interface CommanderBarCardOptions {
   scene: PIXI.Container;
   width?: number;  // Optional width in grid units (defaults to auto-calculated)
   callbacks?: CommanderBarCallbacks;
+  /** Enable pixel explosion effect on buttons */
+  explodeEffect?: boolean;
 }
 
 export interface CommanderBarCardResult {
@@ -62,7 +64,7 @@ const LAYOUT_SLOTS: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
  * Creates a PIKCELL bar for actions and options
  */
 export function createCommanderBarCard(options: CommanderBarCardOptions): CommanderBarCardResult {
-  const { x, y, renderer, scene, width, callbacks } = options;
+  const { x, y, renderer, scene, width, callbacks, explodeEffect = false } = options;
 
   const canvasWidth = renderer.width;
   const barHeight = COMMANDER_BAR_CONFIG.barHeight;
@@ -162,6 +164,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
         label: def.label,
         selectionMode: 'press',
         actionMode: 'click',
+        explodeEffect,
+        explodeScene: scene,
+        explodeScreenHeight: renderer.height,
+        explodeRenderer: renderer,
         onClick: () => {
           const callback = callbacks?.[def.callbackKey];
           if (typeof callback === 'function') {
@@ -186,6 +192,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
       label: 'Layout',
       selectionMode: 'press',
       actionMode: 'click',
+      explodeEffect,
+      explodeScene: scene,
+      explodeScreenHeight: renderer.height,
+      explodeRenderer: renderer,
       onClick: showLayoutDialog
     });
     managed.trackChild(layoutButton);
@@ -195,6 +205,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
       label: 'Theme',
       selectionMode: 'press',
       actionMode: 'click',
+      explodeEffect,
+      explodeScene: scene,
+      explodeScreenHeight: renderer.height,
+      explodeRenderer: renderer,
       onClick: showThemeDialog
     });
     managed.trackChild(themeButton);

@@ -22,9 +22,10 @@
  * - Vertical: (11 - 9) / 2 = 1 grid unit margin each side
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px, asBitmapText } from '@moxijs/core';
-import { getTheme } from '../theming/theme';
+import { GRID, px } from '@moxijs/core';
+import { getTheme, createText } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
+import { createPixelExplosion, PixelExplosionResult } from '../effects/pixel-explosion';
 
 export type SelectionMode = 'highlight' | 'press';
 export type ActionMode = 'click' | 'toggle';
@@ -50,6 +51,14 @@ export interface PixelButtonOptions {
   selectionMode?: SelectionMode;  // 'highlight' for swatches, 'press' for tool buttons (visual appearance)
   actionMode?: ActionMode;        // 'click' for simple click, 'toggle' for toggleable state (behavior)
   tooltip?: string;       // Optional tooltip text
+  /** Enable pixel explosion effect on click/toggle */
+  explodeEffect?: boolean;
+  /** Scene container for explosion particles (required if explodeEffect is true) */
+  explodeScene?: PIXI.Container;
+  /** Screen height for explosion effect (required if explodeEffect is true) */
+  explodeScreenHeight?: number;
+  /** PIXI renderer for capturing button pixels (required for authentic explosion) */
+  explodeRenderer?: PIXI.Renderer;
 }
 
 export interface PixelButtonResult extends ComponentResult {
@@ -61,6 +70,8 @@ export interface PixelButtonResult extends ComponentResult {
   setSelected(selected: boolean): void;
   /** Refresh the button (e.g., after theme change) */
   refresh(): void;
+  /** Trigger the pixel explosion effect manually */
+  triggerExplosion(): void;
 }
 
 /**
@@ -89,13 +100,19 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     onClick,
     selectionMode = 'press',
     actionMode = 'click',
-    tooltip
+    tooltip,
+    explodeEffect = false,
+    explodeScene,
+    explodeScreenHeight = 800,
+    explodeRenderer
   } = options;
 
   // Track state
   let isSelectedState = selected;
   let tooltipContainer: PIXI.Container | null = null;
-  let buttonText: PIXI.BitmapText | null = null;
+  let buttonText: PIXI.Text | null = null;
+  let explosionEffect: PixelExplosionResult | null = null;
+  let isExploding = false;
 
   // Auto-calculate width for text labels if not explicitly provided
   let buttonWidth = width ?? size ?? 10;
@@ -103,10 +120,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
   // If label is provided and no explicit width, calculate based on text + padding
   if (label && !width && !size) {
-    const tempText = asBitmapText(
-      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0xffffff } },
-      { scale: GRID.fontScale }
-    );
+    const tempText = createText(label, 0xffffff);
 
     // Calculate text width in grid units
     const textWidthInGridUnits = Math.ceil(tempText.width / px(1));
@@ -224,7 +238,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     // Also update text color to match current theme
     if (buttonText) {
       buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + pressOffset);
-      buttonText.tint = theme.text;
+      buttonText.style.fill = theme.text;
     }
   }
 
@@ -234,11 +248,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
       const container = new PIXI.Container();
       const theme = getTheme();
 
-      const text = asBitmapText(
-        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-        { scale: GRID.fontScale }
-      );
-      text.tint = theme.text; // BitmapText uses tint for color
+      const text = createText(tooltip, theme.text);
 
       const padding = px(2);
       const borderWidth = px(GRID.border);
@@ -314,17 +324,79 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     const theme = getTheme();
     // Labels: no base offset, just move down when pressed
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
-    buttonText = asBitmapText(
-      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: px(buttonWidth) / 2, y: px(buttonHeight) / 2 + pressOffset, anchor: 0.5, scale: GRID.fontScale }
-    );
-    buttonText.tint = theme.text; // BitmapText uses tint for color
+    buttonText = createText(label, theme.text, { 
+      x: px(buttonWidth) / 2, 
+      y: px(buttonHeight) / 2 + pressOffset, 
+      anchor: 0.5 
+    });
     button.addChild(buttonText);
+  }
+
+  /**
+   * Trigger the pixel explosion effect
+   */
+  function triggerExplosion() {
+    if (!explodeScene || isExploding) return;
+
+    isExploding = true;
+
+    // Get global position of button
+    const globalPos = button.getGlobalPosition();
+
+    // Get button colors from theme for the explosion (fallback)
+    const theme = getTheme();
+    const bgColor = backgroundColor ?? theme.buttonBackground;
+    const explosionColors = [
+      bgColor,
+      theme.cardBorder,
+      theme.cardTitleBar,
+      theme.bevelColor,
+      theme.accent
+    ];
+
+    // Clean up previous explosion if any
+    if (explosionEffect) {
+      explosionEffect.destroy();
+    }
+
+    // Create the explosion effect while button is still visible
+    explosionEffect = createPixelExplosion({
+      scene: explodeScene,
+      buttonX: globalPos.x,
+      buttonY: globalPos.y,
+      buttonWidth,
+      buttonHeight,
+      colors: explosionColors,
+      screenHeight: explodeScreenHeight,
+      explosionForce: 1.2,
+      gravity: 0.25,
+      renderer: explodeRenderer,
+      sourceObject: button,
+      onExplosionComplete: () => {
+        // Explosion particles have left the screen
+        // Reassembly will start automatically
+      },
+      onReassemblyComplete: () => {
+        // Show the button again
+        button.visible = true;
+        isExploding = false;
+      }
+    });
+
+    // Start the explosion - this captures the button pixels while it's still visible
+    explosionEffect.explode();
+    
+    // THEN hide the button after pixels have been captured
+    button.visible = false;
   }
 
   // Add click handler if provided
   if (onClick) {
     button.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
+      // Trigger explosion if enabled and not already exploding
+      if (explodeEffect && explodeScene && !isExploding) {
+        triggerExplosion();
+      }
       onClick();
       e.stopPropagation();
     });
@@ -341,10 +413,15 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     refresh: () => {
       drawButton();
     },
+    triggerExplosion,
     destroy: () => {
       if (tooltipContainer) {
         tooltipContainer.destroy();
         tooltipContainer = null;
+      }
+      if (explosionEffect) {
+        explosionEffect.destroy();
+        explosionEffect = null;
       }
       button.removeAllListeners();
       button.destroy({ children: true });

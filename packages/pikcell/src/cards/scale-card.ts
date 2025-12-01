@@ -4,12 +4,12 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
-import { GRID, px, asBitmapText } from '@moxijs/core';
+import { GRID, px } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
 import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonRow } from '../utilities/button-layout';
 import { SCALE_CARD_CONFIG } from '../config/card-configs';
-import { getTheme } from '../theming/theme';
+import { getTheme, createText } from '../theming/theme';
 
 /** Available scale options */
 const SCALE_OPTIONS = [1, 2, 3, 4] as const;
@@ -53,11 +53,7 @@ export function createScaleCard(options: ScaleCardOptions): ScaleCardResult {
 
     // Scale label
     const theme = getTheme();
-    const scaleLabel = asBitmapText(
-      { text: 'Scale:', style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: 0, y: px(3), scale: GRID.fontScale }
-    );
-    scaleLabel.tint = theme.text;
+    const scaleLabel = createText('Scale:', theme.text, { x: 0, y: px(3) });
     contentContainer.addChild(scaleLabel);
 
     // Create scale buttons

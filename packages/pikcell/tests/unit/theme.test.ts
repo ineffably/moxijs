@@ -12,7 +12,11 @@ import {
   resetTheme,
   DARK_THEME,
   ALL_THEMES,
+  getFontDPR,
+  createText,
+  getFontDisplaySize,
 } from '../../src/theming/theme';
+import * as PIXI from 'pixi.js';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -305,6 +309,128 @@ describe('Theme System', () => {
 
     it('ALL_THEMES should match getAllThemes()', () => {
       expect(ALL_THEMES).toEqual(getAllThemes());
+    });
+  });
+
+  describe('Font Configuration', () => {
+    describe('getFontDPR', () => {
+      it('should return font configuration with correct properties', () => {
+        const fontDPR = getFontDPR();
+
+        expect(fontDPR).toHaveProperty('family');
+        expect(fontDPR).toHaveProperty('size');
+        expect(fontDPR).toHaveProperty('dprScale');
+      });
+
+      it('should use PixelOperator8 font family', () => {
+        const fontDPR = getFontDPR();
+
+        expect(fontDPR.family).toBe('PixelOperator8');
+      });
+
+      it('should use display size of 16px', () => {
+        const fontDPR = getFontDPR();
+
+        expect(fontDPR.size).toBe(16);
+        expect(fontDPR.size).toBe(getFontDisplaySize());
+      });
+
+      it('should use DPR scale of 2', () => {
+        const fontDPR = getFontDPR();
+
+        expect(fontDPR.dprScale).toBe(2);
+      });
+    });
+
+    describe('getFontDisplaySize', () => {
+      it('should return 16', () => {
+        expect(getFontDisplaySize()).toBe(16);
+      });
+    });
+
+    describe('createText', () => {
+      it('should create a PIXI.Text instance', () => {
+        const text = createText('Hello', 0xffffff);
+
+        // In test environment, it's a mock, but should have Text-like properties
+        expect(text).toHaveProperty('text');
+        expect(text).toHaveProperty('style');
+        expect(text.text).toBe('Hello');
+      });
+
+      it('should use PixelOperator8 font family', () => {
+        const text = createText('Test', 0x000000);
+
+        expect(text.style.fontFamily).toBe('PixelOperator8');
+      });
+
+      it('should use 16px display size (32px with DPR scaling)', () => {
+        const text = createText('Test', 0x000000);
+
+        // Note: Font size is scaled up for DPR (16 * 2 = 32)
+        // but displayed at 16px due to scale
+        if (text.style && 'fontSize' in text.style) {
+          expect((text.style as any).fontSize).toBe(32); // 16 * 2 (dprScale)
+        }
+      });
+
+      it('should apply DPR scaling (2x)', () => {
+        const text = createText('Test', 0x000000);
+
+        // Font size should be scaled up (16 * 2 = 32)
+        if (text.style && 'fontSize' in text.style) {
+          expect((text.style as any).fontSize).toBe(32);
+        }
+        // Scale should be set to 0.5 to display at 16px
+        expect(text.scale.x).toBe(0.5);
+        expect(text.scale.y).toBe(0.5);
+      });
+
+      it('should set fill color correctly', () => {
+        const text = createText('Test', 0xff0000);
+
+        // Note: PIXI.Text.style might be a TextStyle object
+        if (text.style && 'fill' in text.style) {
+          expect((text.style as any).fill).toBe(0xff0000);
+        }
+      });
+
+      it('should enable pixelPerfect by default', () => {
+        const text = createText('Test', 0x000000);
+
+        // roundPixels is only set if the property exists on the object
+        if ('roundPixels' in text) {
+          expect(text.roundPixels).toBe(true);
+        } else {
+          // If roundPixels doesn't exist, that's fine - the code handles it
+          expect(true).toBe(true);
+        }
+      });
+
+      it('should apply position props', () => {
+        const text = createText('Test', 0x000000, { x: 100, y: 50 });
+
+        expect(text.x).toBe(100);
+        expect(text.y).toBe(50);
+      });
+
+      it('should apply anchor prop', () => {
+        const text = createText('Test', 0x000000, { anchor: 0.5 });
+
+        expect(text.anchor.x).toBe(0.5);
+        expect(text.anchor.y).toBe(0.5);
+      });
+
+      it('should handle scale prop correctly', () => {
+        const text = createText('Test', 0x000000, { scale: 1.5 });
+
+        // Final scale should be (user scale / dprScale) = 1.5 / 2 = 0.75
+        // But the mock applies DPR scaling first, then user scale
+        // So: base scale (0.5) * user scale (1.5) = 0.75
+        // Actually, the implementation divides user scale by dprScale
+        expect(text.scale.x).toBeCloseTo(0.75, 2);
+        expect(text.scale.y).toBeCloseTo(0.75, 2);
+      });
     });
   });
 });

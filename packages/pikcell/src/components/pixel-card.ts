@@ -11,7 +11,7 @@
  * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
-import { getTheme } from '../theming/theme';
+import { getTheme, createText, getFontDisplaySize } from '../theming/theme';
 import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
@@ -74,8 +74,8 @@ export class PixelCard {
       contentHeight: options.contentHeight,
     };
 
-    // Calculate title bar height based on font size
-    const fontHeight = 64 * GRID.fontScale;
+    // Calculate title bar height based on font DISPLAY size (not installation size)
+    const fontHeight = getFontDisplaySize();
     const verticalPadding = px(GRID.padding * 2);
     this.titleBarHeightPx = Math.ceil(fontHeight + verticalPadding);
 
@@ -211,24 +211,24 @@ export class PixelCard {
     this.container.addChild(titleBar);
 
     // Title text
-    const titleText = asBitmapText(
-      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { scale: GRID.fontScale }
-    );
-    titleText.tint = theme.text; // BitmapText uses tint for color
+    const titleText = createText(this.options.title, theme.text);
 
     const textHeight = titleText.height;
     const verticalCenter = px(BORDER.total) + (this.titleBarHeightPx - textHeight) / 2;
     titleText.position.set(px(BORDER.total) + 2, Math.floor(verticalCenter));
     this.container.addChild(titleText);
 
-    // ALPHA! stamp for PIKCELL title
+    // ALPHA! stamp for PIKCELL title (uses BitmapText for rotation/special styling)
     if (this.options.title === 'PIKCELL') {
+      // Random bright color: pink, cyan, or lime green
+      const stampColors = [0xff00ff, 0x00ffff, 0x00ff00];
+      const stampColor = stampColors[Math.floor(Math.random() * stampColors.length)];
+      
       const alphaStamp = asBitmapText(
-        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: theme.accent }, pixelPerfect: true },
-        { anchor: 0.5, scale: GRID.fontScale * 1.2 }
+        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: stampColor }, pixelPerfect: true },
+        { anchor: 0.5, scale: 0.25 * 1.2 }
       );
-      alphaStamp.tint = theme.accent;
+      alphaStamp.tint = stampColor;
       alphaStamp.angle = -8;
 
       const stampX = titleText.x + titleText.width + px(2) + px(8) + px(2);
@@ -373,32 +373,24 @@ export class PixelCard {
     this.options.title = '';
 
     const titleTextChildren = this.container.children.filter(
-      child => child instanceof PIXI.BitmapText
+      child => child instanceof PIXI.Text
     );
     titleTextChildren.forEach(child => this.container.removeChild(child));
 
     const theme = getTheme();
-    const textY = px(BORDER.total) + (this.titleBarHeightPx - 64 * GRID.fontScale) / 2;
+    const textY = px(BORDER.total) + (this.titleBarHeightPx - getFontDisplaySize()) / 2;
 
     // Left-aligned text
-    const leftBitmapText = asBitmapText(
-      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: px(BORDER.total) + 2, y: Math.floor(textY), scale: GRID.fontScale }
-    );
-    leftBitmapText.tint = theme.text; // BitmapText uses tint for color
-    this.container.addChild(leftBitmapText);
+    const leftTextEl = createText(leftText, theme.text, { x: px(BORDER.total) + 2, y: Math.floor(textY) });
+    this.container.addChild(leftTextEl);
 
     // Right-aligned text
-    const rightBitmapText = asBitmapText(
-      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { scale: GRID.fontScale }
-    );
-    rightBitmapText.tint = theme.text; // BitmapText uses tint for color
+    const rightTextEl = createText(rightText, theme.text);
 
     const cardWidth = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
-    const rightX = px(cardWidth - BORDER.total) - rightBitmapText.width - 2;
-    rightBitmapText.position.set(rightX, Math.floor(textY));
-    this.container.addChild(rightBitmapText);
+    const rightX = px(cardWidth - BORDER.total) - rightTextEl.width - 2;
+    rightTextEl.position.set(rightX, Math.floor(textY));
+    this.container.addChild(rightTextEl);
   }
 
   /**
@@ -417,7 +409,7 @@ export class PixelCard {
     // Remove existing title elements (text and icon graphics)
     // Keep: background (first Graphics), title bar (cursor='move'), content mask, and resize handles
     const toRemove = this.container.children.filter(
-      child => child instanceof PIXI.BitmapText ||
+      child => child instanceof PIXI.Text ||
                (child instanceof PIXI.Graphics &&
                 child.cursor !== 'move' &&
                 child.cursor !== 'pointer' &&
@@ -431,7 +423,7 @@ export class PixelCard {
     });
 
     const theme = getTheme();
-    const fontHeight = 64 * GRID.fontScale;
+    const fontHeight = getFontDisplaySize();
     const textY = px(BORDER.total) + (this.titleBarHeightPx - fontHeight) / 2;
 
     // Icon positioning - center vertically in title bar
@@ -447,11 +439,7 @@ export class PixelCard {
 
     // Add text after the icon
     const textX = iconX + iconSize + 4; // 4px gap after icon
-    const titleText = asBitmapText(
-      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: textX, y: Math.floor(textY), scale: GRID.fontScale }
-    );
-    titleText.tint = theme.text; // BitmapText uses tint for color
+    const titleText = createText(text, theme.text, { x: textX, y: Math.floor(textY) });
     this.container.addChild(titleText);
   }
 

@@ -3,10 +3,10 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { GRID, px, asBitmapText } from '@moxijs/core';
+import { GRID, px } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { createPixelCheckbox, PixelCheckboxResult } from './pixel-checkbox';
-import { getTheme } from '../theming/theme';
+import { getTheme, createText } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 
 export interface DialogButton {
@@ -76,11 +76,7 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
 
   // Create message text to measure it
   const theme = getTheme();
-  const messageText = asBitmapText(
-    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-    { scale: GRID.fontScale }
-  );
-  messageText.tint = theme.text; // BitmapText uses tint for color
+  const messageText = createText(message, theme.text);
 
   // Calculate content dimensions based on message, checkboxes, and buttons
   const messageWidthInGridUnits = Math.ceil(messageText.width / px(1));

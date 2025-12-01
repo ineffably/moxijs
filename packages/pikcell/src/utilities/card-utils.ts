@@ -13,9 +13,10 @@
  */
 import { GRID, BORDER, px } from '@moxijs/core';
 import { CARD_CONSTANTS } from '../config/constants';
+import { getFontDisplaySize } from '../theming/theme';
 
 /**
- * Calculate title bar height dynamically based on GRID.fontScale
+ * Calculate title bar height dynamically based on font display size
  * 
  * ⚠️ Returns height in PIXELS (converted from grid units)
  * This function properly calculates the title bar height using grid-based measurements.
@@ -23,7 +24,7 @@ import { CARD_CONSTANTS } from '../config/constants';
  * @returns Height in pixels (not grid units!)
  */
 export function calculateTitleBarHeight(): number {
-  const fontHeight = CARD_CONSTANTS.TITLE_FONT_SCALE_MULTIPLIER * GRID.fontScale;
+  const fontHeight = getFontDisplaySize(); // Use display size, not installation size
   const verticalPadding = px(GRID.padding * CARD_CONSTANTS.TITLE_PADDING_MULTIPLIER);
   return Math.ceil(fontHeight + verticalPadding);
 }

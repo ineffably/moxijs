@@ -23,6 +23,7 @@ import { PixelCard } from '../components/pixel-card';
 import { ILayoutManager, LayoutSpec, CardPosition } from '../interfaces/managers';
 import { GRID, BORDER, px } from '@moxijs/core';
 import { LAYOUT_CONSTANTS, CARD_CONSTANTS } from '../config/constants';
+import { getFontDisplaySize } from '../theming/theme';
 import layoutsConfig from '../config/layouts.json';
 
 /**
@@ -196,12 +197,12 @@ export class LayoutManager implements ILayoutManager {
   }
 
   /**
-   * Calculate title bar height dynamically based on GRID.fontScale
+   * Calculate title bar height dynamically based on font display size
    *
    * @private
    */
   private calculateTitleBarHeight(): number {
-    const fontHeight = CARD_CONSTANTS.TITLE_FONT_SCALE_MULTIPLIER * GRID.fontScale;
+    const fontHeight = getFontDisplaySize(); // Use display size, not installation size
     const verticalPadding = px(GRID.padding * CARD_CONSTANTS.TITLE_PADDING_MULTIPLIER);
     return Math.ceil(fontHeight + verticalPadding);
   }

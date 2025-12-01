@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `createText()` helper function in theme system for centralized text creation
+  - Simplifies text creation across all components
+  - Uses Canvas 2D DPR rendering for crisp, pixel-perfect text
+  - Single point of change for future font rendering updates
+- `getFontDPR()` helper function for font configuration
+- Comprehensive tests for font configuration functions (`createText`, `getFontDPR`)
+
+### Changed
+- **BREAKING**: Switched from BitmapText to Canvas 2D DPR text rendering
+  - All text now uses `createText()` helper with 2× DPR supersampling
+  - Results in crisper, clearer text rendering
+  - Removed BitmapFont installation for PixelOperator8 (now uses raw font)
+  - ALPHA! stamp still uses BitmapText for rotation/special styling
+- ALPHA! stamp now randomly cycles between bright pink, cyan, and lime green colors
+- Centralized text creation API - all components now use `createText()` helper
+  - Makes future font rendering changes a single-line edit
+
+### Fixed
+- Pixel explosion effect now captures button pixels before hiding the button
+  - Ensures authentic pixel capture for explosion particles
+  - Particles now accurately represent the button's visual appearance
+
 ## [0.1.1] - 2025-12-01
 
 ### Added

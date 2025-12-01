@@ -28,6 +28,7 @@ import { SpriteSheetType } from './controllers/sprite-sheet-controller';
 import { UIStateManager } from './state/ui-state-manager';
 import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/project-state-manager';
 import { LayoutStateManager, LayoutSlotState } from './state/layout-state-manager';
+import { UndoManager, StrokeOperation } from './state/undo-manager';
 import { getTheme } from './theming/theme';
 import { PICO8_PALETTE } from './theming/palettes';
 import { GRID, BORDER, px } from '@moxijs/core';
@@ -38,6 +39,7 @@ import { createInfoBarCard, InfoBarCardResult } from './cards/info-bar-card';
 import { createCommanderBarCard, CommanderBarCardResult } from './cards/commander-bar-card';
 import { createToolbarCard, ToolbarCardResult, MainToolType } from './cards/toolbar-card';
 import { ShapeType } from './theming/tool-icons';
+import { Selection } from './components/sprite-editor-card';
 
 // Manager imports
 import { SpriteSheetManager } from './managers/sprite-sheet-manager';
@@ -71,6 +73,7 @@ export class SpriteEditor {
   private layoutManager: LayoutManager;
   private fileOperationsManager: FileOperationsManager;
   private spriteCardFactory: SpriteCardFactory;
+  private undoManager: UndoManager;
 
   // Core dependencies
   private renderer: PIXI.Renderer;
@@ -86,6 +89,14 @@ export class SpriteEditor {
   private currentTool: MainToolType = 'pencil';
   private currentShapeType: ShapeType = 'square';
 
+  // Tool display names for info bar
+  private static readonly TOOL_DISPLAY_NAMES: Record<MainToolType, string> = {
+    pencil: 'Pencil',
+    eraser: 'Eraser',
+    selection: 'Selection',
+    shape: 'Shape'
+  };
+
   // Editor state
   private currentPalette: number[] = PICO8_PALETTE;
   private selectedColorIndex: number = 0;
@@ -96,6 +107,12 @@ export class SpriteEditor {
   private uiStateSaveTimer: number | null = null;
   private projectSaveTimer: number | null = null;
 
+  // Keyboard handler for undo/redo
+  private keyboardHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  // Clipboard for copy/paste operations
+  private clipboard: { width: number; height: number; pixels: number[][] } | null = null;
+
   constructor(options: SpriteEditorOptions) {
     this.renderer = options.renderer;
     this.scene = options.scene;
@@ -105,6 +122,7 @@ export class SpriteEditor {
     this.uiManager = new UIManager(this.scene);
     this.layoutManager = new LayoutManager(this.renderer);
     this.fileOperationsManager = new FileOperationsManager();
+    this.undoManager = new UndoManager({ maxHistory: 50 });
 
     // Initialize sprite card factory
     this.spriteCardFactory = new SpriteCardFactory({
@@ -112,10 +130,17 @@ export class SpriteEditor {
       scene: this.scene,
       registerCard: (id, card) => this.registerCard(id, card),
       getSelectedColorIndex: () => this.selectedColorIndex,
+      getSelectedColorHex: () => this.currentPalette[this.selectedColorIndex] ?? 0xFFFFFF,
+      getCurrentTool: () => this.currentTool,
+      getCurrentShape: () => this.currentShapeType,
+      undoManager: this.undoManager,
       onPixelChange: () => this.saveProjectState(),
       onFocus: (instance) => this.activateInstance(instance),
       getSheetIndex: (instance) => this.spriteSheetManager.getAll().indexOf(instance)
     });
+
+    // Setup keyboard handler for undo/redo
+    this.setupKeyboardHandler();
 
     // Initialize or load project state
     const loadResult = ProjectStateManager.loadProject();
@@ -442,6 +467,383 @@ export class SpriteEditor {
   }
 
   /**
+   * Update info bar with current tool and color
+   */
+  private updateInfoBar(): void {
+    if (!this.infoBarCard) return;
+
+    // Get tool display name (include shape type if shape tool)
+    let toolName = SpriteEditor.TOOL_DISPLAY_NAMES[this.currentTool];
+    if (this.currentTool === 'shape') {
+      const shapeNames: Record<ShapeType, string> = {
+        'circle': 'Circle',
+        'circle-filled': 'Filled Circle',
+        'square': 'Rectangle',
+        'square-filled': 'Filled Rect'
+      };
+      toolName = shapeNames[this.currentShapeType];
+    }
+
+    // Get color hex value
+    const colorValue = this.currentPalette[this.selectedColorIndex];
+    const colorHex = `#${colorValue.toString(16).padStart(6, '0').toUpperCase()}`;
+
+    this.infoBarCard.updateSections([
+      { label: 'Tool:', value: toolName },
+      { label: 'Color:', value: colorHex }
+    ]);
+  }
+
+  /**
+   * Setup keyboard handler for undo/redo and clipboard operations
+   */
+  private setupKeyboardHandler(): void {
+    this.keyboardHandler = (e: KeyboardEvent) => {
+      // Check for Ctrl+key combinations
+      if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.handleRedo();
+          } else {
+            this.handleUndo();
+          }
+        } else if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          this.handleRedo();
+        } else if (e.key === 'c' || e.key === 'C') {
+          e.preventDefault();
+          this.handleCopy();
+        } else if (e.key === 'v' || e.key === 'V') {
+          e.preventDefault();
+          this.handlePaste();
+        } else if (e.key === 'x' || e.key === 'X') {
+          e.preventDefault();
+          this.handleCut();
+        }
+      }
+
+      // Delete/Backspace clears selection
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const activeInstance = this.spriteSheetManager.getActive();
+        if (activeInstance?.spriteCard) {
+          const selection = activeInstance.spriteCard.getSelection();
+          if (selection) {
+            e.preventDefault();
+            this.handleClearSelection();
+          }
+        }
+      }
+
+      // Arrow keys move selection
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        const activeInstance = this.spriteSheetManager.getActive();
+        if (activeInstance?.spriteCard) {
+          const selection = activeInstance.spriteCard.getSelection();
+          if (selection) {
+            e.preventDefault();
+            const dx = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
+            const dy = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
+            this.handleMoveSelection(dx, dy);
+          }
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', this.keyboardHandler);
+    }
+  }
+
+  /**
+   * Handle undo operation
+   */
+  private handleUndo(): void {
+    const operation = this.undoManager.undo();
+    if (!operation) return;
+
+    // Find the sprite sheet instance
+    const instance = this.spriteSheetManager.getAll().find(i => i.id === operation.spriteSheetId);
+    if (!instance) return;
+
+    // Apply the undo - restore old colors
+    for (const change of operation.changes) {
+      // Convert local sprite coordinates to global sheet coordinates
+      const cell = instance.spriteController?.getCell();
+      if (cell) {
+        const globalX = cell.x * 8 + change.x;
+        const globalY = cell.y * 8 + change.y;
+        instance.sheetCard.controller.setPixel(globalX, globalY, change.oldColorIndex);
+      }
+    }
+
+    // Re-render
+    this.refreshInstance(instance);
+    this.saveProjectState();
+  }
+
+  /**
+   * Handle redo operation
+   */
+  private handleRedo(): void {
+    const operation = this.undoManager.redo();
+    if (!operation) return;
+
+    // Find the sprite sheet instance
+    const instance = this.spriteSheetManager.getAll().find(i => i.id === operation.spriteSheetId);
+    if (!instance) return;
+
+    // Apply the redo - apply new colors
+    for (const change of operation.changes) {
+      // Convert local sprite coordinates to global sheet coordinates
+      const cell = instance.spriteController?.getCell();
+      if (cell) {
+        const globalX = cell.x * 8 + change.x;
+        const globalY = cell.y * 8 + change.y;
+        instance.sheetCard.controller.setPixel(globalX, globalY, change.newColorIndex);
+      }
+    }
+
+    // Re-render
+    this.refreshInstance(instance);
+    this.saveProjectState();
+  }
+
+  /**
+   * Refresh rendering for an instance
+   */
+  private refreshInstance(instance: SpriteSheetInstance): void {
+    if (instance.spriteCard && instance.spriteController) {
+      instance.spriteCard.redraw();
+    }
+    instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+  }
+
+  /**
+   * Get normalized selection bounds (minX, minY, maxX, maxY)
+   */
+  private getNormalizedSelection(selection: Selection): { minX: number; minY: number; maxX: number; maxY: number } {
+    return {
+      minX: Math.min(selection.x1, selection.x2),
+      minY: Math.min(selection.y1, selection.y2),
+      maxX: Math.max(selection.x1, selection.x2),
+      maxY: Math.max(selection.y1, selection.y2)
+    };
+  }
+
+  /**
+   * Handle copy operation - copy selected pixels to clipboard
+   */
+  private handleCopy(): void {
+    const activeInstance = this.spriteSheetManager.getActive();
+    if (!activeInstance?.spriteCard || !activeInstance.spriteController) return;
+
+    const selection = activeInstance.spriteCard.getSelection();
+    if (!selection) return;
+
+    const { minX, minY, maxX, maxY } = this.getNormalizedSelection(selection);
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+
+    // Copy pixels from selection
+    const pixels: number[][] = [];
+    for (let y = 0; y < height; y++) {
+      const row: number[] = [];
+      for (let x = 0; x < width; x++) {
+        row.push(activeInstance.spriteController.getPixel(minX + x, minY + y));
+      }
+      pixels.push(row);
+    }
+
+    this.clipboard = { width, height, pixels };
+    console.log(`Copied ${width}x${height} pixels to clipboard`);
+  }
+
+  /**
+   * Handle paste operation - paste clipboard at selection or origin
+   */
+  private handlePaste(): void {
+    if (!this.clipboard) return;
+
+    const activeInstance = this.spriteSheetManager.getActive();
+    if (!activeInstance?.spriteCard || !activeInstance.spriteController) return;
+
+    const selection = activeInstance.spriteCard.getSelection();
+
+    // Paste at selection top-left, or at origin if no selection
+    const startX = selection ? Math.min(selection.x1, selection.x2) : 0;
+    const startY = selection ? Math.min(selection.y1, selection.y2) : 0;
+
+    // Begin undo stroke
+    this.undoManager.beginStroke(activeInstance.id);
+
+    // Paste pixels (index 0 is transparent - don't overwrite destination)
+    for (let y = 0; y < this.clipboard.height; y++) {
+      for (let x = 0; x < this.clipboard.width; x++) {
+        const destX = startX + x;
+        const destY = startY + y;
+
+        // Skip if out of bounds
+        if (destX < 0 || destX >= 8 || destY < 0 || destY >= 8) continue;
+
+        const newColorIndex = this.clipboard.pixels[y][x];
+
+        // Skip transparent pixels (index 0) - they don't overwrite
+        if (newColorIndex === 0) continue;
+
+        const oldColorIndex = activeInstance.spriteController.getPixel(destX, destY);
+
+        if (oldColorIndex !== newColorIndex) {
+          this.undoManager.recordPixelChange(destX, destY, oldColorIndex, newColorIndex);
+          activeInstance.spriteController.setPixel(destX, destY, newColorIndex);
+        }
+      }
+    }
+
+    this.undoManager.endStroke();
+    this.refreshInstance(activeInstance);
+    this.saveProjectState();
+    console.log(`Pasted ${this.clipboard.width}x${this.clipboard.height} pixels at (${startX}, ${startY})`);
+  }
+
+  /**
+   * Handle cut operation - copy then clear selection
+   */
+  private handleCut(): void {
+    this.handleCopy();
+    this.handleClearSelection();
+  }
+
+  /**
+   * Handle clear selection - fill selection with transparent (color 0)
+   */
+  private handleClearSelection(): void {
+    const activeInstance = this.spriteSheetManager.getActive();
+    if (!activeInstance?.spriteCard || !activeInstance.spriteController) return;
+
+    const selection = activeInstance.spriteCard.getSelection();
+    if (!selection) return;
+
+    const { minX, minY, maxX, maxY } = this.getNormalizedSelection(selection);
+
+    // Begin undo stroke
+    this.undoManager.beginStroke(activeInstance.id);
+
+    // Clear pixels (set to color 0 = transparent)
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const oldColorIndex = activeInstance.spriteController.getPixel(x, y);
+        if (oldColorIndex !== 0) {
+          this.undoManager.recordPixelChange(x, y, oldColorIndex, 0);
+          activeInstance.spriteController.setPixel(x, y, 0);
+        }
+      }
+    }
+
+    this.undoManager.endStroke();
+    this.refreshInstance(activeInstance);
+    this.saveProjectState();
+  }
+
+  /**
+   * Helper to check if coordinates are within sprite bounds
+   */
+  private isInBounds(x: number, y: number): boolean {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+  }
+
+  /**
+   * Handle move selection - move selected pixels by dx, dy
+   * Selection can move freely; pixels that move off-screen are clipped
+   */
+  private handleMoveSelection(dx: number, dy: number): void {
+    const activeInstance = this.spriteSheetManager.getActive();
+    if (!activeInstance?.spriteCard || !activeInstance.spriteController) return;
+
+    const selection = activeInstance.spriteCard.getSelection();
+    if (!selection) return;
+
+    const { minX, minY, maxX, maxY } = this.getNormalizedSelection(selection);
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+
+    // Calculate new selection position (can be outside bounds)
+    const newMinX = minX + dx;
+    const newMinY = minY + dy;
+    const newMaxX = maxX + dx;
+    const newMaxY = maxY + dy;
+
+    // Copy current selection pixels (only from valid coordinates)
+    const pixels: (number | null)[][] = [];
+    for (let y = 0; y < height; y++) {
+      const row: (number | null)[] = [];
+      for (let x = 0; x < width; x++) {
+        const srcX = minX + x;
+        const srcY = minY + y;
+        if (this.isInBounds(srcX, srcY)) {
+          row.push(activeInstance.spriteController.getPixel(srcX, srcY));
+        } else {
+          row.push(null); // Out of bounds - no pixel data
+        }
+      }
+      pixels.push(row);
+    }
+
+    // Begin undo stroke
+    this.undoManager.beginStroke(activeInstance.id);
+
+    // Clear old position (only valid coordinates, and only if not going to be overwritten by new position)
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        if (!this.isInBounds(x, y)) continue;
+
+        // Check if this position (x, y) will be overwritten by a pixel from the moved selection
+        // A pixel lands at (x, y) if (x, y) is within the new selection bounds
+        const willBeOverwritten = x >= newMinX && x <= newMaxX && y >= newMinY && y <= newMaxY;
+        if (!willBeOverwritten) {
+          const oldColorIndex = activeInstance.spriteController.getPixel(x, y);
+          if (oldColorIndex !== 0) {
+            this.undoManager.recordPixelChange(x, y, oldColorIndex, 0);
+            activeInstance.spriteController.setPixel(x, y, 0);
+          }
+        }
+      }
+    }
+
+    // Draw at new position (only valid coordinates)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const destX = newMinX + x;
+        const destY = newMinY + y;
+        const pixelData = pixels[y][x];
+
+        // Skip if destination is out of bounds or source had no data
+        if (!this.isInBounds(destX, destY) || pixelData === null) continue;
+
+        const newColorIndex = pixelData;
+        const oldColorIndex = activeInstance.spriteController.getPixel(destX, destY);
+
+        if (oldColorIndex !== newColorIndex) {
+          this.undoManager.recordPixelChange(destX, destY, oldColorIndex, newColorIndex);
+          activeInstance.spriteController.setPixel(destX, destY, newColorIndex);
+        }
+      }
+    }
+
+    this.undoManager.endStroke();
+    this.refreshInstance(activeInstance);
+    this.saveProjectState();
+
+    // Update selection to follow the moved area (selection can be outside bounds)
+    activeInstance.spriteCard.setSelection({
+      x1: newMinX,
+      y1: newMinY,
+      x2: newMaxX,
+      y2: newMaxY
+    });
+  }
+
+  /**
    * Recreate all UI with current theme
    */
   async recreateUI(): Promise<void> {
@@ -482,6 +884,7 @@ export class SpriteEditor {
       selectedColorIndex: this.selectedColorIndex,
       onColorSelect: (colorIndex) => {
         this.selectedColorIndex = colorIndex;
+        this.updateInfoBar();
       }
     });
     this.scene.addChild(this.paletteCard.card.container);
@@ -499,6 +902,7 @@ export class SpriteEditor {
         if (shapeType) {
           this.currentShapeType = shapeType;
         }
+        this.updateInfoBar();
         console.log(`Tool selected: ${tool}${shapeType ? ` (${shapeType})` : ''}`);
       }
     });
@@ -534,6 +938,9 @@ export class SpriteEditor {
 
     // Center the selected cell after layout is applied
     this.centerActiveSheetCell();
+
+    // Update info bar with initial state
+    this.updateInfoBar();
   }
 
   /**
@@ -917,6 +1324,12 @@ export class SpriteEditor {
     }
     if (this.projectSaveTimer) {
       clearTimeout(this.projectSaveTimer);
+    }
+
+    // Clean up keyboard handler
+    if (this.keyboardHandler && typeof window !== 'undefined') {
+      window.removeEventListener('keydown', this.keyboardHandler);
+      this.keyboardHandler = null;
     }
 
     // Destroy all sprite sheet controllers to prevent memory leaks

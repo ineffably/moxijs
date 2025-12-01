@@ -29,8 +29,7 @@ export interface InfoBarCardResult extends CardResult {
 /** Default sections */
 const DEFAULT_SECTIONS: InfoSection[] = [
   { label: 'Tool:', value: 'Pencil' },
-  { label: 'Color:', value: '#000000' },
-  { label: 'Scale:', value: '1x' }
+  { label: 'Color:', value: '#000000' }
 ];
 
 /** Layout constants */

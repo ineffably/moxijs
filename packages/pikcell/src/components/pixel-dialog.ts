@@ -6,7 +6,7 @@ import { PixelCard } from './pixel-card';
 import { GRID, px, asBitmapText } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { createPixelCheckbox, PixelCheckboxResult } from './pixel-checkbox';
-import { getTheme } from '../theming/theme';
+import { getTheme, getFont } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 
 export interface DialogButton {
@@ -76,9 +76,10 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
 
   // Create message text to measure it
   const theme = getTheme();
+  const font = getFont();
   const messageText = asBitmapText(
-    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-    { scale: GRID.fontScale }
+    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+    { scale: font.scale }
   );
   messageText.tint = theme.text; // BitmapText uses tint for color
 

@@ -42,15 +42,39 @@ export async function initPikcell(hostElement?: HTMLElement) {
   // Load pixel fonts
   await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT, ASSETS.KENNEY_BLOCKS_FONT]);
 
-  // Install bitmap font at 64px for high quality, will scale down to 16px
+  // ===========================================
+  // HIGH-DPI FONT EXPERIMENT
+  // Toggle this to test higher resolution fonts
+  // ===========================================
+  const USE_HIGH_DPI_FONT = true; // <-- Toggle this to compare
+  const HIGH_DPI_FONT_SIZE = 256; // 4x the original 64px
+  
+  // Install bitmap font - either high-DPI or standard
   PIXI.BitmapFont.install({
     name: 'PixelOperator8Bitmap',
     style: {
       fontFamily: 'PixelOperator8',
-      fontSize: 64,
+      fontSize: USE_HIGH_DPI_FONT ? HIGH_DPI_FONT_SIZE : 64,
       fill: 0xffffff,
-    }
+    },
+    chars: PIXI.BitmapFontManager.ALPHANUMERIC.concat('.,!?\'"-:;()[]{}@#$%^&*+=<>/\\|~`_'),
+    resolution: 1,
+    padding: USE_HIGH_DPI_FONT ? 8 : 2,
+    textureStyle: { scaleMode: 'nearest' }
   });
+  
+  // Log which mode we're using
+  console.log(`🔤 Font mode: ${USE_HIGH_DPI_FONT ? 'HIGH-DPI (' + HIGH_DPI_FONT_SIZE + 'px)' : 'Standard (64px)'}`);
+  
+  // Export the font configuration for use in components
+  const actualFontSize = USE_HIGH_DPI_FONT ? HIGH_DPI_FONT_SIZE : 64;
+  
+  // Font scale: how much to scale the font to get 16px display
+  // If high-DPI, we need to scale down more (256px → 16px = 0.0625 vs 64px → 16px = 0.25)
+  (globalThis as Record<string, unknown>).__PIKCELL_FONT_SCALE__ = 16 / actualFontSize;
+  
+  // Font size: the actual size the font was installed at
+  (globalThis as Record<string, unknown>).__PIKCELL_FONT_SIZE__ = actualFontSize;
 
   // Install Kenney Blocks bitmap font for branding
   PIXI.BitmapFont.install({

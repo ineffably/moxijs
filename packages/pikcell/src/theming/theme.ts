@@ -335,3 +335,50 @@ export function setThemeByName(name: string): boolean {
 export function resetTheme(): void {
   setTheme(defaultDarkTheme);
 }
+
+/**
+ * PIKCELL Font Configuration
+ * 
+ * The font system works like this:
+ * - Font is installed at a high resolution (e.g., 256px for high-DPI)
+ * - It's scaled down to a consistent DISPLAY size (16px)
+ * - All calculations should use DISPLAY_SIZE, not the installation size
+ */
+const FONT_DISPLAY_SIZE = 16; // The actual pixel height we want text to appear
+
+/**
+ * Get the font configuration for PIKCELL's bitmap text.
+ * Returns both the fontSize to use in BitmapText and the scale to apply.
+ * 
+ * Usage:
+ *   const font = getFont();
+ *   asBitmapText({ style: { fontSize: font.size } }, { scale: font.scale });
+ */
+export function getFont(): { size: number; scale: number; displaySize: number } {
+  const size = (globalThis as Record<string, unknown>).__PIKCELL_FONT_SIZE__ as number ?? 64;
+  const scale = (globalThis as Record<string, unknown>).__PIKCELL_FONT_SCALE__ as number ?? 0.25;
+  return { size, scale, displaySize: FONT_DISPLAY_SIZE };
+}
+
+/**
+ * @deprecated Use getFont().scale instead
+ */
+export function getFontScale(): number {
+  return getFont().scale;
+}
+
+/**
+ * @deprecated Use getFont().size instead
+ */
+export function getFontSize(): number {
+  return getFont().size;
+}
+
+/**
+ * Get the font display size (the actual rendered height in pixels).
+ * Use this for layout calculations like title bar height.
+ * This is constant regardless of the font installation size.
+ */
+export function getFontDisplaySize(): number {
+  return FONT_DISPLAY_SIZE;
+}

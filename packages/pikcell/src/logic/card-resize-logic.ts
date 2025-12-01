@@ -5,7 +5,7 @@
  * Manages 8-direction resizing, minimum size constraints, and scale indicator.
  */
 import * as PIXI from 'pixi.js';
-import { getTheme } from '../theming/theme';
+import { getTheme, getFont } from '../theming/theme';
 import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 
 export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw';
@@ -260,9 +260,10 @@ export class CardResizeHandler {
     const scaleText = `${width}x${height}`;
 
     const theme = getTheme();
+    const font = getFont();
     const text = asBitmapText(
-      { text: scaleText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { scale: GRID.fontScale }
+      { text: scaleText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { scale: font.scale }
     );
 
     const padding = px(2);

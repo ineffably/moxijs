@@ -23,7 +23,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { GRID, px, asBitmapText } from '@moxijs/core';
-import { getTheme } from '../theming/theme';
+import { getTheme, getFont } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 import { createPixelExplosion, PixelExplosionResult } from '../effects/pixel-explosion';
 
@@ -120,9 +120,10 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
   // If label is provided and no explicit width, calculate based on text + padding
   if (label && !width && !size) {
+    const font = getFont();
     const tempText = asBitmapText(
-      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0xffffff } },
-      { scale: GRID.fontScale }
+      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: 0xffffff } },
+      { scale: font.scale }
     );
 
     // Calculate text width in grid units
@@ -250,10 +251,11 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     const createTooltip = () => {
       const container = new PIXI.Container();
       const theme = getTheme();
+      const font = getFont();
 
       const text = asBitmapText(
-        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-        { scale: GRID.fontScale }
+        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+        { scale: font.scale }
       );
       text.tint = theme.text; // BitmapText uses tint for color
 
@@ -329,11 +331,12 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
   // Add label if provided (and no icon)
   else if (label) {
     const theme = getTheme();
+    const font = getFont();
     // Labels: no base offset, just move down when pressed
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
     buttonText = asBitmapText(
-      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: px(buttonWidth) / 2, y: px(buttonHeight) / 2 + pressOffset, anchor: 0.5, scale: GRID.fontScale }
+      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { x: px(buttonWidth) / 2, y: px(buttonHeight) / 2 + pressOffset, anchor: 0.5, scale: font.scale }
     );
     buttonText.tint = theme.text; // BitmapText uses tint for color
     button.addChild(buttonText);

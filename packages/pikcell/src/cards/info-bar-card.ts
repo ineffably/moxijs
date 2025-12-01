@@ -66,10 +66,12 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
 
   /** Create a text element */
   function createText(text: string, color: number): PIXI.BitmapText {
-    return asBitmapText(
+    const bitmapText = asBitmapText(
       { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: color }, pixelPerfect: true },
       { scale: GRID.fontScale }
     );
+    bitmapText.tint = color; // BitmapText uses tint for color
+    return bitmapText;
   }
 
   function updateInfoSections() {
@@ -79,13 +81,13 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
     let currentX = px(SECTION_PADDING);
 
     sections.forEach(section => {
-      const labelText = createText(section.label, theme.textSecondary);
+      const labelText = createText(section.label, theme.text);
       labelText.position.set(currentX, px(SECTION_PADDING));
       contentContainer.addChild(labelText);
 
       currentX += labelText.width + px(LABEL_VALUE_GAP);
 
-      const valueText = createText(section.value, theme.textPrimary);
+      const valueText = createText(section.value, theme.text);
       valueText.position.set(currentX, px(SECTION_PADDING));
       contentContainer.addChild(valueText);
 

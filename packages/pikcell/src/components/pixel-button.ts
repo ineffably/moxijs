@@ -26,13 +26,6 @@ import { GRID, px, asBitmapText } from '@moxijs/core';
 import { getTheme } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 
-// Re-export UI_COLORS for backward compatibility
-export const UI_COLORS = {
-  buttonBg: 0x3c3d3b,
-  buttonBgHover: 0x4a4b49,
-  buttonBgPressed: 0x2a2b29,
-};
-
 export type SelectionMode = 'highlight' | 'press';
 export type ActionMode = 'click' | 'toggle';
 
@@ -66,13 +59,15 @@ export interface PixelButtonResult extends ComponentResult {
   isSelected(): boolean;
   /** Set the selected state (for toggle buttons) */
   setSelected(selected: boolean): void;
+  /** Refresh the button (e.g., after theme change) */
+  refresh(): void;
 }
 
 /**
  * Creates a pixel-perfect button with optional label
  *
  * Selection modes (visual appearance):
- * - 'highlight': Shows orange border when selected (for color swatches)
+ * - 'highlight': Shows accent border when selected (for color swatches)
  * - 'press': Shows pressed state with bevel (for tool buttons)
  *
  * Action modes (behavior):
@@ -90,7 +85,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     drawIcon,
     iconWidth = 10,
     iconHeight = 9,
-    backgroundColor = UI_COLORS.buttonBg,
+    backgroundColor,
     onClick,
     selectionMode = 'press',
     actionMode = 'click',
@@ -132,63 +127,64 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     button.clear();
 
     const theme = getTheme();
+    const bgColor = backgroundColor ?? theme.buttonBackground;
 
     if (selectionMode === 'highlight') {
       // Highlight mode (for swatches)
       if (isSelectedState) {
-        // Selected: accent border, then strong border, then background/color
+        // Selected: accent border, then card border, then background/color
         button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-        button.fill({ color: theme.accentPrimary });
+        button.fill({ color: theme.accent });
 
         button.rect(px(GRID.border), px(GRID.border),
                     px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
-        button.fill({ color: theme.borderStrong });
+        button.fill({ color: theme.cardBorder });
 
         button.rect(px(GRID.border * 2), px(GRID.border * 2),
                     px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4));
-        button.fill({ color: backgroundColor });
+        button.fill({ color: bgColor });
       } else {
         // Unselected: border, then background/color
         button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-        button.fill({ color: theme.borderStrong });
+        button.fill({ color: theme.cardBorder });
 
         button.rect(px(GRID.border), px(GRID.border),
                     px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2));
-        button.fill({ color: backgroundColor });
+        button.fill({ color: bgColor });
       }
     } else {
       // Press mode (for tool buttons)
       if (isSelectedState) {
-        // Pressed: starts 1px lower, strong border, subtle border, background (no bevel)
+        // Pressed: starts 1px lower, card border, title bar color as inner border, background (no bevel)
         button.rect(0, px(1), px(buttonWidth), px(buttonHeight) - px(1));
-        button.fill({ color: theme.borderStrong });
+        button.fill({ color: theme.cardBorder });
 
         button.rect(px(GRID.border), px(GRID.border + 1),
                     px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 2 - 1));
-        button.fill({ color: theme.borderSubtle });
+        button.fill({ color: theme.cardTitleBar });
 
         button.rect(px(GRID.border * 2), px(GRID.border * 2 + 1),
                     px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 4 - 1));
-        button.fill({ color: backgroundColor });
+        button.fill({ color: bgColor });
       } else {
-        // Unpressed: strong border, bevel at bottom, subtle border, background
+        // Unpressed: card border, bevel at bottom, title bar as inner border, background
         button.rect(0, 0, px(buttonWidth), px(buttonHeight));
-        button.fill({ color: theme.borderStrong });
+        button.fill({ color: theme.cardBorder });
 
         // Bevel strip at bottom
         button.rect(px(GRID.border), px(buttonHeight - GRID.border * 2),
                     px(buttonWidth - GRID.border * 2), px(GRID.border));
-        button.fill({ color: theme.backgroundOverlay });
+        button.fill({ color: theme.bevelColor });
 
         // Inner border
         button.rect(px(GRID.border), px(GRID.border),
                     px(buttonWidth - GRID.border * 2), px(buttonHeight - GRID.border * 3));
-        button.fill({ color: theme.borderSubtle });
+        button.fill({ color: theme.cardTitleBar });
 
         // Background
         button.rect(px(GRID.border * 2), px(GRID.border * 2),
                     px(buttonWidth - GRID.border * 4), px(buttonHeight - GRID.border * 5));
-        button.fill({ color: backgroundColor });
+        button.fill({ color: bgColor });
       }
     }
 
@@ -200,7 +196,6 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     // Icon is 10x9 cells, content area is 12×11 grid units (due to bevel)
     // Center the icon in the content area
     if (drawIcon) {
-      const theme = getTheme();
       const iconWidthPx = iconWidth * GRID.scale;
       const iconHeightPx = iconHeight * GRID.scale;
       // Content area starts after 2 border layers
@@ -212,7 +207,7 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
       // Center icon in content area, snap to grid
       const iconX = contentX + Math.floor((contentWidth - iconWidthPx) / 2 / GRID.scale) * GRID.scale;
       const iconY = contentY + Math.floor((contentHeight - iconHeightPx) / 2 / GRID.scale) * GRID.scale;
-      drawIcon(button, iconX, iconY, theme.textPrimary, GRID.scale);
+      drawIcon(button, iconX, iconY, theme.text, GRID.scale);
     }
     // Legacy: position icon sprite (for backwards compatibility)
     else if (icon) {
@@ -226,8 +221,10 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     }
 
     // Labels: no base offset, just move down when pressed
+    // Also update text color to match current theme
     if (buttonText) {
       buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + pressOffset);
+      buttonText.tint = theme.text;
     }
   }
 
@@ -235,11 +232,13 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
   if (tooltip) {
     const createTooltip = () => {
       const container = new PIXI.Container();
+      const theme = getTheme();
 
       const text = asBitmapText(
-        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0xffffff }, pixelPerfect: true },
+        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
         { scale: GRID.fontScale }
       );
+      text.tint = theme.text; // BitmapText uses tint for color
 
       const padding = px(2);
       const borderWidth = px(GRID.border);
@@ -251,19 +250,19 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
       const shadowOffset = px(1);
 
-      // Gray drop shadow
+      // Drop shadow
       bg.rect(shadowOffset, shadowOffset, tooltipWidth, tooltipHeight);
-      bg.fill({ color: 0x686461 });
+      bg.fill({ color: theme.cardTitleBar });
 
-      // White outer border
+      // Outer border
       bg.rect(0, 0, tooltipWidth, tooltipHeight);
-      bg.fill({ color: 0xffffff });
+      bg.fill({ color: theme.cardBorder });
 
-      // Black background
+      // Background
       bg.rect(borderWidth, borderWidth,
               tooltipWidth - borderWidth * 2,
               tooltipHeight - borderWidth * 2);
-      bg.fill({ color: 0x000000 });
+      bg.fill({ color: theme.cardBackground });
 
       container.addChild(bg);
       text.position.set(borderWidth + padding, borderWidth + padding);
@@ -316,9 +315,10 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     // Labels: no base offset, just move down when pressed
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
     buttonText = asBitmapText(
-      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { x: px(buttonWidth) / 2, y: px(buttonHeight) / 2 + pressOffset, anchor: 0.5, scale: GRID.fontScale }
     );
+    buttonText.tint = theme.text; // BitmapText uses tint for color
     button.addChild(buttonText);
   }
 
@@ -336,6 +336,9 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     isSelected: () => isSelectedState,
     setSelected: (selected: boolean) => {
       isSelectedState = selected;
+      drawButton();
+    },
+    refresh: () => {
       drawButton();
     },
     destroy: () => {

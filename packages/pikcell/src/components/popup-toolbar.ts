@@ -113,24 +113,24 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     background.rect(px(shadowOffset), px(shadowOffset), px(totalWidth), px(totalHeight));
     background.fill({ color: 0x000000, alpha: 0.3 });
 
-    // Outer border (strong)
+    // Outer border
     background.rect(0, 0, px(totalWidth), px(totalHeight));
-    background.fill({ color: theme.borderStrong });
+    background.fill({ color: theme.cardBorder });
 
-    // Middle border (subtle)
+    // Middle border (using buttonBackground for subtle contrast)
     background.rect(px(borderWidth), px(borderWidth),
                     px(totalWidth - borderWidth * 2), px(totalHeight - borderWidth * 2));
-    background.fill({ color: theme.borderSubtle });
+    background.fill({ color: theme.buttonBackground });
 
-    // Inner border (strong)
+    // Inner border
     background.rect(px(borderWidth * 2), px(borderWidth * 2),
                     px(totalWidth - borderWidth * 4), px(totalHeight - borderWidth * 4));
-    background.fill({ color: theme.borderStrong });
+    background.fill({ color: theme.cardBorder });
 
     // Background fill
     background.rect(px(borderWidth * 2 + 1), px(borderWidth * 2 + 1),
                     px(totalWidth - borderWidth * 4 - 2), px(totalHeight - borderWidth * 4 - 2));
-    background.fill({ color: theme.backgroundSurface });
+    background.fill({ color: theme.cardBackground });
   }
 
   /**

@@ -8,7 +8,7 @@ import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
 import { createPixelDialog } from '../components/pixel-dialog';
 import { BORDER, GRID, px } from '@moxijs/core';
-import { getAllThemes, setThemeByMetadata } from '../theming/theme';
+import { getAllThemes, setTheme, ThemeInfo } from '../theming/theme';
 import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonRow } from '../utilities/button-layout';
 import { COMMANDER_BAR_CONFIG } from '../config/card-configs';
@@ -139,10 +139,10 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
     const dialog = createPixelDialog({
       title: 'Choose Theme',
       message: 'Select a theme:',
-      buttons: allThemes.map(theme => ({
-        label: theme.name,
+      buttons: allThemes.map((themeInfo: ThemeInfo) => ({
+        label: themeInfo.name,
         onClick: () => {
-          setThemeByMetadata(theme);
+          setTheme(themeInfo);
           callbacks?.onThemeChange?.();
         }
       })),

@@ -464,7 +464,7 @@ export class SpriteEditor {
    * Update theme without losing state
    */
   updateTheme(): void {
-    this.renderer.background.color = getTheme().backgroundRoot;
+    this.renderer.background.color = getTheme().workspace;
 
     // Refresh all cards
     if (this.commanderBarCard) this.commanderBarCard.card.refresh();
@@ -887,7 +887,7 @@ export class SpriteEditor {
    */
   async recreateUI(): Promise<void> {
     this.scene.removeChildren();
-    this.renderer.background.color = getTheme().backgroundRoot;
+    this.renderer.background.color = getTheme().workspace;
 
     // Create commander bar
     this.commanderBarCard = createCommanderBarCard({

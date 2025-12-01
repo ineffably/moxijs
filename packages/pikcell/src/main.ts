@@ -4,11 +4,20 @@
  * For library usage, import from 'pikcell' directly.
  */
 import { initPikcell } from './index';
+import { getAllThemes, setTheme, getTheme, getThemeInfo, ThemeInfo } from './theming/theme';
+
+// Theme utilities for testing/debugging
+const themeUtils = {
+  getAllThemes,
+  setTheme,
+  getTheme,
+  getThemeInfo
+};
 
 // Extend window interface for testing
 declare global {
   interface Window {
-    pikcell?: Awaited<ReturnType<typeof initPikcell>>;
+    pikcell?: Awaited<ReturnType<typeof initPikcell>> & { theme: typeof themeUtils };
   }
 }
 
@@ -19,8 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initPikcell(app)
       .then((result) => {
         // Expose to window for testing/debugging
-        window.pikcell = result;
+        window.pikcell = { ...result, theme: themeUtils };
         console.log('PIKCELL ready - access via window.pikcell');
+        console.log('Theme utils: window.pikcell.theme.getAllThemes(), .setTheme(), etc.');
       })
       .catch(console.error);
   }

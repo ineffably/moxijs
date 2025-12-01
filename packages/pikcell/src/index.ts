@@ -35,7 +35,7 @@ export async function initPikcell(hostElement?: HTMLElement) {
     renderOptions: {
       width: 1280,
       height: 720,
-      backgroundColor: getTheme().backgroundRoot,
+      backgroundColor: getTheme().workspace,
     }
   });
 

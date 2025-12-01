@@ -408,6 +408,56 @@ export class PixelCard {
   }
 
   /**
+   * Set title bar with an icon and text
+   * @param drawIcon Function to draw the icon into a graphics object
+   * @param text Text to display after the icon
+   * @param iconSize Size of the icon in pixels (default 8)
+   */
+  public setTitleWithIcon(
+    drawIcon: (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void,
+    text: string,
+    iconSize: number = 8
+  ) {
+    this.options.title = '';
+
+    // Remove existing title elements (text and graphics that aren't the background)
+    const toRemove = this.container.children.filter(
+      child => child instanceof PIXI.BitmapText ||
+               (child instanceof PIXI.Graphics && child.cursor !== 'move' && child !== this.contentMask)
+    );
+    // Keep the first graphics (background) and title bar
+    const titleElements = toRemove.slice(1); // Skip background
+    titleElements.forEach(child => {
+      if (child instanceof PIXI.BitmapText) {
+        this.container.removeChild(child);
+      }
+    });
+
+    const theme = getTheme();
+    const fontHeight = 64 * GRID.fontScale;
+    const textY = px(BORDER.total) + (this.titleBarHeightPx - fontHeight) / 2;
+
+    // Icon positioning - center vertically in title bar
+    const iconY = px(BORDER.total) + (this.titleBarHeightPx - iconSize) / 2;
+    const iconX = px(BORDER.total) + 2;
+
+    // Draw the icon with 2x pixel size for better visibility in title bar
+    const iconPixelSize = 2;
+    const iconGraphics = new PIXI.Graphics();
+    iconGraphics.roundPixels = true;
+    drawIcon(iconGraphics, iconX, iconY, theme.textPrimary, iconPixelSize);
+    this.container.addChild(iconGraphics);
+
+    // Add text after the icon
+    const textX = iconX + iconSize + 4; // 4px gap after icon
+    const titleText = asBitmapText(
+      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { x: textX, y: Math.floor(textY), scale: GRID.fontScale }
+    );
+    this.container.addChild(titleText);
+  }
+
+  /**
    * Set the paired card
    */
   public setPairedCard(card: PixelCard) {

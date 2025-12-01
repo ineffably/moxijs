@@ -102,6 +102,12 @@ export class SpriteCardFactory {
     instance.spriteController.setCell(cellX, cellY);
     instance.spriteCard.redraw();
     instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+    // Update title with new cell coordinates
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    instance.spriteCard.updateTitle(currentTool, currentShape);
+
     this.onFocus(instance);
   }
 
@@ -243,6 +249,11 @@ export class SpriteCardFactory {
 
     // Setup zoom handler
     this.setupZoomHandler(instance, spriteController, spriteCardResult);
+
+    // Set initial title with tool icon, coordinates, size, and scale
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    spriteCardResult.updateTitle(currentTool, currentShape);
   }
 
   /**
@@ -285,12 +296,16 @@ export class SpriteCardFactory {
 
       if (newScale !== currentScale) {
         spriteController.setScale(newScale);
-        spriteCardResult.card.setTitle(`Sprite (${newScale}x)`);
 
         const dims = spriteController.getScaledDimensions();
         const newContentWidth = Math.ceil(dims.width / px(1));
         const newContentHeight = Math.ceil(dims.height / px(1));
         spriteCardResult.card.setContentSize(newContentWidth, newContentHeight);
+
+        // Update title with new scale
+        const currentTool = this.getCurrentTool();
+        const currentShape = this.getCurrentShape();
+        spriteCardResult.updateTitle(currentTool, currentShape);
 
         spriteCardResult.redraw();
       }
@@ -317,12 +332,17 @@ export class SpriteCardFactory {
     if (!instance.spriteController || !instance.spriteCard) return;
 
     instance.spriteController.setScale(scale);
-    instance.spriteCard.card.setTitle(`Sprite (${scale}x)`);
 
     const dims = instance.spriteController.getScaledDimensions();
     const newContentWidth = Math.ceil(dims.width / px(1));
     const newContentHeight = Math.ceil(dims.height / px(1));
     instance.spriteCard.card.setContentSize(newContentWidth, newContentHeight);
+
+    // Update title with new scale
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    instance.spriteCard.updateTitle(currentTool, currentShape);
+
     instance.spriteCard.redraw();
   }
 

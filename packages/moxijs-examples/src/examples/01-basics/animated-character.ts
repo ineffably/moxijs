@@ -43,6 +43,7 @@ export async function initAnimatedCharacter() {
 
   // Set scale mode to nearest neighbor for pixel art
   grassSheet.source.scaleMode = 'nearest';
+  sheet.textureSource.scaleMode = 'nearest';
 
   // Create grass texture frames
   const grassFrames = asTextureFrames(PIXI, grassSheet, {

@@ -2,10 +2,10 @@
  * Pixel-perfect checkbox component
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px, asBitmapText } from '@moxijs/core';
+import { GRID, px } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { ComponentResult } from '../interfaces/components';
-import { getTheme } from '../theming/theme';
+import { getTheme, createText } from '../theming/theme';
 
 export interface PixelCheckboxOptions {
   label: string;
@@ -34,11 +34,7 @@ export function createPixelCheckbox(options: PixelCheckboxOptions): PixelCheckbo
 
   // Checkbox label
   const theme = getTheme();
-  const checkboxLabel = asBitmapText(
-    { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-    { x: px(checkboxSize + 2), y: 0, scale: GRID.fontScale }
-  );
-  checkboxLabel.tint = theme.text; // BitmapText uses tint for color
+  const checkboxLabel = createText(label, theme.text, { x: px(checkboxSize + 2), y: 0 });
   container.addChild(checkboxLabel);
 
   // Create checkbox button (centered vertically with label)

@@ -904,6 +904,7 @@ export class SpriteEditor {
       y: px(GRID.margin),
       renderer: this.renderer,
       scene: this.scene,
+      explodeEffect: true, // Enable pixel explosion on PIKCELL bar buttons
       callbacks: {
         onNew: () => this.handleNew(),
         onSave: () => this.handleSave(),

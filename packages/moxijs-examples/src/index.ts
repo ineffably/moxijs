@@ -73,13 +73,19 @@ import particleSandboxSource from './examples/05-tools/particle-sandbox.ts?raw';
 // === MINI-GUI ===
 import guiBasicsSource from './examples/07-mini-gui/gui-basics.ts?raw';
 
+// Cleanup function type - examples can return this to clean up resources
+type CleanupFunction = () => void;
+
 // Example interface
 interface Example {
   name: string;
   description: string;
-  init: () => Promise<void>;
+  init: () => Promise<CleanupFunction | void>;
   source: string;
 }
+
+// Track current example's cleanup function
+let currentCleanup: CleanupFunction | null = null;
 
 // Category interface
 interface Category {
@@ -436,6 +442,16 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
     return;
   }
 
+  // Clean up previous example if it has a cleanup function
+  if (currentCleanup) {
+    try {
+      currentCleanup();
+    } catch (err) {
+      console.warn('Error during example cleanup:', err);
+    }
+    currentCleanup = null;
+  }
+
   // Clear previous example
   canvasContainer.innerHTML = '';
   currentExample = exampleKey;
@@ -495,7 +511,10 @@ async function loadExample(exampleKey: string, updateHash: boolean = true) {
 
   // Run the example
   try {
-    await found.example.init();
+    const cleanup = await found.example.init();
+    if (typeof cleanup === 'function') {
+      currentCleanup = cleanup;
+    }
   } catch (error) {
     console.error('Error loading example:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

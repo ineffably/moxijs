@@ -15,7 +15,10 @@ import { Graphics, Point, Assets } from 'pixi.js';
 import * as planck from 'planck';
 import { ASSETS } from '../../assets-config';
 
-export async function initPhysicsBasic() {
+// Cleanup function type
+type CleanupFunction = () => void;
+
+export async function initPhysicsBasic(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
@@ -51,12 +54,13 @@ export async function initPhysicsBasic() {
   });
 
   // Toggle debug view with 'P' key
-  document.addEventListener('keydown', (e) => {
+  const handleKeydown = (e: KeyboardEvent) => {
     if (e.key === 'p' || e.key === 'P') {
       debugRenderer.toggle();
       console.log(`Physics debug: ${debugRenderer.getVisible() ? 'ON' : 'OFF'}`);
     }
-  });
+  };
+  document.addEventListener('keydown', handleKeydown);
 
   // Create ground platform (centered at origin to match physics shape)
   // Make it wide - 85% of screen width (1280px * 0.85 = 1088px)
@@ -184,17 +188,18 @@ export async function initPhysicsBasic() {
   };
 
   // Track mouse position
-  canvasElement.addEventListener('mousemove', (e) => {
+  const handleMousemove = (e: MouseEvent) => {
     mouseWorldPos = screenToWorld(e.clientX, e.clientY);
 
     // Update joint target if dragging
     if (mouseJoint && mouseWorldPos) {
       mouseJoint.setTarget(mouseWorldPos);
     }
-  });
+  };
+  canvasElement.addEventListener('mousemove', handleMousemove);
 
   // Mouse down - create MouseJoint
-  canvasElement.addEventListener('mousedown', (e) => {
+  const handleMousedown = (e: MouseEvent) => {
     const worldPoint = screenToWorld(e.clientX, e.clientY);
     const body = findBodyAtPoint(worldPoint);
 
@@ -215,10 +220,11 @@ export async function initPhysicsBasic() {
 
       body.setAwake(true);
     }
-  });
+  };
+  canvasElement.addEventListener('mousedown', handleMousedown);
 
   // Mouse up - destroy joint or spawn box
-  canvasElement.addEventListener('mouseup', (e) => {
+  const handleMouseup = (e: MouseEvent) => {
     if (mouseJoint) {
       // Clean up joint
       physicsWorld!.world.destroyJoint(mouseJoint);
@@ -244,7 +250,8 @@ export async function initPhysicsBasic() {
       scene.addChild(boxEntity);
       boxEntity.moxiEntity.init(scene.renderer);
     }
-  });
+  };
+  canvasElement.addEventListener('mouseup', handleMouseup);
 
   // Initialize and start
   scene.init();
@@ -272,4 +279,14 @@ export async function initPhysicsBasic() {
   console.log('   🖱️  Click empty space to spawn boxes');
   console.log('   ⌨️  Press P to toggle physics debug view');
   console.log('   📦 Watch the boxes, balls, and meteor interact with physics');
+
+  // Return cleanup function
+  return () => {
+    document.removeEventListener('keydown', handleKeydown);
+    canvasElement.removeEventListener('mousemove', handleMousemove);
+    canvasElement.removeEventListener('mousedown', handleMousedown);
+    canvasElement.removeEventListener('mouseup', handleMouseup);
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

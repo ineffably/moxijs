@@ -2,11 +2,12 @@
  * Palette Card - Color palette selector
  */
 import * as PIXI from 'pixi.js';
-import { PixelCard } from '../components/pixel-card';
-import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
+import { createPixelButton } from '../components/pixel-button';
 import { GRID, px } from '@moxijs/core';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
+import { createManagedCard } from '../utilities/managed-card';
 import { CardResult } from '../interfaces/components';
+import { PALETTE_CARD_CONFIG } from '../config/card-configs';
 
 export interface PaletteCardOptions {
   x: number;
@@ -29,23 +30,19 @@ export interface PaletteCardResult extends CardResult {
 export function createPaletteCard(options: PaletteCardOptions): PaletteCardResult {
   const { x, y, renderer, palette, onColorSelect } = options;
 
-  // Track created swatches for cleanup
-  const createdSwatches: PixelButtonResult[] = [];
-  let wheelHandler: ((e: WheelEvent) => void) | null = null;
-
   // State
   let selectedColorIndex = options.selectedColorIndex ?? 0;
   let currentPalette = [...palette];
-  let colorsPerRow = 4;
-  let rows = 4;
-  let swatchSize = 12; // Grid units (8 * 1.5 = 12)
+  let colorsPerRow = PALETTE_CARD_CONFIG.defaultColorsPerRow;
+  let rows = PALETTE_CARD_CONFIG.defaultRows;
+  let swatchSize = PALETTE_CARD_CONFIG.defaultSwatchSize;
 
   // Calculate initial content size
   const contentWidth = colorsPerRow * swatchSize + (colorsPerRow - 1) * GRID.gap;
   const contentHeight = rows * swatchSize + (rows - 1) * GRID.gap;
 
-  // Create the card
-  const card = new PixelCard({
+  // Create the managed card
+  const managed = createManagedCard({
     title: 'Palette',
     x,
     y,
@@ -77,7 +74,7 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
       }
 
       // Update layout
-      swatchSize = Math.max(2, Math.min(32, bestSize));
+      swatchSize = Math.max(PALETTE_CARD_CONFIG.minSwatchSize, Math.min(PALETTE_CARD_CONFIG.maxSwatchSize, bestSize));
       colorsPerRow = bestCols;
       rows = bestRows;
       redrawContent();
@@ -87,15 +84,12 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
     }
   });
 
-  const contentContainer = card.getContentContainer();
+  const { card, contentContainer } = managed;
 
   // Redraw function - only updates content, not the whole card
   function redrawContent() {
-    // Cleanup old swatches
-    createdSwatches.forEach(s => s.destroy());
-    createdSwatches.length = 0;
-
-    // Clear content container
+    // Cleanup old swatches using managed card
+    managed.clearChildren();
     contentContainer.removeChildren();
 
     const totalSwatches = colorsPerRow * rows;
@@ -125,7 +119,7 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
           }
         }
       });
-      createdSwatches.push(swatch);
+      managed.trackChild(swatch);
 
       swatch.container.position.set(swatchX, swatchY);
       contentContainer.addChild(swatch.container);
@@ -133,8 +127,8 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
   }
 
   // Mouse wheel zoom for swatch size
-  wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
-    swatchSize = Math.max(2, Math.min(32, swatchSize + delta));
+  const wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
+    swatchSize = Math.max(PALETTE_CARD_CONFIG.minSwatchSize, Math.min(PALETTE_CARD_CONFIG.maxSwatchSize, swatchSize + delta));
 
     // Update card content size to match new swatch size
     const newContentWidth = colorsPerRow * swatchSize + (colorsPerRow - 1) * GRID.gap;
@@ -145,13 +139,7 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
   });
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('wheel', wheelHandler, { passive: false });
-
-    card.container.on('destroyed', () => {
-      if (wheelHandler) {
-        window.removeEventListener('wheel', wheelHandler);
-      }
-    });
+    managed.addEventListenerTracked(window, 'wheel', wheelHandler, { passive: false });
   }
 
   // Initial draw
@@ -172,19 +160,6 @@ export function createPaletteCard(options: PaletteCardOptions): PaletteCardResul
       currentPalette = [...newPalette];
       redrawContent();
     },
-    destroy: () => {
-      // Cleanup swatches
-      createdSwatches.forEach(s => s.destroy());
-      createdSwatches.length = 0;
-
-      // Remove wheel handler
-      if (wheelHandler && typeof window !== 'undefined') {
-        window.removeEventListener('wheel', wheelHandler);
-        wheelHandler = null;
-      }
-
-      // Destroy card
-      card.container.destroy({ children: true });
-    }
+    destroy: managed.destroy
   };
 }

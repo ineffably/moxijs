@@ -1,20 +1,23 @@
 /**
  * PIKCELL Bar Card - Main action bar with commands
- * 
- * ⚠️ CRITICAL: This component uses GRID UNITS for all measurements!
- * - Button spacing: px(2) = 2 grid units (NOT 2 pixels!)
- * - Bar height: 12 grid units (converted internally)
- * - All spacing/margins use px() to convert grid units to pixels
- * 
- * @see ../utilities/README.md for grid system documentation
+ *
+ * Uses GRID UNITS for all measurements (converted via px()).
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
 import { createPixelDialog } from '../components/pixel-dialog';
-import { GRID, BORDER, px } from '@moxijs/core';
-import { getAllThemes, setThemeByMetadata } from '../theming/theme';
-import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
+import { BORDER, GRID, px } from '@moxijs/core';
+import { getAllThemes, setTheme, ThemeInfo } from '../theming/theme';
+import { createManagedCard } from '../utilities/managed-card';
+import { layoutButtonRow } from '../utilities/button-layout';
+import { COMMANDER_BAR_CONFIG } from '../config/card-configs';
+
+/** Button definition for data-driven creation */
+interface ButtonDef {
+  label: string;
+  callbackKey: keyof CommanderBarCallbacks;
+}
 
 export interface CommanderBarCallbacks {
   onNew?: () => void;
@@ -44,241 +47,177 @@ export interface CommanderBarCardResult {
   destroy: () => void;
 }
 
+/** Left-side button definitions */
+const LEFT_BUTTONS: ButtonDef[] = [
+  { label: 'New', callbackKey: 'onNew' },
+  { label: 'Save', callbackKey: 'onSave' },
+  { label: 'Load', callbackKey: 'onLoad' },
+  { label: 'Export', callbackKey: 'onExport' }
+];
+
+/** Layout slot identifiers */
+const LAYOUT_SLOTS: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
+
 /**
  * Creates a PIKCELL bar for actions and options
  */
 export function createCommanderBarCard(options: CommanderBarCardOptions): CommanderBarCardResult {
   const { x, y, renderer, scene, width, callbacks } = options;
 
-  // Track created buttons for cleanup
-  let createdButtons: Array<{ destroy: () => void }> = [];
-
   const canvasWidth = renderer.width;
-  const barHeight = 12; // Grid units for PIKCELL bar
+  const barHeight = COMMANDER_BAR_CONFIG.barHeight;
+  const buttonSpacing = COMMANDER_BAR_CONFIG.buttonSpacing;
 
-  // IMPORTANT: Card adds BORDER.total * 2 + GRID.padding * 2 to contentWidth (in grid units)
-  // So we must subtract those from the desired total width to get the correct contentWidth
-  // Formula: contentWidth = (canvasWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2)
+  // Calculate bar width (account for card borders and padding)
   const barWidth = width ?? (Math.floor(canvasWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2));
 
-  // Create the card
-  const card = new PixelCard({
+  // Create the managed card
+  const managed = createManagedCard({
     title: 'PIKCELL',
     x,
     y,
     contentWidth: barWidth,
     contentHeight: barHeight,
     renderer,
-    minContentSize: true, // Prevent resizing below content's actual size
-    onResize: (newWidth, newHeight) => {
-      drawCommands();
-    },
-    onRefresh: () => {
-      drawCommands();
-    }
+    minContentSize: true,
+    onResize: () => drawCommands(),
+    onRefresh: () => drawCommands()
   });
 
-  const contentContainer = card.getContentContainer();
+  const { card, contentContainer } = managed;
+
+  /**
+   * Build layout dialog buttons dynamically based on saved slots
+   */
+  function buildLayoutDialogButtons(): Array<{ label: string; onClick: () => void }> {
+    const buttons: Array<{ label: string; onClick: () => void }> = [];
+
+    // Reset layout button
+    buttons.push({
+      label: 'Reset',
+      onClick: () => callbacks?.onApplyLayout?.()
+    });
+
+    // Slot A, B, C load/save buttons
+    LAYOUT_SLOTS.forEach(slot => {
+      const hasSlot = callbacks?.hasLayoutSlot?.(slot) ?? false;
+
+      if (hasSlot) {
+        buttons.push({
+          label: `Load ${slot}`,
+          onClick: () => callbacks?.onLoadLayoutSlot?.(slot)
+        });
+      }
+
+      buttons.push({
+        label: `Save ${slot}`,
+        onClick: () => callbacks?.onSaveLayoutSlot?.(slot)
+      });
+    });
+
+    return buttons;
+  }
+
+  /**
+   * Show layout selection dialog
+   */
+  function showLayoutDialog() {
+    const dialog = createPixelDialog({
+      title: 'Layout',
+      message: 'Choose layout:',
+      buttons: buildLayoutDialogButtons(),
+      renderer
+    });
+    scene.addChild(dialog.container);
+  }
+
+  /**
+   * Show theme selection dialog
+   */
+  function showThemeDialog() {
+    const allThemes = getAllThemes();
+    const dialog = createPixelDialog({
+      title: 'Choose Theme',
+      message: 'Select a theme:',
+      buttons: allThemes.map((themeInfo: ThemeInfo) => ({
+        label: themeInfo.name,
+        onClick: () => {
+          setTheme(themeInfo);
+          callbacks?.onThemeChange?.();
+        }
+      })),
+      renderer
+    });
+    scene.addChild(dialog.container);
+  }
 
   function drawCommands() {
-    // Cleanup old buttons
-    createdButtons.forEach(btn => btn.destroy());
-    createdButtons = [];
+    managed.clearChildren();
     contentContainer.removeChildren();
 
-    const buttonHeight = 12; // Grid units (same as bar height for full height button)
-    const buttonSpacing = px(2);
-
-    // Left side buttons (flush with content container left edge)
-    let currentX = 0;
-
-    // New button
-    const newButton = createPixelButton({
-      height: buttonHeight,
-      label: 'New',
-      selectionMode: 'press',
-      actionMode: 'click',
-      onClick: () => {
-        if (callbacks?.onNew) {
-          callbacks.onNew();
+    // Create left-side buttons from config
+    const leftButtons = LEFT_BUTTONS.map(def => {
+      const btn = createPixelButton({
+        height: barHeight,
+        label: def.label,
+        selectionMode: 'press',
+        actionMode: 'click',
+        onClick: () => {
+          const callback = callbacks?.[def.callbackKey];
+          if (typeof callback === 'function') {
+            (callback as () => void)();
+          }
         }
-      }
+      });
+      managed.trackChild(btn);
+      contentContainer.addChild(btn.container);
+      return btn;
     });
-    createdButtons.push(newButton);
-    newButton.container.position.set(currentX, 0);
-    contentContainer.addChild(newButton.container);
-    currentX += newButton.container.width + buttonSpacing;
 
-    // Save button
-    const saveButton = createPixelButton({
-      height: buttonHeight,
-      label: 'Save',
-      selectionMode: 'press',
-      actionMode: 'click',
-      onClick: () => {
-        if (callbacks?.onSave) {
-          callbacks.onSave();
-        }
-      }
+    // Layout left buttons in a row
+    layoutButtonRow({
+      items: leftButtons,
+      spacing: buttonSpacing
     });
-    createdButtons.push(saveButton);
-    saveButton.container.position.set(currentX, 0);
-    contentContainer.addChild(saveButton.container);
-    currentX += saveButton.container.width + buttonSpacing;
 
-    // Load button
-    const loadButton = createPixelButton({
-      height: buttonHeight,
-      label: 'Load',
-      selectionMode: 'press',
-      actionMode: 'click',
-      onClick: () => {
-        if (callbacks?.onLoad) {
-          callbacks.onLoad();
-        }
-      }
-    });
-    createdButtons.push(loadButton);
-    loadButton.container.position.set(currentX, 0);
-    contentContainer.addChild(loadButton.container);
-    currentX += loadButton.container.width + buttonSpacing;
-
-    // Export button
-    const exportButton = createPixelButton({
-      height: buttonHeight,
-      label: 'Export',
-      selectionMode: 'press',
-      actionMode: 'click',
-      onClick: () => {
-        if (callbacks?.onExport) {
-          callbacks.onExport();
-        }
-      }
-    });
-    createdButtons.push(exportButton);
-    exportButton.container.position.set(currentX, 0);
-    contentContainer.addChild(exportButton.container);
-    currentX += exportButton.container.width + buttonSpacing;
-
-    // Right side buttons - positioned at the far right
-    const rightButtonsSpacing = px(2);
-
-    // Layout button (auto-sized based on text)
+    // Create right-side buttons
     const layoutButton = createPixelButton({
-      height: buttonHeight,
+      height: barHeight,
       label: 'Layout',
       selectionMode: 'press',
       actionMode: 'click',
-      onClick: () => {
-        // Build button list dynamically
-        const buttons: Array<{ label: string; onClick: () => void }> = [];
-
-        // Reset layout button
-        buttons.push({
-          label: 'Reset',
-          onClick: () => {
-            if (callbacks?.onApplyLayout) {
-              callbacks.onApplyLayout();
-            }
-          }
-        });
-
-        // Slot A, B, C load/save buttons
-        const slots: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
-        slots.forEach(slot => {
-          const hasSlot = callbacks?.hasLayoutSlot?.(slot) ?? false;
-
-          // Load button (if slot has saved layout)
-          if (hasSlot) {
-            buttons.push({
-              label: `Load ${slot}`,
-              onClick: () => {
-                if (callbacks?.onLoadLayoutSlot) {
-                  callbacks.onLoadLayoutSlot(slot);
-                }
-              }
-            });
-          }
-
-          // Save button
-          buttons.push({
-            label: hasSlot ? `Save ${slot}` : `Save ${slot}`,
-            onClick: () => {
-              if (callbacks?.onSaveLayoutSlot) {
-                callbacks.onSaveLayoutSlot(slot);
-              }
-            }
-          });
-        });
-
-        // Show layout dialog
-        const dialog = createPixelDialog({
-          title: 'Layout',
-          message: 'Choose layout:',
-          buttons,
-          renderer
-        });
-        scene.addChild(dialog.container);
-      }
+      onClick: showLayoutDialog
     });
-    createdButtons.push(layoutButton);
+    managed.trackChild(layoutButton);
 
-    // Theme button (auto-sized based on text)
     const themeButton = createPixelButton({
-      height: buttonHeight,
+      height: barHeight,
       label: 'Theme',
       selectionMode: 'press',
       actionMode: 'click',
-      onClick: () => {
-        // Show theme selection dialog
-        // Dynamically create buttons from all available themes
-        const allThemes = getAllThemes();
-        const dialog = createPixelDialog({
-          title: 'Choose Theme',
-          message: 'Select a theme:',
-          buttons: allThemes.map(themeMetadata => ({
-            label: themeMetadata.name,
-            onClick: () => {
-              setThemeByMetadata(themeMetadata);
-              // Update theme callback
-              if (callbacks?.onThemeChange) {
-                callbacks.onThemeChange();
-              }
-            }
-          })),
-          renderer
-        });
-        scene.addChild(dialog.container);
-      }
+      onClick: showThemeDialog
     });
-    createdButtons.push(themeButton);
+    managed.trackChild(themeButton);
 
-    // Position right-side buttons (get their widths after creation)
-    const layoutButtonWidth = layoutButton.container.width / px(1); // Convert from pixels to grid units
-    const themeButtonWidth = themeButton.container.width / px(1);
+    // Position right-side buttons at far right
+    const layoutWidth = layoutButton.container.width / px(1);
+    const themeWidth = themeButton.container.width / px(1);
+    const spacingPx = px(buttonSpacing);
 
-    // Position before theme button (content width - both buttons - spacing)
-    layoutButton.container.position.set(px(barWidth - layoutButtonWidth - themeButtonWidth) - rightButtonsSpacing, 0);
+    layoutButton.container.position.set(px(barWidth - layoutWidth - themeWidth) - spacingPx, 0);
+    themeButton.container.position.set(px(barWidth - themeWidth), 0);
+
     contentContainer.addChild(layoutButton.container);
-
-    // Position at far right (content width - button width)
-    themeButton.container.position.set(px(barWidth - themeButtonWidth), 0);
     contentContainer.addChild(themeButton.container);
   }
 
   // Initial draw
   drawCommands();
-
-  // Update minimum content size based on actual content
   card.updateMinContentSize();
 
   return {
     card,
     container: card.container,
-    destroy: () => {
-      createdButtons.forEach(btn => btn.destroy());
-      createdButtons = [];
-      card.container.destroy({ children: true });
-    }
+    destroy: managed.destroy
   };
 }

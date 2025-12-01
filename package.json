@@ -17,10 +17,10 @@
     "watch": "concurrently \"npm run watch --workspace=moxijs-examples\" \"npm run watch --workspace=@moxijs/core\"",
     "watch:moxijs": "npm run watch --workspace=@moxijs/core",
     "examples": "npm run local --workspace=moxijs-examples",
-    "test": "npm run test --workspace=@moxijs/core",
+    "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspace=@moxijs/core",
     "test:ci": "npm run test:ci --workspace=@moxijs/core",
-    "pikcell": "npm run dev --workspace=pikcell"
+    "pikcell": "npm run dev --workspace=@moxijs/pikcell"
   },
   "keywords": [
     "moxijs",

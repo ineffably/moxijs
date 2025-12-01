@@ -3,6 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { px } from '@moxijs/core';
+import { SPRITE_SHEET_CONTROLLER_CONFIG } from '../config/controller-configs';
 
 export type SpriteSheetType = 'PICO-8' | 'TIC-80';
 
@@ -52,7 +53,7 @@ export class SpriteSheetController {
   private isDragging: boolean = false;
   private dragStartX: number = 0;
   private dragStartY: number = 0;
-  private clickThreshold: number = 5; // Pixels of movement before it's considered a drag
+  private clickThreshold: number = SPRITE_SHEET_CONTROLLER_CONFIG.clickThreshold;
 
   // Event listener references for cleanup
   private wheelHandler: ((e: WheelEvent) => void) | null = null;
@@ -69,9 +70,9 @@ export class SpriteSheetController {
     this.onCellHover = options.onCellHover;
     this.onCellClick = options.onCellClick;
 
-    // Calculate initial scale to fit nicely (50% of viewport height)
-    const targetHeight = this.renderer.height * 0.5;
-    this.scale = Math.max(1, Math.floor(targetHeight / this.config.height));
+    // Calculate initial scale to fit nicely (percentage of viewport height)
+    const targetHeight = this.renderer.height * SPRITE_SHEET_CONTROLLER_CONFIG.initialScaleViewportRatio;
+    this.scale = Math.max(SPRITE_SHEET_CONTROLLER_CONFIG.minScale, Math.floor(targetHeight / this.config.height));
 
     // Initialize pixel data (all set to first palette color)
     this.pixels = [];
@@ -131,8 +132,8 @@ export class SpriteSheetController {
           const localY = (mouseY - spriteCenterY) / oldScale;
 
           // Calculate new scale
-          const zoomDelta = e.deltaY > 0 ? -0.5 : 0.5;
-          const newScale = Math.max(1, Math.min(16, this.scale + zoomDelta));
+          const zoomDelta = e.deltaY > 0 ? -SPRITE_SHEET_CONTROLLER_CONFIG.zoomDelta : SPRITE_SHEET_CONTROLLER_CONFIG.zoomDelta;
+          const newScale = Math.max(SPRITE_SHEET_CONTROLLER_CONFIG.minScale, Math.min(SPRITE_SHEET_CONTROLLER_CONFIG.maxScale, this.scale + zoomDelta));
 
           if (newScale !== this.scale) {
             // Reposition sprite so the local point under mouse stays at same screen position
@@ -227,7 +228,7 @@ export class SpriteSheetController {
    * Set the scale (supports smooth/fractional scaling)
    */
   public setScale(newScale: number) {
-    const clampedScale = Math.max(1, Math.min(16, newScale));
+    const clampedScale = Math.max(SPRITE_SHEET_CONTROLLER_CONFIG.minScale, Math.min(SPRITE_SHEET_CONTROLLER_CONFIG.maxScale, newScale));
     // Allow smooth scaling - no rounding to integers
     if (clampedScale !== this.scale) {
       this.scale = clampedScale;
@@ -305,8 +306,8 @@ export class SpriteSheetController {
 
     // Bake grid into texture if enabled
     if (this.showGrid) {
-      const gridSize = 8;
-      ctx.strokeStyle = 'rgba(128, 128, 128, 0.3)'; // Gray with 30% opacity
+      const gridSize = SPRITE_SHEET_CONTROLLER_CONFIG.gridSize;
+      ctx.strokeStyle = `rgba(128, 128, 128, ${SPRITE_SHEET_CONTROLLER_CONFIG.gridOpacity})`;
       ctx.lineWidth = 1;
 
       // Draw vertical grid lines
@@ -344,7 +345,7 @@ export class SpriteSheetController {
 
     this.cellOverlay.clear();
 
-    const cellSize = 8 * this.scale;
+    const cellSize = SPRITE_SHEET_CONTROLLER_CONFIG.cellSize * this.scale;
     // Sprite has anchor (0.5, 0.5), so adjust for centered origin
     const spriteX = this.sprite.x - (this.config.width * this.scale) / 2;
     const spriteY = this.sprite.y - (this.config.height * this.scale) / 2;
@@ -357,7 +358,7 @@ export class SpriteSheetController {
         cellSize,
         cellSize
       );
-      this.cellOverlay.stroke({ color: 0xffec27, width: 2 }); // Yellow highlight
+      this.cellOverlay.stroke({ color: SPRITE_SHEET_CONTROLLER_CONFIG.selectedCellColor, width: SPRITE_SHEET_CONTROLLER_CONFIG.selectedCellStrokeWidth });
     }
 
     // Draw hovered cell on top (subtle highlight)
@@ -368,7 +369,7 @@ export class SpriteSheetController {
         cellSize,
         cellSize
       );
-      this.cellOverlay.stroke({ color: 0xffffff, width: 1, alpha: 0.5 });
+      this.cellOverlay.stroke({ color: SPRITE_SHEET_CONTROLLER_CONFIG.hoveredCellColor, width: SPRITE_SHEET_CONTROLLER_CONFIG.hoveredCellStrokeWidth, alpha: SPRITE_SHEET_CONTROLLER_CONFIG.hoveredCellAlpha });
     }
   }
 
@@ -388,7 +389,7 @@ export class SpriteSheetController {
 
       // Convert to sprite-local coordinates (unscaled, centered at origin)
       const spriteLocal = e.getLocalPosition(this.sprite);
-      const cellSize = 8; // Cell size in texture space (unscaled)
+      const cellSize = SPRITE_SHEET_CONTROLLER_CONFIG.cellSize; // Cell size in texture space (unscaled)
 
       // Adjust for centered anchor (sprite origin is at center)
       const adjustedX = spriteLocal.x + (this.config.width / 2);
@@ -397,8 +398,8 @@ export class SpriteSheetController {
       const cellX = Math.floor(adjustedX / cellSize);
       const cellY = Math.floor(adjustedY / cellSize);
 
-      const maxCellX = Math.floor(this.config.width / 8) - 1;
-      const maxCellY = Math.floor(this.config.height / 8) - 1;
+      const maxCellX = Math.floor(this.config.width / SPRITE_SHEET_CONTROLLER_CONFIG.cellSize) - 1;
+      const maxCellY = Math.floor(this.config.height / SPRITE_SHEET_CONTROLLER_CONFIG.cellSize) - 1;
 
       if (cellX >= 0 && cellX <= maxCellX && cellY >= 0 && cellY <= maxCellY) {
         if (cellX !== this.hoveredCellX || cellY !== this.hoveredCellY) {
@@ -633,7 +634,7 @@ export class SpriteSheetController {
   public centerCell(cellX: number, cellY: number, containerWidth: number, containerHeight: number): void {
     if (!this.sprite) return;
 
-    const cellSize = 8; // Each cell is 8x8 pixels
+    const cellSize = SPRITE_SHEET_CONTROLLER_CONFIG.cellSize;
 
     // Calculate the center of the cell in sprite-local coordinates (unscaled)
     const cellCenterX = (cellX * cellSize) + (cellSize / 2);

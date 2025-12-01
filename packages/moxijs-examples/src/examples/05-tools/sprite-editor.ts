@@ -8,10 +8,13 @@ import { Assets } from 'pixi.js';
 import { ASSETS } from '../../assets-config';
 import { SpriteEditor, getTheme } from 'pikcell';
 
+// Cleanup function type
+type CleanupFunction = () => void;
+
 /**
  * Initialize and run the sprite editor
  */
-export async function initSpriteEditor() {
+export async function initSpriteEditor(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
@@ -65,4 +68,11 @@ export async function initSpriteEditor() {
   engine.start();
 
   console.log('PIKCELL Sprite Editor loaded');
+
+  // Return cleanup function
+  return () => {
+    spriteEditor.destroy();
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

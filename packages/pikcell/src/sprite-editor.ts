@@ -142,6 +142,9 @@ export class SpriteEditor {
     // Setup keyboard handler for undo/redo
     this.setupKeyboardHandler();
 
+    // Setup beforeunload handler to save state when page closes
+    this.setupBeforeUnloadHandler();
+
     // Initialize or load project state
     const loadResult = ProjectStateManager.loadProject();
     if (!loadResult.success) {
@@ -179,9 +182,16 @@ export class SpriteEditor {
     }
 
     this.uiStateSaveTimer = window.setTimeout(() => {
-      const stateMap = this.uiManager.exportAllStates();
-      UIStateManager.saveState(stateMap, this.renderer.width, this.renderer.height);
+      this.saveUIStateImmediate();
     }, PERFORMANCE_CONSTANTS.UI_STATE_DEBOUNCE_MS);
+  }
+
+  /**
+   * Save UI state immediately (no debounce) - used for beforeunload
+   */
+  private saveUIStateImmediate(): void {
+    const stateMap = this.uiManager.exportAllStates();
+    UIStateManager.saveState(stateMap, this.renderer.width, this.renderer.height);
   }
 
   /**
@@ -552,6 +562,19 @@ export class SpriteEditor {
 
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', this.keyboardHandler);
+    }
+  }
+
+  /**
+   * Setup beforeunload handler to ensure state is saved when page closes
+   */
+  private setupBeforeUnloadHandler(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        // Force immediate save of UI and project state
+        this.saveUIStateImmediate();
+        this.saveProjectStateImmediate();
+      });
     }
   }
 
@@ -978,6 +1001,35 @@ export class SpriteEditor {
         console.warn('Auto-save failed:', saveResult.error);
       }
     }, PERFORMANCE_CONSTANTS.AUTO_SAVE_DEBOUNCE_MS);
+  }
+
+  /**
+   * Save project state immediately (no debounce) - used for beforeunload
+   */
+  private saveProjectStateImmediate(): void {
+    this.projectState.spriteSheets = this.spriteSheetManager.getAll().map(instance => {
+      const cell = instance.sheetCard.controller.getSelectedCell();
+      const state: SpriteSheetState = {
+        id: instance.id,
+        type: instance.sheetCard.controller.getConfig().type,
+        showGrid: false,
+        pixels: instance.sheetCard.controller.getPixelData(),
+        selectedCellX: cell.x,
+        selectedCellY: cell.y,
+        scale: instance.sheetCard.controller.getScale(),
+        spriteCardScale: instance.spriteController?.getScale()
+      };
+      return state;
+    });
+
+    const activeSheet = this.spriteSheetManager.getActive();
+    this.projectState.activeSpriteSheetId = activeSheet?.id ?? null;
+    this.projectState.selectedColorIndex = this.selectedColorIndex;
+
+    const saveResult = ProjectStateManager.saveProject(this.projectState);
+    if (!saveResult.success) {
+      console.warn('Immediate save failed:', saveResult.error);
+    }
   }
 
   /**

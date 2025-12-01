@@ -28,7 +28,11 @@ export interface TextOptions {
         fill?: number | string;
         [key: string]: any;
     };
+    pixelPerfect?: boolean;
     [key: string]: any;
+}
+export interface TextDPROptions extends TextOptions {
+    dprScale?: number;
 }
 export interface PixiProps {
     x?: number;
@@ -54,5 +58,6 @@ export interface PixiProps {
 export declare function asBitmapText(constructorArgs: BitmapTextOptions, props?: PixiProps): PIXI.BitmapText;
 export declare function asSprite(constructorArgs: SpriteOptions, props?: PixiProps): PIXI.Sprite;
 export declare function asText(constructorArgs: TextOptions, props?: PixiProps): PIXI.Text;
+export declare function asTextDPR(constructorArgs: TextDPROptions, props?: PixiProps): PIXI.Text;
 export declare function asGraphics(props?: PixiProps): PIXI.Graphics;
 export declare function asContainer(props?: PixiProps): PIXI.Container;

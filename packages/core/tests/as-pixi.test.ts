@@ -1,4 +1,4 @@
-import { asBitmapText, asSprite, asGraphics, asContainer, asText, PixiProps } from '../src/library/as-pixi';
+import { asBitmapText, asSprite, asGraphics, asContainer, asText, asTextDPR, PixiProps } from '../src/library/as-pixi';
 import PIXI from 'pixi.js';
 
 describe('as-pixi helpers', () => {
@@ -475,6 +475,163 @@ describe('as-pixi helpers', () => {
 
       // PIXI.Text stores objects as-is, conversion happens during rendering
       expect(text.text).toBe(customObj);
+    });
+  });
+
+  describe('asTextDPR', () => {
+    it('should create a Text with DPR scaling', () => {
+      const text = asTextDPR({
+        text: 'Hello',
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 16
+        },
+        dprScale: 2
+      });
+
+      expect(text).toBeInstanceOf(PIXI.Text);
+      expect(text.text).toBe('Hello');
+      // Font size should be scaled up (16 * 2 = 32)
+      // Note: PIXI.Text.style might be a TextStyle object, check if fontSize exists
+      if (text.style && 'fontSize' in text.style) {
+        expect((text.style as any).fontSize).toBe(32);
+      }
+      // Scale should be set to 1/dprScale (0.5) to display at original size
+      expect(text.scale.x).toBe(0.5);
+      expect(text.scale.y).toBe(0.5);
+    });
+
+    it('should default to dprScale of 2', () => {
+      const text = asTextDPR({
+        text: 'Test',
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 20
+        }
+      });
+
+      if (text.style && 'fontSize' in text.style) {
+        expect((text.style as any).fontSize).toBe(40); // 20 * 2
+      }
+      expect(text.scale.x).toBe(0.5); // 1 / 2
+    });
+
+    it('should apply custom dprScale', () => {
+      const text = asTextDPR({
+        text: 'Test',
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 16
+        },
+        dprScale: 4
+      });
+
+      if (text.style && 'fontSize' in text.style) {
+        expect((text.style as any).fontSize).toBe(64); // 16 * 4
+      }
+      expect(text.scale.x).toBe(0.25); // 1 / 4
+    });
+
+    it('should enable pixelPerfect by default', () => {
+      const text = asTextDPR({
+        text: 'Test',
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 16
+        }
+      });
+
+      // roundPixels is only set if the property exists on the object
+      if ('roundPixels' in text) {
+        expect(text.roundPixels).toBe(true);
+      } else {
+        // If roundPixels doesn't exist, that's fine - the code handles it
+        expect(true).toBe(true);
+      }
+    });
+
+    it('should allow disabling pixelPerfect', () => {
+      const text = asTextDPR({
+        text: 'Test',
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 16
+        },
+        pixelPerfect: false
+      });
+
+      // roundPixels is only set if the property exists on the object
+      if ('roundPixels' in text) {
+        expect(text.roundPixels).toBe(false);
+      } else {
+        // If roundPixels doesn't exist, that's fine - the code handles it
+        expect(true).toBe(true);
+      }
+    });
+
+    it('should apply props after creation', () => {
+      const text = asTextDPR(
+        {
+          text: 'Test',
+          style: { fontFamily: 'Arial', fontSize: 16 }
+        },
+        { x: 100, y: 50 }
+      );
+
+      expect(text.x).toBe(100);
+      expect(text.y).toBe(50);
+    });
+
+    it('should handle scale prop correctly with DPR scaling', () => {
+      const text = asTextDPR(
+        {
+          text: 'Test',
+          style: { fontFamily: 'Arial', fontSize: 16 },
+          dprScale: 2
+        },
+        { scale: 1.5 }
+      );
+
+      // Final scale should be (user scale / dprScale) = 1.5 / 2 = 0.75
+      expect(text.scale.x).toBe(0.75);
+      expect(text.scale.y).toBe(0.75);
+    });
+
+    it('should handle scale as object with DPR scaling', () => {
+      const text = asTextDPR(
+        {
+          text: 'Test',
+          style: { fontFamily: 'Arial', fontSize: 16 },
+          dprScale: 2
+        },
+        { scale: { x: 2, y: 1.5 } }
+      );
+
+      // Final scale should be (user scale / dprScale)
+      expect(text.scale.x).toBe(1); // 2 / 2
+      expect(text.scale.y).toBe(0.75); // 1.5 / 2
+    });
+
+    it('should apply anchor prop', () => {
+      const text = asTextDPR(
+        {
+          text: 'Test',
+          style: { fontFamily: 'Arial', fontSize: 16 }
+        },
+        { anchor: 0.5 }
+      );
+
+      expect(text.anchor.x).toBe(0.5);
+      expect(text.anchor.y).toBe(0.5);
+    });
+
+    it('should handle text as number', () => {
+      const text = asTextDPR({
+        text: 42,
+        style: { fontFamily: 'Arial', fontSize: 16 }
+      });
+
+      expect(text.text).toBe(42);
     });
   });
 

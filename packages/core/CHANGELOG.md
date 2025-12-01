@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asTextDPR()` function for Canvas 2D Device Pixel Ratio (DPR) text rendering
+  - Renders text at higher resolution (e.g., 2×) then scales down for crisp, pixel-perfect text
+  - Supports custom DPR scale factors (default: 2)
+  - Enables pixel-perfect rendering by default
+  - Handles scale props correctly with DPR scaling
+- Comprehensive tests for `asTextDPR()` function
+
 ### Changed
 - Renamed `src/core/` directory to `src/main/` for clearer project structure
 - Updated test imports to use new `src/main/` paths

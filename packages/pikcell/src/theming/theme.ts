@@ -1,123 +1,155 @@
 /**
- * Theme system for the sprite editor
- * Allows customizing the look and feel of all UI components
+ * Simplified Theme System for Pikcell
+ *
+ * Themes are palette-based with 7 core properties for clean, consistent styling.
+ * Theme definitions are data-driven, loaded from JSON config files.
  */
 
-import cc29ThemesJson from './themes/cc29-themes.json';
+import { getPalette, PaletteType } from './palettes';
+import cc29Themes from '../config/themes/cc29.json';
 
 /**
- * Theme Configuration
+ * Theme Configuration - 8 core properties
  *
- * A theme defines the visual appearance through semantic color roles.
- * Colors are organized by their visual function, not by which component uses them.
- *
- * BACKGROUND LAYERS (4 colors - define depth through layering):
- *   backgroundRoot     - The canvas/viewport background (furthest back)
- *   backgroundSurface  - Cards, panels, dialogs (main surfaces)
- *   backgroundRaised   - Buttons, inputs, interactive elements (raised above surfaces)
- *   backgroundOverlay  - Headers, title bars, hover states (highest layer)
- *
- * BORDERS (2 colors - define edges and separation):
- *   borderStrong  - Primary borders, strong definition
- *   borderSubtle  - Subtle dividers, inner borders, light separation
- *
- * ACCENTS (2 colors - draw attention and show state):
- *   accentPrimary   - Active states, selections, primary actions
- *   accentSecondary - Hover states, secondary highlights
- *
- * TEXT (2 colors - content hierarchy):
- *   textPrimary   - Main content, important text
- *   textSecondary - Labels, hints, de-emphasized content
+ * workspace      - Main canvas/viewport background
+ * cardBackground - Card content area background
+ * cardTitleBar   - Card title bar & header overlays
+ * cardBorder     - Card borders (outer frame)
+ * buttonBackground - Buttons, controls, interactive elements
+ * bevelColor     - Button bevel/3D effect color
+ * accent         - Selection highlights, active states, focus
+ * text           - All text content (titles, labels, body)
  */
 export interface Theme {
-  // Background layers (from back to front)
-  backgroundRoot: number;     // Canvas background
-  backgroundSurface: number;  // Cards, panels
-  backgroundRaised: number;   // Buttons, inputs
-  backgroundOverlay: number;  // Headers, title bars
-
-  // Borders
-  borderStrong: number;  // Primary borders
-  borderSubtle: number;  // Light dividers
-
-  // Accents
-  accentPrimary: number;   // Selections, active
-  accentSecondary: number; // Hover, secondary
-
-  // Text
-  textPrimary: number;   // Main content
-  textSecondary: number; // Labels, hints
+  workspace: number;
+  cardBackground: number;
+  cardTitleBar: number;
+  cardBorder: number;
+  buttonBackground: number;
+  bevelColor: number;
+  accent: number;
+  text: number;
 }
 
 /**
- * Convert JSON theme data to Theme object
- * JSON stores colors as hex strings, need to convert to numbers
+ * Theme variant type
  */
-function parseThemeFromJson(jsonTheme: any): Theme {
-  const parseColor = (colorStr: string): number => {
-    return parseInt(colorStr, 16);
-  };
+export type ThemeVariant = 'dark' | 'light';
 
+/**
+ * Theme metadata
+ */
+export interface ThemeInfo {
+  name: string;
+  palette: PaletteType;
+  variant: ThemeVariant;
+  theme: Theme;
+  description?: string;
+}
+
+/**
+ * Raw theme data from JSON (hex strings)
+ */
+interface RawThemeData {
+  name: string;
+  variant: ThemeVariant;
+  description?: string;
+  workspace: string;
+  cardBackground: string;
+  cardTitleBar: string;
+  cardBorder: string;
+  buttonBackground: string;
+  bevelColor: string;
+  accent: string;
+  text: string;
+}
+
+/**
+ * Raw theme config from JSON
+ */
+interface RawThemeConfig {
+  palette: PaletteType;
+  paletteName: string;
+  description: string;
+  themes: {
+    [category: string]: RawThemeData[];
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme Parsing (JSON -> Runtime)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Parse hex string (e.g., "0x2b2b2e") to number
+ */
+function parseHex(hex: string): number {
+  return parseInt(hex.replace('0x', ''), 16);
+}
+
+/**
+ * Parse raw theme data from JSON to Theme
+ */
+function parseTheme(raw: RawThemeData): Theme {
   return {
-    backgroundRoot: parseColor(jsonTheme.backgroundRoot),
-    backgroundSurface: parseColor(jsonTheme.backgroundSurface),
-    backgroundRaised: parseColor(jsonTheme.backgroundRaised),
-    backgroundOverlay: parseColor(jsonTheme.backgroundOverlay),
-    borderStrong: parseColor(jsonTheme.borderStrong),
-    borderSubtle: parseColor(jsonTheme.borderSubtle),
-    accentPrimary: parseColor(jsonTheme.accentPrimary),
-    accentSecondary: parseColor(jsonTheme.accentSecondary),
-    textPrimary: parseColor(jsonTheme.textPrimary),
-    textSecondary: parseColor(jsonTheme.textSecondary),
+    workspace: parseHex(raw.workspace),
+    cardBackground: parseHex(raw.cardBackground),
+    cardTitleBar: parseHex(raw.cardTitleBar),
+    cardBorder: parseHex(raw.cardBorder),
+    buttonBackground: parseHex(raw.buttonBackground),
+    bevelColor: parseHex(raw.bevelColor),
+    accent: parseHex(raw.accent),
+    text: parseHex(raw.text),
   };
 }
 
 /**
- * Load themes from JSON
+ * Load themes from a theme config
  */
-const cc29Themes = cc29ThemesJson as any;
+function loadThemesFromConfig(config: RawThemeConfig): ThemeInfo[] {
+  const themes: ThemeInfo[] = [];
 
-// Classic themes
-export const DARK_THEME: Theme = parseThemeFromJson(cc29Themes.classic[0]);
-export const LIGHT_THEME: Theme = parseThemeFromJson(cc29Themes.classic[1]);
+  for (const category of Object.keys(config.themes)) {
+    for (const rawTheme of config.themes[category]) {
+      themes.push({
+        name: rawTheme.name,
+        palette: config.palette,
+        variant: rawTheme.variant,
+        description: rawTheme.description,
+        theme: parseTheme(rawTheme),
+      });
+    }
+  }
 
-// Seasonal themes
-export const SPRING_THEME: Theme = parseThemeFromJson(cc29Themes.seasonal[0]);
-export const SUMMER_THEME: Theme = parseThemeFromJson(cc29Themes.seasonal[1]);
-export const AUTUMN_THEME: Theme = parseThemeFromJson(cc29Themes.seasonal[2]);
-export const WINTER_THEME: Theme = parseThemeFromJson(cc29Themes.seasonal[3]);
+  return themes;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dynamic Theme Generation (from palettes)
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Helper function to create a theme from a palette
- * Maps palette colors to theme roles based on brightness/purpose
+ * Calculate luminance of a color (0-255)
  */
-export function createThemeFromPalette(
-  palette: number[],
-  config?: {
-    background?: number;
-    cardBg?: number;
-    titleBar?: number;
-    buttonBg?: number;
-    highlight?: number;
-    darkText?: number;
-    lightText?: number;
-  }
-): Theme {
-  // Sort palette by brightness (simple luminance calculation)
-  const sortedByBrightness = [...palette].sort((a, b) => {
-    const lumA = ((a >> 16) & 0xff) * 0.299 + ((a >> 8) & 0xff) * 0.587 + (a & 0xff) * 0.114;
-    const lumB = ((b >> 16) & 0xff) * 0.299 + ((b >> 8) & 0xff) * 0.587 + (b & 0xff) * 0.114;
-    return lumA - lumB;
-  });
+function getLuminance(color: number): number {
+  const r = (color >> 16) & 0xff;
+  const g = (color >> 8) & 0xff;
+  const b = color & 0xff;
+  return r * 0.299 + g * 0.587 + b * 0.114;
+}
 
-  const darkest = sortedByBrightness[0];
-  const dark = sortedByBrightness[Math.floor(sortedByBrightness.length * 0.25)];
-  const medium = sortedByBrightness[Math.floor(sortedByBrightness.length * 0.5)];
-  const light = sortedByBrightness[Math.floor(sortedByBrightness.length * 0.75)];
-  const lightest = sortedByBrightness[sortedByBrightness.length - 1];
+/**
+ * Sort colors by luminance
+ */
+function sortByLuminance(colors: number[]): number[] {
+  return [...colors].sort((a, b) => getLuminance(a) - getLuminance(b));
+}
 
-  // Find a saturated color for highlight (highest saturation)
-  const highlight = palette.reduce((best, color) => {
+/**
+ * Find the most saturated color in a palette (for accent)
+ */
+function findAccentColor(colors: number[]): number {
+  return colors.reduce((best, color) => {
     const r = (color >> 16) & 0xff;
     const g = (color >> 8) & 0xff;
     const b = color & 0xff;
@@ -133,142 +165,173 @@ export function createThemeFromPalette(
     const bestSat = bestMax === 0 ? 0 : (bestMax - bestMin) / bestMax;
 
     return sat > bestSat ? color : best;
-  }, palette[0]);
+  }, colors[0]);
+}
+
+/**
+ * Generate a dark theme from a palette
+ */
+export function createDarkTheme(palette: number[]): Theme {
+  const sorted = sortByLuminance(palette);
+  const len = sorted.length;
 
   return {
-    backgroundRoot: config?.background ?? dark,
-    backgroundSurface: config?.cardBg ?? medium,
-    backgroundRaised: config?.buttonBg ?? light,
-    backgroundOverlay: config?.titleBar ?? dark,
-    borderStrong: darkest,
-    borderSubtle: lightest,
-    accentPrimary: config?.highlight ?? highlight,
-    accentSecondary: config?.highlight ?? highlight,
-    textPrimary: config?.darkText ?? darkest,
-    textSecondary: config?.lightText ?? dark,
+    workspace: sorted[Math.floor(len * 0.1)],
+    cardBackground: sorted[Math.floor(len * 0.15)],
+    cardTitleBar: sorted[Math.floor(len * 0.25)],
+    cardBorder: sorted[0],
+    buttonBackground: sorted[Math.floor(len * 0.35)],
+    bevelColor: sorted[Math.floor(len * 0.45)],
+    accent: findAccentColor(palette),
+    text: sorted[len - 1],
   };
 }
 
 /**
- * Theme metadata for organizing and displaying themes
+ * Generate a light theme from a palette
  */
-export interface ThemeMetadata {
-  name: string;
-  theme: Theme;
-  category: 'classic' | 'seasonal';
-  palette: string;
-}
-
-/**
- * Theme group - organizes themes by palette
- */
-export interface ThemeGroup {
-  paletteName: string;
-  classic: ThemeMetadata[];
-  seasonal: ThemeMetadata[];
-}
-
-/**
- * Load theme groups from JSON files
- */
-function loadThemeGroup(jsonData: any): ThemeGroup {
-  const paletteName = jsonData.paletteName;
-
-  const classic: ThemeMetadata[] = jsonData.classic.map((jsonTheme: any) => ({
-    name: jsonTheme.name,
-    theme: parseThemeFromJson(jsonTheme),
-    category: 'classic' as const,
-    palette: paletteName
-  }));
-
-  const seasonal: ThemeMetadata[] = jsonData.seasonal.map((jsonTheme: any) => ({
-    name: jsonTheme.name,
-    theme: parseThemeFromJson(jsonTheme),
-    category: 'seasonal' as const,
-    palette: paletteName
-  }));
+export function createLightTheme(palette: number[]): Theme {
+  const sorted = sortByLuminance(palette);
+  const len = sorted.length;
 
   return {
-    paletteName,
-    classic,
-    seasonal
+    workspace: sorted[Math.floor(len * 0.7)],
+    cardBackground: sorted[Math.floor(len * 0.85)],
+    cardTitleBar: sorted[Math.floor(len * 0.6)],
+    cardBorder: sorted[Math.floor(len * 0.15)],
+    buttonBackground: sorted[Math.floor(len * 0.75)],
+    bevelColor: sorted[Math.floor(len * 0.5)],
+    accent: findAccentColor(palette),
+    text: sorted[0],
   };
 }
 
 /**
- * All available theme groups organized by palette
+ * Generate themes for a palette
  */
-export const THEME_GROUPS: ThemeGroup[] = [
-  loadThemeGroup(cc29ThemesJson)
+export function createThemesFromPalette(paletteType: PaletteType): { dark: ThemeInfo; light: ThemeInfo } {
+  const palette = getPalette(paletteType);
+  const paletteName = paletteType.toUpperCase();
+
+  return {
+    dark: {
+      name: `${paletteName} Dark`,
+      palette: paletteType,
+      variant: 'dark',
+      theme: createDarkTheme(palette),
+    },
+    light: {
+      name: `${paletteName} Light`,
+      palette: paletteType,
+      variant: 'light',
+      theme: createLightTheme(palette),
+    },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme Registry (data-driven from JSON)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Load all themes from config files
+const cc29ThemeList = loadThemesFromConfig(cc29Themes as RawThemeConfig);
+
+/** All available themes */
+export const ALL_THEMES: ThemeInfo[] = [
+  ...cc29ThemeList,
+  // Add more palette themes here as they're created:
+  // ...pico8ThemeList,
+  // ...tic80ThemeList,
 ];
 
-/**
- * Get all themes flattened into a single array
- */
-export function getAllThemes(): ThemeMetadata[] {
-  return THEME_GROUPS.flatMap(group => [...group.classic, ...group.seasonal]);
+// Default theme references (first dark and light themes)
+const defaultDarkTheme = ALL_THEMES.find(t => t.name === 'Dark') || ALL_THEMES[0];
+const defaultLightTheme = ALL_THEMES.find(t => t.name === 'Light') || ALL_THEMES[1];
+
+/** Default dark theme */
+export const DARK_THEME = defaultDarkTheme.theme;
+
+/** Default light theme */
+export const LIGHT_THEME = defaultLightTheme.theme;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme State Management
+// ─────────────────────────────────────────────────────────────────────────────
+
+const THEME_STORAGE_KEY = 'pikcell-theme';
+
+function saveThemeToStorage(themeName: string): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeName);
+  } catch {
+    // localStorage might not be available
+  }
 }
 
-/**
- * Get themes by palette name
- */
-export function getThemesByPalette(paletteName: string): ThemeGroup | undefined {
-  return THEME_GROUPS.find(group => group.paletteName === paletteName);
+function loadThemeFromStorage(): string | null {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
-/**
- * Get theme by name
- */
-export function getThemeByName(name: string): ThemeMetadata | undefined {
-  return getAllThemes().find(t => t.name === name);
+function initializeTheme(): ThemeInfo {
+  const savedName = loadThemeFromStorage();
+  if (savedName) {
+    const found = ALL_THEMES.find(t => t.name === savedName);
+    if (found) return found;
+  }
+  return defaultDarkTheme;
 }
 
-/**
- * Global theme state - can be modified at runtime
- */
-let currentTheme: Theme = DARK_THEME;
-let currentThemeMetadata: ThemeMetadata = { name: 'Dark', theme: DARK_THEME, category: 'classic', palette: 'CC-29' };
+// Current theme state
+let currentThemeInfo: ThemeInfo = initializeTheme();
 
 /**
  * Get the current theme
  */
 export function getTheme(): Theme {
-  return currentTheme;
+  return currentThemeInfo.theme;
 }
 
 /**
- * Get the current theme metadata
+ * Get the current theme info (includes name, palette, variant)
  */
-export function getCurrentThemeMetadata(): ThemeMetadata {
-  return currentThemeMetadata;
+export function getThemeInfo(): ThemeInfo {
+  return currentThemeInfo;
 }
 
 /**
- * Set the current theme by metadata
+ * Get all available themes
  */
-export function setThemeByMetadata(metadata: ThemeMetadata): void {
-  currentTheme = metadata.theme;
-  currentThemeMetadata = metadata;
+export function getAllThemes(): ThemeInfo[] {
+  return ALL_THEMES;
 }
 
 /**
- * Set the current theme (legacy API)
+ * Set the current theme by ThemeInfo
  */
-export function setTheme(theme: Theme): void {
-  currentTheme = theme;
-  // Try to find metadata for this theme
-  const metadata = getAllThemes().find(t => t.theme === theme);
-  if (metadata) {
-    currentThemeMetadata = metadata;
+export function setTheme(themeInfo: ThemeInfo): void {
+  currentThemeInfo = themeInfo;
+  saveThemeToStorage(themeInfo.name);
+}
+
+/**
+ * Set the current theme by name
+ */
+export function setThemeByName(name: string): boolean {
+  const found = ALL_THEMES.find(t => t.name === name);
+  if (found) {
+    setTheme(found);
+    return true;
   }
+  return false;
 }
 
 /**
  * Reset to default theme
  */
 export function resetTheme(): void {
-  const defaultMetadata = getThemeByName('Dark');
-  if (defaultMetadata) {
-    setThemeByMetadata(defaultMetadata);
-  }
+  setTheme(defaultDarkTheme);
 }

@@ -13,12 +13,21 @@ import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { calculateCommanderBarHeight } from '../utilities/card-utils';
 import { SpriteSheetInstance } from '../interfaces/managers';
 import { getSpriteCardId } from '../config/card-ids';
+import { SPRITE_CONSTANTS } from '../config/constants';
+import { MainToolType } from '../cards/toolbar-card';
+import { ShapeType } from '../theming/tool-icons';
+import { UndoManager } from '../state/undo-manager';
+import { Point, getFloodFillPixels } from '../utilities/shape-drawer';
 
 export interface SpriteCardFactoryOptions {
   renderer: PIXI.Renderer;
   scene: PIXI.Container;
   registerCard: (id: string, card: PixelCard) => void;
   getSelectedColorIndex: () => number;
+  getSelectedColorHex: () => number;
+  getCurrentTool: () => MainToolType;
+  getCurrentShape: () => ShapeType;
+  undoManager: UndoManager;
   onPixelChange: () => void;
   onFocus: (instance: SpriteSheetInstance) => void;
   getSheetIndex: (instance: SpriteSheetInstance) => number;
@@ -39,6 +48,10 @@ export class SpriteCardFactory {
   private scene: PIXI.Container;
   private registerCard: (id: string, card: any) => void;
   private getSelectedColorIndex: () => number;
+  private getSelectedColorHex: () => number;
+  private getCurrentTool: () => MainToolType;
+  private getCurrentShape: () => ShapeType;
+  private undoManager: UndoManager;
   private onPixelChange: () => void;
   private onFocus: (instance: SpriteSheetInstance) => void;
   private getSheetIndex: (instance: SpriteSheetInstance) => number;
@@ -51,6 +64,10 @@ export class SpriteCardFactory {
     this.scene = options.scene;
     this.registerCard = options.registerCard;
     this.getSelectedColorIndex = options.getSelectedColorIndex;
+    this.getSelectedColorHex = options.getSelectedColorHex;
+    this.getCurrentTool = options.getCurrentTool;
+    this.getCurrentShape = options.getCurrentShape;
+    this.undoManager = options.undoManager;
     this.onPixelChange = options.onPixelChange;
     this.onFocus = options.onFocus;
     this.getSheetIndex = options.getSheetIndex;
@@ -85,6 +102,12 @@ export class SpriteCardFactory {
     instance.spriteController.setCell(cellX, cellY);
     instance.spriteCard.redraw();
     instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+    // Update title with new cell coordinates
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    instance.spriteCard.updateTitle(currentTool, currentShape);
+
     this.onFocus(instance);
   }
 
@@ -122,14 +145,89 @@ export class SpriteCardFactory {
       y: position.y,
       renderer: this.renderer,
       spriteController,
-      onPixelClick: (x, y) => {
-        spriteController.setPixel(x, y, this.getSelectedColorIndex());
+      getCurrentTool: () => this.getCurrentTool(),
+      getCurrentShape: () => this.getCurrentShape(),
+      getPreviewColor: () => this.getSelectedColorHex(),
+      onPixelClick: (x, y, oldColorIndex) => {
+        // Use color index 0 for eraser, otherwise use selected color
+        const tool = this.getCurrentTool();
+        const newColorIndex = tool === 'eraser' ? 0 : this.getSelectedColorIndex();
+
+        // Record the pixel change for undo
+        this.undoManager.recordPixelChange(x, y, oldColorIndex, newColorIndex);
+
+        spriteController.setPixel(x, y, newColorIndex);
 
         // Re-render
         spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
         instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
 
         this.onPixelChange();
+      },
+      onShapeDraw: (pixels, oldColors) => {
+        // Use color index 0 for eraser, otherwise use selected color
+        const tool = this.getCurrentTool();
+        const newColorIndex = tool === 'eraser' ? 0 : this.getSelectedColorIndex();
+
+        // Record all pixel changes for undo
+        for (const pixel of pixels) {
+          const key = `${pixel.x},${pixel.y}`;
+          const oldColorIndex = oldColors.get(key) ?? 0;
+          this.undoManager.recordPixelChange(pixel.x, pixel.y, oldColorIndex, newColorIndex);
+          spriteController.setPixel(pixel.x, pixel.y, newColorIndex);
+        }
+
+        // Re-render
+        spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+        this.onPixelChange();
+      },
+      onFill: (x, y) => {
+        const newColorIndex = this.getSelectedColorIndex();
+        const targetColorIndex = spriteController.getPixel(x, y);
+
+        // Don't fill if clicking on same color
+        if (newColorIndex === targetColorIndex) {
+          return;
+        }
+
+        // Sprite dimensions are always 8x8
+        const size = SPRITE_CONSTANTS.CELL_SIZE;
+
+        // Get all pixels to fill using flood fill algorithm
+        const pixelsToFill = getFloodFillPixels(
+          x, y, size, size,
+          (px, py) => spriteController.getPixel(px, py)
+        );
+
+        if (pixelsToFill.length === 0) {
+          return;
+        }
+
+        // Begin undo stroke
+        this.undoManager.beginStroke(instance.id);
+
+        // Record all pixel changes for undo and apply them
+        for (const pixel of pixelsToFill) {
+          this.undoManager.recordPixelChange(pixel.x, pixel.y, targetColorIndex, newColorIndex);
+          spriteController.setPixel(pixel.x, pixel.y, newColorIndex);
+        }
+
+        // End undo stroke
+        this.undoManager.endStroke();
+
+        // Re-render
+        spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+        this.onPixelChange();
+      },
+      onDrawStart: () => {
+        this.undoManager.beginStroke(instance.id);
+      },
+      onDrawEnd: () => {
+        this.undoManager.endStroke();
       },
       onFocus: () => this.onFocus(instance)
     });
@@ -151,6 +249,11 @@ export class SpriteCardFactory {
 
     // Setup zoom handler
     this.setupZoomHandler(instance, spriteController, spriteCardResult);
+
+    // Set initial title with tool icon, coordinates, size, and scale
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    spriteCardResult.updateTitle(currentTool, currentShape);
   }
 
   /**
@@ -193,12 +296,16 @@ export class SpriteCardFactory {
 
       if (newScale !== currentScale) {
         spriteController.setScale(newScale);
-        spriteCardResult.card.setTitle(`Sprite (${newScale}x)`);
 
         const dims = spriteController.getScaledDimensions();
         const newContentWidth = Math.ceil(dims.width / px(1));
         const newContentHeight = Math.ceil(dims.height / px(1));
         spriteCardResult.card.setContentSize(newContentWidth, newContentHeight);
+
+        // Update title with new scale
+        const currentTool = this.getCurrentTool();
+        const currentShape = this.getCurrentShape();
+        spriteCardResult.updateTitle(currentTool, currentShape);
 
         spriteCardResult.redraw();
       }
@@ -225,12 +332,17 @@ export class SpriteCardFactory {
     if (!instance.spriteController || !instance.spriteCard) return;
 
     instance.spriteController.setScale(scale);
-    instance.spriteCard.card.setTitle(`Sprite (${scale}x)`);
 
     const dims = instance.spriteController.getScaledDimensions();
     const newContentWidth = Math.ceil(dims.width / px(1));
     const newContentHeight = Math.ceil(dims.height / px(1));
     instance.spriteCard.card.setContentSize(newContentWidth, newContentHeight);
+
+    // Update title with new scale
+    const currentTool = this.getCurrentTool();
+    const currentShape = this.getCurrentShape();
+    instance.spriteCard.updateTitle(currentTool, currentShape);
+
     instance.spriteCard.redraw();
   }
 

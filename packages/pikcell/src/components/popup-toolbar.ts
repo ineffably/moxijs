@@ -11,8 +11,8 @@ import { ComponentResult } from '../interfaces/components';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 
 export interface PopupToolbarButton {
-  /** Factory function to create the icon (called each time buttons are created) */
-  createIcon: () => PIXI.Sprite | PIXI.Graphics;
+  /** Draw icon directly into button graphics for perfect grid alignment */
+  drawIcon: (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void;
   /** Tooltip text */
   tooltip?: string;
   /** Unique identifier for this option */
@@ -28,6 +28,8 @@ export interface PopupToolbarOptions {
   buttonSpacing?: number;
   /** Direction to arrange buttons */
   direction?: 'horizontal' | 'vertical';
+  /** Vertical anchor point: 'top' aligns popup top with parent top, 'bottom' aligns popup bottom with parent bottom */
+  verticalAnchor?: 'top' | 'bottom';
   /** Callback when an option is selected */
   onSelect?: (id: string) => void;
   /** Callback when popup is closed without selection */
@@ -58,6 +60,7 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     buttonSize = 14,
     buttonSpacing = 1,
     direction = 'horizontal',
+    verticalAnchor = 'top',
     onSelect,
     onClose
   } = options;
@@ -113,24 +116,24 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     background.rect(px(shadowOffset), px(shadowOffset), px(totalWidth), px(totalHeight));
     background.fill({ color: 0x000000, alpha: 0.3 });
 
-    // Outer border (strong)
+    // Outer border
     background.rect(0, 0, px(totalWidth), px(totalHeight));
-    background.fill({ color: theme.borderStrong });
+    background.fill({ color: theme.cardBorder });
 
-    // Middle border (subtle)
+    // Middle border (using buttonBackground for subtle contrast)
     background.rect(px(borderWidth), px(borderWidth),
                     px(totalWidth - borderWidth * 2), px(totalHeight - borderWidth * 2));
-    background.fill({ color: theme.borderSubtle });
+    background.fill({ color: theme.buttonBackground });
 
-    // Inner border (strong)
+    // Inner border
     background.rect(px(borderWidth * 2), px(borderWidth * 2),
                     px(totalWidth - borderWidth * 4), px(totalHeight - borderWidth * 4));
-    background.fill({ color: theme.borderStrong });
+    background.fill({ color: theme.cardBorder });
 
     // Background fill
     background.rect(px(borderWidth * 2 + 1), px(borderWidth * 2 + 1),
                     px(totalWidth - borderWidth * 4 - 2), px(totalHeight - borderWidth * 4 - 2));
-    background.fill({ color: theme.backgroundSurface });
+    background.fill({ color: theme.cardBackground });
   }
 
   /**
@@ -150,7 +153,7 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     buttons.forEach((btnConfig, index) => {
       const btn = createPixelButton({
         size: buttonSize,
-        icon: btnConfig.createIcon(),
+        drawIcon: btnConfig.drawIcon,
         selected: btnConfig.id === selectedId,
         selectionMode: 'press',
         actionMode: 'toggle',
@@ -192,12 +195,22 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     const dims = getPopupDimensions();
     const borderWidth = GRID.border;
     const padding = 2;
-    const totalWidth = px(dims.width + padding * 2 + borderWidth * 4);
+    const totalHeight = px(dims.height + padding * 2 + borderWidth * 4);
+
+    // Calculate Y position based on anchor
+    let posY: number;
+    if (verticalAnchor === 'bottom') {
+      // Align popup bottom with parent bottom
+      posY = parentY + parentHeight - totalHeight;
+    } else {
+      // Align popup top with parent top (default)
+      posY = parentY;
+    }
 
     // Position to the right of parent with small gap
     container.position.set(
       parentX + parentWidth + px(2),
-      parentY
+      posY
     );
 
     container.visible = true;

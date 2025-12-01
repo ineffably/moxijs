@@ -13,12 +13,20 @@ import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { calculateCommanderBarHeight } from '../utilities/card-utils';
 import { SpriteSheetInstance } from '../interfaces/managers';
 import { getSpriteCardId } from '../config/card-ids';
+import { MainToolType } from '../cards/toolbar-card';
+import { ShapeType } from '../theming/tool-icons';
+import { UndoManager } from '../state/undo-manager';
+import { Point } from '../utilities/shape-drawer';
 
 export interface SpriteCardFactoryOptions {
   renderer: PIXI.Renderer;
   scene: PIXI.Container;
   registerCard: (id: string, card: PixelCard) => void;
   getSelectedColorIndex: () => number;
+  getSelectedColorHex: () => number;
+  getCurrentTool: () => MainToolType;
+  getCurrentShape: () => ShapeType;
+  undoManager: UndoManager;
   onPixelChange: () => void;
   onFocus: (instance: SpriteSheetInstance) => void;
   getSheetIndex: (instance: SpriteSheetInstance) => number;
@@ -39,6 +47,10 @@ export class SpriteCardFactory {
   private scene: PIXI.Container;
   private registerCard: (id: string, card: any) => void;
   private getSelectedColorIndex: () => number;
+  private getSelectedColorHex: () => number;
+  private getCurrentTool: () => MainToolType;
+  private getCurrentShape: () => ShapeType;
+  private undoManager: UndoManager;
   private onPixelChange: () => void;
   private onFocus: (instance: SpriteSheetInstance) => void;
   private getSheetIndex: (instance: SpriteSheetInstance) => number;
@@ -51,6 +63,10 @@ export class SpriteCardFactory {
     this.scene = options.scene;
     this.registerCard = options.registerCard;
     this.getSelectedColorIndex = options.getSelectedColorIndex;
+    this.getSelectedColorHex = options.getSelectedColorHex;
+    this.getCurrentTool = options.getCurrentTool;
+    this.getCurrentShape = options.getCurrentShape;
+    this.undoManager = options.undoManager;
     this.onPixelChange = options.onPixelChange;
     this.onFocus = options.onFocus;
     this.getSheetIndex = options.getSheetIndex;
@@ -122,14 +138,49 @@ export class SpriteCardFactory {
       y: position.y,
       renderer: this.renderer,
       spriteController,
-      onPixelClick: (x, y) => {
-        spriteController.setPixel(x, y, this.getSelectedColorIndex());
+      getCurrentTool: () => this.getCurrentTool(),
+      getCurrentShape: () => this.getCurrentShape(),
+      getPreviewColor: () => this.getSelectedColorHex(),
+      onPixelClick: (x, y, oldColorIndex) => {
+        // Use color index 0 for eraser, otherwise use selected color
+        const tool = this.getCurrentTool();
+        const newColorIndex = tool === 'eraser' ? 0 : this.getSelectedColorIndex();
+
+        // Record the pixel change for undo
+        this.undoManager.recordPixelChange(x, y, oldColorIndex, newColorIndex);
+
+        spriteController.setPixel(x, y, newColorIndex);
 
         // Re-render
         spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
         instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
 
         this.onPixelChange();
+      },
+      onShapeDraw: (pixels, oldColors) => {
+        // Use color index 0 for eraser, otherwise use selected color
+        const tool = this.getCurrentTool();
+        const newColorIndex = tool === 'eraser' ? 0 : this.getSelectedColorIndex();
+
+        // Record all pixel changes for undo
+        for (const pixel of pixels) {
+          const key = `${pixel.x},${pixel.y}`;
+          const oldColorIndex = oldColors.get(key) ?? 0;
+          this.undoManager.recordPixelChange(pixel.x, pixel.y, oldColorIndex, newColorIndex);
+          spriteController.setPixel(pixel.x, pixel.y, newColorIndex);
+        }
+
+        // Re-render
+        spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+        this.onPixelChange();
+      },
+      onDrawStart: () => {
+        this.undoManager.beginStroke(instance.id);
+      },
+      onDrawEnd: () => {
+        this.undoManager.endStroke();
       },
       onFocus: () => this.onFocus(instance)
     });

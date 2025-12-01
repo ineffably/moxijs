@@ -13,7 +13,7 @@ import { TOOL_ICONS } from '../config/icons';
 import { TOOLBAR_CARD_CONFIG } from '../config/card-configs';
 
 /** Available main tools */
-export type MainToolType = 'pencil' | 'selection' | 'shape';
+export type MainToolType = 'pencil' | 'eraser' | 'selection' | 'shape';
 
 /** Combined tool state */
 export interface ToolState {
@@ -31,6 +31,7 @@ interface ToolDef {
 /** Tool definitions */
 const MAIN_TOOLS: ToolDef[] = [
   { id: 'pencil', tooltip: 'Pencil (P)' },
+  { id: 'eraser', tooltip: 'Eraser (E)' },
   { id: 'selection', tooltip: 'Selection (S)' },
   { id: 'shape', tooltip: 'Shapes (U)', hasPopup: true }
 ];
@@ -103,6 +104,12 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
   async function createToolIconSprite(tool: MainToolType, btnSize: number = buttonSize): Promise<PIXI.Sprite> {
     const theme = getTheme();
     const size = getIconSizePx(btnSize);
+
+    // For shape tool, use the selected shape icon instead of generic shape icon
+    if (tool === 'shape') {
+      return createShapeIconSprite(selectedShape, btnSize);
+    }
+
     const texture = await svgToTexture({
       svgString: TOOL_ICONS[tool],
       width: size,

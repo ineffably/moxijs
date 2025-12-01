@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px, asBitmapText } from '@moxijs/core';
 import { getTheme } from '../theming/theme';
 import { CardResult } from '../interfaces/components';
 import { createManagedCard } from '../utilities/managed-card';
@@ -67,17 +67,10 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
 
   /** Create a text element */
   function createText(text: string, color: number): PIXI.BitmapText {
-    const textEl = new PIXI.BitmapText({
-      text,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: color
-      }
-    });
-    textEl.roundPixels = true;
-    textEl.scale.set(GRID.fontScale);
-    return textEl;
+    return asBitmapText(
+      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: color }, pixelPerfect: true },
+      { scale: GRID.fontScale }
+    );
   }
 
   function updateInfoSections() {

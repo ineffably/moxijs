@@ -7,7 +7,7 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
 import { createPixelDialog } from '../components/pixel-dialog';
-import { BORDER, px } from '@moxijs/core';
+import { BORDER, GRID, px } from '@moxijs/core';
 import { getAllThemes, setThemeByMetadata } from '../theming/theme';
 import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonRow } from '../utilities/button-layout';
@@ -69,7 +69,7 @@ export function createCommanderBarCard(options: CommanderBarCardOptions): Comman
   const buttonSpacing = COMMANDER_BAR_CONFIG.buttonSpacing;
 
   // Calculate bar width (account for card borders and padding)
-  const barWidth = width ?? (Math.floor(canvasWidth / px(1)) - (BORDER.total * 2) - (BORDER.total * 2));
+  const barWidth = width ?? (Math.floor(canvasWidth / px(1)) - (BORDER.total * 2) - (GRID.padding * 2));
 
   // Create the managed card
   const managed = createManagedCard({

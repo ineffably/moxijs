@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px, asBitmapText } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { createPixelCheckbox, PixelCheckboxResult } from './pixel-checkbox';
 import { getTheme } from '../theming/theme';
@@ -71,16 +71,10 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
 
   // Create message text to measure it
   const theme = getTheme();
-  const messageText = new PIXI.BitmapText({
-    text: message,
-    style: {
-      fontFamily: 'PixelOperator8Bitmap',
-      fontSize: 64,
-      fill: theme.textPrimary,
-    }
-  });
-  messageText.roundPixels = true;
-  messageText.scale.set(GRID.fontScale);
+  const messageText = asBitmapText(
+    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+    { scale: GRID.fontScale }
+  );
 
   // Calculate content dimensions based on message, checkboxes, and buttons
   const messageWidthInGridUnits = Math.ceil(messageText.width / px(1));

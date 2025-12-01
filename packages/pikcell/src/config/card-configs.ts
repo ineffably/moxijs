@@ -21,25 +21,10 @@ export const TOOLBAR_CARD_CONFIG = {
 } as const;
 
 // ============================================================================
-// SPT Toolbar Card (sprite sheet tools - pan/zoom)
+// Sprite Editor Tools (tool selection list)
 // ============================================================================
 
-export const SPT_TOOLBAR_CONFIG = {
-  /** Button size in grid units (square) */
-  buttonSize: 16,
-  /** Spacing between buttons in grid units */
-  buttonSpacing: 1,
-  /** Number of tool buttons */
-  numButtons: 2,
-  /** Layout direction */
-  layout: 'vertical' as const
-} as const;
-
-// ============================================================================
-// Tool Card (tool selection list)
-// ============================================================================
-
-export const TOOL_CARD_CONFIG: {
+export const SPRITE_EDITOR_TOOLS_CONFIG: {
   defaultWidth: number;
   defaultHeight: number;
   baseFontScale: number;
@@ -162,8 +147,7 @@ export const COMPONENT_STYLES = {
 
 export const CARD_CONFIGS = {
   toolbar: TOOLBAR_CARD_CONFIG,
-  sptToolbar: SPT_TOOLBAR_CONFIG,
-  tool: TOOL_CARD_CONFIG,
+  spriteEditorTools: SPRITE_EDITOR_TOOLS_CONFIG,
   palette: PALETTE_CARD_CONFIG,
   commanderBar: COMMANDER_BAR_CONFIG,
   infoBar: INFO_BAR_CONFIG,

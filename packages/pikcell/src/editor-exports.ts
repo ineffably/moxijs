@@ -8,8 +8,7 @@ export { SpriteEditor, SpriteEditorOptions } from './sprite-editor';
 
 // Cards
 export { createPaletteCard, PaletteCardOptions, PaletteCardResult } from './cards/palette-card';
-export { createToolCard, ToolCardOptions, ToolCardResult } from './cards/tool-card';
-export { createSPTToolbarCard, SPTToolbarCardOptions, SPTToolbarCardResult, SPTTool } from './cards/spt-toolbar-card';
+export { createSpriteEditorTools, SpriteEditorToolsOptions, SpriteEditorToolsResult } from './cards/sprite-editor-tools';
 export { createInfoBarCard, InfoBarCardOptions, InfoBarCardResult, InfoSection } from './cards/info-bar-card';
 export { createCommanderBarCard, CommanderBarCardOptions, CommanderBarCardResult, CommanderBarCallbacks } from './cards/commander-bar-card';
 export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scale-card';

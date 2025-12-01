@@ -1,5 +1,5 @@
 /**
- * Tool Card - Drawing tool selector
+ * Sprite Editor Tools - Drawing tool selector
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
@@ -10,9 +10,9 @@ import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonColumn } from '../utilities/button-layout';
 import { ToolType } from '../theming/tool-icons';
 import { CardResult } from '../interfaces/components';
-import { TOOL_CARD_CONFIG } from '../config/card-configs';
+import { SPRITE_EDITOR_TOOLS_CONFIG } from '../config/card-configs';
 
-export interface ToolCardOptions {
+export interface SpriteEditorToolsOptions {
   x: number;
   y: number;
   renderer: PIXI.Renderer;
@@ -21,7 +21,7 @@ export interface ToolCardOptions {
   onToolSelect?: (toolIndex: number, tool: ToolType) => void;
 }
 
-export interface ToolCardResult extends CardResult {
+export interface SpriteEditorToolsResult extends CardResult {
   getSelectedToolIndex: () => number;
   getSelectedTool: () => ToolType;
   setSelectedToolIndex: (index: number) => void;
@@ -38,9 +38,9 @@ const TOOL_NAMES: Record<ToolType, string> = {
 };
 
 /**
- * Creates a tool selection card
+ * Creates a sprite editor tools card
  */
-export function createToolCard(options: ToolCardOptions): ToolCardResult {
+export function createSpriteEditorTools(options: SpriteEditorToolsOptions): SpriteEditorToolsResult {
   const { x, y, renderer, onToolSelect } = options;
 
   // Tool state
@@ -48,8 +48,8 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
   const tools: ToolType[] = options.tools ?? ['pencil', 'eraser', 'fill', 'eyedrop'];
 
   // Sizing state
-  let toolWidth = TOOL_CARD_CONFIG.defaultWidth;
-  let toolHeight = TOOL_CARD_CONFIG.defaultHeight;
+  let toolWidth = SPRITE_EDITOR_TOOLS_CONFIG.defaultWidth;
+  let toolHeight = SPRITE_EDITOR_TOOLS_CONFIG.defaultHeight;
   const rows = tools.length;
 
   // Calculate initial content size
@@ -66,8 +66,8 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
     renderer,
     onResize: (newWidth, newHeight) => {
       const maxHeight = Math.floor((newHeight - (rows - 1) * GRID.gap) / rows);
-      toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, maxHeight));
-      toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, newWidth));
+      toolHeight = Math.max(SPRITE_EDITOR_TOOLS_CONFIG.minHeight, Math.min(SPRITE_EDITOR_TOOLS_CONFIG.maxHeight, maxHeight));
+      toolWidth = Math.max(SPRITE_EDITOR_TOOLS_CONFIG.minWidth, Math.min(SPRITE_EDITOR_TOOLS_CONFIG.maxWidth, newWidth));
       drawTools();
     },
     onRefresh: () => drawTools()
@@ -110,8 +110,8 @@ export function createToolCard(options: ToolCardOptions): ToolCardResult {
 
   // Mouse wheel zoom handler
   const wheelHandler = createCardZoomHandler(renderer, card, (delta) => {
-    toolWidth = Math.max(TOOL_CARD_CONFIG.minWidth, Math.min(TOOL_CARD_CONFIG.maxWidth, toolWidth + delta * 2));
-    toolHeight = Math.max(TOOL_CARD_CONFIG.minHeight, Math.min(TOOL_CARD_CONFIG.maxHeight, toolHeight + delta));
+    toolWidth = Math.max(SPRITE_EDITOR_TOOLS_CONFIG.minWidth, Math.min(SPRITE_EDITOR_TOOLS_CONFIG.maxWidth, toolWidth + delta * 2));
+    toolHeight = Math.max(SPRITE_EDITOR_TOOLS_CONFIG.minHeight, Math.min(SPRITE_EDITOR_TOOLS_CONFIG.maxHeight, toolHeight + delta));
 
     card.setContentSize(toolWidth, rows * toolHeight + (rows - 1) * GRID.gap);
     drawTools();

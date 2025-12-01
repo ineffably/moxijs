@@ -2,7 +2,7 @@
  * Pixel-perfect button component for the sprite editor
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px, asBitmapText } from '@moxijs/core';
 import { getTheme } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 
@@ -76,15 +76,10 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
   // If label is provided and no explicit width, calculate based on text + padding
   if (label && !width && !size) {
-    const tempText = new PIXI.BitmapText({
-      text: label,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: 0xffffff,
-      }
-    });
-    tempText.scale.set(GRID.fontScale);
+    const tempText = asBitmapText(
+      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0xffffff } },
+      { scale: GRID.fontScale }
+    );
 
     // Calculate text width in grid units
     const textWidthInGridUnits = Math.ceil(tempText.width / px(1));
@@ -192,16 +187,10 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     const createTooltip = () => {
       const container = new PIXI.Container();
 
-      const text = new PIXI.BitmapText({
-        text: tooltip,
-        style: {
-          fontFamily: 'PixelOperator8Bitmap',
-          fontSize: 64,
-          fill: 0xffffff,
-        }
-      });
-      text.roundPixels = true;
-      text.scale.set(GRID.fontScale);
+      const text = asBitmapText(
+        { text: tooltip, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0xffffff }, pixelPerfect: true },
+        { scale: GRID.fontScale }
+      );
 
       const padding = px(2);
       const borderWidth = px(GRID.border);
@@ -275,20 +264,12 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
   // Add label if provided (and no icon)
   else if (label) {
     const theme = getTheme();
-    buttonText = new PIXI.BitmapText({
-      text: label,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: theme.textPrimary,
-      }
-    });
-    buttonText.roundPixels = true;
-    buttonText.scale.set(GRID.fontScale);
-    buttonText.anchor.set(0.5);
     // Labels: no base offset, just move down when pressed
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
-    buttonText.position.set(px(buttonWidth) / 2, px(buttonHeight) / 2 + pressOffset);
+    buttonText = asBitmapText(
+      { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { x: px(buttonWidth) / 2, y: px(buttonHeight) / 2 + pressOffset, anchor: 0.5, scale: GRID.fontScale }
+    );
     button.addChild(buttonText);
   }
 

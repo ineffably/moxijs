@@ -2,7 +2,7 @@
  * Pixel-perfect checkbox component
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px, asBitmapText } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { ComponentResult } from '../interfaces/components';
 
@@ -32,17 +32,10 @@ export function createPixelCheckbox(options: PixelCheckboxOptions): PixelCheckbo
   const checkboxSize = 6; // Grid units for checkbox square
 
   // Checkbox label
-  const checkboxLabel = new PIXI.BitmapText({
-    text: label,
-    style: {
-      fontFamily: 'PixelOperator8Bitmap',
-      fontSize: 64,
-      fill: 0x000000,
-    }
-  });
-  checkboxLabel.roundPixels = true;
-  checkboxLabel.scale.set(GRID.fontScale);
-  checkboxLabel.position.set(px(checkboxSize + 2), 0);
+  const checkboxLabel = asBitmapText(
+    { text: label, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: 0x000000 }, pixelPerfect: true },
+    { x: px(checkboxSize + 2), y: 0, scale: GRID.fontScale }
+  );
   container.addChild(checkboxLabel);
 
   // Create checkbox button (centered vertically with label)

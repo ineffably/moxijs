@@ -12,7 +12,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
-import { GRID, BORDER, px } from '@moxijs/core';
+import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
 
@@ -221,16 +221,10 @@ export class PixelCard {
 
     // Title text
     const theme = getTheme();
-    const titleText = new PIXI.BitmapText({
-      text: this.options.title,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: theme.textPrimary,
-      }
-    });
-    titleText.roundPixels = true;
-    titleText.scale.set(GRID.fontScale);
+    const titleText = asBitmapText(
+      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { scale: GRID.fontScale }
+    );
 
     const textHeight = titleText.height;
     const verticalCenter = px(BORDER.total) + (this.titleBarHeightPx - textHeight) / 2;
@@ -239,17 +233,10 @@ export class PixelCard {
 
     // ALPHA! stamp for PIKCELL title
     if (this.options.title === 'PIKCELL') {
-      const alphaStamp = new PIXI.BitmapText({
-        text: 'ALPHA!',
-        style: {
-          fontFamily: 'KennyBlocksBitmap',
-          fontSize: 64,
-          fill: 0x29adff,
-        }
-      });
-      alphaStamp.roundPixels = true;
-      alphaStamp.anchor.set(0.5);
-      alphaStamp.scale.set(GRID.fontScale * 1.2);
+      const alphaStamp = asBitmapText(
+        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: 0x29adff }, pixelPerfect: true },
+        { anchor: 0.5, scale: GRID.fontScale * 1.2 }
+      );
       alphaStamp.angle = -8;
 
       const stampX = titleText.x + titleText.width + px(2) + px(8) + px(2);
@@ -402,30 +389,17 @@ export class PixelCard {
     const textY = px(BORDER.total) + (this.titleBarHeightPx - 64 * GRID.fontScale) / 2;
 
     // Left-aligned text
-    const leftBitmapText = new PIXI.BitmapText({
-      text: leftText,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: theme.textPrimary,
-      }
-    });
-    leftBitmapText.roundPixels = true;
-    leftBitmapText.scale.set(GRID.fontScale);
-    leftBitmapText.position.set(px(BORDER.total) + 2, Math.floor(textY));
+    const leftBitmapText = asBitmapText(
+      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { x: px(BORDER.total) + 2, y: Math.floor(textY), scale: GRID.fontScale }
+    );
     this.container.addChild(leftBitmapText);
 
     // Right-aligned text
-    const rightBitmapText = new PIXI.BitmapText({
-      text: rightText,
-      style: {
-        fontFamily: 'PixelOperator8Bitmap',
-        fontSize: 64,
-        fill: theme.textPrimary,
-      }
-    });
-    rightBitmapText.roundPixels = true;
-    rightBitmapText.scale.set(GRID.fontScale);
+    const rightBitmapText = asBitmapText(
+      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { scale: GRID.fontScale }
+    );
 
     const cardWidth = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
     const rightX = px(cardWidth - BORDER.total) - rightBitmapText.width - 2;

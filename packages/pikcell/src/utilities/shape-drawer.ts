@@ -12,6 +12,40 @@ export interface Point {
 }
 
 /**
+ * Calculate pixels for a line using Bresenham's algorithm
+ */
+export function getLinePixels(x1: number, y1: number, x2: number, y2: number): Point[] {
+  const pixels: Point[] = [];
+
+  let dx = Math.abs(x2 - x1);
+  let dy = Math.abs(y2 - y1);
+  const sx = x1 < x2 ? 1 : -1;
+  const sy = y1 < y2 ? 1 : -1;
+  let err = dx - dy;
+
+  let x = x1;
+  let y = y1;
+
+  while (true) {
+    pixels.push({ x, y });
+
+    if (x === x2 && y === y2) break;
+
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
+  }
+
+  return pixels;
+}
+
+/**
  * Calculate pixels for a rectangle outline
  */
 export function getRectangleOutlinePixels(x1: number, y1: number, x2: number, y2: number): Point[] {
@@ -60,58 +94,53 @@ export function getFilledRectanglePixels(x1: number, y1: number, x2: number, y2:
 }
 
 /**
- * Calculate pixels for a circle outline using Bresenham's algorithm
- * Uses 8-way symmetry for cleaner pixel-perfect circles
+ * Calculate pixels for a circle outline using corner intersection testing
+ *
+ * For each pixel in the bounding box, checks if the mathematical circle
+ * passes through that pixel's area (circle crosses between corners).
  */
 function getCircleOutlinePixels(centerX: number, centerY: number, radius: number): Point[] {
   const pixels: Point[] = [];
   const pixelSet = new Set<string>();
 
   const addPixel = (x: number, y: number) => {
-    const px = Math.round(x);
-    const py = Math.round(y);
-    const key = `${px},${py}`;
+    const key = `${x},${y}`;
     if (!pixelSet.has(key)) {
       pixelSet.add(key);
-      pixels.push({ x: px, y: py });
+      pixels.push({ x, y });
     }
   };
 
-  // Add all 8 symmetric points
-  const addSymmetricPoints = (cx: number, cy: number, x: number, y: number) => {
-    addPixel(cx + x, cy + y);
-    addPixel(cx - x, cy + y);
-    addPixel(cx + x, cy - y);
-    addPixel(cx - x, cy - y);
-    addPixel(cx + y, cy + x);
-    addPixel(cx - y, cy + x);
-    addPixel(cx + y, cy - x);
-    addPixel(cx - y, cy - x);
-  };
-
-  // Handle small radii with hand-tuned patterns for better aesthetics
-  const r = Math.round(radius);
-  if (r <= 0) {
-    addPixel(centerX, centerY);
+  // Handle tiny radius
+  if (radius < 0.5) {
+    addPixel(Math.floor(centerX), Math.floor(centerY));
     return pixels;
   }
 
-  // Bresenham's circle algorithm with midpoint decision
-  let x = 0;
-  let y = r;
-  let d = 3 - 2 * r;
+  // Calculate bounding box
+  const minX = Math.floor(centerX - radius);
+  const maxX = Math.ceil(centerX + radius);
+  const minY = Math.floor(centerY - radius);
+  const maxY = Math.ceil(centerY + radius);
 
-  addSymmetricPoints(centerX, centerY, x, y);
+  // For each pixel, check if the circle outline passes through it
+  // Use pixel center distance for more consistent circles at all sizes
+  for (let py = minY; py <= maxY; py++) {
+    for (let px = minX; px <= maxX; px++) {
+      // Distance from pixel center to circle center
+      const pixelCenterX = px + 0.5;
+      const pixelCenterY = py + 0.5;
+      const distFromCenter = Math.sqrt(
+        (pixelCenterX - centerX) ** 2 + (pixelCenterY - centerY) ** 2
+      );
 
-  while (y >= x) {
-    x++;
-    if (d > 0) {
-      y--;
-      d = d + 4 * (x - y) + 10;
-    } else {
-      d = d + 4 * x + 6;
+      // Pixel is on circle if its center is within tolerance of the radius
+      // Tolerance scales slightly with radius for better small circle rendering
+      const tolerance = Math.min(0.75, 0.5 + radius * 0.05);
+      if (Math.abs(distFromCenter - radius) <= tolerance) {
+        addPixel(px, py);
+      }
     }
-    addSymmetricPoints(centerX, centerY, x, y);
   }
 
   return pixels;
@@ -120,13 +149,27 @@ function getCircleOutlinePixels(centerX: number, centerY: number, radius: number
 /**
  * Calculate pixels for an ellipse outline using midpoint algorithm
  * For circles (equal width/height), delegates to the cleaner circle algorithm
+ *
+ * Uses pixel-inclusive bounds: drawing from (0,0) to (7,7) creates a circle
+ * that spans all 8 pixels (0-7), matching rectangle behavior.
  */
 export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: number): Point[] {
   const pixels: Point[] = [];
-  const centerX = (x1 + x2) / 2;
-  const centerY = (y1 + y2) / 2;
-  const width = Math.abs(x2 - x1);
-  const height = Math.abs(y2 - y1);
+
+  const minX = Math.min(x1, x2);
+  const maxX = Math.max(x1, x2);
+  const minY = Math.min(y1, y2);
+  const maxY = Math.max(y1, y2);
+
+  // Bounding box approach: circle inscribed in the drag rectangle
+  // For (0,0) to (7,7): 8 pixels wide, center at 4, radius 4
+  const width = maxX - minX + 1;  // +1 for pixel-inclusive (0-7 = 8 pixels)
+  const height = maxY - minY + 1;
+
+  // Center at true middle of bounding box
+  const centerX = minX + width / 2;
+  const centerY = minY + height / 2;
+
   const radiusX = width / 2;
   const radiusY = height / 2;
 
@@ -154,8 +197,8 @@ export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: 
     return pixels;
   }
 
-  // For circles (equal width and height), use the cleaner Bresenham algorithm
-  if (Math.abs(width - height) < 1) {
+  // For circles (equal radii), use the cleaner intersection algorithm
+  if (Math.abs(radiusX - radiusY) < 1) {
     return getCircleOutlinePixels(centerX, centerY, radiusX);
   }
 
@@ -227,24 +270,30 @@ export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: 
 
 /**
  * Calculate pixels for a filled ellipse
+ *
+ * Uses pixel-inclusive bounds to match rectangle and outline behavior.
  */
 export function getFilledEllipsePixels(x1: number, y1: number, x2: number, y2: number): Point[] {
   const pixels: Point[] = [];
-  const centerX = (x1 + x2) / 2;
-  const centerY = (y1 + y2) / 2;
-  const radiusX = Math.abs(x2 - x1) / 2;
-  const radiusY = Math.abs(y2 - y1) / 2;
-
-  // Handle degenerate cases
-  if (radiusX < 0.5 && radiusY < 0.5) {
-    pixels.push({ x: Math.round(centerX), y: Math.round(centerY) });
-    return pixels;
-  }
 
   const minX = Math.min(x1, x2);
   const maxX = Math.max(x1, x2);
   const minY = Math.min(y1, y2);
   const maxY = Math.max(y1, y2);
+
+  // Center at midpoint for symmetry, radius to reach edges
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const width = maxX - minX + 1;
+  const height = maxY - minY + 1;
+  const radiusX = width / 2;
+  const radiusY = height / 2;
+
+  // Handle degenerate cases
+  if (radiusX <= 0.5 && radiusY <= 0.5) {
+    pixels.push({ x: x1, y: y1 });
+    return pixels;
+  }
 
   // For each row, find the extent of the ellipse
   for (let y = minY; y <= maxY; y++) {
@@ -272,6 +321,8 @@ export function getFilledEllipsePixels(x1: number, y1: number, x2: number, y2: n
  */
 export function getShapePixels(shapeType: ShapeType, x1: number, y1: number, x2: number, y2: number): Point[] {
   switch (shapeType) {
+    case 'line':
+      return getLinePixels(x1, y1, x2, y2);
     case 'square':
       return getRectangleOutlinePixels(x1, y1, x2, y2);
     case 'square-filled':

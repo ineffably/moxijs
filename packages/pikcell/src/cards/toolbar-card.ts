@@ -38,6 +38,7 @@ const MAIN_TOOLS: ToolDef[] = [
 
 /** Shape tooltips */
 const SHAPE_TOOLTIPS: Record<ShapeType, string> = {
+  'line': 'Line',
   'circle': 'Circle',
   'circle-filled': 'Filled Circle',
   'square': 'Rectangle',
@@ -45,7 +46,7 @@ const SHAPE_TOOLTIPS: Record<ShapeType, string> = {
 };
 
 /** Available shapes */
-const SHAPE_OPTIONS: ShapeType[] = ['circle', 'circle-filled', 'square', 'square-filled'];
+const SHAPE_OPTIONS: ShapeType[] = ['line', 'circle', 'circle-filled', 'square', 'square-filled'];
 
 export interface ToolbarCardOptions {
   x: number;
@@ -144,6 +145,7 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
       buttonSize: popupButtonSize,
       buttonSpacing: 1,
       direction: 'vertical',
+      verticalAnchor: 'bottom',
       selectedId: selectedShape,
       onSelect: (id) => {
         selectedShape = id as ShapeType;

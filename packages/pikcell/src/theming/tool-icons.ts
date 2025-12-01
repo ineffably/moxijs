@@ -10,7 +10,7 @@
 import * as PIXI from 'pixi.js';
 
 export type ToolType = 'pencil' | 'eraser' | 'fill' | 'eyedrop' | 'selection' | 'shape';
-export type ShapeType = 'circle' | 'circle-filled' | 'square' | 'square-filled';
+export type ShapeType = 'line' | 'circle' | 'circle-filled' | 'square' | 'square-filled';
 
 // Cache for generated textures
 const textureCache: Map<string, PIXI.Texture> = new Map();
@@ -94,6 +94,18 @@ const TOOL_ICON_GRIDS: Record<ToolType, string> = {
 };
 
 const SHAPE_ICON_GRIDS: Record<ShapeType, string> = {
+  line: `
+.........#
+........#.
+.......#..
+......#...
+.....#....
+....#.....
+...#......
+..#.......
+.#........
+`.trim(),
+
   circle: `
 ...####...
 .##....##.

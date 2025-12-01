@@ -407,7 +407,10 @@ class EnhancedParticleEmitter extends Container {
   }
 }
 
-export async function initParticleEmitterSandbox() {
+// Cleanup function type
+type CleanupFunction = () => void;
+
+export async function initParticleEmitterSandbox(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('Canvas container not found');
 
@@ -471,7 +474,7 @@ export async function initParticleEmitterSandbox() {
 
   // Mouse/touch interaction - click to reposition emitter
   const canvas = renderer.canvas as HTMLCanvasElement;
-  canvas.addEventListener('click', (e) => {
+  const handleClick = (e: MouseEvent) => {
     const rect = canvas.getBoundingClientRect();
     emitter.emitterX = e.clientX - rect.left;
     emitter.emitterY = e.clientY - rect.top;
@@ -479,7 +482,8 @@ export async function initParticleEmitterSandbox() {
     if (!config.continuous) {
       emitter.burst(config.burst);
     }
-  });
+  };
+  canvas.addEventListener('click', handleClick);
 
   // Create comprehensive UI controls
   createEnhancedControls(appLike, emitter, config, textures);
@@ -490,4 +494,12 @@ export async function initParticleEmitterSandbox() {
 
   console.log('✅ Particle Emitter Sandbox loaded');
   console.log('💡 Click to reposition emitter, use controls to adjust settings!');
+
+  // Return cleanup function
+  return () => {
+    canvas.removeEventListener('click', handleClick);
+    emitter.clearParticles();
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

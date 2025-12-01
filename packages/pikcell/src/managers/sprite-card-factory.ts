@@ -13,10 +13,11 @@ import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { calculateCommanderBarHeight } from '../utilities/card-utils';
 import { SpriteSheetInstance } from '../interfaces/managers';
 import { getSpriteCardId } from '../config/card-ids';
+import { SPRITE_CONSTANTS } from '../config/constants';
 import { MainToolType } from '../cards/toolbar-card';
 import { ShapeType } from '../theming/tool-icons';
 import { UndoManager } from '../state/undo-manager';
-import { Point } from '../utilities/shape-drawer';
+import { Point, getFloodFillPixels } from '../utilities/shape-drawer';
 
 export interface SpriteCardFactoryOptions {
   renderer: PIXI.Renderer;
@@ -169,6 +170,46 @@ export class SpriteCardFactory {
           this.undoManager.recordPixelChange(pixel.x, pixel.y, oldColorIndex, newColorIndex);
           spriteController.setPixel(pixel.x, pixel.y, newColorIndex);
         }
+
+        // Re-render
+        spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);
+        instance.sheetCard.controller.render(instance.sheetCard.card.getContentContainer());
+
+        this.onPixelChange();
+      },
+      onFill: (x, y) => {
+        const newColorIndex = this.getSelectedColorIndex();
+        const targetColorIndex = spriteController.getPixel(x, y);
+
+        // Don't fill if clicking on same color
+        if (newColorIndex === targetColorIndex) {
+          return;
+        }
+
+        // Sprite dimensions are always 8x8
+        const size = SPRITE_CONSTANTS.CELL_SIZE;
+
+        // Get all pixels to fill using flood fill algorithm
+        const pixelsToFill = getFloodFillPixels(
+          x, y, size, size,
+          (px, py) => spriteController.getPixel(px, py)
+        );
+
+        if (pixelsToFill.length === 0) {
+          return;
+        }
+
+        // Begin undo stroke
+        this.undoManager.beginStroke(instance.id);
+
+        // Record all pixel changes for undo and apply them
+        for (const pixel of pixelsToFill) {
+          this.undoManager.recordPixelChange(pixel.x, pixel.y, targetColorIndex, newColorIndex);
+          spriteController.setPixel(pixel.x, pixel.y, newColorIndex);
+        }
+
+        // End undo stroke
+        this.undoManager.endStroke();
 
         // Re-render
         spriteController.render(spriteCardResult.card.getContentContainer().children[0] as PIXI.Container);

@@ -16,7 +16,10 @@ import {
 import { Graphics, Point, Container } from 'pixi.js';
 import * as planck from 'planck';
 
-export async function initNewtonsCradle() {
+// Cleanup function type
+type CleanupFunction = () => void;
+
+export async function initNewtonsCradle(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
@@ -196,7 +199,7 @@ export async function initNewtonsCradle() {
     return foundBall;
   };
 
-  canvasElement.addEventListener('mousedown', (e) => {
+  const handleMousedown = (e: MouseEvent) => {
     const pixelPoint = screenToPixel(e.clientX, e.clientY);
     draggedBall = findBallAtPixelPoint(pixelPoint);
 
@@ -218,22 +221,25 @@ export async function initNewtonsCradle() {
         );
       }
     }
-  });
+  };
+  canvasElement.addEventListener('mousedown', handleMousedown);
 
-  canvasElement.addEventListener('mousemove', (e) => {
+  const handleMousemove = (e: MouseEvent) => {
     if (mouseJoint) {
       const worldPoint = screenToWorld(e.clientX, e.clientY);
       mouseJoint.setTarget(worldPoint);
     }
-  });
+  };
+  canvasElement.addEventListener('mousemove', handleMousemove);
 
-  canvasElement.addEventListener('mouseup', () => {
+  const handleMouseup = () => {
     if (mouseJoint) {
       physicsWorld!.world.destroyJoint(mouseJoint);
       mouseJoint = null;
       draggedBall = null;
     }
-  });
+  };
+  canvasElement.addEventListener('mouseup', handleMouseup);
 
   // UI instructions
   const instructionText = asText({
@@ -283,7 +289,7 @@ export async function initNewtonsCradle() {
   engine.start();
 
   // Give the first ball an initial push to demonstrate
-  setTimeout(() => {
+  const initialPushTimeout = setTimeout(() => {
     const firstBall = balls[0];
     const body = getPhysicsBody(firstBall);
     if (body) {
@@ -295,4 +301,14 @@ export async function initNewtonsCradle() {
   console.log('   Click and drag end balls to pull them');
   console.log('   Release to watch momentum transfer');
   console.log('   Press P to toggle physics debug view');
+
+  // Return cleanup function
+  return () => {
+    clearTimeout(initialPushTimeout);
+    canvasElement.removeEventListener('mousedown', handleMousedown);
+    canvasElement.removeEventListener('mousemove', handleMousemove);
+    canvasElement.removeEventListener('mouseup', handleMouseup);
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

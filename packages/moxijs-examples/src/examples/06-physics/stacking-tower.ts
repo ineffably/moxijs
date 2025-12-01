@@ -13,7 +13,10 @@ import {
 } from '@moxijs/core';
 import { Graphics, Text, TextStyle, Container, Renderer } from 'pixi.js';
 
-export async function initStackingTower() {
+// Cleanup function type
+type CleanupFunction = () => void;
+
+export async function initStackingTower(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
@@ -162,15 +165,17 @@ export async function initStackingTower() {
     return (e.clientX - rect.left) * scaleX;
   };
 
-  canvasElement.addEventListener('mousemove', (e) => {
+  const handleMousemove = (e: MouseEvent) => {
     const x = Math.max(150, Math.min(1130, getMouseX(e)));
     preview.x = x;
-  });
+  };
+  canvasElement.addEventListener('mousemove', handleMousemove);
 
-  canvasElement.addEventListener('click', (e) => {
+  const handleClick = (e: MouseEvent) => {
     const x = Math.max(150, Math.min(1130, getMouseX(e)));
     spawnBlock(x);
-  });
+  };
+  canvasElement.addEventListener('click', handleClick);
 
   // Reset function
   const reset = () => {
@@ -187,11 +192,12 @@ export async function initStackingTower() {
   };
 
   // Keyboard controls
-  document.addEventListener('keydown', (e) => {
+  const handleKeydown = (e: KeyboardEvent) => {
     if (e.key === 'r' || e.key === 'R') {
       reset();
     }
-  });
+  };
+  document.addEventListener('keydown', handleKeydown);
 
   // Create a Logic component to track tower height
   class TowerTrackerLogic extends Logic<Container> {
@@ -229,4 +235,13 @@ export async function initStackingTower() {
   console.log('   Click to drop blocks');
   console.log('   Press R to reset');
   console.log('   Try to build the tallest tower!');
+
+  // Return cleanup function
+  return () => {
+    canvasElement.removeEventListener('mousemove', handleMousemove);
+    canvasElement.removeEventListener('click', handleClick);
+    document.removeEventListener('keydown', handleKeydown);
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

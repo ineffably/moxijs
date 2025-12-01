@@ -28,6 +28,8 @@ export interface PopupToolbarOptions {
   buttonSpacing?: number;
   /** Direction to arrange buttons */
   direction?: 'horizontal' | 'vertical';
+  /** Vertical anchor point: 'top' aligns popup top with parent top, 'bottom' aligns popup bottom with parent bottom */
+  verticalAnchor?: 'top' | 'bottom';
   /** Callback when an option is selected */
   onSelect?: (id: string) => void;
   /** Callback when popup is closed without selection */
@@ -58,6 +60,7 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     buttonSize = 14,
     buttonSpacing = 1,
     direction = 'horizontal',
+    verticalAnchor = 'top',
     onSelect,
     onClose
   } = options;
@@ -192,12 +195,22 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     const dims = getPopupDimensions();
     const borderWidth = GRID.border;
     const padding = 2;
-    const totalWidth = px(dims.width + padding * 2 + borderWidth * 4);
+    const totalHeight = px(dims.height + padding * 2 + borderWidth * 4);
+
+    // Calculate Y position based on anchor
+    let posY: number;
+    if (verticalAnchor === 'bottom') {
+      // Align popup bottom with parent bottom
+      posY = parentY + parentHeight - totalHeight;
+    } else {
+      // Align popup top with parent top (default)
+      posY = parentY;
+    }
 
     // Position to the right of parent with small gap
     container.position.set(
       parentX + parentWidth + px(2),
-      parentY
+      posY
     );
 
     container.visible = true;

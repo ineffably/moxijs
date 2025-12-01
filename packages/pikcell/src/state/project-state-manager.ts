@@ -6,6 +6,7 @@
 import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
 import { MainToolType } from '../cards/toolbar-card';
 import { ShapeType } from '../theming/tool-icons';
+import { PaletteType } from '../theming/palettes';
 
 const PROJECT_STATE_KEY = 'sprite-editor-project';
 
@@ -44,6 +45,7 @@ export interface ProjectState {
   selectedColorIndex: number;
   selectedTool?: MainToolType; // Active tool (pencil, eraser, etc.)
   selectedShape?: ShapeType; // Active shape for shape tool
+  selectedPalette?: PaletteType; // Active color palette
 }
 
 /**
@@ -65,7 +67,8 @@ export class ProjectStateManager {
       activeSpriteSheetId: null,
       selectedColorIndex: 0,
       selectedTool: 'pencil',
-      selectedShape: 'square'
+      selectedShape: 'square',
+      selectedPalette: 'pico8'
     };
   }
 

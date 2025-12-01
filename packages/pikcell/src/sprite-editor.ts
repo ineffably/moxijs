@@ -30,7 +30,7 @@ import { ProjectStateManager, ProjectState, SpriteSheetState } from './state/pro
 import { LayoutStateManager, LayoutSlotState } from './state/layout-state-manager';
 import { UndoManager, StrokeOperation } from './state/undo-manager';
 import { getTheme } from './theming/theme';
-import { PICO8_PALETTE } from './theming/palettes';
+import { PICO8_PALETTE, getPalette, PaletteType } from './theming/palettes';
 import { GRID, BORDER, px } from '@moxijs/core';
 
 // Card imports
@@ -99,6 +99,7 @@ export class SpriteEditor {
   };
 
   // Editor state
+  private currentPaletteType: PaletteType = 'pico8';
   private currentPalette: number[] = PICO8_PALETTE;
   private selectedColorIndex: number = 0;
   private projectState: ProjectState;
@@ -325,6 +326,9 @@ export class SpriteEditor {
     const activeSheet = this.spriteSheetManager.getActive();
     if (!activeSheet || !this.paletteCard) return;
 
+    // Update palette type based on sprite sheet type
+    const sheetType = activeSheet.sheetCard.controller.getConfig().type;
+    this.currentPaletteType = sheetType === 'PICO-8' ? 'pico8' : 'tic80';
     this.currentPalette = activeSheet.sheetCard.controller.getConfig().palette;
     this.paletteCard.setPalette(this.currentPalette);
   }
@@ -490,6 +494,7 @@ export class SpriteEditor {
     let toolName = SpriteEditor.TOOL_DISPLAY_NAMES[this.currentTool];
     if (this.currentTool === 'shape') {
       const shapeNames: Record<ShapeType, string> = {
+        'line': 'Line',
         'circle': 'Circle',
         'circle-filled': 'Filled Circle',
         'square': 'Rectangle',
@@ -1023,6 +1028,7 @@ export class SpriteEditor {
       this.projectState.selectedColorIndex = this.selectedColorIndex;
       this.projectState.selectedTool = this.currentTool;
       this.projectState.selectedShape = this.currentShapeType;
+      this.projectState.selectedPalette = this.currentPaletteType;
 
       const saveResult = ProjectStateManager.saveProject(this.projectState);
       if (!saveResult.success) {
@@ -1071,6 +1077,20 @@ export class SpriteEditor {
     }
 
     this.selectedColorIndex = this.projectState.selectedColorIndex ?? 0;
+
+    // Restore palette selection
+    if (this.projectState.selectedPalette) {
+      this.currentPaletteType = this.projectState.selectedPalette;
+      this.currentPalette = getPalette(this.currentPaletteType);
+      if (this.paletteCard) {
+        this.paletteCard.setPalette(this.currentPalette);
+      }
+    }
+
+    // Restore selected color index in palette card
+    if (this.paletteCard) {
+      this.paletteCard.setSelectedColorIndex(this.selectedColorIndex);
+    }
 
     // Track loaded IDs to prevent duplicates from corrupted state
     const loadedIds = new Set<string>();
@@ -1159,6 +1179,13 @@ export class SpriteEditor {
 
     this.spriteSheetManager.clear();
     this.projectState = ProjectStateManager.createEmptyProject();
+
+    // Reset palette to default
+    this.currentPaletteType = 'pico8';
+    this.currentPalette = PICO8_PALETTE;
+    if (this.paletteCard) {
+      this.paletteCard.setPalette(this.currentPalette);
+    }
 
     // Clear localStorage immediately to prevent stale state on reload
     ProjectStateManager.saveProject(this.projectState);

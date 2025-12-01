@@ -1,6 +1,6 @@
 {
   "name": "@moxijs/pikcell",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pixel-perfect sprite editor built on MoxiJS and PIXI.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -3,7 +3,7 @@
     "default": {
       "id": "default",
       "name": "Default Layout",
-      "description": "Standard layout with commander bar at top, palette on left, info bar at bottom",
+      "description": "Standard layout with commander bar at top, palette on left, toolbar, info bar at bottom",
       "positions": {
         "commander": {
           "anchor": "top-left",
@@ -14,6 +14,12 @@
         "palette": {
           "anchor": "top-left",
           "below": "commander",
+          "gapMultiplier": 2
+        },
+        "tool": {
+          "anchor": "top-left",
+          "below": "commander",
+          "x": 250,
           "gapMultiplier": 2
         },
         "info": {

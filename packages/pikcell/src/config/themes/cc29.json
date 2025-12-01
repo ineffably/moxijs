@@ -1,0 +1,89 @@
+{
+  "palette": "cc29",
+  "paletteName": "CC-29",
+  "description": "Themes built from the CC-29 color palette",
+  "themes": {
+    "classic": [
+      {
+        "name": "Dark",
+        "variant": "dark",
+        "description": "Classic dark theme",
+        "workspace": "0x2b2b2e",
+        "cardBackground": "0x212123",
+        "cardTitleBar": "0x45444f",
+        "cardBorder": "0x000000",
+        "buttonBackground": "0x646365",
+        "bevelColor": "0x868188",
+        "accent": "0x4b80ca",
+        "text": "0xf2f0e5"
+      },
+      {
+        "name": "Light",
+        "variant": "light",
+        "description": "Clean light theme",
+        "workspace": "0x868188",
+        "cardBackground": "0xf2f0e5",
+        "cardTitleBar": "0xdad8ce",
+        "cardBorder": "0x646365",
+        "buttonBackground": "0xf2f0e5",
+        "bevelColor": "0xb8b5b9",
+        "accent": "0x4b80ca",
+        "text": "0x212123"
+      }
+    ],
+    "seasonal": [
+      {
+        "name": "Spring",
+        "variant": "light",
+        "description": "Fresh greens and soft pastels",
+        "workspace": "0xb2b47e",
+        "cardBackground": "0xa2dcc7",
+        "cardTitleBar": "0x8ab060",
+        "cardBorder": "0x4e584a",
+        "buttonBackground": "0xc2d368",
+        "bevelColor": "0xb2b47e",
+        "accent": "0xedc8c4",
+        "text": "0x212123"
+      },
+      {
+        "name": "Summer",
+        "variant": "light",
+        "description": "Bright blues and warm sunshine",
+        "workspace": "0xa2dcc7",
+        "cardBackground": "0x68c2d3",
+        "cardTitleBar": "0x4b80ca",
+        "cardBorder": "0x80493a",
+        "buttonBackground": "0xede19e",
+        "bevelColor": "0xd3a068",
+        "accent": "0xd3a068",
+        "text": "0x212123"
+      },
+      {
+        "name": "Autumn",
+        "variant": "dark",
+        "description": "Warm oranges, browns, and deep reds",
+        "workspace": "0x7b7243",
+        "cardBackground": "0xa77b5b",
+        "cardTitleBar": "0x7b7243",
+        "cardBorder": "0x80493a",
+        "buttonBackground": "0xa77b5b",
+        "bevelColor": "0xd3a068",
+        "accent": "0xb45252",
+        "text": "0xf2f0e5"
+      },
+      {
+        "name": "Winter",
+        "variant": "dark",
+        "description": "Cool blues, purples, and icy whites",
+        "workspace": "0x212123",
+        "cardBackground": "0x43436a",
+        "cardTitleBar": "0x4b4158",
+        "cardBorder": "0x3a3858",
+        "buttonBackground": "0x68c2d3",
+        "bevelColor": "0x4b80ca",
+        "accent": "0xcf8acb",
+        "text": "0xf2f0e5"
+      }
+    ]
+  }
+}

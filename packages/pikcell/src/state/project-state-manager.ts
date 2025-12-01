@@ -4,6 +4,9 @@
  * Saves sprite pixel data, sprite sheet configurations, and active editing state
  */
 import { SpriteSheetType } from '../controllers/sprite-sheet-controller';
+import { MainToolType } from '../cards/toolbar-card';
+import { ShapeType } from '../theming/tool-icons';
+import { PaletteType } from '../theming/palettes';
 
 const PROJECT_STATE_KEY = 'sprite-editor-project';
 
@@ -40,6 +43,9 @@ export interface ProjectState {
   spriteSheets: SpriteSheetState[];
   activeSpriteSheetId: string | null;
   selectedColorIndex: number;
+  selectedTool?: MainToolType; // Active tool (pencil, eraser, etc.)
+  selectedShape?: ShapeType; // Active shape for shape tool
+  selectedPalette?: PaletteType; // Active color palette
 }
 
 /**
@@ -59,7 +65,10 @@ export class ProjectStateManager {
       modifiedAt: Date.now(),
       spriteSheets: [],
       activeSpriteSheetId: null,
-      selectedColorIndex: 0
+      selectedColorIndex: 0,
+      selectedTool: 'pencil',
+      selectedShape: 'square',
+      selectedPalette: 'pico8'
     };
   }
 

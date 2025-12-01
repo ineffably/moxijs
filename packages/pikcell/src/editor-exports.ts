@@ -8,15 +8,14 @@ export { SpriteEditor, SpriteEditorOptions } from './sprite-editor';
 
 // Cards
 export { createPaletteCard, PaletteCardOptions, PaletteCardResult } from './cards/palette-card';
-export { createToolCard, ToolCardOptions, ToolCardResult } from './cards/tool-card';
-export { createSPTToolbarCard, SPTToolbarCardOptions, SPTToolbarCardResult, SPTTool } from './cards/spt-toolbar-card';
+export { createSpriteEditorTools, SpriteEditorToolsOptions, SpriteEditorToolsResult } from './cards/sprite-editor-tools';
 export { createInfoBarCard, InfoBarCardOptions, InfoBarCardResult, InfoSection } from './cards/info-bar-card';
 export { createCommanderBarCard, CommanderBarCardOptions, CommanderBarCardResult, CommanderBarCallbacks } from './cards/commander-bar-card';
 export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scale-card';
 export { createToolbarCard, ToolbarCardOptions, ToolbarCardResult, MainToolType, ToolState } from './cards/toolbar-card';
 
 // Components
-export { PixelCard, UI_COLORS } from './components/pixel-card';
+export { PixelCard } from './components/pixel-card';
 export { createPixelButton, PixelButtonOptions, PixelButtonResult, SelectionMode, ActionMode } from './components/pixel-button';
 export { createPixelDialog, PixelDialogOptions, PixelDialogResult } from './components/pixel-dialog';
 export { createPixelCheckbox, PixelCheckboxOptions, PixelCheckboxResult } from './components/pixel-checkbox';
@@ -36,8 +35,17 @@ export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions,
 export { SpriteController, SpriteControllerOptions } from './controllers/sprite-controller';
 
 // Utilities
-export { createSVGIconButton, SVG_ICONS, SVGIconButtonOptions } from './utilities/svg-icon-button';
+export { createSVGIconButton, SVGIconButtonOptions, TOOL_ICONS, SPT_ICONS, ACTION_ICONS } from './utilities/svg-icon-button';
 export { createCardZoomHandler } from './utilities/card-zoom-handler';
+export { createManagedCard, ManagedCard, Destroyable, EventListenerRef } from './utilities/managed-card';
+export {
+  layoutButtonRow, layoutButtonColumn, layoutButtonGrid, calculateGridDimensions,
+  ButtonRowOptions, ButtonColumnOptions, ButtonGridOptions, LayoutResult, Positionable
+} from './utilities/button-layout';
+
+// Icons (consolidated)
+export { TOOL_ICONS as ToolIcons, SPT_ICONS as SPTIcons, ACTION_ICONS as ActionIcons, getIcon } from './config/icons';
+export type { ToolIconType, SPTIconType, ActionIconType } from './config/icons';
 
 // Re-export SVG utilities from moxi
 export { svgToTexture } from '@moxijs/core';
@@ -61,24 +69,20 @@ export type { CardId } from './config/card-ids';
 // Theming System
 export {
   Theme,
-  ThemeMetadata,
-  ThemeGroup,
+  ThemeInfo,
+  ThemeVariant,
   DARK_THEME,
   LIGHT_THEME,
-  SPRING_THEME,
-  SUMMER_THEME,
-  AUTUMN_THEME,
-  WINTER_THEME,
-  THEME_GROUPS,
+  ALL_THEMES,
   getAllThemes,
-  getThemesByPalette,
-  getThemeByName,
-  getCurrentThemeMetadata,
   getTheme,
+  getThemeInfo,
   setTheme,
-  setThemeByMetadata,
+  setThemeByName,
   resetTheme,
-  createThemeFromPalette
+  createDarkTheme,
+  createLightTheme,
+  createThemesFromPalette
 } from './theming/theme';
 
 // Palettes & Icons

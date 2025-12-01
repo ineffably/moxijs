@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-12-01
+
+### Added
+- Line tool in shapes popup for drawing straight lines (Bresenham's algorithm)
+- `bevelColor` property to theme system for button bevel styling
+- Palette selection persistence in project state
+- Selected color index now restores on page reload
+- `verticalAnchor` option for popup toolbar positioning
+
+### Changed
+- Shapes popup now anchors to bottom of toolbar for better UX
+- Themes are now data-driven from JSON files (`config/themes/cc29.json`)
+- Circle drawing algorithm improved with pixel-center distance approach
+- Theme interface now has 8 properties (added `bevelColor`)
+
+### Fixed
+- Selected color not visually restoring when loading saved project
+- Circle tool producing square shapes at small sizes
+- Autumn theme bevel color matching border (now distinct)
+
 ## [0.1.0] - 2025-11-29
 
 ### Added

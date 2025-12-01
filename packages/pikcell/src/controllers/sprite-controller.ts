@@ -3,6 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { SpriteSheetController } from './sprite-sheet-controller';
+import { SPRITE_CONTROLLER_CONFIG } from '../config/controller-configs';
 
 export interface SpriteControllerOptions {
   spriteSheetController: SpriteSheetController;
@@ -32,7 +33,7 @@ export class SpriteController {
     this.spriteSheetController = options.spriteSheetController;
     this.cellX = options.cellX;
     this.cellY = options.cellY;
-    this.scale = options.scale ?? 8; // Default 8x zoom for editing
+    this.scale = options.scale ?? SPRITE_CONTROLLER_CONFIG.defaultScale;
   }
 
   /**
@@ -61,7 +62,7 @@ export class SpriteController {
    * Set the scale
    */
   public setScale(newScale: number) {
-    this.scale = Math.max(1, Math.min(64, newScale));
+    this.scale = Math.max(SPRITE_CONTROLLER_CONFIG.minScale, Math.min(SPRITE_CONTROLLER_CONFIG.maxScale, newScale));
   }
 
   /**
@@ -69,8 +70,8 @@ export class SpriteController {
    */
   public getPixel(localX: number, localY: number): number {
     // Convert local coordinates to global sheet coordinates
-    const globalX = this.cellX * 8 + localX;
-    const globalY = this.cellY * 8 + localY;
+    const globalX = this.cellX * SPRITE_CONTROLLER_CONFIG.cellSize + localX;
+    const globalY = this.cellY * SPRITE_CONTROLLER_CONFIG.cellSize + localY;
     return this.spriteSheetController.getPixel(globalX, globalY);
   }
 
@@ -79,8 +80,8 @@ export class SpriteController {
    */
   public setPixel(localX: number, localY: number, colorIndex: number) {
     // Convert local coordinates to global sheet coordinates
-    const globalX = this.cellX * 8 + localX;
-    const globalY = this.cellY * 8 + localY;
+    const globalX = this.cellX * SPRITE_CONTROLLER_CONFIG.cellSize + localX;
+    const globalY = this.cellY * SPRITE_CONTROLLER_CONFIG.cellSize + localY;
     this.spriteSheetController.setPixel(globalX, globalY, colorIndex);
   }
 
@@ -99,14 +100,14 @@ export class SpriteController {
     // For now, we'll render our own texture from pixel data
     // This ensures we always show the latest pixel data
     const canvas = document.createElement('canvas');
-    canvas.width = 8;
-    canvas.height = 8;
+    canvas.width = SPRITE_CONTROLLER_CONFIG.cellSize;
+    canvas.height = SPRITE_CONTROLLER_CONFIG.cellSize;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Draw the 8x8 sprite from sprite sheet data
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
+    // Draw the sprite from sprite sheet data
+    for (let y = 0; y < SPRITE_CONTROLLER_CONFIG.cellSize; y++) {
+      for (let x = 0; x < SPRITE_CONTROLLER_CONFIG.cellSize; x++) {
         const colorIndex = this.getPixel(x, y);
         const color = sheetConfig.palette[colorIndex];
 
@@ -143,7 +144,7 @@ export class SpriteController {
     const pixelX = Math.floor(screenX / this.scale);
     const pixelY = Math.floor(screenY / this.scale);
 
-    if (pixelX < 0 || pixelX >= 8 || pixelY < 0 || pixelY >= 8) {
+    if (pixelX < 0 || pixelX >= SPRITE_CONTROLLER_CONFIG.cellSize || pixelY < 0 || pixelY >= SPRITE_CONTROLLER_CONFIG.cellSize) {
       return null;
     }
 
@@ -155,8 +156,8 @@ export class SpriteController {
    */
   public getScaledDimensions(): { width: number; height: number } {
     return {
-      width: 8 * this.scale,
-      height: 8 * this.scale
+      width: SPRITE_CONTROLLER_CONFIG.cellSize * this.scale,
+      height: SPRITE_CONTROLLER_CONFIG.cellSize * this.scale
     };
   }
 

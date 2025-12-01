@@ -225,6 +225,9 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
   // Initial creation
   updateButtons();
 
+  // Ensure card respects minimum content size for all buttons
+  card.updateMinContentSize();
+
   return {
     card,
     container: card.container,

@@ -13,9 +13,10 @@ import { PixelCard } from './pixel-card';
 import { px, GRID } from '@moxijs/core';
 import { SpriteController } from '../controllers/sprite-controller';
 import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
-import { ShapeType } from '../theming/tool-icons';
+import { ShapeType, drawToolIconInto, drawShapeIconInto, ToolType } from '../theming/tool-icons';
 import { getShapePixels, Point } from '../utilities/shape-drawer';
 import { MainToolType } from '../cards/toolbar-card';
+import { SPRITE_CONSTANTS } from '../config/constants';
 
 /** Selection rectangle in pixel coordinates */
 export interface Selection {
@@ -47,6 +48,8 @@ export interface SpriteEditorCardResult extends CardResult, ControllableComponen
   getSelection: () => Selection | null;
   setSelection: (selection: Selection | null) => void;
   clearSelection: () => void;
+  /** Update title bar with tool icon, coordinates, size, and scale */
+  updateTitle: (tool: MainToolType, shapeType?: ShapeType) => void;
 }
 
 /** Grid line color (semi-transparent) */
@@ -483,6 +486,34 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
   drawSprite();
   if (showGrid) drawGrid();
 
+  /**
+   * Update the title bar with tool icon and info
+   * Format: [icon] (x,y) 8x8 Nx
+   */
+  function updateTitle(tool: MainToolType, shapeType?: ShapeType) {
+    const cell = spriteController.getCell();
+    const scale = spriteController.getScale();
+    const size = SPRITE_CONSTANTS.CELL_SIZE;
+
+    // Build info string: (x,y) 8x8 Nx
+    const infoText = `(${cell.x},${cell.y}) ${size}x${size} ${scale}x`;
+
+    // Choose the icon drawing function based on tool
+    let drawIcon: (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void;
+
+    if (tool === 'shape' && shapeType) {
+      drawIcon = (g, x, y, color, pixelSize) => drawShapeIconInto(g, shapeType, x, y, color, pixelSize);
+    } else {
+      // Map MainToolType to ToolType (they're mostly the same)
+      const toolType = tool as ToolType;
+      drawIcon = (g, x, y, color, pixelSize) => drawToolIconInto(g, toolType, x, y, color, pixelSize);
+    }
+
+    // Icon dimensions: 10x9 grid units, rendered at 2x = 20x18 pixels
+    const scaledIconWidth = 20;
+    card.setTitleWithIcon(drawIcon, infoText, scaledIconWidth);
+  }
+
   return {
     card,
     container: card.container,
@@ -494,6 +525,7 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
     getSelection: () => currentSelection,
     setSelection: (selection: Selection | null) => setSelection(selection),
     clearSelection: () => clearSelection(),
+    updateTitle,
     destroy: () => {
       stopSelectionAnimation();
       spriteContainer.removeAllListeners();

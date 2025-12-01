@@ -22,7 +22,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './components/pixel-card';
-import { createPixelDialog } from './components/pixel-dialog';
+import { createPixelDialog, PixelDialogResult } from './components/pixel-dialog';
 import { createSpriteSheetCard, SPRITESHEET_CONFIGS } from './components/spritesheet-card';
 import { SpriteSheetType } from './controllers/sprite-sheet-controller';
 import { UIStateManager } from './state/ui-state-manager';
@@ -113,6 +113,9 @@ export class SpriteEditor {
 
   // Clipboard for copy/paste operations
   private clipboard: { width: number; height: number; pixels: number[][] } | null = null;
+
+  // Track current dialog for cleanup
+  private currentDialog: PixelDialogResult | null = null;
 
   constructor(options: SpriteEditorOptions) {
     this.renderer = options.renderer;
@@ -503,6 +506,18 @@ export class SpriteEditor {
       { label: 'Tool:', value: toolName },
       { label: 'Color:', value: colorHex }
     ]);
+  }
+
+  /**
+   * Update all sprite card titles with current tool
+   */
+  private updateSpriteCardTitles(): void {
+    const instances = this.spriteSheetManager.getAll();
+    for (const instance of instances) {
+      if (instance.spriteCard) {
+        instance.spriteCard.updateTitle(this.currentTool, this.currentShapeType);
+      }
+    }
   }
 
   /**
@@ -935,6 +950,7 @@ export class SpriteEditor {
           this.currentShapeType = shapeType;
         }
         this.updateInfoBar();
+        this.updateSpriteCardTitles(); // Update all sprite card titles with new tool
         this.saveProjectState(); // Persist tool selection
         console.log(`Tool selected: ${tool}${shapeType ? ` (${shapeType})` : ''}`);
       }
@@ -1149,7 +1165,7 @@ export class SpriteEditor {
     this.hasUnsavedChanges = false;
 
     // Show sprite sheet type dialog
-    const dialog = createPixelDialog({
+    this.currentDialog = createPixelDialog({
       title: 'New Sprite Sheet',
       message: 'Choose sprite sheet type:',
       checkboxes: [
@@ -1163,6 +1179,7 @@ export class SpriteEditor {
         {
           label: 'PICO-8',
           onClick: (checkboxStates) => {
+            this.currentDialog = null;
             this.createNewSpriteSheet('PICO-8', checkboxStates?.showGrid ?? false);
             // Always apply default layout for new projects
             this.applyDefaultLayout();
@@ -1172,6 +1189,7 @@ export class SpriteEditor {
         {
           label: 'TIC-80',
           onClick: (checkboxStates) => {
+            this.currentDialog = null;
             this.createNewSpriteSheet('TIC-80', checkboxStates?.showGrid ?? false);
             // Always apply default layout for new projects
             this.applyDefaultLayout();
@@ -1181,7 +1199,7 @@ export class SpriteEditor {
       ],
       renderer: this.renderer
     });
-    this.scene.addChild(dialog.container);
+    this.scene.addChild(this.currentDialog.container);
   }
 
   /**
@@ -1379,6 +1397,208 @@ export class SpriteEditor {
       renderer: this.renderer
     });
     this.scene.addChild(dialog.container);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PUBLIC API - Programmatic access to editor actions
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Select a drawing tool
+   * @param tool - The tool to select: 'pencil', 'eraser', 'fill', 'selection', 'shape'
+   */
+  selectTool(tool: MainToolType): void {
+    this.currentTool = tool;
+    this.toolbarCard?.setSelectedTool(tool);
+    this.updateInfoBar();
+    this.updateSpriteCardTitles();
+    this.saveProjectState();
+  }
+
+  /**
+   * Select a shape type (used when shape tool is active)
+   * @param shape - The shape to select: 'circle', 'circle-filled', 'square', 'square-filled'
+   */
+  selectShape(shape: ShapeType): void {
+    this.currentShapeType = shape;
+    this.toolbarCard?.setSelectedShape(shape);
+    this.updateInfoBar();
+    this.updateSpriteCardTitles();
+    this.saveProjectState();
+  }
+
+  /**
+   * Select a color from the palette by index
+   * @param index - Palette color index (0-15 for PICO-8)
+   */
+  selectColor(index: number): void {
+    if (index >= 0 && index < this.currentPalette.length) {
+      this.selectedColorIndex = index;
+      this.paletteCard?.setSelectedColorIndex(index);
+      this.updateInfoBar();
+    }
+  }
+
+  /**
+   * Undo the last drawing operation
+   */
+  undo(): void {
+    this.handleUndo();
+  }
+
+  /**
+   * Redo the last undone operation
+   */
+  redo(): void {
+    this.handleRedo();
+  }
+
+  /**
+   * Copy the current selection to clipboard
+   */
+  copy(): void {
+    this.handleCopy();
+  }
+
+  /**
+   * Paste clipboard contents at selection or origin
+   */
+  paste(): void {
+    this.handlePaste();
+  }
+
+  /**
+   * Cut the current selection (copy + clear)
+   */
+  cut(): void {
+    this.handleCut();
+  }
+
+  /**
+   * Clear the current selection (fill with transparent)
+   */
+  clearSelection(): void {
+    this.handleClearSelection();
+  }
+
+  /**
+   * Move the current selection by offset
+   * @param dx - Horizontal offset in pixels
+   * @param dy - Vertical offset in pixels
+   */
+  moveSelection(dx: number, dy: number): void {
+    this.handleMoveSelection(dx, dy);
+  }
+
+  /**
+   * Click the "New" button - shows the new project dialog
+   */
+  clickNew(): void {
+    this.handleNew();
+  }
+
+  /**
+   * Click the "PICO-8" button in the new project dialog
+   */
+  clickPico8(): boolean {
+    if (!this.currentDialog) return false;
+    return this.currentDialog.clickButton('PICO-8');
+  }
+
+  /**
+   * Click the "TIC-80" button in the new project dialog
+   */
+  clickTic80(): boolean {
+    if (!this.currentDialog) return false;
+    return this.currentDialog.clickButton('TIC-80');
+  }
+
+  /**
+   * Click the "Save" button
+   */
+  clickSave(): void {
+    this.handleSave();
+  }
+
+  /**
+   * Click the "Load" button (opens file picker)
+   */
+  async clickLoad(): Promise<void> {
+    await this.handleLoad();
+  }
+
+  /**
+   * Click the "Export" button
+   */
+  clickExport(): void {
+    this.handleExport();
+  }
+
+  /**
+   * Click the "Layout" button
+   */
+  clickLayout(): void {
+    this.applyDefaultLayout();
+  }
+
+  /**
+   * Update the editor theme
+   */
+  refreshTheme(): void {
+    this.updateTheme();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // State Getters
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get the currently selected tool
+   */
+  getCurrentTool(): MainToolType {
+    return this.currentTool;
+  }
+
+  /**
+   * Get the currently selected shape type
+   */
+  getCurrentShape(): ShapeType {
+    return this.currentShapeType;
+  }
+
+  /**
+   * Get the selected color palette index
+   */
+  getSelectedColorIndex(): number {
+    return this.selectedColorIndex;
+  }
+
+  /**
+   * Get the selected color as hex value
+   */
+  getSelectedColorHex(): number {
+    return this.currentPalette[this.selectedColorIndex] ?? 0xFFFFFF;
+  }
+
+  /**
+   * Get the current palette
+   */
+  getPalette(): number[] {
+    return [...this.currentPalette];
+  }
+
+  /**
+   * Check if there are unsaved changes
+   */
+  hasChanges(): boolean {
+    return this.hasUnsavedChanges;
+  }
+
+  /**
+   * Get the number of sprite sheets
+   */
+  getSpriteSheetCount(): number {
+    return this.spriteSheetManager.count();
   }
 
   /**

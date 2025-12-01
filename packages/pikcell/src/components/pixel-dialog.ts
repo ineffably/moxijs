@@ -33,6 +33,10 @@ export interface PixelDialogResult extends ComponentResult {
   close(): void;
   /** Get checkbox states */
   getCheckboxStates(): Record<string, boolean>;
+  /** Click a button by its label (for testing) */
+  clickButton(label: string): boolean;
+  /** Get available button labels */
+  getButtonLabels(): string[];
 }
 
 /**
@@ -44,6 +48,7 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
 
   // Track created components for cleanup
   const createdButtons: PixelButtonResult[] = [];
+  const buttonLabels: string[] = [];
   const createdCheckboxes: PixelCheckboxResult[] = [];
 
   // Create overlay container
@@ -153,6 +158,7 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
       }
     });
     createdButtons.push(buttonResult);
+    buttonLabels.push(buttonConfig.label);
     buttonResult.container.position.set(currentX, buttonY);
     contentContainer.addChild(buttonResult.container);
     currentX += px(buttonWidth) + buttonSpacing;
@@ -171,6 +177,15 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
     container: overlay,
     close: cleanup,
     getCheckboxStates: () => ({ ...checkboxStates }),
+    clickButton: (label: string): boolean => {
+      const index = buttonLabels.indexOf(label);
+      if (index === -1) return false;
+      // Trigger the button's click handler with mock event
+      const mockEvent = { stopPropagation: () => {} } as PIXI.FederatedPointerEvent;
+      createdButtons[index]?.container.emit('pointerdown', mockEvent);
+      return true;
+    },
+    getButtonLabels: () => [...buttonLabels],
     destroy: cleanup
   };
 }

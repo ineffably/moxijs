@@ -60,14 +60,75 @@ export function getFilledRectanglePixels(x1: number, y1: number, x2: number, y2:
 }
 
 /**
+ * Calculate pixels for a circle outline using Bresenham's algorithm
+ * Uses 8-way symmetry for cleaner pixel-perfect circles
+ */
+function getCircleOutlinePixels(centerX: number, centerY: number, radius: number): Point[] {
+  const pixels: Point[] = [];
+  const pixelSet = new Set<string>();
+
+  const addPixel = (x: number, y: number) => {
+    const px = Math.round(x);
+    const py = Math.round(y);
+    const key = `${px},${py}`;
+    if (!pixelSet.has(key)) {
+      pixelSet.add(key);
+      pixels.push({ x: px, y: py });
+    }
+  };
+
+  // Add all 8 symmetric points
+  const addSymmetricPoints = (cx: number, cy: number, x: number, y: number) => {
+    addPixel(cx + x, cy + y);
+    addPixel(cx - x, cy + y);
+    addPixel(cx + x, cy - y);
+    addPixel(cx - x, cy - y);
+    addPixel(cx + y, cy + x);
+    addPixel(cx - y, cy + x);
+    addPixel(cx + y, cy - x);
+    addPixel(cx - y, cy - x);
+  };
+
+  // Handle small radii with hand-tuned patterns for better aesthetics
+  const r = Math.round(radius);
+  if (r <= 0) {
+    addPixel(centerX, centerY);
+    return pixels;
+  }
+
+  // Bresenham's circle algorithm with midpoint decision
+  let x = 0;
+  let y = r;
+  let d = 3 - 2 * r;
+
+  addSymmetricPoints(centerX, centerY, x, y);
+
+  while (y >= x) {
+    x++;
+    if (d > 0) {
+      y--;
+      d = d + 4 * (x - y) + 10;
+    } else {
+      d = d + 4 * x + 6;
+    }
+    addSymmetricPoints(centerX, centerY, x, y);
+  }
+
+  return pixels;
+}
+
+/**
  * Calculate pixels for an ellipse outline using midpoint algorithm
+ * For circles (equal width/height), delegates to the cleaner circle algorithm
  */
 export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: number): Point[] {
   const pixels: Point[] = [];
   const centerX = (x1 + x2) / 2;
   const centerY = (y1 + y2) / 2;
-  const radiusX = Math.abs(x2 - x1) / 2;
-  const radiusY = Math.abs(y2 - y1) / 2;
+  const width = Math.abs(x2 - x1);
+  const height = Math.abs(y2 - y1);
+  const radiusX = width / 2;
+  const radiusY = height / 2;
 
   // Handle degenerate cases
   if (radiusX < 0.5 && radiusY < 0.5) {
@@ -93,17 +154,23 @@ export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: 
     return pixels;
   }
 
-  // Use a set to avoid duplicates
+  // For circles (equal width and height), use the cleaner Bresenham algorithm
+  if (Math.abs(width - height) < 1) {
+    return getCircleOutlinePixels(centerX, centerY, radiusX);
+  }
+
+  // For ellipses, use midpoint ellipse algorithm
   const pixelSet = new Set<string>();
   const addPixel = (x: number, y: number) => {
-    const key = `${x},${y}`;
+    const px = Math.round(x);
+    const py = Math.round(y);
+    const key = `${px},${py}`;
     if (!pixelSet.has(key)) {
       pixelSet.add(key);
-      pixels.push({ x, y });
+      pixels.push({ x: px, y: py });
     }
   };
 
-  // Bresenham-like ellipse algorithm
   const rx2 = radiusX * radiusX;
   const ry2 = radiusY * radiusY;
 
@@ -115,10 +182,10 @@ export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: 
   let dy = 2 * rx2 * y;
 
   while (dx < dy) {
-    addPixel(Math.round(centerX + x), Math.round(centerY + y));
-    addPixel(Math.round(centerX - x), Math.round(centerY + y));
-    addPixel(Math.round(centerX + x), Math.round(centerY - y));
-    addPixel(Math.round(centerX - x), Math.round(centerY - y));
+    addPixel(centerX + x, centerY + y);
+    addPixel(centerX - x, centerY + y);
+    addPixel(centerX + x, centerY - y);
+    addPixel(centerX - x, centerY - y);
 
     if (d1 < 0) {
       x++;
@@ -137,10 +204,10 @@ export function getEllipseOutlinePixels(x1: number, y1: number, x2: number, y2: 
   let d2 = ry2 * (x + 0.5) * (x + 0.5) + rx2 * (y - 1) * (y - 1) - rx2 * ry2;
 
   while (y >= 0) {
-    addPixel(Math.round(centerX + x), Math.round(centerY + y));
-    addPixel(Math.round(centerX - x), Math.round(centerY + y));
-    addPixel(Math.round(centerX + x), Math.round(centerY - y));
-    addPixel(Math.round(centerX - x), Math.round(centerY - y));
+    addPixel(centerX + x, centerY + y);
+    addPixel(centerX - x, centerY + y);
+    addPixel(centerX + x, centerY - y);
+    addPixel(centerX - x, centerY - y);
 
     if (d2 > 0) {
       y--;

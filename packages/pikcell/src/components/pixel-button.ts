@@ -1,5 +1,25 @@
 /**
  * Pixel-perfect button component for the sprite editor
+ *
+ * IMPORTANT - Button Content Area Sizing:
+ * ----------------------------------------
+ * For 'press' mode buttons (selectionMode='press'), there is a BEVEL at the bottom
+ * that reduces the content area height by 1 grid unit.
+ *
+ * Button structure (unpressed, press mode):
+ * - Outer border: 1 grid unit all around
+ * - Bevel strip: 1 grid unit at bottom (inside outer border)
+ * - Inner border: 1 grid unit all around (above bevel)
+ * - Background/content: remaining space
+ *
+ * For a 16x16 grid unit button:
+ * - Content width:  16 - (border * 4) = 12 grid units
+ * - Content height: 16 - (border * 5) = 11 grid units (due to bevel!)
+ *
+ * Icon sizing for perfect centering:
+ * - Icons are 10 wide × 9 tall grid units
+ * - Horizontal: (12 - 10) / 2 = 1 grid unit margin each side
+ * - Vertical: (11 - 9) / 2 = 1 grid unit margin each side
  */
 import * as PIXI from 'pixi.js';
 import { GRID, px, asBitmapText } from '@moxijs/core';
@@ -22,7 +42,16 @@ export interface PixelButtonOptions {
   height?: number;        // Height in grid units (for rectangular buttons)
   selected?: boolean;
   label?: string;
-  icon?: PIXI.Sprite | PIXI.Graphics;   // Optional icon sprite or graphic
+  icon?: PIXI.Sprite | PIXI.Graphics;   // Optional icon sprite or graphic (legacy)
+  /** Draw icon directly into button graphics for perfect grid alignment.
+   * Called with (graphics, x, y, color, pixelSize) where x,y is the top-left position.
+   * Icons are 10x9 grids, so icon size = (10 * pixelSize) wide × (9 * pixelSize) tall.
+   */
+  drawIcon?: (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void;
+  /** Icon width in cells (default 10) - used with drawIcon to calculate centering */
+  iconWidth?: number;
+  /** Icon height in cells (default 9) - used with drawIcon to calculate centering */
+  iconHeight?: number;
   backgroundColor?: number;
   onClick?: () => void;
   selectionMode?: SelectionMode;  // 'highlight' for swatches, 'press' for tool buttons (visual appearance)
@@ -58,6 +87,9 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     selected = false,
     label,
     icon,
+    drawIcon,
+    iconWidth = 10,
+    iconHeight = 9,
     backgroundColor = UI_COLORS.buttonBg,
     onClick,
     selectionMode = 'press',
@@ -164,12 +196,29 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
     // Press offset: when pressed, content moves down with button
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
 
-    // Icons: shift up 1px to center in visible area (above bevel)
-    if (icon) {
-      const iconBaseY = (selectionMode === 'press') ? -px(1) : 0;
+    // Draw icon directly into button graphics for perfect grid alignment
+    // Icon is 10x9 cells, content area is 12×11 grid units (due to bevel)
+    // Center the icon in the content area
+    if (drawIcon) {
+      const theme = getTheme();
+      const iconWidthPx = iconWidth * GRID.scale;
+      const iconHeightPx = iconHeight * GRID.scale;
+      // Content area starts after 2 border layers
+      const contentX = px(GRID.border * 2);
+      const contentY = px(GRID.border * 2) + pressOffset;
+      // Content dimensions (width: buttonWidth-4, height: buttonHeight-5 due to bevel)
+      const contentWidth = px(buttonWidth - GRID.border * 4);
+      const contentHeight = px(buttonHeight - GRID.border * 5);
+      // Center icon in content area, snap to grid
+      const iconX = contentX + Math.floor((contentWidth - iconWidthPx) / 2 / GRID.scale) * GRID.scale;
+      const iconY = contentY + Math.floor((contentHeight - iconHeightPx) / 2 / GRID.scale) * GRID.scale;
+      drawIcon(button, iconX, iconY, theme.textPrimary, GRID.scale);
+    }
+    // Legacy: position icon sprite (for backwards compatibility)
+    else if (icon) {
       icon.position.set(
-        px(buttonWidth) / 2 - icon.width / 2,
-        px(buttonHeight) / 2 - icon.height / 2 + iconBaseY + pressOffset
+        Math.floor((px(buttonWidth) - icon.width) / 2 / GRID.scale) * GRID.scale,
+        Math.floor((px(buttonHeight) - icon.height) / 2 / GRID.scale) * GRID.scale + pressOffset
       );
       if (!button.children.includes(icon)) {
         button.addChild(icon);
@@ -253,11 +302,11 @@ export function createPixelButton(options: PixelButtonOptions): PixelButtonResul
 
   // Add icon if provided
   if (icon) {
-    const iconBaseY = (selectionMode === 'press') ? -px(1) : 0;
     const pressOffset = (selectionMode === 'press' && isSelectedState) ? px(1) : 0;
+    // Snap to GRID.scale for pixel-perfect alignment
     icon.position.set(
-      px(buttonWidth) / 2 - icon.width / 2,
-      px(buttonHeight) / 2 - icon.height / 2 + iconBaseY + pressOffset
+      Math.floor((px(buttonWidth) - icon.width) / 2 / GRID.scale) * GRID.scale,
+      Math.floor((px(buttonHeight) - icon.height) / 2 / GRID.scale) * GRID.scale + pressOffset
     );
     button.addChild(icon);
   }

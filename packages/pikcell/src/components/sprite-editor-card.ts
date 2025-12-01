@@ -33,6 +33,7 @@ export interface SpriteEditorCardOptions {
   showGrid?: boolean;  // Show pixel grid overlay (default: true)
   onPixelClick?: (x: number, y: number, oldColorIndex: number) => void;
   onShapeDraw?: (pixels: Point[], oldColors: Map<string, number>) => void;  // Called when shape is drawn
+  onFill?: (x: number, y: number) => void;  // Called when fill tool is used
   onDrawStart?: () => void;  // Called when user starts drawing
   onDrawEnd?: () => void;    // Called when user stops drawing
   getCurrentTool?: () => MainToolType;  // Get current tool type
@@ -56,7 +57,7 @@ const GRID_LINE_ALPHA = 0.4;
  * Creates a sprite editor card for editing a single 8x8 sprite
  */
 export function createSpriteEditorCard(options: SpriteEditorCardOptions): SpriteEditorCardResult {
-  const { x, y, renderer, spriteController, onPixelClick, onShapeDraw, onDrawStart, onDrawEnd, getCurrentTool, getCurrentShape, getPreviewColor, onSelectionChange, onFocus } = options;
+  const { x, y, renderer, spriteController, onPixelClick, onShapeDraw, onFill, onDrawStart, onDrawEnd, getCurrentTool, getCurrentShape, getPreviewColor, onSelectionChange, onFocus } = options;
   const showGrid = options.showGrid ?? true;
 
   // Get scaled dimensions
@@ -327,6 +328,11 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
           // Shape mode: record start position
           shapeStartX = pixel.x;
           shapeStartY = pixel.y;
+        } else if (currentTool === 'fill') {
+          // Fill mode: flood fill from clicked pixel
+          if (onFill) {
+            onFill(pixel.x, pixel.y);
+          }
         } else {
           // Pencil/eraser mode: draw immediately
           lastPixelX = pixel.x;

@@ -14,8 +14,6 @@ export const TOOLBAR_CARD_CONFIG = {
   buttonSize: 16,
   /** Spacing between buttons in grid units */
   buttonSpacing: 1,
-  /** Number of main tool buttons */
-  numButtons: 4,
   /** Layout direction */
   layout: 'vertical' as const
 } as const;

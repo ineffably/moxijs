@@ -93,6 +93,7 @@ export class SpriteEditor {
   private static readonly TOOL_DISPLAY_NAMES: Record<MainToolType, string> = {
     pencil: 'Pencil',
     eraser: 'Eraser',
+    fill: 'Fill',
     selection: 'Selection',
     shape: 'Shape'
   };
@@ -913,6 +914,14 @@ export class SpriteEditor {
     this.scene.addChild(this.paletteCard.card.container);
     this.registerCard(CARD_IDS.PALETTE, this.paletteCard.card);
 
+    // Restore tool selection from project state before creating toolbar
+    if (this.projectState.selectedTool) {
+      this.currentTool = this.projectState.selectedTool;
+    }
+    if (this.projectState.selectedShape) {
+      this.currentShapeType = this.projectState.selectedShape;
+    }
+
     // Create toolbar card (default position - will be repositioned in applyDefaultLayout)
     this.toolbarCard = createToolbarCard({
       x: this.renderer.width / 2 + 200, // Temporary - repositioned by layout
@@ -926,6 +935,7 @@ export class SpriteEditor {
           this.currentShapeType = shapeType;
         }
         this.updateInfoBar();
+        this.saveProjectState(); // Persist tool selection
         console.log(`Tool selected: ${tool}${shapeType ? ` (${shapeType})` : ''}`);
       }
     });
@@ -995,6 +1005,8 @@ export class SpriteEditor {
       const activeSheet = this.spriteSheetManager.getActive();
       this.projectState.activeSpriteSheetId = activeSheet?.id ?? null;
       this.projectState.selectedColorIndex = this.selectedColorIndex;
+      this.projectState.selectedTool = this.currentTool;
+      this.projectState.selectedShape = this.currentShapeType;
 
       const saveResult = ProjectStateManager.saveProject(this.projectState);
       if (!saveResult.success) {
@@ -1025,6 +1037,8 @@ export class SpriteEditor {
     const activeSheet = this.spriteSheetManager.getActive();
     this.projectState.activeSpriteSheetId = activeSheet?.id ?? null;
     this.projectState.selectedColorIndex = this.selectedColorIndex;
+    this.projectState.selectedTool = this.currentTool;
+    this.projectState.selectedShape = this.currentShapeType;
 
     const saveResult = ProjectStateManager.saveProject(this.projectState);
     if (!saveResult.success) {

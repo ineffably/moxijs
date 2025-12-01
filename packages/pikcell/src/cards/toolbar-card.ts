@@ -12,7 +12,7 @@ import { CardResult } from '../interfaces/components';
 import { TOOLBAR_CARD_CONFIG } from '../config/card-configs';
 
 /** Available main tools */
-export type MainToolType = 'pencil' | 'eraser' | 'selection' | 'shape';
+export type MainToolType = 'pencil' | 'eraser' | 'fill' | 'selection' | 'shape';
 
 /** Combined tool state */
 export interface ToolState {
@@ -31,6 +31,7 @@ interface ToolDef {
 const MAIN_TOOLS: ToolDef[] = [
   { id: 'pencil', tooltip: 'Pencil (P)' },
   { id: 'eraser', tooltip: 'Eraser (E)' },
+  { id: 'fill', tooltip: 'Fill (F)' },
   { id: 'selection', tooltip: 'Selection (S)' },
   { id: 'shape', tooltip: 'Shapes (U)', hasPopup: true }
 ];
@@ -69,7 +70,8 @@ export interface ToolbarCardResult extends CardResult {
 export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResult {
   const { x, y, renderer, onToolSelect } = options;
 
-  const { buttonSize, buttonSpacing, numButtons } = TOOLBAR_CARD_CONFIG;
+  const { buttonSize, buttonSpacing } = TOOLBAR_CARD_CONFIG;
+  const numButtons = MAIN_TOOLS.length;
   const barWidth = buttonSize;
   const barHeight = numButtons * buttonSize + (numButtons - 1) * buttonSpacing;
 

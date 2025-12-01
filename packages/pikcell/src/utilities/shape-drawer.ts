@@ -284,3 +284,70 @@ export function getShapePixels(shapeType: ShapeType, x1: number, y1: number, x2:
       return [];
   }
 }
+
+/**
+ * Flood fill algorithm - returns all connected pixels of the same color
+ * Uses BFS (queue-based) approach which is more efficient than recursive DFS
+ *
+ * @param startX - Starting X coordinate
+ * @param startY - Starting Y coordinate
+ * @param width - Grid width
+ * @param height - Grid height
+ * @param getPixel - Function to get pixel color at (x, y)
+ * @returns Array of points that should be filled
+ */
+export function getFloodFillPixels(
+  startX: number,
+  startY: number,
+  width: number,
+  height: number,
+  getPixel: (x: number, y: number) => number
+): Point[] {
+  const pixels: Point[] = [];
+  const targetColor = getPixel(startX, startY);
+
+  // Track visited pixels
+  const visited = new Set<string>();
+  const key = (x: number, y: number) => `${x},${y}`;
+
+  // BFS queue
+  const queue: Point[] = [{ x: startX, y: startY }];
+  visited.add(key(startX, startY));
+
+  while (queue.length > 0) {
+    const { x, y } = queue.shift()!;
+
+    // Check bounds
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      continue;
+    }
+
+    // Check if this pixel matches the target color
+    if (getPixel(x, y) !== targetColor) {
+      continue;
+    }
+
+    // Add to result
+    pixels.push({ x, y });
+
+    // Add adjacent pixels to queue (4-connected)
+    const neighbors = [
+      { x: x + 1, y },
+      { x: x - 1, y },
+      { x, y: y + 1 },
+      { x, y: y - 1 }
+    ];
+
+    for (const neighbor of neighbors) {
+      const nKey = key(neighbor.x, neighbor.y);
+      if (!visited.has(nKey) &&
+          neighbor.x >= 0 && neighbor.x < width &&
+          neighbor.y >= 0 && neighbor.y < height) {
+        visited.add(nKey);
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return pixels;
+}

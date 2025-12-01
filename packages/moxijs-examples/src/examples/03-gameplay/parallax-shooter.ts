@@ -188,7 +188,10 @@ class ShipMovementLogic extends Logic<PIXI.Sprite> {
   }
 }
 
-export async function initParallaxSpaceShooter() {
+// Cleanup function type
+type CleanupFunction = () => void;
+
+export async function initParallaxSpaceShooter(): Promise<CleanupFunction> {
   const root = document.getElementById('canvas-container');
   if (!root) throw new Error('App element not found');
 
@@ -287,4 +290,10 @@ export async function initParallaxSpaceShooter() {
   console.log('   🌌 Watch the parallax effect as you move!');
   console.log('   📊 Nebula layer: 0.3x speed (far)');
   console.log('   ⭐ Stars layer: 0.6x speed (closer)');
+
+  // Return cleanup function
+  return () => {
+    engine.stop();
+    scene.destroy({ children: true });
+  };
 }

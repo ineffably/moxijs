@@ -112,6 +112,9 @@ export class SpriteEditor {
   // Keyboard handler for undo/redo
   private keyboardHandler: ((e: KeyboardEvent) => void) | null = null;
 
+  // Beforeunload handler for saving state when page closes
+  private beforeUnloadHandler: (() => void) | null = null;
+
   // Clipboard for copy/paste operations
   private clipboard: { width: number; height: number; pixels: number[][] } | null = null;
 
@@ -591,11 +594,12 @@ export class SpriteEditor {
    */
   private setupBeforeUnloadHandler(): void {
     if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
+      this.beforeUnloadHandler = () => {
         // Force immediate save of UI and project state
         this.saveUIStateImmediate();
         this.saveProjectStateImmediate();
-      });
+      };
+      window.addEventListener('beforeunload', this.beforeUnloadHandler);
     }
   }
 
@@ -1644,6 +1648,12 @@ export class SpriteEditor {
     if (this.keyboardHandler && typeof window !== 'undefined') {
       window.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
+    }
+
+    // Clean up beforeunload handler
+    if (this.beforeUnloadHandler && typeof window !== 'undefined') {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
     }
 
     // Destroy all sprite sheet controllers to prevent memory leaks

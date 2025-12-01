@@ -55,6 +55,10 @@ export interface ToolbarCardOptions {
   selectedTool?: MainToolType;
   selectedShape?: ShapeType;
   onToolSelect?: (tool: MainToolType, shapeType?: ShapeType) => void;
+  /** Scene container for explosion effects */
+  scene?: PIXI.Container;
+  /** Enable pixel explosion effect on tool buttons */
+  explodeEffect?: boolean;
 }
 
 export interface ToolbarCardResult extends CardResult {
@@ -69,7 +73,7 @@ export interface ToolbarCardResult extends CardResult {
  * Creates the main toolbar card with tool buttons
  */
 export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResult {
-  const { x, y, renderer, onToolSelect } = options;
+  const { x, y, renderer, onToolSelect, scene, explodeEffect = false } = options;
 
   const { buttonSize, buttonSpacing } = TOOLBAR_CARD_CONFIG;
   const numButtons = MAIN_TOOLS.length;
@@ -213,6 +217,9 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
         selectionMode: 'press',
         actionMode: 'toggle',
         tooltip: toolDef.tooltip,
+        explodeEffect: explodeEffect && !!scene,
+        explodeScene: scene,
+        explodeScreenHeight: renderer.height,
         onClick: () => {
           selectTool(toolDef.id);
           if (toolDef.hasPopup) showShapePopup();

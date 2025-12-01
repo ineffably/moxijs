@@ -39,20 +39,10 @@ export async function initPikcell(hostElement?: HTMLElement) {
     }
   });
 
-  // Load pixel fonts
+  // Load pixel fonts (for Canvas 2D DPR text rendering)
   await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT, ASSETS.KENNEY_BLOCKS_FONT]);
-
-  // Install bitmap font at 64px for high quality, will scale down to 16px
-  PIXI.BitmapFont.install({
-    name: 'PixelOperator8Bitmap',
-    style: {
-      fontFamily: 'PixelOperator8',
-      fontSize: 64,
-      fill: 0xffffff,
-    }
-  });
-
-  // Install Kenney Blocks bitmap font for branding
+  
+  // Install Kenney Blocks as BitmapFont for the ALPHA! stamp (needs rotation/special styling)
   PIXI.BitmapFont.install({
     name: 'KennyBlocksBitmap',
     style: {
@@ -61,6 +51,8 @@ export async function initPikcell(hostElement?: HTMLElement) {
       fill: 0xffffff,
     }
   });
+  
+  console.log('🔤 Font mode: Canvas 2D DPR (2× supersampling)');
 
   // Create the sprite editor
   const spriteEditor = new SpriteEditor({

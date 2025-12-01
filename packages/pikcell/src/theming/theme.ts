@@ -335,3 +335,122 @@ export function setThemeByName(name: string): boolean {
 export function resetTheme(): void {
   setTheme(defaultDarkTheme);
 }
+
+/**
+ * PIKCELL Font Configuration
+ * 
+ * The font system works like this:
+ * - Font is installed at a high resolution (e.g., 256px for high-DPI)
+ * - It's scaled down to a consistent DISPLAY size (16px)
+ * - All calculations should use DISPLAY_SIZE, not the installation size
+ */
+const FONT_DISPLAY_SIZE = 16; // The actual pixel height we want text to appear
+
+/**
+ * @deprecated Use getFontDPR() instead for Canvas 2D DPR text rendering.
+ * This was used for BitmapText which has been replaced with asTextDPR().
+ */
+export function getFont(): { size: number; scale: number; displaySize: number } {
+  const size = (globalThis as Record<string, unknown>).__PIKCELL_FONT_SIZE__ as number ?? 64;
+  const scale = (globalThis as Record<string, unknown>).__PIKCELL_FONT_SCALE__ as number ?? 0.25;
+  return { size, scale, displaySize: FONT_DISPLAY_SIZE };
+}
+
+/**
+ * @deprecated Use getFontDPR() instead
+ */
+export function getFontScale(): number {
+  return getFont().scale;
+}
+
+/**
+ * @deprecated Use getFontDPR() instead
+ */
+export function getFontSize(): number {
+  return getFont().size;
+}
+
+/**
+ * Get the font display size (the actual rendered height in pixels).
+ * Use this for layout calculations like title bar height.
+ * This is constant regardless of the font installation size.
+ */
+export function getFontDisplaySize(): number {
+  return FONT_DISPLAY_SIZE;
+}
+
+/**
+ * Get the font configuration for Canvas 2D DPR text rendering.
+ * @internal Use createText() instead for a simpler API.
+ */
+export function getFontDPR(): { family: string; size: number; dprScale: number } {
+  return {
+    family: 'PixelOperator8',  // Use the raw font, not the bitmap version
+    size: FONT_DISPLAY_SIZE,   // Display size (16px)
+    dprScale: 2                // Render at 2× for crisp text
+  };
+}
+
+// Import for createText helper
+import * as PIXI from 'pixi.js';
+import { asTextDPR, PixiProps } from '@moxijs/core';
+
+/**
+ * Create a PIKCELL-styled text element using Canvas 2D DPR rendering.
+ * This is the primary way to create text in PIKCELL components.
+ * 
+ * Uses PixelOperator8 font at 16px display size with 2× DPR supersampling
+ * for crisp, pixel-perfect text rendering.
+ * 
+ * @param text - The text content to display
+ * @param color - Fill color (hex number, e.g., 0xffffff)
+ * @param props - Optional PIXI display object properties (x, y, anchor, etc.)
+ * @returns A PIXI.Text instance configured for pixel-perfect rendering
+ * 
+ * @example
+ * ```typescript
+ * const label = createText('Hello World', theme.text, { x: 10, y: 20 });
+ * const centered = createText('Centered', 0xffffff, { anchor: 0.5 });
+ * ```
+ */
+export function createText(text: string, color: number, props?: PixiProps): PIXI.Text {
+  const fontDPR = getFontDPR();
+  return asTextDPR(
+    { 
+      text, 
+      style: { fontFamily: fontDPR.family, fontSize: fontDPR.size, fill: color }, 
+      dprScale: fontDPR.dprScale, 
+      pixelPerfect: true 
+    },
+    props
+  );
+}
+
+/**
+ * Create a PIKCELL-styled text element with a custom font.
+ * Use this for special cases like the ALPHA! stamp that uses KennyBlocks.
+ * 
+ * @param text - The text content to display
+ * @param fontFamily - The font family name
+ * @param color - Fill color (hex number)
+ * @param props - Optional PIXI display object properties
+ * @param dprScale - DPR scale multiplier (default: 2)
+ * @returns A PIXI.Text instance
+ */
+export function createTextCustomFont(
+  text: string, 
+  fontFamily: string, 
+  color: number, 
+  props?: PixiProps,
+  dprScale: number = 2
+): PIXI.Text {
+  return asTextDPR(
+    { 
+      text, 
+      style: { fontFamily, fontSize: FONT_DISPLAY_SIZE, fill: color }, 
+      dprScale, 
+      pixelPerfect: true 
+    },
+    props
+  );
+}

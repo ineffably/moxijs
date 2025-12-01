@@ -1,17 +1,13 @@
 /**
  * Example: Bitmap Font Generator - High-DPI Supersampling
  *
- * Demonstrates the supersampling technique used in PIKCELL for pixel-perfect fonts.
+ * Compares THREE different approaches to crisp text rendering:
  * 
- * THE PROBLEM:
- * Canvas 2D always applies anti-aliasing to text. This makes pixel fonts look blurry.
+ * 1. BitmapText @ 64px (standard) - Pre-rendered to texture, scaled down
+ * 2. BitmapText @ 256px (supersampling) - PIKCELL's approach, AA becomes sub-pixel
+ * 3. Canvas 2D Text with DPR scaling - Render at 2x, scale down (SO approach)
  * 
- * THE SOLUTION (Supersampling):
- * 1. Install font at HIGH resolution (256px) - more pixels = less visible AA
- * 2. Scale DOWN when displaying (e.g., scale: 0.0625 = 16px display)
- * 3. The anti-aliasing becomes sub-pixel and virtually invisible
- * 
- * This is the same technique PIKCELL uses for crisp UI text.
+ * Reference: https://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
  */
 import { setupMoxi } from '@moxijs/core';
 import * as PIXI from 'pixi.js';
@@ -35,7 +31,9 @@ const CHAR_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 // SUPERSAMPLING CONFIGURATIONS
 // ========================================
 const STANDARD_SIZE = 64;    // Standard resolution
+const MEDIUM_DPI_SIZE = 128; // Medium resolution (2x)
 const HIGH_DPI_SIZE = 256;   // High resolution (4x) - PIKCELL default
+const DPR_SCALE = 2;         // DPR scaling factor (like Retina)
 
 export async function initBitmapFontGenerator() {
   const root = document.getElementById('canvas-container');
@@ -62,6 +60,7 @@ export async function initBitmapFontGenerator() {
 
   // Track all bitmap texts for toggling roundPixels
   const allBitmapTexts: BitmapText[] = [];
+  const allDprTexts: Text[] = [];
 
   // ========================================
   // Background Gradient
@@ -110,6 +109,20 @@ export async function initBitmapFontGenerator() {
     textureStyle: { scaleMode: 'nearest' }
   });
 
+  // MEDIUM-DPI: 128px base (2x)
+  BitmapFont.install({
+    name: `${FONT_CONFIG.name}-MediumDPI`,
+    style: {
+      fontFamily: FONT_CONFIG.family,
+      fontSize: MEDIUM_DPI_SIZE,
+      fill: 0xffffff,
+    },
+    chars: CHAR_SET,
+    resolution: 1,
+    padding: 6,
+    textureStyle: { scaleMode: 'nearest' }
+  });
+
   // HIGH-DPI: 256px base (PIKCELL approach)
   BitmapFont.install({
     name: `${FONT_CONFIG.name}-HighDPI`,
@@ -140,7 +153,7 @@ export async function initBitmapFontGenerator() {
 
   // Make the content container draggable
   contentContainer.eventMode = 'static';
-  contentContainer.hitArea = new PIXI.Rectangle(-2000, -2000, 6000, 6000);
+  contentContainer.hitArea = new PIXI.Rectangle(-2000, -2000, 8000, 8000);
   contentContainer.cursor = 'grab';
 
   contentContainer.on('pointerdown', (e: FederatedPointerEvent) => {
@@ -184,13 +197,35 @@ export async function initBitmapFontGenerator() {
   });
 
   // ========================================
-  // UI Layout - Two Columns (wider spacing)
+  // Helper: Create DPR-scaled Text (Canvas 2D approach)
+  // ========================================
+  function createDprText(text: string, displaySize: number, color: number = 0xffffff): Text {
+    // Render at DPR_SCALE times the size, then scale down
+    const renderSize = displaySize * DPR_SCALE;
+    const t = new Text({
+      text,
+      style: {
+        fontFamily: FONT_CONFIG.family,
+        fontSize: renderSize,
+        fill: color,
+      }
+    });
+    t.scale.set(1 / DPR_SCALE);
+    t.roundPixels = true;
+    allDprTexts.push(t);
+    return t;
+  }
+
+  // ========================================
+  // UI Layout - Four Columns (wide spacing for panning)
   // ========================================
 
   const contentPadding = 30;
   let y = contentPadding;
-  const col1 = 50;     // Standard (64px)
-  const col2 = 750;    // High-DPI (256px) - wider gap
+  const col1 = 50;      // BitmapText Standard (64px)
+  const col2 = 550;     // BitmapText Medium (128px)
+  const col3 = 1050;    // BitmapText High-DPI (256px)
+  const col4 = 1550;    // Canvas 2D DPR (2x scale)
 
   // Title
   const title = new Text({
@@ -277,6 +312,9 @@ export async function initBitmapFontGenerator() {
     for (const bt of allBitmapTexts) {
       bt.roundPixels = pixelPerfectEnabled;
     }
+    for (const t of allDprTexts) {
+      t.roundPixels = pixelPerfectEnabled;
+    }
 
     checkboxHint.text = pixelPerfectEnabled 
       ? 'roundPixels + pixelated' 
@@ -290,20 +328,62 @@ export async function initBitmapFontGenerator() {
 
   // Column Headers
   const header1 = new Text({
-    text: 'Standard (64px base)',
-    style: { fontSize: 18, fill: 0xff6666, fontWeight: 'bold' }
+    text: 'BitmapText (64px)',
+    style: { fontSize: 14, fill: 0xff6666, fontWeight: 'bold' }
   });
   header1.position.set(col1, y);
   contentContainer.addChild(header1);
 
+  const subheader1 = new Text({
+    text: 'Standard',
+    style: { fontSize: 9, fill: 0x888899 }
+  });
+  subheader1.position.set(col1, y + 18);
+  contentContainer.addChild(subheader1);
+
   const header2 = new Text({
-    text: 'High-DPI (256px base) ✓',
-    style: { fontSize: 18, fill: 0x66ff66, fontWeight: 'bold' }
+    text: 'BitmapText (128px)',
+    style: { fontSize: 14, fill: 0xffaa66, fontWeight: 'bold' }
   });
   header2.position.set(col2, y);
   contentContainer.addChild(header2);
 
-  y += 40;
+  const subheader2 = new Text({
+    text: '2× supersampling',
+    style: { fontSize: 9, fill: 0x888899 }
+  });
+  subheader2.position.set(col2, y + 18);
+  contentContainer.addChild(subheader2);
+
+  const header3 = new Text({
+    text: 'BitmapText (256px) ✓',
+    style: { fontSize: 14, fill: 0x66ff66, fontWeight: 'bold' }
+  });
+  header3.position.set(col3, y);
+  contentContainer.addChild(header3);
+
+  const subheader3 = new Text({
+    text: '4× PIKCELL default',
+    style: { fontSize: 9, fill: 0x888899 }
+  });
+  subheader3.position.set(col3, y + 18);
+  contentContainer.addChild(subheader3);
+
+  const header4 = new Text({
+    text: 'Canvas 2D (DPR 2×)',
+    style: { fontSize: 14, fill: 0x6699ff, fontWeight: 'bold' }
+  });
+  header4.position.set(col4, y);
+  contentContainer.addChild(header4);
+
+  const subheader4 = new Text({
+    text: 'Stack Overflow',
+    style: { fontSize: 9, fill: 0x888899 }
+  });
+  subheader4.position.set(col4, y + 18);
+  contentContainer.addChild(subheader4);
+
+  y += 45;
 
   // ========================================
   // Font Samples - Multiple sizes with mixed case
@@ -320,7 +400,7 @@ export async function initBitmapFontGenerator() {
   for (const displaySize of displaySizes) {
     // Section divider
     const divider = new Graphics();
-    divider.rect(col1, y - 5, 1350, 1);
+    divider.rect(col1, y - 5, 2000, 1);
     divider.fill(0x333344);
     contentContainer.addChild(divider);
 
@@ -334,11 +414,12 @@ export async function initBitmapFontGenerator() {
     contentContainer.addChild(sizeLabel);
 
     const standardScale = displaySize / STANDARD_SIZE;
+    const mediumDpiScale = displaySize / MEDIUM_DPI_SIZE;
     const highDpiScale = displaySize / HIGH_DPI_SIZE;
 
     let rowY = y;
     for (const testText of testTexts) {
-      // Standard column (64px)
+      // Column 1: BitmapText Standard (64px)
       const standardText = new BitmapText({
         text: testText,
         style: { fontFamily: `${FONT_CONFIG.name}-Standard`, fontSize: STANDARD_SIZE }
@@ -350,17 +431,34 @@ export async function initBitmapFontGenerator() {
       contentContainer.addChild(standardText);
       allBitmapTexts.push(standardText);
 
-      // High-DPI column (256px)
+      // Column 2: BitmapText Medium-DPI (128px)
+      const mediumDpiText = new BitmapText({
+        text: testText,
+        style: { fontFamily: `${FONT_CONFIG.name}-MediumDPI`, fontSize: MEDIUM_DPI_SIZE }
+      });
+      mediumDpiText.scale.set(mediumDpiScale);
+      mediumDpiText.roundPixels = true;
+      mediumDpiText.position.set(col2, rowY);
+      mediumDpiText.tint = 0xffffff;
+      contentContainer.addChild(mediumDpiText);
+      allBitmapTexts.push(mediumDpiText);
+
+      // Column 3: BitmapText High-DPI (256px)
       const highDpiText = new BitmapText({
         text: testText,
         style: { fontFamily: `${FONT_CONFIG.name}-HighDPI`, fontSize: HIGH_DPI_SIZE }
       });
       highDpiText.scale.set(highDpiScale);
       highDpiText.roundPixels = true;
-      highDpiText.position.set(col2, rowY);
+      highDpiText.position.set(col3, rowY);
       highDpiText.tint = 0xffffff;
       contentContainer.addChild(highDpiText);
       allBitmapTexts.push(highDpiText);
+
+      // Column 4: Canvas 2D with DPR scaling
+      const dprText = createDprText(testText, displaySize);
+      dprText.position.set(col4, rowY);
+      contentContainer.addChild(dprText);
 
       rowY += displaySize + 8;
     }
@@ -382,20 +480,30 @@ export async function initBitmapFontGenerator() {
   contentContainer.addChild(blackOnWhiteLabel);
   y += 25;
 
-  // White background panels (wider)
+  // White background panels
   const whiteBg1 = new Graphics();
-  whiteBg1.roundRect(col1 - 10, y - 5, 650, 50, 4);
+  whiteBg1.roundRect(col1 - 10, y - 5, 450, 50, 4);
   whiteBg1.fill(0xf0f0f0);
   contentContainer.addChild(whiteBg1);
 
   const whiteBg2 = new Graphics();
-  whiteBg2.roundRect(col2 - 10, y - 5, 650, 50, 4);
+  whiteBg2.roundRect(col2 - 10, y - 5, 450, 50, 4);
   whiteBg2.fill(0xf0f0f0);
   contentContainer.addChild(whiteBg2);
 
+  const whiteBg3 = new Graphics();
+  whiteBg3.roundRect(col3 - 10, y - 5, 450, 50, 4);
+  whiteBg3.fill(0xf0f0f0);
+  contentContainer.addChild(whiteBg3);
+
+  const whiteBg4 = new Graphics();
+  whiteBg4.roundRect(col4 - 10, y - 5, 450, 50, 4);
+  whiteBg4.fill(0xf0f0f0);
+  contentContainer.addChild(whiteBg4);
+
   // Black text samples
   const blackText1 = new BitmapText({
-    text: 'Hello World! ABCabc 123',
+    text: 'Hello World! ABCabc',
     style: { fontFamily: `${FONT_CONFIG.name}-Standard`, fontSize: STANDARD_SIZE }
   });
   blackText1.scale.set(32 / STANDARD_SIZE);
@@ -406,15 +514,30 @@ export async function initBitmapFontGenerator() {
   allBitmapTexts.push(blackText1);
 
   const blackText2 = new BitmapText({
-    text: 'Hello World! ABCabc 123',
-    style: { fontFamily: `${FONT_CONFIG.name}-HighDPI`, fontSize: HIGH_DPI_SIZE }
+    text: 'Hello World! ABCabc',
+    style: { fontFamily: `${FONT_CONFIG.name}-MediumDPI`, fontSize: MEDIUM_DPI_SIZE }
   });
-  blackText2.scale.set(32 / HIGH_DPI_SIZE);
+  blackText2.scale.set(32 / MEDIUM_DPI_SIZE);
   blackText2.roundPixels = true;
   blackText2.position.set(col2, y + 5);
   blackText2.tint = 0x000000;
   contentContainer.addChild(blackText2);
   allBitmapTexts.push(blackText2);
+
+  const blackText3 = new BitmapText({
+    text: 'Hello World! ABCabc',
+    style: { fontFamily: `${FONT_CONFIG.name}-HighDPI`, fontSize: HIGH_DPI_SIZE }
+  });
+  blackText3.scale.set(32 / HIGH_DPI_SIZE);
+  blackText3.roundPixels = true;
+  blackText3.position.set(col3, y + 5);
+  blackText3.tint = 0x000000;
+  contentContainer.addChild(blackText3);
+  allBitmapTexts.push(blackText3);
+
+  const blackText4 = createDprText('Hello World! ABCabc', 32, 0x000000);
+  blackText4.position.set(col4, y + 5);
+  contentContainer.addChild(blackText4);
 
   y += 70;
 
@@ -430,7 +553,7 @@ export async function initBitmapFontGenerator() {
   contentContainer.addChild(zoomLabel);
   y += 25;
 
-  const zoomChars = 'AaBbCc';
+  const zoomChars = 'AaBb';
   
   const zoomStandard = new BitmapText({
     text: zoomChars,
@@ -443,25 +566,48 @@ export async function initBitmapFontGenerator() {
   contentContainer.addChild(zoomStandard);
   allBitmapTexts.push(zoomStandard);
 
+  const zoomMediumDpi = new BitmapText({
+    text: zoomChars,
+    style: { fontFamily: `${FONT_CONFIG.name}-MediumDPI`, fontSize: MEDIUM_DPI_SIZE }
+  });
+  zoomMediumDpi.scale.set(64 / MEDIUM_DPI_SIZE);
+  zoomMediumDpi.roundPixels = true;
+  zoomMediumDpi.position.set(col2, y);
+  zoomMediumDpi.tint = 0xffffff;
+  contentContainer.addChild(zoomMediumDpi);
+  allBitmapTexts.push(zoomMediumDpi);
+
   const zoomHighDpi = new BitmapText({
     text: zoomChars,
     style: { fontFamily: `${FONT_CONFIG.name}-HighDPI`, fontSize: HIGH_DPI_SIZE }
   });
   zoomHighDpi.scale.set(64 / HIGH_DPI_SIZE);
   zoomHighDpi.roundPixels = true;
-  zoomHighDpi.position.set(col2, y);
+  zoomHighDpi.position.set(col3, y);
   zoomHighDpi.tint = 0xffffff;
   contentContainer.addChild(zoomHighDpi);
   allBitmapTexts.push(zoomHighDpi);
+
+  const zoomDpr = createDprText(zoomChars, 64);
+  zoomDpr.position.set(col4, y);
+  contentContainer.addChild(zoomDpr);
 
   // Notes under zoomed
   const note1 = new Text({ text: '(fuzzy edges)', style: { fontSize: 10, fill: 0xff6666 } });
   note1.position.set(col1, y + 70);
   contentContainer.addChild(note1);
 
-  const note2 = new Text({ text: '(crisp pixel edges!)', style: { fontSize: 10, fill: 0x66ff66 } });
+  const note2 = new Text({ text: '(better)', style: { fontSize: 10, fill: 0xffaa66 } });
   note2.position.set(col2, y + 70);
   contentContainer.addChild(note2);
+
+  const note3 = new Text({ text: '(crisp pixel edges!)', style: { fontSize: 10, fill: 0x66ff66 } });
+  note3.position.set(col3, y + 70);
+  contentContainer.addChild(note3);
+
+  const note4 = new Text({ text: '(still has AA blur)', style: { fontSize: 10, fill: 0x6699ff } });
+  note4.position.set(col4, y + 70);
+  contentContainer.addChild(note4);
 
   y += 100;
 
@@ -500,19 +646,22 @@ export async function initBitmapFontGenerator() {
   // ========================================
 
   const insightsBox = new Graphics();
-  insightsBox.roundRect(col1 - 10, y - 10, 1350, 100, 6);
+  insightsBox.roundRect(col1 - 10, y - 10, 1950, 160, 6);
   insightsBox.fill(0x1a1a2e);
   contentContainer.addChild(insightsBox);
 
   const insights = new Text({
     text: [
-      'Key Insights:',
-      '• 64px = standard resolution, 256px = 4× more pixels (PIKCELL default)',
-      '• Higher base resolution = anti-aliasing becomes sub-pixel and virtually invisible',
-      '• Trade-off: Higher resolution = larger texture atlas = more memory usage',
-      '• Click and drag to pan around the content, scroll to move vertically',
+      'Comparison:',
+      '',
+      '• BitmapText 64px: Pre-rendered texture, GPU scaling, still has visible AA at edges',
+      '• BitmapText 128px: 2× more pixels, AA reduced but still visible - good balance of quality vs memory',
+      '• BitmapText 256px (PIKCELL): 4× more pixels, AA becomes sub-pixel, virtually invisible - BEST for pixel fonts',
+      '• Canvas 2D DPR 2×: Render at 2× then scale down, still uses Canvas AA, helps on HiDPI but not pixel-perfect',
+      '',
+      'Winner: BitmapText 256px - pre-baked high-res + GPU nearest-neighbor = crisp pixels with no per-frame cost',
     ].join('\n'),
-    style: { fontSize: 11, fill: 0x99aacc, lineHeight: 18 }
+    style: { fontSize: 11, fill: 0x99aacc, lineHeight: 16 }
   });
   insights.position.set(col1, y);
   contentContainer.addChild(insights);
@@ -534,6 +683,7 @@ export async function initBitmapFontGenerator() {
 
   console.log('✅ Bitmap Font Generator (High-DPI) loaded');
   console.log(`📝 Total BitmapText elements: ${allBitmapTexts.length}`);
+  console.log(`📝 Total DPR Text elements: ${allDprTexts.length}`);
 
   return () => {
     engine.stop();

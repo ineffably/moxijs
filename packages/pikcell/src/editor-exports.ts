@@ -15,7 +15,7 @@ export { createScaleCard, ScaleCardOptions, ScaleCardResult } from './cards/scal
 export { createToolbarCard, ToolbarCardOptions, ToolbarCardResult, MainToolType, ToolState } from './cards/toolbar-card';
 
 // Components
-export { PixelCard, UI_COLORS } from './components/pixel-card';
+export { PixelCard } from './components/pixel-card';
 export { createPixelButton, PixelButtonOptions, PixelButtonResult, SelectionMode, ActionMode } from './components/pixel-button';
 export { createPixelDialog, PixelDialogOptions, PixelDialogResult } from './components/pixel-dialog';
 export { createPixelCheckbox, PixelCheckboxOptions, PixelCheckboxResult } from './components/pixel-checkbox';
@@ -69,24 +69,20 @@ export type { CardId } from './config/card-ids';
 // Theming System
 export {
   Theme,
-  ThemeMetadata,
-  ThemeGroup,
+  ThemeInfo,
+  ThemeVariant,
   DARK_THEME,
   LIGHT_THEME,
-  SPRING_THEME,
-  SUMMER_THEME,
-  AUTUMN_THEME,
-  WINTER_THEME,
-  THEME_GROUPS,
+  ALL_THEMES,
   getAllThemes,
-  getThemesByPalette,
-  getThemeByName,
-  getCurrentThemeMetadata,
   getTheme,
+  getThemeInfo,
   setTheme,
-  setThemeByMetadata,
+  setThemeByName,
   resetTheme,
-  createThemeFromPalette
+  createDarkTheme,
+  createLightTheme,
+  createThemesFromPalette
 } from './theming/theme';
 
 // Palettes & Icons

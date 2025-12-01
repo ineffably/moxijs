@@ -77,9 +77,10 @@ export function createPixelDialog(options: PixelDialogOptions): PixelDialogResul
   // Create message text to measure it
   const theme = getTheme();
   const messageText = asBitmapText(
-    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+    { text: message, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
     { scale: GRID.fontScale }
   );
+  messageText.tint = theme.text; // BitmapText uses tint for color
 
   // Calculate content dimensions based on message, checkboxes, and buttons
   const messageWidthInGridUnits = Math.ceil(messageText.width / px(1));

@@ -7,7 +7,6 @@
 import * as PIXI from 'pixi.js';
 import { getTheme } from '../theming/theme';
 import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
-import { UI_COLORS } from '../components/pixel-card';
 
 export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw';
 
@@ -262,7 +261,7 @@ export class CardResizeHandler {
 
     const theme = getTheme();
     const text = asBitmapText(
-      { text: scaleText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text: scaleText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { scale: GRID.fontScale }
     );
 
@@ -277,7 +276,7 @@ export class CardResizeHandler {
 
     // Gray drop shadow
     bg.rect(shadowOffset, shadowOffset, indicatorWidth, indicatorHeight);
-    bg.fill({ color: UI_COLORS.titleBar });
+    bg.fill({ color: theme.cardTitleBar });
 
     // White outer border
     bg.rect(0, 0, indicatorWidth, indicatorHeight);

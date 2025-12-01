@@ -14,7 +14,7 @@ import { px, GRID } from '@moxijs/core';
 import { SpriteController } from '../controllers/sprite-controller';
 import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
 import { ShapeType, drawToolIconInto, drawShapeIconInto, ToolType } from '../theming/tool-icons';
-import { getShapePixels, Point } from '../utilities/shape-drawer';
+import { getShapePixels, getFloodFillPixels, Point } from '../utilities/shape-drawer';
 import { MainToolType } from '../cards/toolbar-card';
 import { SPRITE_CONSTANTS } from '../config/constants';
 
@@ -68,6 +68,10 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
   const contentWidth = Math.ceil(dims.width / px(1));
   const contentHeight = Math.ceil(dims.height / px(1));
 
+  // Track current tool for refresh
+  let lastTool: MainToolType = getCurrentTool?.() ?? 'pencil';
+  let lastShape: ShapeType | undefined = getCurrentShape?.();
+
   // Create the card
   const card = new PixelCard({
     title: `(${spriteController.getScale()}x)`,
@@ -82,6 +86,10 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
       // Re-render sprite when card resizes
       drawSprite();
       if (showGrid) drawGrid();
+    },
+    onRefresh: () => {
+      // Re-apply title with icon after theme change
+      updateTitleInternal(lastTool, lastShape);
     },
     onFocus
   });
@@ -141,7 +149,7 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
       g.lineTo(totalSize, lineY);
     }
 
-    g.stroke({ color: GRID_LINE_COLOR, alpha: GRID_LINE_ALPHA, width: 1 });
+    g.stroke({ color: GRID_LINE_COLOR, alpha: GRID_LINE_ALPHA, width: 2 });
     gridContainer.addChild(g);
   }
 
@@ -167,11 +175,17 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
     }
     g.fill({ color: previewColor, alpha: 0.5 });
 
-    // Draw outline around each pixel for clarity
+    // Draw white/black outline around each pixel for visibility (2px)
+    for (const pixel of validPixels) {
+      const x = pixel.x * scale;
+      const y = pixel.y * scale;
+      g.rect(x + 2, y + 2, scale - 4, scale - 4);
+      g.stroke({ color: 0x000000, alpha: 0.8, width: 2 });
+    }
     for (const pixel of validPixels) {
       g.rect(pixel.x * scale, pixel.y * scale, scale, scale);
     }
-    g.stroke({ color: previewColor, alpha: 0.8, width: 1 });
+    g.stroke({ color: 0xFFFFFF, alpha: 0.8, width: 2 });
 
     previewContainer.addChild(g);
   }
@@ -179,6 +193,91 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
   // Clear shape preview
   function clearShapePreview() {
     previewContainer.removeChildren();
+  }
+
+  // Draw hover preview for single pixel (pen/eraser/selection)
+  function drawHoverPreview(pixelX: number, pixelY: number, tool: MainToolType) {
+    previewContainer.removeChildren();
+
+    if (pixelX < 0 || pixelX >= 8 || pixelY < 0 || pixelY >= 8) return;
+
+    const scale = spriteController.getScale();
+    const g = new PIXI.Graphics();
+    g.roundPixels = true;
+
+    // All tools use white/black border for visibility on any background
+    const x = pixelX * scale;
+    const y = pixelY * scale;
+
+    if (tool === 'eraser') {
+      // Eraser: white/black double border (2px)
+      g.rect(x + 2, y + 2, scale - 4, scale - 4);
+      g.stroke({ color: 0x000000, alpha: 0.9, width: 2 });
+      g.rect(x, y, scale, scale);
+      g.stroke({ color: 0xFFFFFF, alpha: 0.9, width: 2 });
+    } else if (tool === 'selection') {
+      // Selection: white/black double border (2px)
+      g.rect(x + 2, y + 2, scale - 4, scale - 4);
+      g.stroke({ color: 0x000000, alpha: 0.9, width: 2 });
+      g.rect(x, y, scale, scale);
+      g.stroke({ color: 0xFFFFFF, alpha: 0.9, width: 2 });
+    } else {
+      // Pencil: filled pixel with white/black border (2px)
+      const previewColor = getPreviewColor?.() ?? 0xFFFFFF;
+      g.rect(x, y, scale, scale);
+      g.fill({ color: previewColor, alpha: 0.5 });
+      g.rect(x + 2, y + 2, scale - 4, scale - 4);
+      g.stroke({ color: 0x000000, alpha: 0.8, width: 2 });
+      g.rect(x, y, scale, scale);
+      g.stroke({ color: 0xFFFFFF, alpha: 0.8, width: 2 });
+    }
+
+    previewContainer.addChild(g);
+  }
+
+  // Draw fill preview - highlight all pixels that would be filled
+  function drawFillPreview(pixelX: number, pixelY: number) {
+    previewContainer.removeChildren();
+
+    if (pixelX < 0 || pixelX >= 8 || pixelY < 0 || pixelY >= 8) return;
+
+    // Get all pixels that would be filled using flood fill algorithm
+    const pixelsToFill = getFloodFillPixels(
+      pixelX,
+      pixelY,
+      8, // width
+      8, // height
+      (x, y) => spriteController.getPixel(x, y)
+    );
+
+    if (pixelsToFill.length === 0) return;
+
+    const scale = spriteController.getScale();
+    const previewColor = getPreviewColor?.() ?? 0xFFFFFF;
+    const g = new PIXI.Graphics();
+    g.roundPixels = true;
+
+    // Draw semi-transparent fill preview
+    for (const pixel of pixelsToFill) {
+      g.rect(pixel.x * scale, pixel.y * scale, scale, scale);
+    }
+    g.fill({ color: previewColor, alpha: 0.4 });
+
+    // Draw white/black border around each pixel for visibility (2px)
+    for (const pixel of pixelsToFill) {
+      const x = pixel.x * scale;
+      const y = pixel.y * scale;
+      g.rect(x + 2, y + 2, scale - 4, scale - 4);
+      g.stroke({ color: 0x000000, alpha: 0.5, width: 2 });
+    }
+    for (const pixel of pixelsToFill) {
+      const x = pixel.x * scale;
+      const y = pixel.y * scale;
+      g.rect(x, y, scale, scale);
+      g.stroke({ color: 0xFFFFFF, alpha: 0.5, width: 2 });
+    }
+
+    previewContainer.addChild(g);
   }
 
   // Draw selection with marching ants (dotted animated border)
@@ -315,6 +414,7 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
 
     spriteContainer.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
       isDrawing = true;
+      clearShapePreview(); // Clear hover preview when starting to draw
       onDrawStart?.();
       const local = e.getLocalPosition(spriteContainer);
       const pixel = spriteController.screenToPixel(local.x, local.y);
@@ -480,6 +580,51 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
 
     spriteContainer.on('pointerup', endDraw);
     spriteContainer.on('pointerupoutside', endDraw);
+
+    // Track last hover position for preview
+    let lastHoverX = -1;
+    let lastHoverY = -1;
+
+    // Add hover preview (separate from drawing)
+    const updateHoverPreview = (e: PIXI.FederatedPointerEvent) => {
+      // Don't show hover preview while actively drawing
+      if (isDrawing) return;
+
+      const local = e.getLocalPosition(spriteContainer);
+      const pixel = spriteController.screenToPixel(local.x, local.y);
+      const currentTool = getCurrentTool?.() ?? 'pencil';
+
+      // Shape tool doesn't have hover preview (uses drag preview instead)
+      if (currentTool === 'shape') {
+        clearShapePreview();
+        lastHoverX = -1;
+        lastHoverY = -1;
+        return;
+      }
+
+      if (pixel && (pixel.x !== lastHoverX || pixel.y !== lastHoverY)) {
+        lastHoverX = pixel.x;
+        lastHoverY = pixel.y;
+
+        if (currentTool === 'fill') {
+          drawFillPreview(pixel.x, pixel.y);
+        } else {
+          drawHoverPreview(pixel.x, pixel.y, currentTool);
+        }
+      }
+    };
+
+    spriteContainer.on('pointermove', updateHoverPreview);
+    spriteContainer.on('pointerover', updateHoverPreview);
+
+    // Clear preview when mouse leaves
+    spriteContainer.on('pointerout', () => {
+      if (!isDrawing) {
+        clearShapePreview();
+        lastHoverX = -1;
+        lastHoverY = -1;
+      }
+    });
   }
 
   // Initial draw
@@ -487,10 +632,10 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
   if (showGrid) drawGrid();
 
   /**
-   * Update the title bar with tool icon and info
+   * Internal function to update the title bar with tool icon and info
    * Format: [icon] (x,y) 8x8 Nx
    */
-  function updateTitle(tool: MainToolType, shapeType?: ShapeType) {
+  function updateTitleInternal(tool: MainToolType, shapeType?: ShapeType) {
     const cell = spriteController.getCell();
     const scale = spriteController.getScale();
     const size = SPRITE_CONSTANTS.CELL_SIZE;
@@ -512,6 +657,15 @@ export function createSpriteEditorCard(options: SpriteEditorCardOptions): Sprite
     // Icon dimensions: 10x9 grid units, rendered at 2x = 20x18 pixels
     const scaledIconWidth = 20;
     card.setTitleWithIcon(drawIcon, infoText, scaledIconWidth);
+  }
+
+  /**
+   * Public function to update title - also tracks state for refresh
+   */
+  function updateTitle(tool: MainToolType, shapeType?: ShapeType) {
+    lastTool = tool;
+    lastShape = shapeType;
+    updateTitleInternal(tool, shapeType);
   }
 
   return {

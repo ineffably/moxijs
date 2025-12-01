@@ -2,12 +2,12 @@
  * Pixel-perfect card component with drag, resize, and triple border
  *
  * Refactored to use CardDragHandler and CardResizeHandler for cleaner SRP.
- * 
+ *
  * ⚠️ CRITICAL: This component uses GRID UNITS for all dimensions!
  * - contentWidth/contentHeight are in GRID UNITS (not pixels)
  * - Internal calculations convert to pixels using px()
  * - All spacing, borders, padding use GRID constants
- * 
+ *
  * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
@@ -15,17 +15,6 @@ import { getTheme } from '../theming/theme';
 import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
-
-// UI Colors - Maps theme tokens to component usage
-export const UI_COLORS = {
-  get cardBg() { return getTheme().backgroundSurface; },
-  get cardBorder() { return getTheme().borderStrong; },
-  get middleBorder() { return getTheme().borderSubtle; },
-  get text() { return getTheme().textPrimary; },
-  get titleBar() { return getTheme().backgroundOverlay; },
-  get selected() { return getTheme().accentPrimary; },
-  get buttonBg() { return getTheme().backgroundRaised; },
-};
 
 export interface PixelCardOptions {
   title: string;
@@ -37,7 +26,7 @@ export interface PixelCardOptions {
   onResize?: (width: number, height: number) => void;
   onRefresh?: () => void; // Callback when card is refreshed (e.g., theme change)
   minContentSize?: boolean; // If true, prevents resizing below content's actual size
-  backgroundColor?: number; // Custom background color (defaults to UI_COLORS.cardBg)
+  backgroundColor?: number; // Custom background color (defaults to theme.cardBackground)
   clipContent?: boolean; // If true, clips content to container bounds (like CSS overflow: hidden)
   pairedCard?: PixelCard; // Optional paired card that should layer together
   onFocus?: () => void; // Callback when card is clicked/focused
@@ -167,6 +156,7 @@ export class PixelCard {
   }
 
   private drawBackground(cardWidth: number, cardHeight: number) {
+    const theme = getTheme();
     const bg = new PIXI.Graphics();
     bg.roundPixels = true;
 
@@ -174,39 +164,40 @@ export class PixelCard {
 
     // Drop shadow
     bg.rect(shadowOffset, shadowOffset, px(cardWidth), cardHeight);
-    bg.fill({ color: 0x000000, alpha: 0.3 });
+    bg.fill({ color: theme.cardBorder, alpha: 0.3 });
 
-    // Layer 1: Outer black border
+    // Layer 1: Outer border
     bg.rect(0, 0, px(cardWidth), cardHeight);
-    bg.fill({ color: 0x000000 });
+    bg.fill({ color: theme.cardBorder });
 
-    // Layer 2: Middle tan border
+    // Layer 2: Middle border (using buttonBackground for subtle contrast)
     bg.rect(px(BORDER.outer), px(BORDER.outer),
             px(cardWidth - BORDER.outer * 2), cardHeight - px(BORDER.outer * 2));
-    bg.fill({ color: UI_COLORS.middleBorder });
+    bg.fill({ color: theme.buttonBackground });
 
-    // Layer 3: Inner black border
+    // Layer 3: Inner border
     bg.rect(px(BORDER.outer + BORDER.middle), px(BORDER.outer + BORDER.middle),
             px(cardWidth - (BORDER.outer + BORDER.middle) * 2),
             cardHeight - px((BORDER.outer + BORDER.middle) * 2));
-    bg.fill({ color: 0x000000 });
+    bg.fill({ color: theme.cardBorder });
 
     // Layer 4: Content background
     bg.rect(px(BORDER.total), px(BORDER.total),
             px(cardWidth - BORDER.total * 2), cardHeight - px(BORDER.total * 2));
-    bg.fill({ color: this.options.backgroundColor ?? UI_COLORS.cardBg });
+    bg.fill({ color: this.options.backgroundColor ?? theme.cardBackground });
 
     this.container.addChild(bg);
   }
 
   private drawTitleBar(cardWidth: number) {
+    const theme = getTheme();
     const titleBar = new PIXI.Graphics();
     titleBar.roundPixels = true;
     titleBar.eventMode = 'static';
     titleBar.cursor = 'move';
     titleBar.rect(px(BORDER.total), px(BORDER.total),
                   px(cardWidth - BORDER.total * 2), this.titleBarHeightPx);
-    titleBar.fill({ color: UI_COLORS.titleBar });
+    titleBar.fill({ color: theme.cardTitleBar });
 
     // Title bar dragging
     titleBar.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
@@ -220,11 +211,11 @@ export class PixelCard {
     this.container.addChild(titleBar);
 
     // Title text
-    const theme = getTheme();
     const titleText = asBitmapText(
-      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { scale: GRID.fontScale }
     );
+    titleText.tint = theme.text; // BitmapText uses tint for color
 
     const textHeight = titleText.height;
     const verticalCenter = px(BORDER.total) + (this.titleBarHeightPx - textHeight) / 2;
@@ -234,9 +225,10 @@ export class PixelCard {
     // ALPHA! stamp for PIKCELL title
     if (this.options.title === 'PIKCELL') {
       const alphaStamp = asBitmapText(
-        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: 0x29adff }, pixelPerfect: true },
+        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: theme.accent }, pixelPerfect: true },
         { anchor: 0.5, scale: GRID.fontScale * 1.2 }
       );
+      alphaStamp.tint = theme.accent;
       alphaStamp.angle = -8;
 
       const stampX = titleText.x + titleText.width + px(2) + px(8) + px(2);
@@ -390,16 +382,18 @@ export class PixelCard {
 
     // Left-aligned text
     const leftBitmapText = asBitmapText(
-      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { x: px(BORDER.total) + 2, y: Math.floor(textY), scale: GRID.fontScale }
     );
+    leftBitmapText.tint = theme.text; // BitmapText uses tint for color
     this.container.addChild(leftBitmapText);
 
     // Right-aligned text
     const rightBitmapText = asBitmapText(
-      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { scale: GRID.fontScale }
     );
+    rightBitmapText.tint = theme.text; // BitmapText uses tint for color
 
     const cardWidth = this.state.contentWidth + BORDER.total * 2 + GRID.padding * 2;
     const rightX = px(cardWidth - BORDER.total) - rightBitmapText.width - 2;
@@ -420,17 +414,20 @@ export class PixelCard {
   ) {
     this.options.title = '';
 
-    // Remove existing title elements (text and graphics that aren't the background)
+    // Remove existing title elements (text and icon graphics)
+    // Keep: background (first Graphics), title bar (cursor='move'), content mask, and resize handles
     const toRemove = this.container.children.filter(
       child => child instanceof PIXI.BitmapText ||
-               (child instanceof PIXI.Graphics && child.cursor !== 'move' && child !== this.contentMask)
+               (child instanceof PIXI.Graphics &&
+                child.cursor !== 'move' &&
+                child.cursor !== 'pointer' &&
+                !child.cursor?.includes('resize') &&
+                child !== this.contentMask)
     );
-    // Keep the first graphics (background) and title bar
-    const titleElements = toRemove.slice(1); // Skip background
+    // Skip the first graphics element (background)
+    const titleElements = toRemove.slice(1);
     titleElements.forEach(child => {
-      if (child instanceof PIXI.BitmapText) {
-        this.container.removeChild(child);
-      }
+      this.container.removeChild(child);
     });
 
     const theme = getTheme();
@@ -445,15 +442,16 @@ export class PixelCard {
     const iconPixelSize = 2;
     const iconGraphics = new PIXI.Graphics();
     iconGraphics.roundPixels = true;
-    drawIcon(iconGraphics, iconX, iconY, theme.textPrimary, iconPixelSize);
+    drawIcon(iconGraphics, iconX, iconY, theme.text, iconPixelSize);
     this.container.addChild(iconGraphics);
 
     // Add text after the icon
     const textX = iconX + iconSize + 4; // 4px gap after icon
     const titleText = asBitmapText(
-      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.textPrimary }, pixelPerfect: true },
+      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
       { x: textX, y: Math.floor(textY), scale: GRID.fontScale }
     );
+    titleText.tint = theme.text; // BitmapText uses tint for color
     this.container.addChild(titleText);
   }
 

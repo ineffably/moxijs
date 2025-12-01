@@ -11,7 +11,7 @@
  * @see ../utilities/README.md for grid system documentation
  */
 import * as PIXI from 'pixi.js';
-import { getTheme } from '../theming/theme';
+import { getTheme, getFont, getFontDisplaySize } from '../theming/theme';
 import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
@@ -74,8 +74,8 @@ export class PixelCard {
       contentHeight: options.contentHeight,
     };
 
-    // Calculate title bar height based on font size
-    const fontHeight = 64 * GRID.fontScale;
+    // Calculate title bar height based on font DISPLAY size (not installation size)
+    const fontHeight = getFontDisplaySize();
     const verticalPadding = px(GRID.padding * 2);
     this.titleBarHeightPx = Math.ceil(fontHeight + verticalPadding);
 
@@ -211,9 +211,10 @@ export class PixelCard {
     this.container.addChild(titleBar);
 
     // Title text
+    const font = getFont();
     const titleText = asBitmapText(
-      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { scale: GRID.fontScale }
+      { text: this.options.title, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { scale: font.scale }
     );
     titleText.tint = theme.text; // BitmapText uses tint for color
 
@@ -225,8 +226,8 @@ export class PixelCard {
     // ALPHA! stamp for PIKCELL title
     if (this.options.title === 'PIKCELL') {
       const alphaStamp = asBitmapText(
-        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: 64, fill: theme.accent }, pixelPerfect: true },
-        { anchor: 0.5, scale: GRID.fontScale * 1.2 }
+        { text: 'ALPHA!', style: { fontFamily: 'KennyBlocksBitmap', fontSize: font.size, fill: theme.accent }, pixelPerfect: true },
+        { anchor: 0.5, scale: font.scale * 1.2 }
       );
       alphaStamp.tint = theme.accent;
       alphaStamp.angle = -8;
@@ -378,20 +379,21 @@ export class PixelCard {
     titleTextChildren.forEach(child => this.container.removeChild(child));
 
     const theme = getTheme();
-    const textY = px(BORDER.total) + (this.titleBarHeightPx - 64 * GRID.fontScale) / 2;
+    const font = getFont();
+    const textY = px(BORDER.total) + (this.titleBarHeightPx - getFontDisplaySize()) / 2;
 
     // Left-aligned text
     const leftBitmapText = asBitmapText(
-      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: px(BORDER.total) + 2, y: Math.floor(textY), scale: GRID.fontScale }
+      { text: leftText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { x: px(BORDER.total) + 2, y: Math.floor(textY), scale: font.scale }
     );
     leftBitmapText.tint = theme.text; // BitmapText uses tint for color
     this.container.addChild(leftBitmapText);
 
     // Right-aligned text
     const rightBitmapText = asBitmapText(
-      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { scale: GRID.fontScale }
+      { text: rightText, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { scale: font.scale }
     );
     rightBitmapText.tint = theme.text; // BitmapText uses tint for color
 
@@ -431,7 +433,8 @@ export class PixelCard {
     });
 
     const theme = getTheme();
-    const fontHeight = 64 * GRID.fontScale;
+    const font = getFont();
+    const fontHeight = getFontDisplaySize();
     const textY = px(BORDER.total) + (this.titleBarHeightPx - fontHeight) / 2;
 
     // Icon positioning - center vertically in title bar
@@ -448,8 +451,8 @@ export class PixelCard {
     // Add text after the icon
     const textX = iconX + iconSize + 4; // 4px gap after icon
     const titleText = asBitmapText(
-      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: theme.text }, pixelPerfect: true },
-      { x: textX, y: Math.floor(textY), scale: GRID.fontScale }
+      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: theme.text }, pixelPerfect: true },
+      { x: textX, y: Math.floor(textY), scale: font.scale }
     );
     titleText.tint = theme.text; // BitmapText uses tint for color
     this.container.addChild(titleText);

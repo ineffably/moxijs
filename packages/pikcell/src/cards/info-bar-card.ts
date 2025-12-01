@@ -4,7 +4,7 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { GRID, px, asBitmapText } from '@moxijs/core';
-import { getTheme } from '../theming/theme';
+import { getTheme, getFont } from '../theming/theme';
 import { CardResult } from '../interfaces/components';
 import { createManagedCard } from '../utilities/managed-card';
 import { INFO_BAR_CONFIG } from '../config/card-configs';
@@ -65,10 +65,11 @@ export function createInfoBarCard(options: InfoBarCardOptions): InfoBarCardResul
   const { card, contentContainer } = managed;
 
   /** Create a text element */
+  const font = getFont();
   function createText(text: string, color: number): PIXI.BitmapText {
     const bitmapText = asBitmapText(
-      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: 64, fill: color }, pixelPerfect: true },
-      { scale: GRID.fontScale }
+      { text, style: { fontFamily: 'PixelOperator8Bitmap', fontSize: font.size, fill: color }, pixelPerfect: true },
+      { scale: font.scale }
     );
     bitmapText.tint = color; // BitmapText uses tint for color
     return bitmapText;

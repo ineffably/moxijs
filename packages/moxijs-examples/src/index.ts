@@ -14,6 +14,8 @@ import { initProgressBar } from './examples/01-basics/progress-bar';
 import { initTextRendering } from './examples/02-ui/text-rendering';
 import { initFontRenderingComparison } from './examples/02-ui/font-rendering-comparison';
 import { initUIShowcase } from './examples/02-ui/ui-showcase';
+import { initBitmapFontGenerator } from './examples/02-ui/bitmap-font-generator';
+// import { initFontRasterizationLab } from './examples/02-ui/font-rasterization-lab'; // Disabled - experimental
 
 // === GAMEPLAY ===
 import { initBunnyAdventure } from './examples/03-gameplay/bunny-adventure';
@@ -49,6 +51,8 @@ import progressBarSource from './examples/01-basics/progress-bar.ts?raw';
 import textRenderingSource from './examples/02-ui/text-rendering.ts?raw';
 import fontRenderingComparisonSource from './examples/02-ui/font-rendering-comparison.ts?raw';
 import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
+import bitmapFontGeneratorSource from './examples/02-ui/bitmap-font-generator.ts?raw';
+// import fontRasterizationLabSource from './examples/02-ui/font-rasterization-lab.ts?raw'; // Disabled - experimental
 
 // === GAMEPLAY ===
 import bunnyAdventureSource from './examples/03-gameplay/bunny-adventure.ts?raw';
@@ -147,7 +151,14 @@ const categories: Record<string, Category> = {
         description: 'Tabbed interface with all UI components',
         init: initUIShowcase,
         source: uiShowcaseSource
+      },
+      'bitmap-font-generator': {
+        name: 'Bitmap Font Generator',
+        description: 'High-DPI supersampling for pixel-perfect fonts',
+        init: initBitmapFontGenerator,
+        source: bitmapFontGeneratorSource
       }
+      // 'font-rasterization-lab' disabled - experimental
     }
   },
   'gameplay': {

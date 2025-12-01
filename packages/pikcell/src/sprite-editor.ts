@@ -929,6 +929,7 @@ export class SpriteEditor {
       onColorSelect: (colorIndex) => {
         this.selectedColorIndex = colorIndex;
         this.updateInfoBar();
+        this.saveProjectState();
       }
     });
     this.scene.addChild(this.paletteCard.card.container);

@@ -1,6 +1,11 @@
 /**
  * Tool icons for the sprite editor
- * Creates simple pixel art icons and bakes them to textures
+ * Icons defined as 10x9 ASCII grids (# = filled, . = empty)
+ * Each cell = GRID.scale pixels. Icons are centered in button content area.
+ *
+ * Button content area (press mode): 12 wide × 11 tall grid units
+ * Icon: 10 wide × 9 tall cells
+ * Centering: (12-10)/2 = 1 grid unit horizontal, (11-9)/2 = 1 grid unit vertical
  */
 import * as PIXI from 'pixi.js';
 
@@ -10,257 +15,245 @@ export type ShapeType = 'circle' | 'circle-filled' | 'square' | 'square-filled';
 // Cache for generated textures
 const textureCache: Map<string, PIXI.Texture> = new Map();
 
-// SVG icon data (kept for reference, but we use Graphics-based icons)
-const SVG_ICONS: Record<ToolType, string> = {
-  pencil: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 2h-2v2h-2v2h-2v2h-2v2H8v2H6v2H4v2H2v6h6v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2V8h2V6h-2V4h-2V2zm0 8h-2v2h-2v2h-2v2h-2v2H8v-2H6v-2h2v-2h2v-2h2V8h2V6h2v2h2v2zM6 16H4v4h4v-2H6v-2z" fill="currentColor"/></svg>`,
-  eraser: '',
-  fill: '',
-  eyedrop: '',
-  selection: '',
-  shape: ''
+/**
+ * 10x9 ASCII icon definitions (10 wide × 9 tall)
+ * # = filled pixel, . = empty, E = eraser fill (light gray)
+ * No built-in margins - icons are centered by the button component
+ */
+const TOOL_ICON_GRIDS: Record<ToolType, string> = {
+  pencil: `
+.......##.
+......###.
+.....##...
+....##....
+...##.....
+..###.....
+.####.....
+#####.....
+####......
+`.trim(),
+
+  eraser: `
+..........
+EEEEEEEEEE
+EEEEEEEEEE
+EEEEEEEEEE
+##########
+..........
+..........
+..........
+..........
+`.trim(),
+
+  fill: `
+...###....
+..#####...
+..#####...
+..#####...
+...###....
+....#.....
+....#.....
+..........
+..........
+`.trim(),
+
+  eyedrop: `
+...###....
+...###....
+....#.....
+....#.....
+....#.....
+....#.....
+....#.....
+....#.....
+..........
+`.trim(),
+
+  selection: `
+####..####
+#........#
+#........#
+..........
+..........
+#........#
+#........#
+#........#
+####..####
+`.trim(),
+
+  shape: `
+.....####.
+.....#..#.
+#####.##..
+#...#.....
+#...#.....
+#...#.....
+#...#.....
+#####.....
+..........
+`.trim()
+};
+
+const SHAPE_ICON_GRIDS: Record<ShapeType, string> = {
+  circle: `
+...####...
+.##....##.
+#........#
+#........#
+#........#
+#........#
+#........#
+.##....##.
+...####...
+`.trim(),
+
+  'circle-filled': `
+...####...
+.########.
+##########
+##########
+##########
+##########
+##########
+.########.
+...####...
+`.trim(),
+
+  square: `
+##########
+#........#
+#........#
+#........#
+#........#
+#........#
+#........#
+#........#
+##########
+`.trim(),
+
+  'square-filled': `
+##########
+##########
+##########
+##########
+##########
+##########
+##########
+##########
+##########
+`.trim()
 };
 
 /**
- * Draws a tool icon as Graphics at native size (24x24)
+ * Parse ASCII grid and render to Graphics at target size
+ * Each cell is rendered as (pixelSize x pixelSize) rectangle
+ * Renders directly at target size for pixel-perfect results (like SVG approach)
  */
-function drawToolGraphic(tool: ToolType, color: number): PIXI.Graphics {
+function renderAsciiGrid(grid: string, color: number, pixelSize: number): PIXI.Graphics {
   const g = new PIXI.Graphics();
   g.roundPixels = true;
 
-  switch (tool) {
-    case 'pencil':
-      // Pixel art pencil from SVG - native 24x24 size, 2px blocks
-      g.rect(16, 0, 2, 2);
-      g.fill({ color });
-      g.rect(14, 2, 2, 2);
-      g.fill({ color });
-      g.rect(12, 4, 2, 2);
-      g.fill({ color });
-      g.rect(10, 6, 2, 2);
-      g.fill({ color });
-      g.rect(8, 8, 2, 2);
-      g.fill({ color });
-      g.rect(6, 10, 2, 2);
-      g.fill({ color });
-      g.rect(4, 12, 2, 2);
-      g.fill({ color });
-      g.rect(2, 14, 2, 2);
-      g.fill({ color });
-      g.rect(0, 16, 2, 6);
-      g.fill({ color });
-      g.rect(2, 18, 4, 2);
-      g.fill({ color });
-      // Inner detail
-      g.rect(14, 8, 2, 2);
-      g.fill({ color });
-      g.rect(12, 10, 2, 2);
-      g.fill({ color });
-      g.rect(10, 12, 2, 2);
-      g.fill({ color });
-      g.rect(8, 14, 2, 2);
-      g.fill({ color });
-      g.rect(6, 14, 2, 2);
-      g.fill({ color });
-      // Bottom square detail
-      g.rect(4, 16, 2, 4);
-      g.fill({ color });
-      g.rect(2, 16, 2, 2);
-      g.fill({ color });
-      break;
+  const lines = grid.split('\n');
+  const gridSize = lines.length; // Should be 12
+  const totalSize = gridSize * pixelSize;
 
-    case 'eraser':
-      // Eraser at 24x24
-      g.rect(6, 10, 12, 8);
-      g.fill({ color: 0xeeeeee });
-      g.rect(6, 10, 12, 2);
-      g.fill({ color });
-      g.rect(6, 16, 12, 2);
-      g.fill({ color });
-      g.rect(6, 10, 2, 8);
-      g.fill({ color });
-      g.rect(16, 10, 2, 8);
-      g.fill({ color });
-      break;
+  // Force full bounds by drawing transparent pixels at corners
+  g.rect(0, 0, 1, 1);
+  g.fill({ color: 0x000000, alpha: 0 });
+  g.rect(totalSize - 1, totalSize - 1, 1, 1);
+  g.fill({ color: 0x000000, alpha: 0 });
 
-    case 'fill':
-      // Fill bucket at 24x24
-      g.rect(8, 10, 8, 6);
-      g.fill({ color });
-      g.rect(14, 8, 4, 4);
-      g.fill({ color });
-      g.rect(10, 18, 4, 4);
-      g.fill({ color });
-      g.rect(11, 22, 2, 2);
-      g.fill({ color });
-      break;
-
-    case 'eyedrop':
-      // Eyedropper at 24x24
-      g.rect(8, 4, 8, 4);
-      g.fill({ color });
-      g.rect(10, 8, 4, 6);
-      g.fill({ color });
-      g.rect(11, 14, 2, 6);
-      g.fill({ color });
-      break;
-
-    case 'selection':
-      // Selection/marquee tool - dashed rectangle at 24x24
-      // Top edge (dashed)
-      g.rect(4, 4, 4, 2);
-      g.fill({ color });
-      g.rect(12, 4, 4, 2);
-      g.fill({ color });
-      // Bottom edge (dashed)
-      g.rect(4, 18, 4, 2);
-      g.fill({ color });
-      g.rect(12, 18, 4, 2);
-      g.fill({ color });
-      // Left edge (dashed)
-      g.rect(4, 4, 2, 4);
-      g.fill({ color });
-      g.rect(4, 12, 2, 4);
-      g.fill({ color });
-      // Right edge (dashed)
-      g.rect(18, 4, 2, 4);
-      g.fill({ color });
-      g.rect(18, 12, 2, 4);
-      g.fill({ color });
-      // Corners
-      g.rect(4, 4, 2, 2);
-      g.fill({ color });
-      g.rect(18, 4, 2, 2);
-      g.fill({ color });
-      g.rect(4, 18, 2, 2);
-      g.fill({ color });
-      g.rect(18, 18, 2, 2);
-      g.fill({ color });
-      break;
-
-    case 'shape':
-      // Shape tool icon - overlapping shapes at 24x24
-      // Square outline (back)
-      g.rect(2, 8, 12, 2);
-      g.fill({ color });
-      g.rect(2, 18, 12, 2);
-      g.fill({ color });
-      g.rect(2, 8, 2, 12);
-      g.fill({ color });
-      g.rect(12, 8, 2, 12);
-      g.fill({ color });
-      // Circle outline (front) - simplified pixel circle
-      g.rect(14, 2, 6, 2);
-      g.fill({ color });
-      g.rect(12, 4, 2, 2);
-      g.fill({ color });
-      g.rect(20, 4, 2, 2);
-      g.fill({ color });
-      g.rect(10, 6, 2, 6);
-      g.fill({ color });
-      g.rect(22, 6, 2, 6);
-      g.fill({ color });
-      g.rect(12, 12, 2, 2);
-      g.fill({ color });
-      g.rect(20, 12, 2, 2);
-      g.fill({ color });
-      g.rect(14, 14, 6, 2);
-      g.fill({ color });
-      break;
+  for (let y = 0; y < lines.length; y++) {
+    const line = lines[y];
+    for (let x = 0; x < line.length; x++) {
+      const char = line[x];
+      if (char === '#') {
+        g.rect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        g.fill({ color });
+      } else if (char === 'E') {
+        g.rect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        g.fill({ color: 0xeeeeee });
+      }
+    }
   }
 
   return g;
 }
 
 /**
- * Draws a shape icon as Graphics at native size (24x24)
- */
-function drawShapeGraphic(shape: ShapeType, color: number): PIXI.Graphics {
-  const g = new PIXI.Graphics();
-  g.roundPixels = true;
-
-  switch (shape) {
-    case 'circle':
-      // Circle outline at 24x24
-      g.rect(8, 2, 8, 2);
-      g.fill({ color });
-      g.rect(6, 4, 2, 2);
-      g.fill({ color });
-      g.rect(16, 4, 2, 2);
-      g.fill({ color });
-      g.rect(4, 6, 2, 4);
-      g.fill({ color });
-      g.rect(18, 6, 2, 4);
-      g.fill({ color });
-      g.rect(2, 10, 2, 4);
-      g.fill({ color });
-      g.rect(20, 10, 2, 4);
-      g.fill({ color });
-      g.rect(4, 14, 2, 4);
-      g.fill({ color });
-      g.rect(18, 14, 2, 4);
-      g.fill({ color });
-      g.rect(6, 18, 2, 2);
-      g.fill({ color });
-      g.rect(16, 18, 2, 2);
-      g.fill({ color });
-      g.rect(8, 20, 8, 2);
-      g.fill({ color });
-      break;
-
-    case 'circle-filled':
-      // Filled circle at 24x24
-      g.rect(8, 2, 8, 2);
-      g.fill({ color });
-      g.rect(6, 4, 12, 2);
-      g.fill({ color });
-      g.rect(4, 6, 16, 4);
-      g.fill({ color });
-      g.rect(2, 10, 20, 4);
-      g.fill({ color });
-      g.rect(4, 14, 16, 4);
-      g.fill({ color });
-      g.rect(6, 18, 12, 2);
-      g.fill({ color });
-      g.rect(8, 20, 8, 2);
-      g.fill({ color });
-      break;
-
-    case 'square':
-      // Square outline at 24x24
-      g.rect(4, 4, 16, 2);
-      g.fill({ color });
-      g.rect(4, 18, 16, 2);
-      g.fill({ color });
-      g.rect(4, 4, 2, 16);
-      g.fill({ color });
-      g.rect(18, 4, 2, 16);
-      g.fill({ color });
-      break;
-
-    case 'square-filled':
-      // Filled square at 24x24
-      g.rect(4, 4, 16, 16);
-      g.fill({ color });
-      break;
-  }
-
-  return g;
-}
-
-/**
- * Creates a tool icon sprite from cached or newly generated texture
- * Icons are rendered at native 24x24 and scaled to fit the target size
- * @param tool - The tool type
- * @param size - Target size in pixels (icon will scale to fit with padding)
+ * Draw ASCII grid directly into an existing Graphics object at a position.
+ * Use this to draw icons in the same pass as button backgrounds for perfect grid alignment.
+ *
+ * @param g - Graphics object to draw into
+ * @param grid - ASCII grid string (10x9 for tool/shape icons)
+ * @param offsetX - X position in pixels (should be grid-aligned)
+ * @param offsetY - Y position in pixels (should be grid-aligned)
  * @param color - Icon color
- * @param renderer - PIXI renderer for texture generation
+ * @param pixelSize - Size of each grid cell in pixels (typically GRID.scale)
+ */
+function drawAsciiGridInto(g: PIXI.Graphics, grid: string, offsetX: number, offsetY: number, color: number, pixelSize: number): void {
+  const lines = grid.split('\n');
+
+  for (let y = 0; y < lines.length; y++) {
+    const line = lines[y];
+    for (let x = 0; x < line.length; x++) {
+      const char = line[x];
+      if (char === '#') {
+        g.rect(offsetX + x * pixelSize, offsetY + y * pixelSize, pixelSize, pixelSize);
+        g.fill({ color });
+      } else if (char === 'E') {
+        g.rect(offsetX + x * pixelSize, offsetY + y * pixelSize, pixelSize, pixelSize);
+        g.fill({ color: 0xeeeeee });
+      }
+    }
+  }
+}
+
+/**
+ * Draw a tool icon directly into a Graphics object.
+ * Perfect for drawing icons in the same pass as button backgrounds.
+ */
+export function drawToolIconInto(g: PIXI.Graphics, tool: ToolType, offsetX: number, offsetY: number, color: number, pixelSize: number): void {
+  drawAsciiGridInto(g, TOOL_ICON_GRIDS[tool], offsetX, offsetY, color, pixelSize);
+}
+
+/**
+ * Draw a shape icon directly into a Graphics object.
+ * Perfect for drawing icons in the same pass as button backgrounds.
+ */
+export function drawShapeIconInto(g: PIXI.Graphics, shape: ShapeType, offsetX: number, offsetY: number, color: number, pixelSize: number): void {
+  drawAsciiGridInto(g, SHAPE_ICON_GRIDS[shape], offsetX, offsetY, color, pixelSize);
+}
+
+/**
+ * Draws a tool icon from ASCII grid at target size
+ */
+function drawToolGraphic(tool: ToolType, color: number, pixelSize: number): PIXI.Graphics {
+  return renderAsciiGrid(TOOL_ICON_GRIDS[tool], color, pixelSize);
+}
+
+/**
+ * Draws a shape icon from ASCII grid at target size
+ */
+function drawShapeGraphic(shape: ShapeType, color: number, pixelSize: number): PIXI.Graphics {
+  return renderAsciiGrid(SHAPE_ICON_GRIDS[shape], color, pixelSize);
+}
+
+/** Icon dimensions: 10 wide × 9 tall cells */
+export const ICON_WIDTH = 10;
+export const ICON_HEIGHT = 9;
+
+/**
+ * Creates a tool icon sprite rendered directly at target size
+ * No sprite scaling needed - texture is generated at final size for pixel-perfect rendering
  */
 export function createToolIcon(tool: ToolType, size: number, color: number, renderer: PIXI.Renderer): PIXI.Sprite {
-  const cacheKey = `${tool}_${color}`;
+  // Cache key includes size since we render at target size
+  const pixelSize = Math.floor(size / ICON_WIDTH);
+  const cacheKey = `${tool}_${color}_${pixelSize}`;
 
-  // Check cache
   if (!textureCache.has(cacheKey)) {
-    const graphic = drawToolGraphic(tool, color);
+    const graphic = drawToolGraphic(tool, color, pixelSize);
     graphic.roundPixels = true;
 
     const texture = renderer.generateTexture({
@@ -278,27 +271,21 @@ export function createToolIcon(tool: ToolType, size: number, color: number, rend
   sprite.roundPixels = true;
   sprite.texture.source.scaleMode = 'nearest';
 
-  // Scale to fit target size (icon is 24x24 native)
-  const scale = size / 24;
-  sprite.scale.set(scale);
-
+  // No scaling needed - texture is already at target size
   return sprite;
 }
 
 /**
- * Creates a shape icon sprite from cached or newly generated texture
- * Icons are rendered at native 24x24 and scaled to fit the target size
- * @param shape - The shape type
- * @param size - Target size in pixels (icon will scale to fit)
- * @param color - Icon color
- * @param renderer - PIXI renderer for texture generation
+ * Creates a shape icon sprite rendered directly at target size
+ * No sprite scaling needed - texture is generated at final size for pixel-perfect rendering
  */
 export function createShapeIcon(shape: ShapeType, size: number, color: number, renderer: PIXI.Renderer): PIXI.Sprite {
-  const cacheKey = `shape_${shape}_${color}`;
+  // Cache key includes size since we render at target size
+  const pixelSize = Math.floor(size / ICON_WIDTH);
+  const cacheKey = `shape_${shape}_${color}_${pixelSize}`;
 
-  // Check cache
   if (!textureCache.has(cacheKey)) {
-    const graphic = drawShapeGraphic(shape, color);
+    const graphic = drawShapeGraphic(shape, color, pixelSize);
     graphic.roundPixels = true;
 
     const texture = renderer.generateTexture({
@@ -316,9 +303,6 @@ export function createShapeIcon(shape: ShapeType, size: number, color: number, r
   sprite.roundPixels = true;
   sprite.texture.source.scaleMode = 'nearest';
 
-  // Scale to fit target size (icon is 24x24 native)
-  const scale = size / 24;
-  sprite.scale.set(scale);
-
+  // No scaling needed - texture is already at target size
   return sprite;
 }

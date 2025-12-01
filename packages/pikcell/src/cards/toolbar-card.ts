@@ -5,11 +5,10 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton, PixelButtonResult } from '../components/pixel-button';
 import { createPopupToolbar, PopupToolbarResult } from '../components/popup-toolbar';
-import { createShapeIcon, ShapeType } from '../theming/tool-icons';
+import { drawToolIconInto, drawShapeIconInto, ShapeType, ToolType } from '../theming/tool-icons';
 import { getTheme } from '../theming/theme';
-import { GRID, px, svgToTexture } from '@moxijs/core';
+import { GRID, px } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
-import { TOOL_ICONS } from '../config/icons';
 import { TOOLBAR_CARD_CONFIG } from '../config/card-configs';
 
 /** Available main tools */
@@ -95,36 +94,18 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
 
   const contentContainer = card.getContentContainer();
 
-  /** Calculate icon pixel size */
-  function getIconSizePx(btnSize: number): number {
-    return px(btnSize - GRID.border * 4);
-  }
-
-  /** Create icon sprite from SVG */
-  async function createToolIconSprite(tool: MainToolType, btnSize: number = buttonSize): Promise<PIXI.Sprite> {
-    const theme = getTheme();
-    const size = getIconSizePx(btnSize);
-
-    // For shape tool, use the selected shape icon instead of generic shape icon
+  /** Create drawIcon function for a tool (draws directly into button graphics) */
+  function createToolDrawIcon(tool: MainToolType): (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void {
+    // For shape tool, use the selected shape icon
     if (tool === 'shape') {
-      return createShapeIconSprite(selectedShape, btnSize);
+      return (g, x, y, color, pixelSize) => drawShapeIconInto(g, selectedShape, x, y, color, pixelSize);
     }
-
-    const texture = await svgToTexture({
-      svgString: TOOL_ICONS[tool],
-      width: size,
-      height: size,
-      color: theme.textPrimary
-    });
-    const sprite = new PIXI.Sprite(texture);
-    sprite.roundPixels = true;
-    return sprite;
+    return (g, x, y, color, pixelSize) => drawToolIconInto(g, tool as ToolType, x, y, color, pixelSize);
   }
 
-  /** Create shape icon sprite */
-  function createShapeIconSprite(shape: ShapeType, btnSize: number = buttonSize): PIXI.Sprite {
-    const theme = getTheme();
-    return createShapeIcon(shape, getIconSizePx(btnSize), theme.textPrimary, renderer);
+  /** Create drawIcon function for a shape */
+  function createShapeDrawIcon(shape: ShapeType): (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void {
+    return (g, x, y, color, pixelSize) => drawShapeIconInto(g, shape, x, y, color, pixelSize);
   }
 
   /** Select a tool */
@@ -151,11 +132,11 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
 
     if (shapePopup) shapePopup.destroy();
 
-    const popupButtonSize = 14;
+    const popupButtonSize = 16; // Match main buttons for 1:1 icon sizing
     shapePopup = createPopupToolbar({
       buttons: SHAPE_OPTIONS.map(shape => ({
         id: shape,
-        createIcon: () => createShapeIconSprite(shape, popupButtonSize),
+        drawIcon: createShapeDrawIcon(shape),
         tooltip: SHAPE_TOOLTIPS[shape]
       })),
       buttonSize: popupButtonSize,
@@ -213,20 +194,17 @@ export function createToolbarCard(options: ToolbarCardOptions): ToolbarCardResul
   }
 
   /** Create/recreate all buttons */
-  async function updateButtons(): Promise<void> {
+  function updateButtons(): void {
     // Cleanup existing
     buttonRefs.forEach(btn => btn.destroy());
     buttonRefs.clear();
     contentContainer.removeChildren();
 
-    // Create icons in parallel
-    const icons = await Promise.all(MAIN_TOOLS.map(t => createToolIconSprite(t.id)));
-
-    // Create buttons
+    // Create buttons with direct icon drawing for perfect grid alignment
     MAIN_TOOLS.forEach((toolDef, i) => {
       const btn = createPixelButton({
         size: buttonSize,
-        icon: icons[i],
+        drawIcon: createToolDrawIcon(toolDef.id),
         selected: selectedTool === toolDef.id,
         selectionMode: 'press',
         actionMode: 'toggle',

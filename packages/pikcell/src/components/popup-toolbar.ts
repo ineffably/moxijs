@@ -11,8 +11,8 @@ import { ComponentResult } from '../interfaces/components';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 
 export interface PopupToolbarButton {
-  /** Factory function to create the icon (called each time buttons are created) */
-  createIcon: () => PIXI.Sprite | PIXI.Graphics;
+  /** Draw icon directly into button graphics for perfect grid alignment */
+  drawIcon: (g: PIXI.Graphics, x: number, y: number, color: number, pixelSize: number) => void;
   /** Tooltip text */
   tooltip?: string;
   /** Unique identifier for this option */
@@ -150,7 +150,7 @@ export function createPopupToolbar(options: PopupToolbarOptions): PopupToolbarRe
     buttons.forEach((btnConfig, index) => {
       const btn = createPixelButton({
         size: buttonSize,
-        icon: btnConfig.createIcon(),
+        drawIcon: btnConfig.drawIcon,
         selected: btnConfig.id === selectedId,
         selectionMode: 'press',
         actionMode: 'toggle',

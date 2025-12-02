@@ -12,6 +12,7 @@ import { createButtonsShowcase } from '../ui/buttons-showcase';
 import { createTextInputsShowcase } from '../ui/text-inputs-showcase';
 import { createOptionControlsShowcase } from '../ui/option-controls-showcase';
 import { createThemingShowcase } from '../ui/theming-showcase';
+import { createPanelsShowcase } from '../ui/panels-showcase';
 
 /**
  * Example 14: UI Showcase - Buttons
@@ -72,6 +73,11 @@ export async function initUIShowcase() {
       key: 'theming',
       label: 'Theming & Forms',
       content: await createThemingShowcase()
+    },
+    {
+      key: 'panels',
+      label: 'Panels',
+      content: await createPanelsShowcase()
     }
   ];
 

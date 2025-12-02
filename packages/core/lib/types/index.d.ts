@@ -29,6 +29,7 @@ import { UITextInput } from './ui/components/ui-text-input';
 import { UITextArea } from './ui/components/ui-textarea';
 import { UIScrollContainer } from './ui/components/ui-scroll-container';
 import { UITabs } from './ui/components/ui-tabs';
+import { CardPanel, BaseCardStyle, FlatCardStyle } from './ui/components/card-panel';
 import { UICheckbox } from './ui/components/ui-checkbox';
 import { UICheckboxWithLabel } from './ui/components/ui-checkbox-with-label';
 import { UIRadioButton } from './ui/components/ui-radio-button';
@@ -68,6 +69,7 @@ export type { UIRadioGroupProps, RadioOption } from './ui/components/ui-radio-gr
 export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
+export type { CardPanelProps, CardPanelTitle, CardPanelFooter, DrawIconFn, ResizeDirection, CardStyle, CardThemeColors, CardSectionDimensions, FlatCardStyleConfig } from './ui/components/card-panel';
 export type { UILayerOptions } from './ui/UILayer';
 export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
@@ -211,6 +213,9 @@ declare const exportedObjects: {
     UITabs: typeof UITabs;
     UILayer: typeof UILayer;
     UIScaleMode: typeof UIScaleMode;
+    CardPanel: typeof CardPanel;
+    BaseCardStyle: typeof BaseCardStyle;
+    FlatCardStyle: typeof FlatCardStyle;
     svgToTexture: typeof svgToTexture;
     PixelGrid: typeof PixelGrid;
     px: (units: number) => number;
@@ -234,4 +239,4 @@ declare const exportedObjects: {
     ActionManager: typeof ActionManager;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, ThemeManager, ThemeResolver, createDefaultDarkTheme, createDefaultLightTheme, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UICheckbox, UICheckboxWithLabel, UIRadioButton, UIRadioGroup, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode, svgToTexture, PixelGrid, px, units, GRID, BORDER, createBorderConfig, ActionManager };
+export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, EdgeInsets, UIComponent, UIFocusManager, ThemeManager, ThemeResolver, createDefaultDarkTheme, createDefaultLightTheme, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UILabel, UIPanel, UIButton, ButtonState, UICheckbox, UICheckboxWithLabel, UIRadioButton, UIRadioGroup, UISelect, UITextInput, UITextArea, UIScrollContainer, UITabs, UILayer, UIScaleMode, CardPanel, BaseCardStyle, FlatCardStyle, svgToTexture, PixelGrid, px, units, GRID, BORDER, createBorderConfig, ActionManager };

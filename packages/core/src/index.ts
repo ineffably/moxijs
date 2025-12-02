@@ -41,6 +41,11 @@ import { UITextInput } from './ui/components/ui-text-input';
 import { UITextArea } from './ui/components/ui-textarea';
 import { UIScrollContainer } from './ui/components/ui-scroll-container';
 import { UITabs, TabItem } from './ui/components/ui-tabs';
+import {
+  CardPanel,
+  BaseCardStyle,
+  FlatCardStyle
+} from './ui/components/card-panel';
 import { UICheckbox, UICheckboxProps } from './ui/components/ui-checkbox';
 import { UICheckboxWithLabel, UICheckboxWithLabelProps } from './ui/components/ui-checkbox-with-label';
 import { UIRadioButton, UIRadioButtonProps } from './ui/components/ui-radio-button';
@@ -112,6 +117,17 @@ export type { UIRadioGroupProps, RadioOption } from './ui/components/ui-radio-gr
 export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
+export type {
+  CardPanelProps,
+  CardPanelTitle,
+  CardPanelFooter,
+  DrawIconFn,
+  ResizeDirection,
+  CardStyle,
+  CardThemeColors,
+  CardSectionDimensions,
+  FlatCardStyleConfig
+} from './ui/components/card-panel';
 export type { UILayerOptions } from './ui/UILayer';
 export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
@@ -220,6 +236,9 @@ const exportedObjects = {
   UITabs,
   UILayer,
   UIScaleMode,
+  CardPanel,
+  BaseCardStyle,
+  FlatCardStyle,
   svgToTexture,
   PixelGrid,
   px,
@@ -307,6 +326,9 @@ export {
   UITabs,
   UILayer,
   UIScaleMode,
+  CardPanel,
+  BaseCardStyle,
+  FlatCardStyle,
   svgToTexture,
   PixelGrid,
   px,

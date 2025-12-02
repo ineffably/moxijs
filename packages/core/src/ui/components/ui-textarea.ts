@@ -290,6 +290,8 @@ export class UITextArea extends UIComponent {
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
+      // Handler updates stateManager directly, so we need to update visuals
+      this.updateText();
       this.updateCursor();
     }
   }

@@ -44,6 +44,11 @@ export class Scene extends PIXI.Container {
 
   /** Render the scene. Called automatically by Engine each frame. */
   draw(deltaTime: number) {
-    this.renderer.render(this);
+    try {
+      this.renderer.render(this);
+    } catch (err) {
+      // Catch render errors (e.g., destroyed objects still in tree)
+      console.warn('Scene render error:', err);
+    }
   }
 }

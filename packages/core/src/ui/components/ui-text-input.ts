@@ -135,6 +135,9 @@ export class UITextInput extends UIComponent {
     // Update component state
     this.enabled = !this.props.disabled;
 
+    // Make text input focusable by default
+    this.tabIndex = 0;
+
     // Set box model dimensions
     this.boxModel.width = this.props.width;
     this.boxModel.height = this.props.height;

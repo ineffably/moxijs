@@ -37,3 +37,19 @@ export { UITextInput, UITextInputProps } from './components/ui-text-input';
 export { UITextArea, UITextAreaProps } from './components/ui-textarea';
 export { UIScrollContainer, UIScrollContainerProps } from './components/ui-scroll-container';
 export { UITabs, UITabsProps, TabItem } from './components/ui-tabs';
+
+// Card Panel (flexible card with title/body/footer sections)
+export {
+  CardPanel,
+  CardPanelProps,
+  CardPanelTitle,
+  CardPanelFooter,
+  DrawIconFn,
+  ResizeDirection,
+  BaseCardStyle,
+  CardStyle,
+  CardThemeColors,
+  CardSectionDimensions,
+  FlatCardStyle,
+  FlatCardStyleConfig
+} from './components/card-panel';

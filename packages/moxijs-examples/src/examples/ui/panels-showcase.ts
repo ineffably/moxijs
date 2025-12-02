@@ -1,6 +1,6 @@
 /**
  * Panels Showcase Tab
- * Demonstrates color and textured 9-slice panels with interactive form controls
+ * Demonstrates color panels, textured 9-slice panels, and the new CardPanel component
  */
 import * as PIXI from 'pixi.js';
 import {
@@ -13,9 +13,28 @@ import {
   UITextInput,
   UISelect,
   UIPanel,
-  UIComponent
+  UIBox,
+  UIComponent,
+  UICheckbox,
+  CardPanel,
+  FlatCardStyle,
+  CardStyle
 } from '@moxijs/core';
 import { ASSETS } from '../../assets-config';
+import { PixelCardStyle, createPixelCardColors } from '@moxijs/pikcell/src/styles/pixel-card-style';
+
+// Layout constants for consistent styling
+const FORM_STYLES = {
+  labelFontSize: 16,
+  titleFontSize: 24,
+  inputWidth: 180,
+  inputHeight: 30,
+  checkboxSize: 18,
+  labelColor: 0xffffff,
+  gap: 12,
+  columnGap: 60,
+  padding: 30
+} as const;
 
 interface PanelConfig {
   backgroundColor?: number;
@@ -24,6 +43,17 @@ interface PanelConfig {
   textureName?: string;
   width?: number;
   height?: number;
+}
+
+interface CardPanelConfig {
+  title: string;
+  hasTitle: boolean;
+  draggable: boolean;
+  hasFooter: boolean;
+  styleType: 'flat' | 'pixel';
+  bodyWidth: number;
+  bodyHeight: number;
+  borderRadius: number;
 }
 
 export async function createPanelsShowcase(): Promise<UIComponent> {
@@ -57,6 +87,18 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     height: 250
   };
 
+  // CardPanel configuration state (16:9 ratio, scaled to match other panels)
+  const cardPanelConfig: CardPanelConfig = {
+    title: 'Card Title',
+    hasTitle: true,
+    draggable: true,
+    hasFooter: true,
+    styleType: 'flat',
+    bodyWidth: 320,
+    bodyHeight: 180,
+    borderRadius: 0
+  };
+
   // Available panel textures
   const panelTextures = [
     { name: 'glassPanel', label: 'Glass Panel' },
@@ -70,6 +112,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   // Demo panel containers
   let colorDemoContainer: FlexContainer;
   let texturedDemoContainer: FlexContainer;
+  let cardDemoContainer: PIXI.Container;
+  let currentCardPanel: CardPanel | null = null;
 
   // Function to create color demo panel
   const createColorDemoPanel = (config: PanelConfig): UIPanel => {
@@ -208,13 +252,99 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     texturedDemoContainer.layout(400, 300);
   };
 
+  // Function to create CardPanel demo
+  const createCardDemoPanel = (config: CardPanelConfig): CardPanel => {
+    // Choose style based on config
+    let style: CardStyle;
+    let colors;
+
+    if (config.styleType === 'pixel') {
+      style = new PixelCardStyle();
+      colors = createPixelCardColors();
+    } else {
+      style = new FlatCardStyle({
+        borderRadius: config.borderRadius,
+        showShadow: true,
+        titleBarHeight: 28,
+        footerHeight: 28,
+        contentPadding: 0
+      });
+      colors = {
+        background: 0x2a2a2a,
+        border: 0x404040,
+        titleBar: 0x333333,
+        titleText: 0xffffff
+      };
+    }
+
+    const panel = new CardPanel({
+      style,
+      colors,
+      title: config.hasTitle ? { text: config.title } : undefined,
+      bodyWidth: config.bodyWidth,
+      bodyHeight: config.bodyHeight,
+      draggable: config.draggable,
+      footer: config.hasFooter ? { height: 28 } : undefined
+    });
+
+    // Add some content to the body (no margin - fills entire body area)
+    const bodyContent = new PIXI.Graphics();
+    bodyContent.rect(0, 0, config.bodyWidth, config.bodyHeight);
+    bodyContent.fill({ color: 0x3a3a3a, alpha: 0.5 });
+
+    const contentLabel = new PIXI.Text({
+      text: 'Body Content',
+      style: { fontSize: 12, fill: 0x888888 }
+    });
+    contentLabel.position.set(
+      (config.bodyWidth - contentLabel.width) / 2,
+      (config.bodyHeight - contentLabel.height) / 2
+    );
+
+    panel.getBodyContainer().addChild(bodyContent);
+    panel.getBodyContainer().addChild(contentLabel);
+
+    // Add footer content if present
+    if (config.hasFooter) {
+      const footerLabel = new PIXI.Text({
+        text: 'Footer',
+        style: { fontSize: 11, fill: 0x666666 }
+      });
+      footerLabel.position.set(8, 6);
+      panel.getFooterContainer().addChild(footerLabel);
+    }
+
+    return panel;
+  };
+
+  // Function to update CardPanel demo
+  const updateCardDemo = () => {
+    try {
+      // Remove existing card safely
+      if (currentCardPanel) {
+        if (currentCardPanel.container.parent) {
+          currentCardPanel.container.parent.removeChild(currentCardPanel.container);
+        }
+        currentCardPanel.destroy();
+        currentCardPanel = null;
+      }
+
+      // Create new card
+      currentCardPanel = createCardDemoPanel(cardPanelConfig);
+      currentCardPanel.container.position.set(0, 0);
+      cardDemoContainer.addChild(currentCardPanel.container);
+    } catch (err) {
+      console.error('Error updating CardPanel demo:', err);
+    }
+  };
+
   // Create main container
   const mainContainer = new FlexContainer({
     direction: FlexDirection.Row,
     justify: FlexJustify.Start,
     align: FlexAlign.Start,
-    gap: 60,
-    padding: EdgeInsets.all(30)
+    gap: FORM_STYLES.columnGap,
+    padding: EdgeInsets.all(FORM_STYLES.padding)
   });
 
   // === LEFT COLUMN: Color Panels ===
@@ -225,8 +355,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
 
   const colorTitle = new UILabel({
     text: 'Color Panels',
-    fontSize: 24,
-    color: 0xffffff,
+    fontSize: FORM_STYLES.titleFontSize,
+    color: FORM_STYLES.labelColor,
     fontWeight: 'bold'
   });
   colorColumn.addChild(colorTitle);
@@ -245,11 +375,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   });
 
   // Background color input
-  const colorLabel = new UILabel({ text: 'Background Color:', fontSize: 14, color: 0xffffff });
+  const colorLabel = new UILabel({ text: 'Background Color:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   colorForm.addChild(colorLabel);
   
   const colorInput = new UITextInput({
-    value: '#2c3e50',
+    defaultValue: '#2c3e50',
     width: 150,
     placeholder: '#2c3e50',
     onChange: (value) => {
@@ -264,11 +394,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(colorInput);
 
   // Alpha input
-  const alphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: 14, color: 0xffffff });
+  const alphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   colorForm.addChild(alphaLabel);
   
   const alphaInput = new UITextInput({
-    value: '90',
+    defaultValue: '90',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -282,11 +412,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(alphaInput);
 
   // Border radius input
-  const radiusLabel = new UILabel({ text: 'Border Radius:', fontSize: 14, color: 0xffffff });
+  const radiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   colorForm.addChild(radiusLabel);
   
   const radiusInput = new UITextInput({
-    value: '8',
+    defaultValue: '8',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -300,11 +430,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(radiusInput);
 
   // Width input
-  const widthLabel = new UILabel({ text: 'Width:', fontSize: 14, color: 0xffffff });
+  const widthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   colorForm.addChild(widthLabel);
   
   const widthInput = new UITextInput({
-    value: '350',
+    defaultValue: '350',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -318,11 +448,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(widthInput);
 
   // Height input
-  const heightLabel = new UILabel({ text: 'Height:', fontSize: 14, color: 0xffffff });
+  const heightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   colorForm.addChild(heightLabel);
   
   const heightInput = new UITextInput({
-    value: '250',
+    defaultValue: '250',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -360,8 +490,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
 
   const texturedTitle = new UILabel({
     text: 'Textured Panels',
-    fontSize: 24,
-    color: 0xffffff,
+    fontSize: FORM_STYLES.titleFontSize,
+    color: FORM_STYLES.labelColor,
     fontWeight: 'bold'
   });
   texturedColumn.addChild(texturedTitle);
@@ -380,7 +510,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   });
 
   // Texture select
-  const textureLabel = new UILabel({ text: 'Panel Texture:', fontSize: 14, color: 0xffffff });
+  const textureLabel = new UILabel({ text: 'Panel Texture:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   texturedForm.addChild(textureLabel);
   
   const textureSelect = new UISelect({
@@ -395,11 +525,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(textureSelect);
 
   // Alpha input
-  const texAlphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: 14, color: 0xffffff });
+  const texAlphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   texturedForm.addChild(texAlphaLabel);
   
   const texAlphaInput = new UITextInput({
-    value: '100',
+    defaultValue: '100',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -413,11 +543,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(texAlphaInput);
 
   // Width input
-  const texWidthLabel = new UILabel({ text: 'Width:', fontSize: 14, color: 0xffffff });
+  const texWidthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   texturedForm.addChild(texWidthLabel);
   
   const texWidthInput = new UITextInput({
-    value: '350',
+    defaultValue: '350',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -431,11 +561,11 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(texWidthInput);
 
   // Height input
-  const texHeightLabel = new UILabel({ text: 'Height:', fontSize: 14, color: 0xffffff });
+  const texHeightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
   texturedForm.addChild(texHeightLabel);
   
   const texHeightInput = new UITextInput({
-    value: '250',
+    defaultValue: '250',
     width: 100,
     type: 'number',
     onChange: (value) => {
@@ -463,16 +593,223 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
 
   mainContainer.addChild(texturedColumn);
 
+  // === THIRD COLUMN: CardPanel ===
+  const cardColumn = new FlexContainer({
+    direction: FlexDirection.Column,
+    gap: 20
+  });
+
+  const cardTitle = new UILabel({
+    text: 'CardPanel',
+    fontSize: FORM_STYLES.titleFontSize,
+    color: FORM_STYLES.labelColor,
+    fontWeight: 'bold'
+  });
+  cardColumn.addChild(cardTitle);
+
+  // CardPanel demo - use UIBox as a spacer to reserve space for the card
+  // Card size: body (320x180) + title (28) + footer (28) + borders (2) + shadow (4) = ~330x246
+  const cardDemoSpacer = new UIBox({
+    width: 330,
+    height: 246
+  });
+  cardDemoSpacer.layout(330, 246);
+  cardDemoContainer = new PIXI.Container();
+  cardDemoSpacer.container.addChild(cardDemoContainer);
+  cardColumn.addChild(cardDemoSpacer);
+
+  // CardPanel settings form
+  const cardForm = new FlexContainer({
+    direction: FlexDirection.Column,
+    gap: FORM_STYLES.gap,
+    padding: EdgeInsets.all(15)
+  });
+
+  // Style select
+  const styleLabel = new UILabel({ text: 'Style:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  cardForm.addChild(styleLabel);
+
+  const styleSelect = new UISelect({
+    options: [
+      { label: 'Flat', value: 'flat' },
+      { label: 'Pixel', value: 'pixel' }
+    ],
+    value: 'flat',
+    width: 180,
+    onChange: (value) => {
+      cardPanelConfig.styleType = value as 'flat' | 'pixel';
+      updateCardDemo();
+    }
+  });
+  cardForm.addChild(styleSelect);
+
+  // Border radius (flat style only)
+  const borderRadiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  cardForm.addChild(borderRadiusLabel);
+
+  const borderRadiusInput = new UITextInput({
+    defaultValue: '0',
+    width: 100,
+    type: 'number',
+    onChange: (value) => {
+      const r = parseInt(value, 10);
+      if (!isNaN(r) && r >= 0) {
+        cardPanelConfig.borderRadius = r;
+        updateCardDemo();
+      }
+    }
+  });
+  cardForm.addChild(borderRadiusInput);
+
+  // Title text input
+  const titleLabel = new UILabel({ text: 'Title Text:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  cardForm.addChild(titleLabel);
+
+  const titleInput = new UITextInput({
+    defaultValue: 'Card Title',
+    width: 180,
+    placeholder: 'Card Title',
+    onChange: (value) => {
+      cardPanelConfig.title = value;
+      if (cardPanelConfig.hasTitle) {
+        updateCardDemo();
+      }
+    }
+  });
+  cardForm.addChild(titleInput);
+
+  // Has title checkbox
+  const hasTitleRow = new FlexContainer({
+    direction: FlexDirection.Row,
+    align: FlexAlign.Center,
+    gap: 10
+  });
+  const hasTitleCheckbox = new UICheckbox({
+    defaultChecked: true,
+    size: FORM_STYLES.checkboxSize,
+    onChange: (checked) => {
+      cardPanelConfig.hasTitle = checked;
+      updateCardDemo();
+    }
+  });
+  const hasTitleLabel = new UILabel({ text: 'Has Title', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  hasTitleRow.addChild(hasTitleCheckbox);
+  hasTitleRow.addChild(hasTitleLabel);
+  cardForm.addChild(hasTitleRow);
+
+  // Draggable checkbox
+  const draggableRow = new FlexContainer({
+    direction: FlexDirection.Row,
+    align: FlexAlign.Center,
+    gap: 10
+  });
+  const draggableCheckbox = new UICheckbox({
+    defaultChecked: true,
+    size: FORM_STYLES.checkboxSize,
+    onChange: (checked) => {
+      cardPanelConfig.draggable = checked;
+      updateCardDemo();
+    }
+  });
+  const draggableLabel = new UILabel({ text: 'Draggable', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  draggableRow.addChild(draggableCheckbox);
+  draggableRow.addChild(draggableLabel);
+  cardForm.addChild(draggableRow);
+
+  // Has footer checkbox
+  const hasFooterRow = new FlexContainer({
+    direction: FlexDirection.Row,
+    align: FlexAlign.Center,
+    gap: 10
+  });
+  const hasFooterCheckbox = new UICheckbox({
+    defaultChecked: true,
+    size: FORM_STYLES.checkboxSize,
+    onChange: (checked) => {
+      cardPanelConfig.hasFooter = checked;
+      updateCardDemo();
+    }
+  });
+  const hasFooterLabel = new UILabel({ text: 'Has Footer', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  hasFooterRow.addChild(hasFooterCheckbox);
+  hasFooterRow.addChild(hasFooterLabel);
+  cardForm.addChild(hasFooterRow);
+
+  // Body width input
+  const bodyWidthLabel = new UILabel({ text: 'Body Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  cardForm.addChild(bodyWidthLabel);
+
+  const bodyWidthInput = new UITextInput({
+    defaultValue: '320',
+    width: 100,
+    type: 'number',
+    onChange: (value) => {
+      const w = parseInt(value, 10);
+      if (!isNaN(w) && w > 50) {
+        cardPanelConfig.bodyWidth = w;
+        updateCardDemo();
+      }
+    }
+  });
+  cardForm.addChild(bodyWidthInput);
+
+  // Body height input
+  const bodyHeightLabel = new UILabel({ text: 'Body Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  cardForm.addChild(bodyHeightLabel);
+
+  const bodyHeightInput = new UITextInput({
+    defaultValue: '180',
+    width: 100,
+    type: 'number',
+    onChange: (value) => {
+      const h = parseInt(value, 10);
+      if (!isNaN(h) && h > 50) {
+        cardPanelConfig.bodyHeight = h;
+        updateCardDemo();
+      }
+    }
+  });
+  cardForm.addChild(bodyHeightInput);
+
+  cardColumn.addChild(cardForm);
+
+  // Layout card form elements
+  styleLabel.layout(180, 20);
+  styleSelect.layout(180, 30);
+  borderRadiusLabel.layout(180, 20);
+  borderRadiusInput.layout(100, 30);
+  titleLabel.layout(180, 20);
+  titleInput.layout(180, 30);
+  hasTitleCheckbox.layout(18, 18);
+  hasTitleLabel.layout(100, 20);
+  hasTitleRow.layout(200, 24);
+  draggableCheckbox.layout(18, 18);
+  draggableLabel.layout(100, 20);
+  draggableRow.layout(200, 24);
+  hasFooterCheckbox.layout(18, 18);
+  hasFooterLabel.layout(100, 20);
+  hasFooterRow.layout(200, 24);
+  bodyWidthLabel.layout(180, 20);
+  bodyWidthInput.layout(100, 30);
+  bodyHeightLabel.layout(180, 20);
+  bodyHeightInput.layout(100, 30);
+  cardForm.layout(250, 400);
+
+  mainContainer.addChild(cardColumn);
+
   // Layout columns
   colorTitle.layout(400, 30);
   texturedTitle.layout(400, 30);
+  cardTitle.layout(380, 30);
   colorColumn.layout(450, 800);
   texturedColumn.layout(450, 800);
-  mainContainer.layout(1200, 900);
+  cardColumn.layout(420, 800);
+  mainContainer.layout(1400, 900);
 
   // Create initial demo panels
   updateColorDemo();
   updateTexturedDemo();
+  updateCardDemo();
 
   return mainContainer;
 }

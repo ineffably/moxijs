@@ -1,6 +1,7 @@
 import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
+import { LayoutEngine } from '../services';
 
 /** 9-slice configuration for scalable sprites. */
 export interface NineSliceConfig {
@@ -62,9 +63,15 @@ export interface UIPanelProps {
 export class UIPanel extends UIComponent {
   private props: UIPanelProps;
   private background?: PIXI.NineSliceSprite | PIXI.Graphics;
+  
+  // Services (composition)
+  private layoutEngine: LayoutEngine;
 
   constructor(props: UIPanelProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
+    // Initialize services
+    this.layoutEngine = new LayoutEngine();
 
     this.props = {
       backgroundAlpha: props.backgroundAlpha ?? 1,
@@ -123,43 +130,24 @@ export class UIPanel extends UIComponent {
       contentHeight = this.props.height;
     }
 
-    return {
-      width: contentWidth + padding.horizontal,
-      height: contentHeight + padding.vertical
+    const contentSize: MeasuredSize = {
+      width: contentWidth,
+      height: contentHeight
     };
+
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-    const padding = this.boxModel.padding;
-
-    // Calculate final dimensions
-    let finalWidth = measured.width;
-    let finalHeight = measured.height;
-
-    if (this.boxModel.width === 'fill') {
-      finalWidth = availableWidth;
-    }
-    if (this.boxModel.height === 'fill') {
-      finalHeight = availableHeight;
-    }
-
-    // Apply max constraints
-    if (this.boxModel.maxWidth !== undefined) {
-      finalWidth = Math.min(finalWidth, this.boxModel.maxWidth);
-    }
-    if (this.boxModel.maxHeight !== undefined) {
-      finalHeight = Math.min(finalHeight, this.boxModel.maxHeight);
-    }
-
-    // Update computed layout
-    this.computedLayout.width = finalWidth;
-    this.computedLayout.height = finalHeight;
-    this.computedLayout.contentX = padding.left;
-    this.computedLayout.contentY = padding.top;
-    this.computedLayout.contentWidth = finalWidth - padding.horizontal;
-    this.computedLayout.contentHeight = finalHeight - padding.vertical;
+    
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width: availableWidth, height: availableHeight }
+    );
 
     this.layoutDirty = false;
     this.render();

@@ -15,13 +15,17 @@ export interface UILabelProps {
 export declare class UILabel extends UIComponent {
     private props;
     private textObject;
+    private readonly dprScale;
+    private layoutEngine;
     constructor(props: UILabelProps, boxModel?: Partial<BoxModel>);
     private getTextStyle;
+    private updateTextStyle;
     measure(): MeasuredSize;
     layout(availableWidth: number, availableHeight: number): void;
     protected render(): void;
     setText(text: string): void;
     setColor(color: number): void;
+    setPosition(x: number, y: number): void;
     setFontSize(size: number): void;
     getText(): string;
 }

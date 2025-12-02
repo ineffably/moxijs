@@ -2,6 +2,7 @@ export { EdgeInsets } from './core/edge-insets';
 export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBoxModel } from './core/box-model';
 export { UIComponent } from './core/ui-component';
 export { UIFocusManager, Focusable } from './core/ui-focus-manager';
+export { LayoutEngine, SizeConstraints, FormStateManager, FormStateConfig, TextInputHandler, TextInputHandlerConfig, ThemeApplier, ComponentState } from './services';
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
 export { UIBox, UIBoxProps } from './components/ui-box';
 export { UILabel, UILabelProps, TextAlign } from './components/ui-label';

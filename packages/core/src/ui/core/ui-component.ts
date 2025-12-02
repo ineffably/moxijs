@@ -302,6 +302,14 @@ export abstract class UIComponent {
    * Destroys this component and cleans up resources
    */
   public destroy(): void {
+    // Remove from parent first to prevent rendering issues
+    if (this.container.parent) {
+      this.container.parent.removeChild(this.container);
+    }
+    // Ensure effects is initialized to prevent null reference errors during destruction
+    if (this.container.effects === null) {
+      this.container.effects = [];
+    }
     this.container.destroy({ children: true });
   }
 }

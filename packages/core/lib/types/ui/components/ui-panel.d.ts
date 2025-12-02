@@ -19,6 +19,7 @@ export interface UIPanelProps {
 export declare class UIPanel extends UIComponent {
     private props;
     private background?;
+    private layoutEngine;
     constructor(props?: UIPanelProps, boxModel?: Partial<BoxModel>);
     private createBackground;
     measure(): MeasuredSize;

@@ -2,6 +2,7 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { EdgeInsets } from '../core/edge-insets';
 import { SpriteBackgroundConfig } from './button-background-strategy';
+import { ThemeResolver } from '../theming/theme-resolver';
 export declare enum ButtonState {
     Normal = "normal",
     Hover = "hover",
@@ -24,6 +25,7 @@ export interface UIButtonProps {
     onClick?: () => void;
     onHover?: () => void;
     enabled?: boolean;
+    themeResolver?: ThemeResolver;
 }
 export declare class UIButton extends UIComponent {
     private props;
@@ -31,12 +33,16 @@ export declare class UIButton extends UIComponent {
     private bitmapFontFamily?;
     private onClick?;
     private onHover?;
+    private layoutEngine;
+    private themeApplier;
     private state;
     private backgroundStrategy;
     private label?;
     private bitmapLabel?;
     private labelCenterX;
     private labelCenterY;
+    private componentState;
+    private themeResolver?;
     private keydownHandler?;
     constructor(props?: UIButtonProps, boxModel?: Partial<BoxModel>);
     private createBitmapLabel;

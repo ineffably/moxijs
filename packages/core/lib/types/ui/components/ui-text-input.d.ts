@@ -1,5 +1,6 @@
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
+import { ThemeResolver } from '../theming/theme-resolver';
 export interface UITextInputProps {
     value?: string;
     defaultValue?: string;
@@ -15,6 +16,7 @@ export interface UITextInputProps {
     borderRadius?: number;
     fontSize?: number;
     type?: 'text' | 'number';
+    themeResolver?: ThemeResolver;
 }
 export declare class UITextInput extends UIComponent {
     private props;

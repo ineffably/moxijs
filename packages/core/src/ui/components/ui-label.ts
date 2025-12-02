@@ -1,6 +1,8 @@
 import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
+import { asTextDPR } from '../../library/as-pixi';
+import { LayoutEngine } from '../services';
 
 /** Text alignment options. */
 export type TextAlign = 'left' | 'center' | 'right';
@@ -56,14 +58,21 @@ export interface UILabelProps {
 export class UILabel extends UIComponent {
   private props: Required<UILabelProps>;
   private textObject: PIXI.Text;
+  private readonly dprScale = 2; // DPR scaling factor for crisp text
+  
+  // Services (composition)
+  private layoutEngine: LayoutEngine;
 
   constructor(props: UILabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
+    // Initialize services
+    this.layoutEngine = new LayoutEngine();
+
     this.props = {
       text: props.text,
       fontSize: props.fontSize ?? 16,
-      fontFamily: props.fontFamily ?? 'Arial',
+      fontFamily: props.fontFamily ?? 'PixelOperator8', // Default to pixel-perfect font
       color: props.color ?? 0xffffff,
       align: props.align ?? 'left',
       wordWrap: props.wordWrap ?? false,
@@ -72,33 +81,54 @@ export class UILabel extends UIComponent {
       lineHeight: props.lineHeight ?? 1.2
     };
 
-    // Create PIXI.Text with initial style
-    this.textObject = new PIXI.Text({
+    // Create PIXI.Text with high-DPI DPR rendering for crisp text
+    this.textObject = asTextDPR({
       text: this.props.text,
       style: this.getTextStyle(),
-      resolution: window.devicePixelRatio || 2 // Match device resolution for crisp text
+      dprScale: this.dprScale,
+      pixelPerfect: true
     });
+    this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
 
     this.container.addChild(this.textObject);
   }
 
   /** @internal */
-  private getTextStyle(): PIXI.TextStyle {
-    const style: any = {
+  private getTextStyle(): { [key: string]: any } {
+    // Note: fontSize is multiplied by dprScale in asTextDPR, so we pass display size here
+    const style: { [key: string]: any } = {
       fontFamily: this.props.fontFamily,
-      fontSize: this.props.fontSize,
+      fontSize: this.props.fontSize, // Display size - asTextDPR will multiply by dprScale
       fill: this.props.color,
       align: this.props.align,
       fontWeight: this.props.fontWeight,
-      lineHeight: this.props.fontSize * this.props.lineHeight
+      lineHeight: this.props.fontSize * this.props.lineHeight // Display line height
     };
 
     if (this.props.wordWrap) {
       style.wordWrap = true;
-      style.wordWrapWidth = this.props.wordWrapWidth;
+      // wordWrapWidth needs to be in the scaled coordinate space
+      style.wordWrapWidth = this.props.wordWrapWidth * this.dprScale;
     }
 
     return style;
+  }
+
+  /** @internal */
+  private updateTextStyle(): void {
+    // Update the text style, accounting for DPR scaling
+    const style = this.getTextStyle();
+    // asTextDPR already multiplied fontSize by dprScale, so we need to update it
+    this.textObject.style.fontSize = style.fontSize * this.dprScale;
+    this.textObject.style.fontFamily = style.fontFamily;
+    this.textObject.style.fill = style.fill;
+    this.textObject.style.align = style.align;
+    this.textObject.style.fontWeight = style.fontWeight;
+    this.textObject.style.lineHeight = style.lineHeight * this.dprScale;
+    if (this.props.wordWrap) {
+      this.textObject.style.wordWrap = style.wordWrap;
+      this.textObject.style.wordWrapWidth = style.wordWrapWidth;
+    }
   }
 
   /** @internal */
@@ -110,10 +140,12 @@ export class UILabel extends UIComponent {
     const textWidth = metrics.width;
     const textHeight = metrics.height;
 
-    return {
-      width: textWidth + padding.horizontal,
-      height: textHeight + padding.vertical
+    const contentSize: MeasuredSize = {
+      width: textWidth,
+      height: textHeight
     };
+
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /** @internal */
@@ -122,13 +154,20 @@ export class UILabel extends UIComponent {
 
     // Update word wrap width if needed
     if (this.props.wordWrap && this.props.wordWrapWidth === 0) {
-      // Use available width minus padding
+      // Use available width minus padding (display width)
       const wrapWidth = availableWidth - padding.horizontal;
-      this.props.wordWrapWidth = wrapWidth;
-      this.textObject.style = this.getTextStyle();
+      this.props.wordWrapWidth = wrapWidth; // Store display width
+      this.updateTextStyle();
     }
 
     const measured = this.measure();
+    
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width: availableWidth, height: availableHeight }
+    );
 
     // Handle 'fill' constraints
     let finalWidth = measured.width;
@@ -161,7 +200,21 @@ export class UILabel extends UIComponent {
   /** @internal */
   protected render(): void {
     const padding = this.boxModel.padding;
-    this.textObject.position.set(padding.left, padding.top);
+    const x = Math.round(padding.left);
+    
+    // Vertically center text if height is specified and larger than text height
+    let y: number;
+    if (this.computedLayout.height > 0 && this.computedLayout.contentHeight > 0) {
+      const textHeight = this.textObject.height;
+      const availableHeight = this.computedLayout.contentHeight;
+      // Center vertically within available content height
+      y = Math.round(padding.top + (availableHeight - textHeight) / 2);
+    } else {
+      y = Math.round(padding.top);
+    }
+    
+    this.textObject.position.set(x, y);
+    this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
   }
 
   /** Update displayed text. */
@@ -177,10 +230,18 @@ export class UILabel extends UIComponent {
     this.textObject.style.fill = color;
   }
 
+  /** Set the position of the label (overrides layout positioning) */
+  setPosition(x: number, y: number): void {
+    this.textObject.position.set(Math.round(x), Math.round(y));
+  }
+
   /** Update font size. */
   setFontSize(size: number): void {
     this.props.fontSize = size;
-    this.textObject.style.fontSize = size;
+    // Account for DPR scaling - fontSize in style is display size * dprScale
+    this.textObject.style.fontSize = size * this.dprScale;
+    // Also update line height
+    this.textObject.style.lineHeight = size * this.props.lineHeight * this.dprScale;
     this.markLayoutDirty();
   }
 

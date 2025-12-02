@@ -11,12 +11,8 @@ import {
   SpriteBackgroundConfig
 } from './button-background-strategy';
 import { ThemeResolver } from '../theming/theme-resolver';
-import { DefaultUITheme, createDefaultDarkTheme } from '../theming/theme-data';
-import {
-  LayoutEngine,
-  ThemeApplier,
-  ComponentState
-} from '../services';
+// Theme resolver is now in base class
+// ComponentState removed - using base class state properties
 
 /** Button visual states. */
 export enum ButtonState {
@@ -98,9 +94,7 @@ export class UIButton extends UIComponent {
   private onClick?: () => void;
   private onHover?: () => void;
 
-  // Services (composition)
-  private layoutEngine: LayoutEngine;
-  private themeApplier: ThemeApplier;
+  // Services (composition) - ThemeApplier removed, using base class helpers
 
   // Button state
   private state: ButtonState = ButtonState.Normal;
@@ -112,16 +106,9 @@ export class UIButton extends UIComponent {
   private labelCenterX: number = 0;
   private labelCenterY: number = 0;
 
-  // Component state (data-driven)
-  private componentState: ComponentState = {
-    enabled: true,
-    focused: false,
-    hovered: false,
-    pressed: false
-  };
+  // State is now in base class (enabled, focused, hovered, pressed)
 
-  // Theme data
-  private themeResolver?: ThemeResolver;
+  // Theme resolver is now in base class
 
   // Keyboard handler for cleanup
   private keydownHandler?: (e: KeyboardEvent) => void;
@@ -146,16 +133,11 @@ export class UIButton extends UIComponent {
     this.onClick = props.onClick;
     this.onHover = props.onHover;
 
-    // Initialize theme
+    // Initialize theme resolver
     this.themeResolver = props.themeResolver;
-    const theme = createDefaultDarkTheme(); // TODO: Get from resolver if available
-    
-    // Initialize services
-    this.layoutEngine = new LayoutEngine();
-    this.themeApplier = new ThemeApplier(theme);
 
     // Update component state
-    this.componentState.enabled = this.props.enabled;
+    this.enabled = this.props.enabled;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
@@ -230,8 +212,7 @@ export class UIButton extends UIComponent {
 
   /** @internal */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'pointer';
+    this.makeInteractive('pointer');
 
     this.container.on('pointerover', this.handlePointerOver.bind(this));
     this.container.on('pointerout', this.handlePointerOut.bind(this));
@@ -267,7 +248,7 @@ export class UIButton extends UIComponent {
 
   private handlePointerOver(): void {
     if (this.props.enabled && this.state === ButtonState.Normal) {
-      this.componentState.hovered = true;
+      this.hovered = true;
       this.setState(ButtonState.Hover);
       this.onHover?.();
     }
@@ -275,14 +256,14 @@ export class UIButton extends UIComponent {
 
   private handlePointerOut(): void {
     if (this.props.enabled && this.state !== ButtonState.Pressed) {
-      this.componentState.hovered = false;
+      this.hovered = false;
       this.setState(ButtonState.Normal);
     }
   }
 
   private handlePointerDown(): void {
     if (this.props.enabled) {
-      this.componentState.pressed = true;
+      this.pressed = true;
       this.setState(ButtonState.Pressed);
 
       // Request focus through the focus manager
@@ -300,8 +281,8 @@ export class UIButton extends UIComponent {
 
   private handlePointerUp(): void {
     if (this.props.enabled) {
-      this.componentState.pressed = false;
-      this.componentState.hovered = true;
+      this.pressed = false;
+      this.hovered = true;
       this.setState(ButtonState.Hover);
       this.onClick?.();
     }
@@ -309,8 +290,8 @@ export class UIButton extends UIComponent {
 
   private handlePointerUpOutside(): void {
     if (this.props.enabled) {
-      this.componentState.pressed = false;
-      this.componentState.hovered = false;
+      this.pressed = false;
+      this.hovered = false;
       this.setState(ButtonState.Normal);
     }
   }
@@ -406,7 +387,7 @@ export class UIButton extends UIComponent {
   /** Enable or disable the button. */
   setEnabled(enabled: boolean): void {
     this.props.enabled = enabled;
-    this.componentState.enabled = enabled;
+    this.enabled = enabled;
     this.setState(enabled ? ButtonState.Normal : ButtonState.Disabled);
   }
 

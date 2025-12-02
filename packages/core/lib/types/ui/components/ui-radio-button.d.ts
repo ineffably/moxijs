@@ -18,7 +18,6 @@ export declare class UIRadioButton extends UIComponent {
     private onChange?;
     private selected;
     private isControlled;
-    protected themeResolver?: ThemeResolver;
     private radioGraphics;
     private dotGraphics;
     private keydownHandler?;

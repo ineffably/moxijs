@@ -7,6 +7,10 @@ import { UITextInput } from './ui-text-input';
 import { EdgeInsets } from '../core/edge-insets';
 import { UIFocusManager } from '../core/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
+// Theme resolver is now in base class
+import {
+  FormStateManager
+} from '../services';
 
 /**
  * Option structure for Select component
@@ -83,8 +87,10 @@ export class UISelect extends UIComponent {
   private props: Required<Omit<UISelectProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
   private onChange?: (value: any) => void;
 
-  private selectedValue: any;
-  private isControlled: boolean;
+  // Services (composition)
+  private stateManager: FormStateManager<any>;
+  // ThemeApplier removed - using base class helpers
+  
   private background: UIPanel;
   private label: UILabel;
   private textInput?: UITextInput; // For filterable mode
@@ -100,7 +106,10 @@ export class UISelect extends UIComponent {
 
   private hoverColor: number;
   private selectedColor: number;
-  private themeResolver?: ThemeResolver;
+  // Theme resolver is now in base class
+  
+  // Component state (data-driven)
+  // State is now in base class (enabled, focused, hovered, pressed)
 
   // Keyboard handler for cleanup
   private keydownHandler?: (e: KeyboardEvent) => void;
@@ -122,10 +131,19 @@ export class UISelect extends UIComponent {
       allowCustomValue: props.allowCustomValue ?? false
     };
 
-    this.onChange = props.onChange;
-    this.isControlled = props.value !== undefined;
-    this.selectedValue = props.value ?? props.defaultValue;
+    // Initialize theme resolver
     this.themeResolver = props.themeResolver;
+    
+    this.stateManager = new FormStateManager({
+      value: props.value,
+      defaultValue: props.defaultValue,
+      onChange: props.onChange
+    });
+
+    // Update component state
+    this.enabled = !this.props.disabled;
+
+    this.onChange = props.onChange;
 
     // Calculate colors
     this.hoverColor = this.darkenColor(this.props.backgroundColor, 0.95);
@@ -187,7 +205,7 @@ export class UISelect extends UIComponent {
       this.label = new UILabel({
         text: displayText,
         fontSize: 14,
-        color: this.selectedValue ? this.props.textColor : 0x999999,
+        color: this.stateManager.getValue() ? this.props.textColor : 0x999999,
         align: 'left',
         fontFamily: 'PixelOperator8' // Use pixel-perfect font
       }, {
@@ -213,12 +231,13 @@ export class UISelect extends UIComponent {
    * Gets the display text based on selected value
    */
   private getDisplayText(): string {
-    if (!this.selectedValue) {
+    if (!this.stateManager.getValue()) {
       return this.props.placeholder;
     }
 
-    const option = this.props.options.find(opt => opt.value === this.selectedValue);
-    return option ? option.label : (this.props.allowCustomValue ? String(this.selectedValue) : this.props.placeholder);
+    const selectedValue = this.stateManager.getValue();
+    const option = this.props.options.find(opt => opt.value === selectedValue);
+    return option ? option.label : (this.props.allowCustomValue ? String(selectedValue) : this.props.placeholder);
   }
 
   /**
@@ -340,8 +359,7 @@ export class UISelect extends UIComponent {
    * Sets up mouse/touch event handlers
    */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'pointer';
+    this.makeInteractive('pointer');
 
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
 
@@ -668,9 +686,8 @@ export class UISelect extends UIComponent {
   private selectOption(value: any): void {
     if (this.props.disabled) return;
 
-    if (!this.isControlled) {
-      this.selectedValue = value;
-    }
+    // Update state through FormStateManager (handles controlled/uncontrolled)
+    this.stateManager.setValue(value);
 
     // Update display based on mode
     if (this.props.filterable && this.textInput) {
@@ -743,10 +760,12 @@ export class UISelect extends UIComponent {
    * Measures the size needed for this select
    */
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.props.width,
       height: this.props.height
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /**
@@ -754,9 +773,7 @@ export class UISelect extends UIComponent {
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
+    super.layout(availableWidth, availableHeight);
 
     // Layout background
     this.background.layout(measured.width, measured.height);
@@ -801,9 +818,8 @@ export class UISelect extends UIComponent {
    */
   setValue(value: any): void {
     if (this.props.disabled) return;
-    if (this.isControlled) return; // Controlled mode - don't update internal state
-
-    this.selectedValue = value;
+    // FormStateManager handles controlled mode automatically
+    this.stateManager.setValue(value);
     
     if (this.props.filterable && this.textInput) {
       const displayText = this.getDisplayText();
@@ -819,7 +835,7 @@ export class UISelect extends UIComponent {
    * Gets the current selected value
    */
   getValue(): any {
-    return this.selectedValue;
+    return this.stateManager.getValue();
   }
 
   /**

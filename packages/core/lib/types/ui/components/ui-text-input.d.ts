@@ -20,15 +20,16 @@ export interface UITextInputProps {
 }
 export declare class UITextInput extends UIComponent {
     private props;
-    private onChange?;
-    private currentValue;
+    private stateManager;
+    private inputHandler;
     private background;
     private textDisplay;
     private cursor;
-    private cursorPosition;
     private cursorBlinkInterval?;
     private cursorVisible;
+    private colorOverrides;
     constructor(props: UITextInputProps, boxModel?: Partial<BoxModel>);
+    private createVisuals;
     private getDisplayText;
     private setupInteractivity;
     private handlePointerDown;
@@ -36,14 +37,15 @@ export declare class UITextInput extends UIComponent {
     onBlur(): void;
     private handleKeyDown;
     private updateText;
+    private updateBackground;
     private updateCursor;
     private startCursorBlink;
     private stopCursorBlink;
-    private lightenColor;
     measure(): MeasuredSize;
     layout(availableWidth: number, availableHeight: number): void;
     protected render(): void;
     setValue(value: string): void;
     getValue(): string;
+    updateValue(value: string): void;
     destroy(): void;
 }

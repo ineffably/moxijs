@@ -33,16 +33,12 @@ export declare class UIButton extends UIComponent {
     private bitmapFontFamily?;
     private onClick?;
     private onHover?;
-    private layoutEngine;
-    private themeApplier;
     private state;
     private backgroundStrategy;
     private label?;
     private bitmapLabel?;
     private labelCenterX;
     private labelCenterY;
-    private componentState;
-    private themeResolver?;
     private keydownHandler?;
     constructor(props?: UIButtonProps, boxModel?: Partial<BoxModel>);
     private createBitmapLabel;

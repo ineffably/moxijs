@@ -5,13 +5,10 @@ import { UIPanel } from './ui-panel';
 import { UIFocusManager } from '../core/ui-focus-manager';
 import { asTextDPR } from '../../library/as-pixi';
 import { ThemeResolver } from '../theming/theme-resolver';
-import { DefaultUITheme, createDefaultDarkTheme } from '../theming/theme-data';
+// Theme resolver is now in base class
 import {
-  LayoutEngine,
   FormStateManager,
-  TextInputHandler,
-  ThemeApplier,
-  ComponentState
+  TextInputHandler
 } from '../services';
 
 /**
@@ -76,10 +73,9 @@ export class UITextArea extends UIComponent {
   private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
   
   // Services (composition)
-  private layoutEngine: LayoutEngine;
   private stateManager: FormStateManager<string>;
   private inputHandler: TextInputHandler;
-  private themeApplier: ThemeApplier;
+  // ThemeApplier removed - using base class helpers
   
   // Visual elements
   private background: UIPanel;
@@ -90,16 +86,10 @@ export class UITextArea extends UIComponent {
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
   
-  // Component state (data-driven)
-  private componentState: ComponentState = {
-    enabled: true,
-    focused: false,
-    hovered: false,
-    pressed: false
-  };
+  // State is now in base class (enabled, focused, hovered, pressed)
   
   // Theme data
-  private themeResolver?: ThemeResolver;
+  // Theme resolver is now in base class
   private colorOverrides: {
     backgroundColor?: number;
     textColor?: number;
@@ -134,31 +124,24 @@ export class UITextArea extends UIComponent {
       placeholderColor: props.placeholderColor
     };
 
-    // Initialize theme
+    // Initialize theme resolver
     this.themeResolver = props.themeResolver;
-    const theme = createDefaultDarkTheme(); // TODO: Get from resolver if available
     
-    // Initialize services
-    this.layoutEngine = new LayoutEngine();
     this.stateManager = new FormStateManager({
       value: props.value,
       defaultValue: props.defaultValue,
       onChange: props.onChange
     });
+    // Initialize input handler - it now uses stateManager directly
     this.inputHandler = new TextInputHandler({
-      value: this.stateManager.getValue(),
+      stateManager: this.stateManager,
       maxLength: this.props.maxLength,
       type: 'text', // Textarea doesn't support number type
-      multiline: true,
-      onChange: (value) => {
-        this.stateManager.setValue(value);
-        this.updateText();
-      }
+      multiline: true
     });
-    this.themeApplier = new ThemeApplier(theme);
 
     // Update component state
-    this.componentState.enabled = !this.props.disabled;
+    this.enabled = !this.props.disabled;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
@@ -181,13 +164,7 @@ export class UITextArea extends UIComponent {
    */
   private createVisuals(): void {
     // Create background
-    const bgColor = this.themeResolver
-      ? this.themeResolver.getColor('background', this.colorOverrides.backgroundColor)
-      : this.themeApplier.applyBackground(
-          {} as PIXI.Graphics,
-          this.componentState,
-          this.colorOverrides.backgroundColor
-        );
+    const bgColor = this.resolveColor('background', this.colorOverrides.backgroundColor);
     
     this.background = new UIPanel({
       backgroundColor: bgColor,
@@ -201,12 +178,8 @@ export class UITextArea extends UIComponent {
     const displayText = this.getDisplayText();
     const dprScale = 2;
     const textColor = displayText === this.props.placeholder
-      ? (this.themeResolver
-          ? this.themeResolver.getPlaceholderColor(this.colorOverrides.placeholderColor)
-          : this.themeApplier.applyPlaceholderColor(this.colorOverrides.placeholderColor))
-      : (this.themeResolver
-          ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
-          : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor));
+      ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
+      : this.resolveTextColor(this.colorOverrides.textColor);
 
     this.textDisplay = asTextDPR({
       text: displayText,
@@ -239,8 +212,7 @@ export class UITextArea extends UIComponent {
    * Sets up mouse/keyboard event handlers
    */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'text';
+    this.makeInteractive('text');
 
     // Click to focus
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
@@ -272,7 +244,7 @@ export class UITextArea extends UIComponent {
     if (this.focused) return;
 
     super.onFocus();
-    this.componentState.focused = true;
+    // focused is already set by super.onFocus()
     
     // Set cursor position
     this.inputHandler.setCursorPosition(this.stateManager.getValue().length);
@@ -291,7 +263,7 @@ export class UITextArea extends UIComponent {
     if (!this.focused) return;
 
     super.onBlur();
-    this.componentState.focused = false;
+    // focused is already set by super.onBlur()
     this.cursor.visible = false;
     this.stopCursorBlink();
 
@@ -333,12 +305,8 @@ export class UITextArea extends UIComponent {
     
     // Update text color based on whether showing placeholder
     const textColor = value
-      ? (this.themeResolver
-          ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
-          : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor))
-      : (this.themeResolver
-          ? this.themeResolver.getPlaceholderColor(this.colorOverrides.placeholderColor)
-          : this.themeApplier.applyPlaceholderColor(this.colorOverrides.placeholderColor));
+      ? this.resolveTextColor(this.colorOverrides.textColor)
+      : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
     
     this.textDisplay.style.fill = textColor;
     this.updateCursor();
@@ -348,16 +316,9 @@ export class UITextArea extends UIComponent {
    * Update background based on state
    */
   private updateBackground(): void {
-    const bgColor = this.themeResolver
-      ? this.themeResolver.getColor(
-          this.componentState.focused ? 'focus' : 'background',
-          this.colorOverrides.backgroundColor
-        )
-      : this.themeApplier.applyBackground(
-          {} as PIXI.Graphics,
-          this.componentState,
-          this.colorOverrides.backgroundColor
-        );
+    const bgColor = this.focused
+      ? this.resolveColor('focus', this.colorOverrides.backgroundColor)
+      : this.resolveColor('background', this.colorOverrides.backgroundColor);
 
     // Recreate background panel with new color
     const oldBackground = this.background;
@@ -431,9 +392,7 @@ export class UITextArea extends UIComponent {
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
-    const cursorColor = this.themeResolver
-      ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
-      : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor);
+    const cursorColor = this.resolveTextColor(this.colorOverrides.textColor);
     this.cursor.fill({ color: cursorColor });
 
     // Clean up temp objects
@@ -481,19 +440,10 @@ export class UITextArea extends UIComponent {
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-    
-    // Use LayoutEngine to calculate layout
-    this.computedLayout = this.layoutEngine.layout(
-      this.boxModel,
-      measured,
-      { width: availableWidth, height: availableHeight }
-    );
+    super.layout(availableWidth, availableHeight);
 
     // Layout background
     this.background.layout(measured.width, measured.height);
-
-    this.layoutDirty = false;
-    this.render();
   }
 
   /**
@@ -508,7 +458,7 @@ export class UITextArea extends UIComponent {
    */
   setValue(value: string): void {
     this.stateManager.setValue(value);
-    this.inputHandler.setValue(value);
+    // Handler uses stateManager directly, just update cursor position
     this.inputHandler.setCursorPosition(value.length);
     this.updateText();
   }
@@ -525,7 +475,8 @@ export class UITextArea extends UIComponent {
    */
   updateValue(value: string): void {
     this.stateManager.updateValue(value);
-    this.inputHandler.setValue(value);
+    // Handler uses stateManager directly, just update cursor position
+    this.inputHandler.setCursorPosition(value.length);
     this.updateText();
   }
 

@@ -25,12 +25,10 @@ export interface UIRadioGroupProps {
 }
 export declare class UIRadioGroup extends UIComponent {
     private props;
-    private onChange?;
-    private selectedValue;
-    private isControlled;
-    private themeResolver?;
+    private stateManager;
     private radioOptions;
     private flexContainer;
+    private onChange?;
     constructor(props: UIRadioGroupProps, boxModel?: Partial<BoxModel>);
     private createRadioButtons;
     private handleSelection;

@@ -65,13 +65,10 @@ export class UIPanel extends UIComponent {
   private background?: PIXI.NineSliceSprite | PIXI.Graphics;
   
   // Services (composition)
-  private layoutEngine: LayoutEngine;
 
   constructor(props: UIPanelProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    // Initialize services
-    this.layoutEngine = new LayoutEngine();
 
     this.props = {
       backgroundAlpha: props.backgroundAlpha ?? 1,
@@ -138,20 +135,7 @@ export class UIPanel extends UIComponent {
     return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
-  /** @internal */
-  layout(availableWidth: number, availableHeight: number): void {
-    const measured = this.measure();
-    
-    // Use LayoutEngine to calculate layout
-    this.computedLayout = this.layoutEngine.layout(
-      this.boxModel,
-      measured,
-      { width: availableWidth, height: availableHeight }
-    );
-
-    this.layoutDirty = false;
-    this.render();
-  }
+  // Layout is handled by base class
 
   /** @internal */
   protected render(): void {

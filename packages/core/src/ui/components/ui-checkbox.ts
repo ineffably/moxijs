@@ -3,12 +3,9 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIFocusManager } from '../core/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
-import { DefaultUITheme, createDefaultDarkTheme } from '../theming/theme-data';
+// Theme resolver is now in base class
 import {
-  LayoutEngine,
-  FormStateManager,
-  ThemeApplier,
-  ComponentState
+  FormStateManager
 } from '../services';
 
 /**
@@ -61,25 +58,18 @@ export class UICheckbox extends UIComponent {
   private props: Required<Omit<UICheckboxProps, 'onChange' | 'checked' | 'defaultChecked' | 'themeResolver'>>;
   
   // Services (composition)
-  private layoutEngine: LayoutEngine;
   private stateManager: FormStateManager<boolean>;
-  private themeApplier: ThemeApplier;
+  // ThemeApplier removed - using base class helpers
   
   // Visual elements
   private checkboxGraphics: PIXI.Graphics;
   private checkmarkGraphics: PIXI.Graphics;
   
-  // Component state (data-driven)
-  private componentState: ComponentState = {
-    enabled: true,
-    focused: false,
-    hovered: false,
-    pressed: false,
-    checked: false
-  };
+  // State is now in base class (enabled, focused, hovered, pressed)
+  // checked state is managed by FormStateManager
+  private checked: boolean = false;
   
-  // Theme data
-  protected themeResolver?: ThemeResolver;
+  // Theme resolver is now in base class
   private colorOverrides: {
     backgroundColor?: number;
     borderColor?: number;
@@ -101,22 +91,19 @@ export class UICheckbox extends UIComponent {
       checkedBackgroundColor: props.checkedBackgroundColor
     };
 
-    // Initialize theme
+    // Initialize theme resolver
     this.themeResolver = props.themeResolver;
-    const theme = createDefaultDarkTheme(); // TODO: Get from resolver if available
     
-    // Initialize services
-    this.layoutEngine = new LayoutEngine();
     this.stateManager = new FormStateManager({
       value: props.checked,
       defaultValue: props.defaultChecked,
       onChange: props.onChange
     });
-    this.themeApplier = new ThemeApplier(theme);
 
     // Update component state
-    this.componentState.enabled = !(props.disabled ?? false);
-    this.componentState.checked = this.stateManager.getValue();
+    this.enabled = !(props.disabled ?? false);
+    // Initialize checked state from stateManager
+    this.checked = this.stateManager.getValue();
 
     // Resolve colors using ThemeResolver if provided, otherwise use defaults
     const resolver = this.themeResolver;
@@ -161,8 +148,7 @@ export class UICheckbox extends UIComponent {
 
   /** @internal */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'pointer';
+    this.makeInteractive('pointer');
 
     this.container.on('pointerover', this.handlePointerOver.bind(this));
     this.container.on('pointerout', this.handlePointerOut.bind(this));
@@ -188,29 +174,33 @@ export class UICheckbox extends UIComponent {
 
   private handlePointerOver(): void {
     if (this.props.disabled) return;
-    this.componentState.hovered = true;
-    this.updateVisuals();
+    this.hovered = true;
+    // Don't update visuals on hover - checkbox doesn't change appearance on hover
   }
 
   private handlePointerOut(): void {
     if (this.props.disabled) return;
-    this.componentState.hovered = false;
-    this.updateVisuals();
+    this.hovered = false;
+    // Don't update visuals on hover out - checkbox doesn't change appearance
   }
 
   private handlePointerDown(): void {
     if (this.props.disabled) return;
-    // Visual feedback handled in updateVisuals
+    this.pressed = true;
+    // Immediate visual feedback for better responsiveness
+    this.updateVisuals();
   }
 
   private handlePointerUp(): void {
     if (this.props.disabled) return;
+    this.pressed = false;
     this.toggle();
   }
 
   private handlePointerUpOutside(): void {
     if (this.props.disabled) return;
-    this.updateVisuals();
+    // Reset any pressed state if pointer moved outside
+    this.pressed = false;
   }
 
   /**
@@ -228,14 +218,13 @@ export class UICheckbox extends UIComponent {
   public setChecked(checked: boolean): void {
     if (this.props.disabled) return;
     
-    const wasChecked = this.componentState.checked;
+    // Update state manager first (triggers onChange if needed)
     this.stateManager.setValue(checked);
-    this.componentState.checked = checked;
+    // Update local state
+    this.checked = checked;
     
-    // Only update visuals if state actually changed
-    if (wasChecked !== checked) {
-      this.updateVisuals();
-    }
+    // Always update visuals immediately for responsive feedback
+    this.updateVisuals();
   }
 
   /**
@@ -249,7 +238,7 @@ export class UICheckbox extends UIComponent {
   private updateVisuals(): void {
     const size = this.props.size;
     const borderRadius = this.props.borderRadius;
-    const checked = this.componentState.checked;
+    const checked = this.checked;
 
     // Ensure hitArea is set (in case it was cleared)
     if (!this.container.hitArea || 
@@ -262,18 +251,12 @@ export class UICheckbox extends UIComponent {
     this.checkboxGraphics.clear();
     this.checkmarkGraphics.clear();
 
-    // Resolve colors using ThemeApplier or ThemeResolver
+    // Resolve colors using base class helpers
     const bgColor = checked
-      ? (this.themeResolver
-          ? this.themeResolver.getColor('selected', this.colorOverrides.checkedBackgroundColor)
-          : this.themeApplier.applyBackground({} as PIXI.Graphics, { ...this.componentState, checked: true }, this.colorOverrides.checkedBackgroundColor))
-      : (this.themeResolver
-          ? this.themeResolver.getColor('background', this.colorOverrides.backgroundColor)
-          : this.themeApplier.applyBackground({} as PIXI.Graphics, this.componentState, this.colorOverrides.backgroundColor));
+      ? this.resolveColor('selected', this.colorOverrides.checkedBackgroundColor)
+      : this.resolveColor('background', this.colorOverrides.backgroundColor);
 
-    const borderColor = this.themeResolver
-      ? this.themeResolver.getColor('border', this.colorOverrides.borderColor)
-      : this.themeApplier.applyBorderColor(this.componentState, this.colorOverrides.borderColor);
+    const borderColor = this.resolveColor('border', this.colorOverrides.borderColor);
 
     // Draw checkbox background
     this.checkboxGraphics.roundRect(0, 0, size, size, borderRadius);
@@ -286,9 +269,7 @@ export class UICheckbox extends UIComponent {
       const offsetX = (size - checkmarkSize) / 2;
       const offsetY = (size - checkmarkSize) / 2;
 
-      const checkmarkColor = this.themeResolver
-        ? this.themeResolver.getCheckmarkColor(this.colorOverrides.checkColor)
-        : this.themeApplier.applyCheckmarkColor(this.colorOverrides.checkColor);
+      const checkmarkColor = this.resolveCheckmarkColor(this.colorOverrides.checkColor);
 
       // Draw checkmark using lines (pixel-perfect)
       this.checkmarkGraphics.moveTo(offsetX + checkmarkSize * 0.2, offsetY + checkmarkSize * 0.5);
@@ -310,14 +291,7 @@ export class UICheckbox extends UIComponent {
 
   /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
-    const measured = this.measure();
-    
-    // Use LayoutEngine to calculate layout
-    this.computedLayout = this.layoutEngine.layout(
-      this.boxModel,
-      measured,
-      { width: availableWidth, height: availableHeight }
-    );
+    super.layout(availableWidth, availableHeight);
     
     // Ensure hitArea is set after layout (in case container was repositioned)
     this.container.hitArea = new PIXI.Rectangle(0, 0, this.props.size, this.props.size);
@@ -326,9 +300,6 @@ export class UICheckbox extends UIComponent {
     if (this.container.eventMode === 'none' || this.container.eventMode === 'passive') {
       this.container.eventMode = 'static';
     }
-    
-    this.layoutDirty = false;
-    this.render();
   }
 
   /** @internal */
@@ -340,9 +311,9 @@ export class UICheckbox extends UIComponent {
    * Update the checked state (for controlled mode)
    */
   public updateChecked(checked: boolean): void {
-    if (this.stateManager.isControlledMode() && checked !== this.componentState.checked) {
+    if (this.stateManager.isControlledMode() && checked !== this.checked) {
       this.stateManager.updateValue(checked);
-      this.componentState.checked = checked;
+      this.checked = checked;
       this.updateVisuals();
     }
   }
@@ -352,7 +323,7 @@ export class UICheckbox extends UIComponent {
    */
   public setDisabled(disabled: boolean): void {
     this.props.disabled = disabled;
-    this.componentState.enabled = !disabled;
+    this.enabled = !disabled;
     this.enabled = !disabled;
     this.container.cursor = disabled ? 'default' : 'pointer';
     this.updateVisuals(); // updateVisuals will handle alpha

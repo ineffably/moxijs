@@ -3,6 +3,7 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UILabel } from './ui-label';
 import { UIPanel } from './ui-panel';
+import { LayoutEngine } from '../services';
 
 export interface TabItem {
   key: string;
@@ -45,6 +46,8 @@ export class UITabs extends UIComponent {
   private activeTextColor: number;
   private hashPrefix?: string;
 
+  // Services (composition)
+
   private tabBar: PIXI.Container;
   private contentArea: PIXI.Container;
   private tabButtons: Map<string, { container: PIXI.Container; label: UILabel; bg: PIXI.Graphics }> = new Map();
@@ -53,6 +56,7 @@ export class UITabs extends UIComponent {
 
   constructor(props: UITabsProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
 
     this.items = props.items || [];
     this.onChange = props.onChange;
@@ -357,15 +361,26 @@ export class UITabs extends UIComponent {
   }
 
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.width,
       height: this.height
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   layout(width: number, height: number): void {
     this.width = width;
     this.height = height;
+    
+    const measured = this.measure();
+    
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width, height }
+    );
 
     // Rebuild tabs with new dimensions
     this.buildTabs();

@@ -16,7 +16,6 @@ export declare class UILabel extends UIComponent {
     private props;
     private textObject;
     private readonly dprScale;
-    private layoutEngine;
     constructor(props: UILabelProps, boxModel?: Partial<BoxModel>);
     private getTextStyle;
     private updateTextStyle;

@@ -61,13 +61,10 @@ export class UILabel extends UIComponent {
   private readonly dprScale = 2; // DPR scaling factor for crisp text
   
   // Services (composition)
-  private layoutEngine: LayoutEngine;
 
   constructor(props: UILabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    // Initialize services
-    this.layoutEngine = new LayoutEngine();
 
     this.props = {
       text: props.text,

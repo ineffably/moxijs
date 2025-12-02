@@ -14,7 +14,6 @@ export declare class UIBox extends UIComponent {
     private graphics;
     constructor(props?: UIBoxProps, boxModel?: Partial<BoxModel>);
     measure(): MeasuredSize;
-    layout(availableWidth: number, availableHeight: number): void;
     protected render(): void;
     setBackgroundColor(color: number, alpha?: number): void;
     setBorder(color: number, width: number): void;

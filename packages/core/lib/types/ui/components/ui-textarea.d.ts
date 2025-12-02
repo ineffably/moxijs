@@ -1,5 +1,6 @@
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
+import { ThemeResolver } from '../theming/theme-resolver';
 export interface UITextAreaProps {
     value?: string;
     defaultValue?: string;
@@ -16,34 +17,40 @@ export interface UITextAreaProps {
     fontSize?: number;
     lineHeight?: number;
     rows?: number;
+    themeResolver?: ThemeResolver;
 }
 export declare class UITextArea extends UIComponent {
     private props;
-    private onChange?;
-    private currentValue;
+    private layoutEngine;
+    private stateManager;
+    private inputHandler;
+    private themeApplier;
     private background;
     private textDisplay;
     private cursor;
-    private cursorPosition;
     private cursorBlinkInterval?;
     private cursorVisible;
+    private componentState;
+    private themeResolver?;
+    private colorOverrides;
     constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>);
+    private createVisuals;
     private getDisplayText;
     private setupInteractivity;
     private handlePointerDown;
     onFocus(): void;
     onBlur(): void;
     private handleKeyDown;
-    private moveCursorVertically;
     private updateText;
+    private updateBackground;
     private updateCursor;
     private startCursorBlink;
     private stopCursorBlink;
-    private lightenColor;
     measure(): MeasuredSize;
     layout(availableWidth: number, availableHeight: number): void;
     protected render(): void;
     setValue(value: string): void;
     getValue(): string;
+    updateValue(value: string): void;
     destroy(): void;
 }

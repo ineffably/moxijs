@@ -12,6 +12,18 @@ export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBo
 export { UIComponent } from './core/ui-component';
 export { UIFocusManager, Focusable } from './core/ui-focus-manager';
 
+// Services (Composition services for UI components)
+export {
+  LayoutEngine,
+  SizeConstraints,
+  FormStateManager,
+  FormStateConfig,
+  TextInputHandler,
+  TextInputHandlerConfig,
+  ThemeApplier,
+  ComponentState
+} from './services';
+
 // Layout
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
 

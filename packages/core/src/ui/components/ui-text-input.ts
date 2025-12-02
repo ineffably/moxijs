@@ -4,6 +4,8 @@ import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIPanel } from './ui-panel';
 import { EdgeInsets } from '../core/edge-insets';
 import { UIFocusManager } from '../core/ui-focus-manager';
+import { asTextDPR } from '../../library/as-pixi';
+import { ThemeResolver } from '../theming/theme-resolver';
 
 /**
  * Props for configuring a UITextInput
@@ -27,11 +29,11 @@ export interface UITextInputProps {
   height?: number;
   /** Whether the input is disabled */
   disabled?: boolean;
-  /** Background color */
+  /** Background color (overrides theme) */
   backgroundColor?: number;
-  /** Text color */
+  /** Text color (overrides theme) */
   textColor?: number;
-  /** Placeholder text color */
+  /** Placeholder text color (overrides theme) */
   placeholderColor?: number;
   /** Border radius */
   borderRadius?: number;
@@ -39,6 +41,8 @@ export interface UITextInputProps {
   fontSize?: number;
   /** Input type for validation */
   type?: 'text' | 'number';
+  /** Optional ThemeResolver for automatic color resolution */
+  themeResolver?: ThemeResolver;
 }
 
 /**
@@ -57,7 +61,7 @@ export interface UITextInputProps {
  * ```
  */
 export class UITextInput extends UIComponent {
-  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue'>>;
+  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
   private onChange?: (value: string) => void;
 
   private currentValue: string;
@@ -101,18 +105,22 @@ export class UITextInput extends UIComponent {
     });
     this.container.addChild(this.background.container);
 
-    // Create text display
-    this.textDisplay = new PIXI.Text({
+    // Create text display with high-DPI DPR rendering
+    this.textDisplay = asTextDPR({
       text: this.getDisplayText(),
       style: {
-        fontFamily: 'Arial',
+        fontFamily: 'PixelOperator8', // Pixel-perfect font
         fontSize: this.props.fontSize,
         fill: this.currentValue ? this.props.textColor : this.props.placeholderColor,
         align: 'left'
       },
-      resolution: window.devicePixelRatio || 2
+      dprScale: 2,
+      pixelPerfect: true
     });
-    this.textDisplay.position.set(12, (this.props.height - this.props.fontSize) / 2);
+    // Round position to avoid blurry text from fractional pixels
+    const textY = Math.round((this.props.height - this.props.fontSize) / 2);
+    this.textDisplay.position.set(12, textY);
+    this.textDisplay.roundPixels = true; // Ensure pixel-perfect positioning
     this.container.addChild(this.textDisplay);
 
     // Create cursor
@@ -310,12 +318,23 @@ export class UITextInput extends UIComponent {
   private updateCursor(): void {
     // Measure text up to cursor position by creating a temporary text object
     const textUpToCursor = this.currentValue.substring(0, this.cursorPosition);
+    const dprScale = 2;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
-      style: this.textDisplay.style
+      style: {
+        fontFamily: 'PixelOperator8', // Match the display font
+        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
+        fill: this.textDisplay.style.fill,
+        align: 'left'
+      }
     });
+    // Ensure effects is initialized to prevent null reference errors
+    if (tempText.effects === null) {
+      tempText.effects = [];
+    }
 
-    const cursorX = 12 + tempText.width;
+    // Account for DPR scaling when calculating cursor position
+    const cursorX = 12 + (tempText.width / dprScale);
     const cursorY = (this.props.height - this.props.fontSize) / 2;
 
     this.cursor.clear();

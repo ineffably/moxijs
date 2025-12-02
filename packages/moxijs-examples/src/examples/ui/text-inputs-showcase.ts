@@ -25,12 +25,12 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const scrollContainer = new UIScrollContainer({
     width: 1280,
     height: 800,
-    backgroundColor: 0x1a1a2e,
+    backgroundColor: 0x1e1e1e, // Dark neutral gray
     padding: EdgeInsets.all(20),
     scrollbarWidth: 14,
-    scrollbarTrackColor: 0x2d2d44,
-    scrollbarThumbColor: 0x4a4a6a,
-    scrollbarThumbHoverColor: 0x6a6a8a
+    scrollbarTrackColor: 0x2a2a2a,
+    scrollbarThumbColor: 0x404040,
+    scrollbarThumbHoverColor: 0x505050
   });
 
   // Main container with vertical layout (content inside scroll container)

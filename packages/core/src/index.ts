@@ -16,6 +16,19 @@ import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, Pix
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { EdgeInsets } from './ui/core/edge-insets';
+import {
+  ThemeManager,
+  BaseTheme,
+  ThemeInfo,
+  ThemeVariant,
+  ThemeChangeListener,
+  DefaultUITheme,
+  createDefaultDarkTheme,
+  createDefaultLightTheme,
+  ThemeResolver,
+  ColorType,
+  ControlType
+} from './ui/theming';
 import { UIComponent } from './ui/core/ui-component';
 import { UIFocusManager } from './ui/core/ui-focus-manager';
 import { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from './ui/layout/flex-container';
@@ -28,6 +41,10 @@ import { UITextInput } from './ui/components/ui-text-input';
 import { UITextArea } from './ui/components/ui-textarea';
 import { UIScrollContainer } from './ui/components/ui-scroll-container';
 import { UITabs, TabItem } from './ui/components/ui-tabs';
+import { UICheckbox, UICheckboxProps } from './ui/components/ui-checkbox';
+import { UICheckboxWithLabel, UICheckboxWithLabelProps } from './ui/components/ui-checkbox-with-label';
+import { UIRadioButton, UIRadioButtonProps } from './ui/components/ui-radio-button';
+import { UIRadioGroup, UIRadioGroupProps, RadioOption } from './ui/components/ui-radio-group';
 import { UILayer } from './ui/UILayer';
 import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
@@ -75,10 +92,23 @@ export type {
 } from './library/physics';
 export type { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint } from './ui/core/box-model';
 export type { FlexContainerProps } from './ui/layout/flex-container';
+export type {
+  BaseTheme,
+  ThemeVariant,
+  ThemeInfo,
+  ThemeChangeListener,
+  DefaultUITheme,
+  ColorType,
+  ControlType
+} from './ui/theming';
 export type { UIBoxProps } from './ui/components/ui-box';
 export type { UILabelProps, TextAlign } from './ui/components/ui-label';
 export type { UIPanelProps, NineSliceConfig } from './ui/components/ui-panel';
 export type { UIButtonProps, SpriteBackgroundConfig } from './ui/components/ui-button';
+export type { UICheckboxProps } from './ui/components/ui-checkbox';
+export type { UICheckboxWithLabelProps } from './ui/components/ui-checkbox-with-label';
+export type { UIRadioButtonProps } from './ui/components/ui-radio-button';
+export type { UIRadioGroupProps, RadioOption } from './ui/components/ui-radio-group';
 export type { UISelectProps, SelectOption } from './ui/components/ui-select';
 export type { UITextInputProps } from './ui/components/ui-text-input';
 export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
@@ -166,6 +196,10 @@ const exportedObjects = {
   EdgeInsets,
   UIComponent,
   UIFocusManager,
+  ThemeManager,
+  ThemeResolver,
+  createDefaultDarkTheme,
+  createDefaultLightTheme,
   FlexContainer,
   FlexDirection,
   FlexJustify,
@@ -175,6 +209,10 @@ const exportedObjects = {
   UIPanel,
   UIButton,
   ButtonState,
+  UICheckbox,
+  UICheckboxWithLabel,
+  UIRadioButton,
+  UIRadioGroup,
   UISelect,
   UITextInput,
   UITextArea,
@@ -245,6 +283,10 @@ export {
   EdgeInsets,
   UIComponent,
   UIFocusManager,
+  ThemeManager,
+  ThemeResolver,
+  createDefaultDarkTheme,
+  createDefaultLightTheme,
   FlexContainer,
   FlexDirection,
   FlexJustify,
@@ -254,6 +296,10 @@ export {
   UIPanel,
   UIButton,
   ButtonState,
+  UICheckbox,
+  UICheckboxWithLabel,
+  UIRadioButton,
+  UIRadioGroup,
   UISelect,
   UITextInput,
   UITextArea,

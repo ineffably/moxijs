@@ -10,6 +10,13 @@ import {
   SpriteBackgroundStrategy,
   SpriteBackgroundConfig
 } from './button-background-strategy';
+import { ThemeResolver } from '../theming/theme-resolver';
+import { DefaultUITheme, createDefaultDarkTheme } from '../theming/theme-data';
+import {
+  LayoutEngine,
+  ThemeApplier,
+  ComponentState
+} from '../services';
 
 /** Button visual states. */
 export enum ButtonState {
@@ -30,11 +37,11 @@ export interface UIButtonProps {
   width?: number;
   /** Button height */
   height?: number;
-  /** Background color (only used if spriteBackground is not provided) */
+  /** Background color (overrides theme, only used if spriteBackground is not provided) */
   backgroundColor?: number;
   /** Sprite-based background configuration */
   spriteBackground?: SpriteBackgroundConfig;
-  /** Text color */
+  /** Text color (overrides theme) */
   textColor?: number;
   /** Font size */
   fontSize?: number;
@@ -52,6 +59,8 @@ export interface UIButtonProps {
   onHover?: () => void;
   /** Enabled state */
   enabled?: boolean;
+  /** Optional ThemeResolver for automatic color resolution */
+  themeResolver?: ThemeResolver;
 }
 
 /**
@@ -82,12 +91,18 @@ export interface UIButtonProps {
  * ```
  */
 export class UIButton extends UIComponent {
-  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily'>>;
+  // Props
+  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily' | 'themeResolver'>>;
   private useBitmapText: boolean;
   private bitmapFontFamily?: string;
   private onClick?: () => void;
   private onHover?: () => void;
 
+  // Services (composition)
+  private layoutEngine: LayoutEngine;
+  private themeApplier: ThemeApplier;
+
+  // Button state
   private state: ButtonState = ButtonState.Normal;
   private backgroundStrategy: ButtonBackgroundStrategy;
   private label?: UILabel;
@@ -96,6 +111,17 @@ export class UIButton extends UIComponent {
   // Cached label center position
   private labelCenterX: number = 0;
   private labelCenterY: number = 0;
+
+  // Component state (data-driven)
+  private componentState: ComponentState = {
+    enabled: true,
+    focused: false,
+    hovered: false,
+    pressed: false
+  };
+
+  // Theme data
+  private themeResolver?: ThemeResolver;
 
   // Keyboard handler for cleanup
   private keydownHandler?: (e: KeyboardEvent) => void;
@@ -119,6 +145,17 @@ export class UIButton extends UIComponent {
     this.bitmapFontFamily = props.bitmapFontFamily;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
+
+    // Initialize theme
+    this.themeResolver = props.themeResolver;
+    const theme = createDefaultDarkTheme(); // TODO: Get from resolver if available
+    
+    // Initialize services
+    this.layoutEngine = new LayoutEngine();
+    this.themeApplier = new ThemeApplier(theme);
+
+    // Update component state
+    this.componentState.enabled = this.props.enabled;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
@@ -158,8 +195,10 @@ export class UIButton extends UIComponent {
           color: this.props.textColor,
           align: 'center'
         }, {
-          padding: EdgeInsets.zero()
+          padding: EdgeInsets.zero() // No padding - we'll position manually
         });
+        // Disable UILabel's automatic render positioning since we'll center manually
+        this.label.container.position.set(0, 0);
         this.container.addChild(this.label.container);
       }
     }
@@ -228,6 +267,7 @@ export class UIButton extends UIComponent {
 
   private handlePointerOver(): void {
     if (this.props.enabled && this.state === ButtonState.Normal) {
+      this.componentState.hovered = true;
       this.setState(ButtonState.Hover);
       this.onHover?.();
     }
@@ -235,12 +275,14 @@ export class UIButton extends UIComponent {
 
   private handlePointerOut(): void {
     if (this.props.enabled && this.state !== ButtonState.Pressed) {
+      this.componentState.hovered = false;
       this.setState(ButtonState.Normal);
     }
   }
 
   private handlePointerDown(): void {
     if (this.props.enabled) {
+      this.componentState.pressed = true;
       this.setState(ButtonState.Pressed);
 
       // Request focus through the focus manager
@@ -258,6 +300,8 @@ export class UIButton extends UIComponent {
 
   private handlePointerUp(): void {
     if (this.props.enabled) {
+      this.componentState.pressed = false;
+      this.componentState.hovered = true;
       this.setState(ButtonState.Hover);
       this.onClick?.();
     }
@@ -265,6 +309,8 @@ export class UIButton extends UIComponent {
 
   private handlePointerUpOutside(): void {
     if (this.props.enabled) {
+      this.componentState.pressed = false;
+      this.componentState.hovered = false;
       this.setState(ButtonState.Normal);
     }
   }
@@ -292,7 +338,7 @@ export class UIButton extends UIComponent {
 
     // Apply depth offset to label
     if (this.label) {
-      this.label.setPosition(this.labelCenterX, this.labelCenterY + yOffset);
+      this.label.container.position.set(this.labelCenterX, this.labelCenterY + yOffset);
     } else if (this.bitmapLabel) {
       this.bitmapLabel.x = this.labelCenterX;
       this.bitmapLabel.y = this.labelCenterY + yOffset;
@@ -322,10 +368,13 @@ export class UIButton extends UIComponent {
       this.label.layout(measured.width, measured.height);
 
       // Center the label and cache the position
+      // Use the label's layout dimensions which account for DPR scaling correctly
       const labelLayout = this.label.getLayout();
       this.labelCenterX = (measured.width - labelLayout.width) / 2;
       this.labelCenterY = (actualHeight - labelLayout.height) / 2;
-      this.label.setPosition(this.labelCenterX, this.labelCenterY);
+      
+      // Position the label container (not the text object directly)
+      this.label.container.position.set(this.labelCenterX, this.labelCenterY);
     } else if (this.bitmapLabel) {
       // Center the bitmap text using actual background height
       this.labelCenterX = (measured.width - this.bitmapLabel.width) / 2;
@@ -357,6 +406,7 @@ export class UIButton extends UIComponent {
   /** Enable or disable the button. */
   setEnabled(enabled: boolean): void {
     this.props.enabled = enabled;
+    this.componentState.enabled = enabled;
     this.setState(enabled ? ButtonState.Normal : ButtonState.Disabled);
   }
 

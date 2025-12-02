@@ -3,6 +3,16 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIPanel } from './ui-panel';
 import { UIFocusManager } from '../core/ui-focus-manager';
+import { asTextDPR } from '../../library/as-pixi';
+import { ThemeResolver } from '../theming/theme-resolver';
+import { DefaultUITheme, createDefaultDarkTheme } from '../theming/theme-data';
+import {
+  LayoutEngine,
+  FormStateManager,
+  TextInputHandler,
+  ThemeApplier,
+  ComponentState
+} from '../services';
 
 /**
  * Props for configuring a UITextArea
@@ -26,11 +36,11 @@ export interface UITextAreaProps {
   height?: number;
   /** Whether the textarea is disabled */
   disabled?: boolean;
-  /** Background color */
+  /** Background color (overrides theme) */
   backgroundColor?: number;
-  /** Text color */
+  /** Text color (overrides theme) */
   textColor?: number;
-  /** Placeholder text color */
+  /** Placeholder text color (overrides theme) */
   placeholderColor?: number;
   /** Border radius */
   borderRadius?: number;
@@ -40,6 +50,8 @@ export interface UITextAreaProps {
   lineHeight?: number;
   /** Number of visible rows */
   rows?: number;
+  /** Optional ThemeResolver for automatic color resolution */
+  themeResolver?: ThemeResolver;
 }
 
 /**
@@ -60,21 +72,45 @@ export interface UITextAreaProps {
  * ```
  */
 export class UITextArea extends UIComponent {
-  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue'>>;
-  private onChange?: (value: string) => void;
-
-  private currentValue: string;
+  // Props
+  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
+  
+  // Services (composition)
+  private layoutEngine: LayoutEngine;
+  private stateManager: FormStateManager<string>;
+  private inputHandler: TextInputHandler;
+  private themeApplier: ThemeApplier;
+  
+  // Visual elements
   private background: UIPanel;
   private textDisplay: PIXI.Text;
   private cursor: PIXI.Graphics;
-  private cursorPosition: number = 0;
+  
+  // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
+  
+  // Component state (data-driven)
+  private componentState: ComponentState = {
+    enabled: true,
+    focused: false,
+    hovered: false,
+    pressed: false
+  };
+  
+  // Theme data
+  private themeResolver?: ThemeResolver;
+  private colorOverrides: {
+    backgroundColor?: number;
+    textColor?: number;
+    placeholderColor?: number;
+  } = {};
 
   constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    const defaultHeight = (props.rows ?? 4) * (props.fontSize ?? 14) * (props.lineHeight ?? 1.5) + 24;
+    const defaultLineHeight = props.lineHeight ?? 1.2; // Tighter spacing for pixel fonts
+    const defaultHeight = (props.rows ?? 4) * (props.fontSize ?? 14) * defaultLineHeight + 24;
 
     this.props = {
       placeholder: props.placeholder ?? '',
@@ -87,42 +123,49 @@ export class UITextArea extends UIComponent {
       placeholderColor: props.placeholderColor ?? 0x999999,
       borderRadius: props.borderRadius ?? 4,
       fontSize: props.fontSize ?? 14,
-      lineHeight: props.lineHeight ?? 1.5,
+      lineHeight: defaultLineHeight,
       rows: props.rows ?? 4
     };
 
-    this.onChange = props.onChange;
-    this.currentValue = props.value ?? props.defaultValue ?? '';
+    // Store color overrides
+    this.colorOverrides = {
+      backgroundColor: props.backgroundColor,
+      textColor: props.textColor,
+      placeholderColor: props.placeholderColor
+    };
+
+    // Initialize theme
+    this.themeResolver = props.themeResolver;
+    const theme = createDefaultDarkTheme(); // TODO: Get from resolver if available
+    
+    // Initialize services
+    this.layoutEngine = new LayoutEngine();
+    this.stateManager = new FormStateManager({
+      value: props.value,
+      defaultValue: props.defaultValue,
+      onChange: props.onChange
+    });
+    this.inputHandler = new TextInputHandler({
+      value: this.stateManager.getValue(),
+      maxLength: this.props.maxLength,
+      type: 'text', // Textarea doesn't support number type
+      multiline: true,
+      onChange: (value) => {
+        this.stateManager.setValue(value);
+        this.updateText();
+      }
+    });
+    this.themeApplier = new ThemeApplier(theme);
+
+    // Update component state
+    this.componentState.enabled = !this.props.disabled;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
     this.boxModel.height = this.props.height;
 
-    // Create background
-    this.background = new UIPanel({
-      backgroundColor: this.props.backgroundColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
-    this.container.addChild(this.background.container);
-
-    // Create text display with word wrapping
-    this.textDisplay = new PIXI.Text({
-      text: this.getDisplayText(),
-      style: {
-        fontFamily: 'Arial',
-        fontSize: this.props.fontSize,
-        fill: this.currentValue ? this.props.textColor : this.props.placeholderColor,
-        align: 'left',
-        wordWrap: true,
-        wordWrapWidth: this.props.width - 24,
-        lineHeight: this.props.fontSize * this.props.lineHeight
-      },
-      resolution: window.devicePixelRatio || 2
-    });
-    this.textDisplay.position.set(12, 12);
-    this.container.addChild(this.textDisplay);
+    // Create visual elements
+    this.createVisuals();
 
     // Create cursor
     this.cursor = new PIXI.Graphics();
@@ -134,13 +177,62 @@ export class UITextArea extends UIComponent {
   }
 
   /**
+   * Create visual elements
+   */
+  private createVisuals(): void {
+    // Create background
+    const bgColor = this.themeResolver
+      ? this.themeResolver.getColor('background', this.colorOverrides.backgroundColor)
+      : this.themeApplier.applyBackground(
+          {} as PIXI.Graphics,
+          this.componentState,
+          this.colorOverrides.backgroundColor
+        );
+    
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+    this.container.addChild(this.background.container);
+
+    // Create text display with word wrapping and high-DPI DPR rendering
+    const displayText = this.getDisplayText();
+    const dprScale = 2;
+    const textColor = displayText === this.props.placeholder
+      ? (this.themeResolver
+          ? this.themeResolver.getPlaceholderColor(this.colorOverrides.placeholderColor)
+          : this.themeApplier.applyPlaceholderColor(this.colorOverrides.placeholderColor))
+      : (this.themeResolver
+          ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
+          : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor));
+
+    this.textDisplay = asTextDPR({
+      text: displayText,
+      style: {
+        fontFamily: 'PixelOperator8',
+        fontSize: this.props.fontSize,
+        fill: textColor,
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: (this.props.width - 24) * dprScale,
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
+      },
+      dprScale,
+      pixelPerfect: true
+    });
+    this.textDisplay.position.set(12, 12);
+    this.textDisplay.roundPixels = true;
+    this.container.addChild(this.textDisplay);
+  }
+
+  /**
    * Gets the display text (value or placeholder)
    */
   private getDisplayText(): string {
-    if (this.currentValue) {
-      return this.currentValue;
-    }
-    return this.props.placeholder;
+    const value = this.stateManager.getValue();
+    return value || this.props.placeholder;
   }
 
   /**
@@ -174,217 +266,142 @@ export class UITextArea extends UIComponent {
   }
 
   /**
-   * Called when textarea receives focus (override from base class)
+   * Called when textarea receives focus
    */
   override onFocus(): void {
     if (this.focused) return;
 
     super.onFocus();
-    this.cursorPosition = this.currentValue.length;
+    this.componentState.focused = true;
+    
+    // Set cursor position
+    this.inputHandler.setCursorPosition(this.stateManager.getValue().length);
     this.cursor.visible = true;
     this.updateCursor();
     this.startCursorBlink();
 
-    // Update background to show focus state
-    this.background = new UIPanel({
-      backgroundColor: this.lightenColor(this.props.backgroundColor, 0.95),
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
+    // Update background for focus state
+    this.updateBackground();
   }
 
   /**
-   * Called when textarea loses focus (override from base class)
+   * Called when textarea loses focus
    */
   override onBlur(): void {
     if (!this.focused) return;
 
     super.onBlur();
+    this.componentState.focused = false;
     this.cursor.visible = false;
     this.stopCursorBlink();
 
-    // Restore normal background
-    this.background = new UIPanel({
-      backgroundColor: this.props.backgroundColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
+    // Update background for normal state
+    this.updateBackground();
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
     // Don't prevent default for Tab (allow tab navigation)
-    if (e.key !== 'Tab') {
-      e.preventDefault();
-      e.stopPropagation();
+    if (e.key === 'Tab') {
+      return; // Let tab navigation work
     }
 
-    const key = e.key;
-
-    // Enter adds new line in textarea
-    if (key === 'Enter') {
-      if (this.currentValue.length < this.props.maxLength) {
-        this.currentValue =
-          this.currentValue.substring(0, this.cursorPosition) +
-          '\n' +
-          this.currentValue.substring(this.cursorPosition);
-        this.cursorPosition++;
-        this.updateText();
-      }
-      return;
-    }
-
-    if (key === 'Escape') {
+    // Handle Enter/Escape for blur
+    if (e.key === 'Escape') {
       this.onBlur();
       return;
     }
 
-    if (key === 'Backspace') {
-      if (this.cursorPosition > 0) {
-        this.currentValue =
-          this.currentValue.substring(0, this.cursorPosition - 1) +
-          this.currentValue.substring(this.cursorPosition);
-        this.cursorPosition--;
-        this.updateText();
-      }
-      return;
-    }
-
-    if (key === 'Delete') {
-      if (this.cursorPosition < this.currentValue.length) {
-        this.currentValue =
-          this.currentValue.substring(0, this.cursorPosition) +
-          this.currentValue.substring(this.cursorPosition + 1);
-        this.updateText();
-      }
-      return;
-    }
-
-    if (key === 'ArrowLeft') {
-      if (this.cursorPosition > 0) {
-        this.cursorPosition--;
-        this.updateCursor();
-      }
-      return;
-    }
-
-    if (key === 'ArrowRight') {
-      if (this.cursorPosition < this.currentValue.length) {
-        this.cursorPosition++;
-        this.updateCursor();
-      }
-      return;
-    }
-
-    if (key === 'ArrowUp') {
-      // Move cursor up one line
-      this.moveCursorVertically(-1);
-      return;
-    }
-
-    if (key === 'ArrowDown') {
-      // Move cursor down one line
-      this.moveCursorVertically(1);
-      return;
-    }
-
-    if (key === 'Home') {
-      // Move to start of current line
-      const lineStart = this.currentValue.lastIndexOf('\n', this.cursorPosition - 1) + 1;
-      this.cursorPosition = lineStart;
+    // Delegate keyboard handling to TextInputHandler
+    const handled = this.inputHandler.handleKeyDown(e);
+    if (handled) {
+      e.preventDefault();
+      e.stopPropagation();
       this.updateCursor();
-      return;
-    }
-
-    if (key === 'End') {
-      // Move to end of current line
-      let lineEnd = this.currentValue.indexOf('\n', this.cursorPosition);
-      if (lineEnd === -1) lineEnd = this.currentValue.length;
-      this.cursorPosition = lineEnd;
-      this.updateCursor();
-      return;
-    }
-
-    // Handle character input
-    if (key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      // Check max length
-      if (this.currentValue.length >= this.props.maxLength) {
-        return;
-      }
-
-      // Insert character at cursor position
-      this.currentValue =
-        this.currentValue.substring(0, this.cursorPosition) +
-        key +
-        this.currentValue.substring(this.cursorPosition);
-      this.cursorPosition++;
-      this.updateText();
     }
   }
 
   /**
-   * Moves cursor vertically by the specified number of lines
-   */
-  private moveCursorVertically(direction: number): void {
-    const lines = this.currentValue.split('\n');
-    let currentLine = 0;
-    let positionInLine = 0;
-    let charCount = 0;
-
-    // Find current line and position
-    for (let i = 0; i < lines.length; i++) {
-      if (charCount + lines[i].length >= this.cursorPosition) {
-        currentLine = i;
-        positionInLine = this.cursorPosition - charCount;
-        break;
-      }
-      charCount += lines[i].length + 1; // +1 for newline
-    }
-
-    // Move to target line
-    const targetLine = Math.max(0, Math.min(lines.length - 1, currentLine + direction));
-    if (targetLine === currentLine) return;
-
-    // Calculate new cursor position
-    let newPosition = 0;
-    for (let i = 0; i < targetLine; i++) {
-      newPosition += lines[i].length + 1;
-    }
-    newPosition += Math.min(positionInLine, lines[targetLine].length);
-
-    this.cursorPosition = newPosition;
-    this.updateCursor();
-  }
-
-  /**
-   * Updates the text display and triggers onChange
+   * Update text display
    */
   private updateText(): void {
-    this.textDisplay.text = this.getDisplayText();
-    this.textDisplay.style.fill = this.currentValue ? this.props.textColor : this.props.placeholderColor;
+    const value = this.stateManager.getValue();
+    const displayText = this.getDisplayText();
+    
+    this.textDisplay.text = displayText;
+    
+    // Update text color based on whether showing placeholder
+    const textColor = value
+      ? (this.themeResolver
+          ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
+          : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor))
+      : (this.themeResolver
+          ? this.themeResolver.getPlaceholderColor(this.colorOverrides.placeholderColor)
+          : this.themeApplier.applyPlaceholderColor(this.colorOverrides.placeholderColor));
+    
+    this.textDisplay.style.fill = textColor;
     this.updateCursor();
-    this.onChange?.(this.currentValue);
   }
 
   /**
-   * Updates cursor position visually
+   * Update background based on state
+   */
+  private updateBackground(): void {
+    const bgColor = this.themeResolver
+      ? this.themeResolver.getColor(
+          this.componentState.focused ? 'focus' : 'background',
+          this.colorOverrides.backgroundColor
+        )
+      : this.themeApplier.applyBackground(
+          {} as PIXI.Graphics,
+          this.componentState,
+          this.colorOverrides.backgroundColor
+        );
+
+    // Recreate background panel with new color
+    const oldBackground = this.background;
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+    
+    // Replace in container
+    const index = this.container.getChildIndex(oldBackground.container);
+    this.container.removeChild(oldBackground.container);
+    this.container.addChildAt(this.background.container, index);
+    oldBackground.destroy();
+  }
+
+  /**
+   * Update cursor position visually
    */
   private updateCursor(): void {
-    // Get text metrics up to cursor position
-    const textUpToCursor = this.currentValue.substring(0, this.cursorPosition);
+    const value = this.stateManager.getValue();
+    const cursorPos = this.inputHandler.getCursorPosition();
+    const textUpToCursor = value.substring(0, cursorPos);
 
     // Create temporary text to measure
+    // Note: wordWrapWidth needs to account for DPR scaling (multiply by dprScale)
+    const dprScale = 2;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
       style: {
-        ...this.textDisplay.style,
+        fontFamily: 'PixelOperator8', // Match the display font
+        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
+        fill: this.textDisplay.style.fill,
+        align: 'left',
         wordWrap: true,
-        wordWrapWidth: this.props.width - 24
+        wordWrapWidth: (this.props.width - 24) * dprScale,
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
       }
     });
+    // Ensure effects is initialized to prevent null reference errors
+    if (tempText.effects === null) {
+      tempText.effects = [];
+    }
 
     // Get the bounds to find cursor position
     const metrics = tempText.getLocalBounds();
@@ -395,15 +412,29 @@ export class UITextArea extends UIComponent {
 
     const lastLineText = new PIXI.Text({
       text: lastLine,
-      style: this.textDisplay.style
+      style: {
+        fontFamily: 'PixelOperator8', // Match the display font
+        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
+        fill: this.textDisplay.style.fill,
+        align: 'left',
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
+      }
     });
+    // Ensure effects is initialized to prevent null reference errors
+    if (lastLineText.effects === null) {
+      lastLineText.effects = [];
+    }
 
-    const cursorX = 12 + lastLineText.width;
+    // Account for DPR scaling when calculating cursor position
+    const cursorX = 12 + (lastLineText.width / dprScale);
     const cursorY = 12 + (lines.length - 1) * (this.props.fontSize * this.props.lineHeight);
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
-    this.cursor.fill({ color: this.props.textColor });
+    const cursorColor = this.themeResolver
+      ? this.themeResolver.getTextColor(this.colorOverrides.textColor)
+      : this.themeApplier.applyTextColor(this.componentState, this.colorOverrides.textColor);
+    this.cursor.fill({ color: cursorColor });
 
     // Clean up temp objects
     tempText.destroy();
@@ -434,23 +465,15 @@ export class UITextArea extends UIComponent {
   }
 
   /**
-   * Lightens a color by a factor
-   */
-  private lightenColor(color: number, factor: number): number {
-    const r = Math.min(255, ((color >> 16) & 0xff) / factor);
-    const g = Math.min(255, ((color >> 8) & 0xff) / factor);
-    const b = Math.min(255, (color & 0xff) / factor);
-    return ((r << 16) | (g << 8) | b) >>> 0;
-  }
-
-  /**
    * Measures the size needed for this textarea
    */
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.props.width,
       height: this.props.height
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /**
@@ -458,9 +481,13 @@ export class UITextArea extends UIComponent {
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
+    
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width: availableWidth, height: availableHeight }
+    );
 
     // Layout background
     this.background.layout(measured.width, measured.height);
@@ -480,8 +507,9 @@ export class UITextArea extends UIComponent {
    * Sets the value programmatically
    */
   setValue(value: string): void {
-    this.currentValue = value;
-    this.cursorPosition = value.length;
+    this.stateManager.setValue(value);
+    this.inputHandler.setValue(value);
+    this.inputHandler.setCursorPosition(value.length);
     this.updateText();
   }
 
@@ -489,7 +517,16 @@ export class UITextArea extends UIComponent {
    * Gets the current value
    */
   getValue(): string {
-    return this.currentValue;
+    return this.stateManager.getValue();
+  }
+
+  /**
+   * Update value (for controlled mode)
+   */
+  updateValue(value: string): void {
+    this.stateManager.updateValue(value);
+    this.inputHandler.setValue(value);
+    this.updateText();
   }
 
   /**

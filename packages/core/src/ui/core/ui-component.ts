@@ -1,5 +1,8 @@
 import PIXI from 'pixi.js';
 import { BoxModel, ComputedLayout, MeasuredSize, createDefaultBoxModel } from './box-model';
+import { LayoutEngine } from '../services';
+import { ThemeResolver } from '../theming/theme-resolver';
+import { createDefaultDarkTheme } from '../theming/theme-data';
 
 /**
  * Base abstract class for all UI components
@@ -49,6 +52,12 @@ export abstract class UIComponent {
   protected layoutDirty: boolean = true;
 
   /**
+   * Layout engine service for calculating layouts
+   * Initialized in base class so all components have access to layout calculations
+   */
+  protected layoutEngine: LayoutEngine;
+
+  /**
    * Tab index for focus order (-1 means not focusable by tab)
    */
   public tabIndex: number = -1;
@@ -57,6 +66,27 @@ export abstract class UIComponent {
    * Internal focus state
    */
   protected focused: boolean = false;
+
+  /**
+   * Hover state (for components that track hover)
+   */
+  protected hovered: boolean = false;
+
+  /**
+   * Pressed state (for components that track press)
+   */
+  protected pressed: boolean = false;
+
+  /**
+   * Optional theme resolver for color resolution
+   * Components can set this to enable automatic theming
+   */
+  protected themeResolver?: ThemeResolver;
+
+  /**
+   * Default theme resolver (lazy initialized)
+   */
+  private defaultThemeResolver?: ThemeResolver;
 
   constructor(boxModel?: Partial<BoxModel>) {
     this.container = new PIXI.Container();
@@ -71,6 +101,9 @@ export abstract class UIComponent {
       contentWidth: 0,
       contentHeight: 0
     };
+
+    // Initialize layout engine service (available to all components)
+    this.layoutEngine = new LayoutEngine();
 
     // Create focus ring (initially hidden)
     this.createFocusRing();
@@ -155,12 +188,24 @@ export abstract class UIComponent {
 
   /**
    * Performs layout for this component within the given available space
-   * Must be implemented by subclasses
+   * Default implementation uses LayoutEngine. Override if custom layout logic is needed.
    *
    * @param availableWidth - Available width in pixels
    * @param availableHeight - Available height in pixels
    */
-  abstract layout(availableWidth: number, availableHeight: number): void;
+  layout(availableWidth: number, availableHeight: number): void {
+    const measured = this.measure();
+    
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width: availableWidth, height: availableHeight }
+    );
+
+    this.layoutDirty = false;
+    this.render();
+  }
 
   /**
    * Renders the component's visuals
@@ -296,6 +341,66 @@ export abstract class UIComponent {
     if (this.focusRing) {
       this.focusRing.visible = false;
     }
+  }
+
+  /**
+   * Get theme resolver (creates default if none provided)
+   */
+  protected getThemeResolver(): ThemeResolver {
+    if (this.themeResolver) {
+      return this.themeResolver;
+    }
+    if (!this.defaultThemeResolver) {
+      this.defaultThemeResolver = new ThemeResolver(createDefaultDarkTheme());
+    }
+    return this.defaultThemeResolver;
+  }
+
+  /**
+   * Resolve a color from theme with optional override
+   * Simplifies color resolution across all components
+   */
+  protected resolveColor(type: 'background' | 'border' | 'text' | 'selected' | 'hover' | 'focus' | 'disabled', override?: number): number {
+    return this.getThemeResolver().getColor(type, override);
+  }
+
+  /**
+   * Resolve a control-specific color with optional override
+   */
+  protected resolveControlColor(controlType: 'checkbox' | 'textInput' | 'textArea' | 'button' | 'radio' | 'select', type: 'background' | 'border' | 'text', override?: number): number {
+    return this.getThemeResolver().getControlColor(controlType, type, override);
+  }
+
+  /**
+   * Resolve text color with optional override
+   */
+  protected resolveTextColor(override?: number): number {
+    return this.getThemeResolver().getTextColor(override);
+  }
+
+  /**
+   * Resolve placeholder color with optional override
+   */
+  protected resolvePlaceholderColor(override?: number): number {
+    return this.getThemeResolver().getPlaceholderColor(override);
+  }
+
+  /**
+   * Resolve checkmark color with optional override
+   */
+  protected resolveCheckmarkColor(override?: number): number {
+    return this.getThemeResolver().getCheckmarkColor(override);
+  }
+
+  /**
+   * Helper to make container interactive with common settings
+   * Components can call this in setupInteractivity() or override for custom behavior
+   * 
+   * @param cursor - Cursor type ('pointer', 'text', 'default', etc.)
+   */
+  protected makeInteractive(cursor: string = 'pointer'): void {
+    this.container.eventMode = 'static';
+    this.container.cursor = cursor;
   }
 
   /**

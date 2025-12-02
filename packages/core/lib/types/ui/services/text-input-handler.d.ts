@@ -1,17 +1,18 @@
 export interface TextInputHandlerConfig {
-    value: string;
+    stateManager: {
+        getValue: () => string;
+        setValue: (value: string) => void;
+    };
     maxLength?: number;
     type?: 'text' | 'number';
     multiline?: boolean;
-    onChange?: (value: string) => void;
 }
 export declare class TextInputHandler {
-    private value;
+    private stateManager;
     private cursorPosition;
     private maxLength;
     private type;
     private multiline;
-    private onChange?;
     constructor(config: TextInputHandlerConfig);
     getValue(): string;
     setValue(value: string): void;
@@ -25,5 +26,4 @@ export declare class TextInputHandler {
     private moveCursorVertically;
     private moveToLineStart;
     private moveToLineEnd;
-    setOnChange(callback: (value: string) => void): void;
 }

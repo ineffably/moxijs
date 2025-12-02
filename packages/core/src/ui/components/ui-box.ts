@@ -1,6 +1,7 @@
 import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
+import { LayoutEngine } from '../services';
 
 /**
  * Props for configuring a UIBox
@@ -43,9 +44,13 @@ export interface UIBoxProps {
 export class UIBox extends UIComponent {
   private props: UIBoxProps;
   private graphics: PIXI.Graphics;
+  
+  // Services (composition)
 
   constructor(props: UIBoxProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+    
+    
     this.props = {
       backgroundColor: 0x000000,
       backgroundAlpha: 1,
@@ -90,57 +95,15 @@ export class UIBox extends UIComponent {
       contentHeight = this.props.height;
     }
 
-    // Add padding and border
-    const totalWidth = contentWidth + padding.horizontal + (border?.horizontal ?? 0);
-    const totalHeight = contentHeight + padding.vertical + (border?.vertical ?? 0);
-
-    return {
-      width: Math.max(totalWidth, this.boxModel.minWidth ?? 0),
-      height: Math.max(totalHeight, this.boxModel.minHeight ?? 0)
+    const contentSize: MeasuredSize = {
+      width: contentWidth,
+      height: contentHeight
     };
+
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
-  /**
-   * Performs layout for this box
-   */
-  layout(availableWidth: number, availableHeight: number): void {
-    const measured = this.measure();
-    const padding = this.boxModel.padding;
-    const border = this.boxModel.border ?? { horizontal: 0, vertical: 0, top: 0, right: 0, bottom: 0, left: 0 };
-
-    // Calculate final dimensions
-    let finalWidth = measured.width;
-    let finalHeight = measured.height;
-
-    // Handle 'fill' constraint
-    if (this.boxModel.width === 'fill') {
-      finalWidth = availableWidth;
-    }
-    if (this.boxModel.height === 'fill') {
-      finalHeight = availableHeight;
-    }
-
-    // Apply max constraints
-    if (this.boxModel.maxWidth !== undefined) {
-      finalWidth = Math.min(finalWidth, this.boxModel.maxWidth);
-    }
-    if (this.boxModel.maxHeight !== undefined) {
-      finalHeight = Math.min(finalHeight, this.boxModel.maxHeight);
-    }
-
-    // Update computed layout
-    this.computedLayout.width = finalWidth;
-    this.computedLayout.height = finalHeight;
-
-    // Content area (inside padding and border)
-    this.computedLayout.contentX = padding.left + border.left;
-    this.computedLayout.contentY = padding.top + border.top;
-    this.computedLayout.contentWidth = finalWidth - padding.horizontal - border.horizontal;
-    this.computedLayout.contentHeight = finalHeight - padding.vertical - border.vertical;
-
-    this.layoutDirty = false;
-    this.render();
-  }
+  // Layout is handled by base class
 
   /**
    * Renders the box visuals

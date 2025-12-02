@@ -1,5 +1,7 @@
 import PIXI from 'pixi.js';
 import { BoxModel, ComputedLayout, MeasuredSize } from './box-model';
+import { LayoutEngine } from '../services';
+import { ThemeResolver } from '../theming/theme-resolver';
 export declare abstract class UIComponent {
     container: PIXI.Container;
     protected boxModel: BoxModel;
@@ -9,13 +11,18 @@ export declare abstract class UIComponent {
     visible: boolean;
     enabled: boolean;
     protected layoutDirty: boolean;
+    protected layoutEngine: LayoutEngine;
     tabIndex: number;
     protected focused: boolean;
+    protected hovered: boolean;
+    protected pressed: boolean;
+    protected themeResolver?: ThemeResolver;
+    private defaultThemeResolver?;
     constructor(boxModel?: Partial<BoxModel>);
     private createFocusRing;
     protected updateFocusRing(): void;
     abstract measure(): MeasuredSize;
-    abstract layout(availableWidth: number, availableHeight: number): void;
+    layout(availableWidth: number, availableHeight: number): void;
     protected abstract render(): void;
     markLayoutDirty(): void;
     getLayout(): ComputedLayout;
@@ -36,5 +43,12 @@ export declare abstract class UIComponent {
     private scrollIntoView;
     onBlur(): void;
     protected hideFocusRing(): void;
+    protected getThemeResolver(): ThemeResolver;
+    protected resolveColor(type: 'background' | 'border' | 'text' | 'selected' | 'hover' | 'focus' | 'disabled', override?: number): number;
+    protected resolveControlColor(controlType: 'checkbox' | 'textInput' | 'textArea' | 'button' | 'radio' | 'select', type: 'background' | 'border' | 'text', override?: number): number;
+    protected resolveTextColor(override?: number): number;
+    protected resolvePlaceholderColor(override?: number): number;
+    protected resolveCheckmarkColor(override?: number): number;
+    protected makeInteractive(cursor?: string): void;
     destroy(): void;
 }

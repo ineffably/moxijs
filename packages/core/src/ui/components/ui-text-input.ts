@@ -6,6 +6,11 @@ import { EdgeInsets } from '../core/edge-insets';
 import { UIFocusManager } from '../core/ui-focus-manager';
 import { asTextDPR } from '../../library/as-pixi';
 import { ThemeResolver } from '../theming/theme-resolver';
+// Theme resolver is now in base class
+import {
+  FormStateManager,
+  TextInputHandler
+} from '../services';
 
 /**
  * Props for configuring a UITextInput
@@ -61,16 +66,31 @@ export interface UITextInputProps {
  * ```
  */
 export class UITextInput extends UIComponent {
+  // Props
   private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
-  private onChange?: (value: string) => void;
-
-  private currentValue: string;
+  
+  // Services (composition)
+  private stateManager: FormStateManager<string>;
+  private inputHandler: TextInputHandler;
+  // ThemeApplier removed - using base class helpers
+  
+  // Visual elements
   private background: UIPanel;
   private textDisplay: PIXI.Text;
   private cursor: PIXI.Graphics;
-  private cursorPosition: number = 0;
+  
+  // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
+  
+  // State is now in base class (enabled, focused, hovered, pressed)
+  
+  // Theme resolver is now in base class
+  private colorOverrides: {
+    backgroundColor?: number;
+    textColor?: number;
+    placeholderColor?: number;
+  } = {};
 
   constructor(props: UITextInputProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -89,65 +109,99 @@ export class UITextInput extends UIComponent {
       type: props.type ?? 'text'
     };
 
-    this.onChange = props.onChange;
-    this.currentValue = props.value ?? props.defaultValue ?? '';
+    // Store color overrides
+    this.colorOverrides = {
+      backgroundColor: props.backgroundColor,
+      textColor: props.textColor,
+      placeholderColor: props.placeholderColor
+    };
+
+    // Initialize theme resolver
+    this.themeResolver = props.themeResolver;
+    
+    this.stateManager = new FormStateManager({
+      value: props.value,
+      defaultValue: props.defaultValue,
+      onChange: props.onChange
+    });
+    // Initialize input handler - it now uses stateManager directly
+    this.inputHandler = new TextInputHandler({
+      stateManager: this.stateManager,
+      maxLength: this.props.maxLength,
+      type: this.props.type,
+      multiline: false
+    });
+
+    // Update component state
+    this.enabled = !this.props.disabled;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
     this.boxModel.height = this.props.height;
 
-    // Create background
-    this.background = new UIPanel({
-      backgroundColor: this.props.backgroundColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
-    this.container.addChild(this.background.container);
-
-    // Create text display with high-DPI DPR rendering
-    this.textDisplay = asTextDPR({
-      text: this.getDisplayText(),
-      style: {
-        fontFamily: 'PixelOperator8', // Pixel-perfect font
-        fontSize: this.props.fontSize,
-        fill: this.currentValue ? this.props.textColor : this.props.placeholderColor,
-        align: 'left'
-      },
-      dprScale: 2,
-      pixelPerfect: true
-    });
-    // Round position to avoid blurry text from fractional pixels
-    const textY = Math.round((this.props.height - this.props.fontSize) / 2);
-    this.textDisplay.position.set(12, textY);
-    this.textDisplay.roundPixels = true; // Ensure pixel-perfect positioning
-    this.container.addChild(this.textDisplay);
-
-    // Create cursor
-    this.cursor = new PIXI.Graphics();
-    this.cursor.visible = false;
-    this.container.addChild(this.cursor);
+    // Create visual elements
+    this.createVisuals();
 
     // Setup interactivity
     this.setupInteractivity();
   }
 
   /**
+   * Create visual elements
+   */
+  private createVisuals(): void {
+    // Create background
+    const bgColor = this.resolveColor('background', this.colorOverrides.backgroundColor);
+    
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+    this.container.addChild(this.background.container);
+
+    // Create text display
+    const displayText = this.getDisplayText();
+    const textColor = displayText === this.props.placeholder
+      ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
+      : this.resolveTextColor(this.colorOverrides.textColor);
+
+    this.textDisplay = asTextDPR({
+      text: displayText,
+      style: {
+        fontFamily: 'PixelOperator8',
+        fontSize: this.props.fontSize,
+        fill: textColor,
+        align: 'left'
+      },
+      dprScale: 2,
+      pixelPerfect: true
+    });
+    const textY = Math.round((this.props.height - this.props.fontSize) / 2);
+    this.textDisplay.position.set(12, textY);
+    this.textDisplay.roundPixels = true;
+    this.container.addChild(this.textDisplay);
+
+    // Create cursor
+    this.cursor = new PIXI.Graphics();
+    this.cursor.visible = false;
+    this.container.addChild(this.cursor);
+  }
+
+  /**
    * Gets the display text (value or placeholder)
    */
   private getDisplayText(): string {
-    if (this.currentValue) {
-      return this.currentValue;
-    }
-    return this.props.placeholder;
+    const value = this.stateManager.getValue();
+    return value || this.props.placeholder;
   }
 
   /**
    * Sets up mouse/keyboard event handlers
    */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'text';
+    this.makeInteractive('text');
 
     // Click to focus
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
@@ -173,151 +227,113 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Called when input receives focus (override from base class)
+   * Called when input receives focus
    */
   override onFocus(): void {
     if (this.focused) return;
 
     super.onFocus();
-    this.cursorPosition = this.currentValue.length;
+    // focused is already set by super.onFocus()
+    
+    // Set cursor position
+    this.inputHandler.setCursorPosition(this.stateManager.getValue().length);
     this.cursor.visible = true;
     this.updateCursor();
     this.startCursorBlink();
 
-    // Update background to show focus state
-    this.background = new UIPanel({
-      backgroundColor: this.lightenColor(this.props.backgroundColor, 0.95),
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
+    // Update background for focus state
+    this.updateBackground();
   }
 
   /**
-   * Called when input loses focus (override from base class)
+   * Called when input loses focus
    */
   override onBlur(): void {
     if (!this.focused) return;
 
     super.onBlur();
+    // focused is already set by super.onBlur()
     this.cursor.visible = false;
     this.stopCursorBlink();
 
-    // Restore normal background
-    this.background = new UIPanel({
-      backgroundColor: this.props.backgroundColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
+    // Update background for normal state
+    this.updateBackground();
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
-    // Stop event from propagating
-    e.preventDefault();
-    e.stopPropagation();
-
-    const key = e.key;
-
-    if (key === 'Enter') {
+    // Handle Enter/Escape for blur (before delegating to handler)
+    if (e.key === 'Enter' || e.key === 'Escape') {
       this.onBlur();
       return;
     }
 
-    if (key === 'Escape') {
-      this.onBlur();
-      return;
-    }
-
-    if (key === 'Backspace') {
-      if (this.cursorPosition > 0) {
-        this.currentValue =
-          this.currentValue.substring(0, this.cursorPosition - 1) +
-          this.currentValue.substring(this.cursorPosition);
-        this.cursorPosition--;
-        this.updateText();
-      }
-      return;
-    }
-
-    if (key === 'Delete') {
-      if (this.cursorPosition < this.currentValue.length) {
-        this.currentValue =
-          this.currentValue.substring(0, this.cursorPosition) +
-          this.currentValue.substring(this.cursorPosition + 1);
-        this.updateText();
-      }
-      return;
-    }
-
-    if (key === 'ArrowLeft') {
-      if (this.cursorPosition > 0) {
-        this.cursorPosition--;
-        this.updateCursor();
-      }
-      return;
-    }
-
-    if (key === 'ArrowRight') {
-      if (this.cursorPosition < this.currentValue.length) {
-        this.cursorPosition++;
-        this.updateCursor();
-      }
-      return;
-    }
-
-    if (key === 'Home') {
-      this.cursorPosition = 0;
-      this.updateCursor();
-      return;
-    }
-
-    if (key === 'End') {
-      this.cursorPosition = this.currentValue.length;
-      this.updateCursor();
-      return;
-    }
-
-    // Handle character input
-    if (key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      // Type validation
-      if (this.props.type === 'number' && !/[0-9.-]/.test(key)) {
-        return;
-      }
-
-      // Check max length
-      if (this.currentValue.length >= this.props.maxLength) {
-        return;
-      }
-
-      // Insert character at cursor position
-      this.currentValue =
-        this.currentValue.substring(0, this.cursorPosition) +
-        key +
-        this.currentValue.substring(this.cursorPosition);
-      this.cursorPosition++;
+    // Delegate keyboard handling to TextInputHandler
+    const handled = this.inputHandler.handleKeyDown(e);
+    if (handled) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Handler updates stateManager directly, so we just need to update visuals
       this.updateText();
+      this.updateCursor();
     }
   }
 
   /**
-   * Updates the text display and triggers onChange
+   * Update text display
    */
   private updateText(): void {
-    this.textDisplay.text = this.getDisplayText();
-    this.textDisplay.style.fill = this.currentValue ? this.props.textColor : this.props.placeholderColor;
+    const value = this.stateManager.getValue();
+    const displayText = this.getDisplayText();
+    
+    this.textDisplay.text = displayText;
+    
+    // Update text color based on whether showing placeholder
+    const textColor = value
+      ? this.resolveTextColor(this.colorOverrides.textColor)
+      : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
+    
+    this.textDisplay.style.fill = textColor;
     this.updateCursor();
-    this.onChange?.(this.currentValue);
   }
 
   /**
-   * Updates cursor position visually
+   * Update background based on state
+   */
+  private updateBackground(): void {
+    const bgColor = this.focused
+      ? this.resolveColor('focus', this.colorOverrides.backgroundColor)
+      : this.resolveColor('background', this.colorOverrides.backgroundColor);
+
+    // Recreate background panel with new color
+    const oldBackground = this.background;
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+    
+    // Replace in container
+    const index = this.container.getChildIndex(oldBackground.container);
+    this.container.removeChild(oldBackground.container);
+    this.container.addChildAt(this.background.container, index);
+    oldBackground.destroy();
+  }
+
+  /**
+   * Update cursor position visually
    */
   private updateCursor(): void {
-    // Measure text up to cursor position by creating a temporary text object
-    const textUpToCursor = this.currentValue.substring(0, this.cursorPosition);
+    const value = this.stateManager.getValue();
+    const cursorPos = this.inputHandler.getCursorPosition();
+    const textUpToCursor = value.substring(0, cursorPos);
+    
+    // Ensure cursor position is valid
+    if (cursorPos > value.length) {
+      this.inputHandler.setCursorPosition(value.length);
+    }
     const dprScale = 2;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
@@ -339,9 +355,9 @@ export class UITextInput extends UIComponent {
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
-    this.cursor.fill({ color: this.props.textColor });
+    const cursorColor = this.resolveTextColor(this.colorOverrides.textColor);
+    this.cursor.fill({ color: cursorColor });
 
-    // Clean up temp text
     tempText.destroy();
   }
 
@@ -369,23 +385,15 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Lightens a color by a factor
-   */
-  private lightenColor(color: number, factor: number): number {
-    const r = Math.min(255, ((color >> 16) & 0xff) / factor);
-    const g = Math.min(255, ((color >> 8) & 0xff) / factor);
-    const b = Math.min(255, (color & 0xff) / factor);
-    return ((r << 16) | (g << 8) | b) >>> 0;
-  }
-
-  /**
    * Measures the size needed for this input
    */
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.props.width,
       height: this.props.height
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /**
@@ -393,15 +401,10 @@ export class UITextInput extends UIComponent {
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
+    super.layout(availableWidth, availableHeight);
 
     // Layout background
     this.background.layout(measured.width, measured.height);
-
-    this.layoutDirty = false;
-    this.render();
   }
 
   /**
@@ -415,16 +418,29 @@ export class UITextInput extends UIComponent {
    * Sets the value programmatically
    */
   setValue(value: string): void {
-    this.currentValue = value;
-    this.cursorPosition = value.length;
+    this.stateManager.setValue(value);
+    this.inputHandler.setValue(value);
+    this.inputHandler.setCursorPosition(value.length);
     this.updateText();
+    this.updateCursor();
   }
 
   /**
    * Gets the current value
    */
   getValue(): string {
-    return this.currentValue;
+    return this.stateManager.getValue();
+  }
+
+  /**
+   * Update value (for controlled mode)
+   */
+  updateValue(value: string): void {
+    this.stateManager.updateValue(value);
+    // Handler uses stateManager directly, just update cursor position
+    this.inputHandler.setCursorPosition(value.length);
+    this.updateText();
+    this.updateCursor();
   }
 
   /**

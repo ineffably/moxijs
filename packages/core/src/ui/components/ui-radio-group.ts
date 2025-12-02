@@ -5,6 +5,10 @@ import { FlexContainer, FlexDirection } from '../layout/flex-container';
 import { EdgeInsets } from '../core/edge-insets';
 import { UIRadioOption } from './ui-radio-option';
 import { ThemeResolver } from '../theming/theme-resolver';
+// Theme resolver is now in base class
+import {
+  FormStateManager
+} from '../services';
 
 /**
  * A single radio option with label and value
@@ -77,13 +81,17 @@ export interface UIRadioGroupProps {
  */
 export class UIRadioGroup extends UIComponent {
   private props: Required<Omit<UIRadioGroupProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
-  private onChange?: (value: any) => void;
-  private selectedValue: any;
-  private isControlled: boolean;
-  private themeResolver?: ThemeResolver;
-
+  
+  // Services (composition)
+  private stateManager: FormStateManager<any>;
+  // ThemeApplier removed - using base class helpers
+  
+  // Theme resolver is now in base class
   private radioOptions: UIRadioOption[] = [];
   private flexContainer: FlexContainer;
+  
+  // Note: onChange is handled by FormStateManager, but we keep the prop reference for backward compatibility
+  private onChange?: (value: any) => void;
 
   constructor(props: UIRadioGroupProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -92,9 +100,14 @@ export class UIRadioGroup extends UIComponent {
       throw new Error('UIRadioGroup requires at least one option');
     }
 
-    this.isControlled = props.value !== undefined;
-    this.selectedValue = props.value ?? props.defaultValue ?? props.options[0]?.value;
+    // Initialize theme resolver
     this.themeResolver = props.themeResolver;
+    
+    this.stateManager = new FormStateManager({
+      value: props.value,
+      defaultValue: props.defaultValue ?? props.options[0]?.value,
+      onChange: props.onChange
+    });
 
     // Resolve colors using ThemeResolver if provided, otherwise use defaults
     const resolver = this.themeResolver;
@@ -113,6 +126,8 @@ export class UIRadioGroup extends UIComponent {
     };
 
     this.onChange = props.onChange;
+    
+    // Note: onChange is handled by FormStateManager, but we keep this for backward compatibility
 
     // Create flex container for layout
     this.flexContainer = new FlexContainer({
@@ -142,7 +157,7 @@ export class UIRadioGroup extends UIComponent {
     this.props.options.forEach((option) => {
       const radioOption = new UIRadioOption({
         label: option.label,
-        selected: this.selectedValue === option.value,
+        selected: this.stateManager.getValue() === option.value,
         disabled: this.props.disabled || option.disabled,
         size: this.props.size,
         fontSize: this.props.fontSize,
@@ -169,44 +184,31 @@ export class UIRadioGroup extends UIComponent {
   /** @internal */
   private handleSelection(value: any): void {
     if (this.props.disabled) return;
-    if (this.selectedValue === value) return; // Already selected
+    if (this.stateManager.getValue() === value) return; // Already selected
 
-    // Update selected value
-    const wasControlled = this.isControlled;
-    if (!this.isControlled) {
-      this.selectedValue = value;
-    }
+    // Update selected value through FormStateManager
+    this.stateManager.setValue(value);
 
     // Update all radio options
     this.radioOptions.forEach((radioOption, index) => {
       const option = this.props.options[index];
       radioOption.updateSelected(option.value === value);
     });
-
-    // Notify parent
-    if (!wasControlled || this.selectedValue !== value) {
-      this.onChange?.(value);
-    }
   }
 
   /**
    * Get the currently selected value
    */
   public getValue(): any {
-    return this.selectedValue;
+    return this.stateManager.getValue();
   }
 
   /**
    * Set the selected value
    */
   public setValue(value: any): void {
-    if (this.isControlled) {
-      // In controlled mode, parent should update the prop
-      this.onChange?.(value);
-      return;
-    }
-
-    // Uncontrolled mode: update internal state
+    if (this.props.disabled) return;
+    // FormStateManager handles controlled mode automatically
     this.handleSelection(value);
   }
 
@@ -214,8 +216,8 @@ export class UIRadioGroup extends UIComponent {
    * Update the selected value (for controlled mode)
    */
   public updateValue(value: any): void {
-    if (this.isControlled && value !== this.selectedValue) {
-      this.selectedValue = value;
+    if (this.stateManager.isControlledMode() && value !== this.stateManager.getValue()) {
+      this.stateManager.updateValue(value);
       // Update all radio options
       this.radioOptions.forEach((radioOption, index) => {
         const option = this.props.options[index];
@@ -247,10 +249,7 @@ export class UIRadioGroup extends UIComponent {
     // Layout flex container
     this.flexContainer.layout(availableWidth, availableHeight);
     
-    const measured = this.measure();
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
-    this.layoutDirty = false;
+    super.layout(availableWidth, availableHeight);
     this.render();
   }
 

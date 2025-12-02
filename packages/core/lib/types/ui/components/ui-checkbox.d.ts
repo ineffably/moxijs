@@ -16,13 +16,10 @@ export interface UICheckboxProps {
 }
 export declare class UICheckbox extends UIComponent {
     private props;
-    private layoutEngine;
     private stateManager;
-    private themeApplier;
     private checkboxGraphics;
     private checkmarkGraphics;
-    private componentState;
-    protected themeResolver?: ThemeResolver;
+    private checked;
     private colorOverrides;
     private keydownHandler?;
     constructor(props?: UICheckboxProps, boxModel?: Partial<BoxModel>);

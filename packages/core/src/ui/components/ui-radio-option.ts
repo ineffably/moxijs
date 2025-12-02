@@ -5,6 +5,7 @@ import { UIRadioButton } from './ui-radio-button';
 import { UILabel } from './ui-label';
 import { EdgeInsets } from '../core/edge-insets';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { LayoutEngine } from '../services';
 
 /**
  * Props for configuring a UIRadioOption (internal component)
@@ -33,9 +34,12 @@ class UIRadioOption extends UIComponent {
   private onChange?: (selected: boolean) => void;
   private radioButton: UIRadioButton;
   private label: UILabel;
+  
+  // Services (composition)
 
   constructor(props: UIRadioOptionProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
 
     const resolver = props.themeResolver;
 
@@ -158,8 +162,13 @@ class UIRadioOption extends UIComponent {
       this.container.eventMode = 'static';
     }
 
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
+    // Use LayoutEngine to calculate layout
+    this.computedLayout = this.layoutEngine.layout(
+      this.boxModel,
+      measured,
+      { width: availableWidth, height: availableHeight }
+    );
+    
     this.layoutDirty = false;
     this.render();
   }

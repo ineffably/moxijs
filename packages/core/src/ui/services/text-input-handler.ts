@@ -11,16 +11,14 @@
  * Configuration for text input handler
  */
 export interface TextInputHandlerConfig {
-  /** Initial value */
-  value: string;
+  /** FormStateManager to use as source of truth */
+  stateManager: { getValue: () => string; setValue: (value: string) => void };
   /** Maximum character length */
   maxLength?: number;
   /** Input type for validation */
   type?: 'text' | 'number';
   /** Whether multi-line (for textarea) */
   multiline?: boolean;
-  /** Change callback */
-  onChange?: (value: string) => void;
 }
 
 /**
@@ -28,38 +26,36 @@ export interface TextInputHandlerConfig {
  * 
  * Manages keyboard input, cursor position, and text editing.
  * Reusable across UITextInput and UITextArea.
+ * Uses FormStateManager as the source of truth for value.
  */
 export class TextInputHandler {
-  private value: string;
+  private stateManager: { getValue: () => string; setValue: (value: string) => void };
   private cursorPosition: number = 0;
   private maxLength: number;
   private type: 'text' | 'number';
   private multiline: boolean;
-  private onChange?: (value: string) => void;
 
   constructor(config: TextInputHandlerConfig) {
-    this.value = config.value ?? '';
+    this.stateManager = config.stateManager;
     this.maxLength = config.maxLength ?? (config.multiline ? 1000 : 100);
     this.type = config.type ?? 'text';
     this.multiline = config.multiline ?? false;
-    this.onChange = config.onChange;
-    this.cursorPosition = this.value.length;
+    this.cursorPosition = this.stateManager.getValue().length;
   }
 
   /**
-   * Get the current value
+   * Get the current value from state manager
    */
   getValue(): string {
-    return this.value;
+    return this.stateManager.getValue();
   }
 
   /**
-   * Set the value programmatically
+   * Set the value programmatically (updates state manager)
    */
   setValue(value: string): void {
-    this.value = value;
-    this.cursorPosition = Math.min(this.cursorPosition, this.value.length);
-    this.onChange?.(this.value);
+    this.stateManager.setValue(value);
+    this.cursorPosition = Math.min(this.cursorPosition, value.length);
   }
 
   /**
@@ -73,7 +69,8 @@ export class TextInputHandler {
    * Set the cursor position
    */
   setCursorPosition(position: number): void {
-    this.cursorPosition = Math.max(0, Math.min(position, this.value.length));
+    const value = this.stateManager.getValue();
+    this.cursorPosition = Math.max(0, Math.min(position, value.length));
   }
 
   /**
@@ -158,16 +155,17 @@ export class TextInputHandler {
    * Insert a character at the current cursor position
    */
   private insertCharacter(char: string): void {
-    if (this.value.length >= this.maxLength) {
+    const value = this.stateManager.getValue();
+    if (value.length >= this.maxLength) {
       return;
     }
 
-    this.value =
-      this.value.substring(0, this.cursorPosition) +
+    const newValue =
+      value.substring(0, this.cursorPosition) +
       char +
-      this.value.substring(this.cursorPosition);
+      value.substring(this.cursorPosition);
+    this.stateManager.setValue(newValue);
     this.cursorPosition++;
-    this.onChange?.(this.value);
   }
 
   /**
@@ -175,11 +173,12 @@ export class TextInputHandler {
    */
   private handleBackspace(): void {
     if (this.cursorPosition > 0) {
-      this.value =
-        this.value.substring(0, this.cursorPosition - 1) +
-        this.value.substring(this.cursorPosition);
+      const value = this.stateManager.getValue();
+      const newValue =
+        value.substring(0, this.cursorPosition - 1) +
+        value.substring(this.cursorPosition);
+      this.stateManager.setValue(newValue);
       this.cursorPosition--;
-      this.onChange?.(this.value);
     }
   }
 
@@ -187,11 +186,12 @@ export class TextInputHandler {
    * Handle delete key
    */
   private handleDelete(): void {
-    if (this.cursorPosition < this.value.length) {
-      this.value =
-        this.value.substring(0, this.cursorPosition) +
-        this.value.substring(this.cursorPosition + 1);
-      this.onChange?.(this.value);
+    const value = this.stateManager.getValue();
+    if (this.cursorPosition < value.length) {
+      const newValue =
+        value.substring(0, this.cursorPosition) +
+        value.substring(this.cursorPosition + 1);
+      this.stateManager.setValue(newValue);
     }
   }
 
@@ -199,7 +199,8 @@ export class TextInputHandler {
    * Move cursor horizontally
    */
   private moveCursor(direction: number): void {
-    this.cursorPosition = Math.max(0, Math.min(this.cursorPosition + direction, this.value.length));
+    const value = this.stateManager.getValue();
+    this.cursorPosition = Math.max(0, Math.min(this.cursorPosition + direction, value.length));
   }
 
   /**
@@ -208,7 +209,8 @@ export class TextInputHandler {
   private moveCursorVertically(direction: number): void {
     if (!this.multiline) return;
 
-    const lines = this.value.split('\n');
+    const value = this.stateManager.getValue();
+    const lines = value.split('\n');
     let currentLine = 0;
     let positionInLine = 0;
     let charCount = 0;
@@ -242,7 +244,8 @@ export class TextInputHandler {
    */
   private moveToLineStart(): void {
     if (this.multiline) {
-      const lineStart = this.value.lastIndexOf('\n', this.cursorPosition - 1) + 1;
+      const value = this.stateManager.getValue();
+      const lineStart = value.lastIndexOf('\n', this.cursorPosition - 1) + 1;
       this.cursorPosition = lineStart;
     } else {
       this.cursorPosition = 0;
@@ -253,20 +256,14 @@ export class TextInputHandler {
    * Move cursor to end of current line
    */
   private moveToLineEnd(): void {
+    const value = this.stateManager.getValue();
     if (this.multiline) {
-      let lineEnd = this.value.indexOf('\n', this.cursorPosition);
-      if (lineEnd === -1) lineEnd = this.value.length;
+      let lineEnd = value.indexOf('\n', this.cursorPosition);
+      if (lineEnd === -1) lineEnd = value.length;
       this.cursorPosition = lineEnd;
     } else {
-      this.cursorPosition = this.value.length;
+      this.cursorPosition = value.length;
     }
-  }
-
-  /**
-   * Set the onChange callback
-   */
-  setOnChange(callback: (value: string) => void): void {
-    this.onChange = callback;
   }
 }
 

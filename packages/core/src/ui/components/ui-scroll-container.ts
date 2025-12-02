@@ -2,6 +2,7 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { EdgeInsets } from '../core/edge-insets';
+import { LayoutEngine } from '../services';
 
 /**
  * Props for configuring a UIScrollContainer
@@ -57,6 +58,8 @@ export class UIScrollContainer extends UIComponent {
   private scrollbarTrack: PIXI.Graphics;
   private scrollbarThumb: PIXI.Graphics;
 
+  // Services (composition)
+
   // Public children array for focus manager discovery
   public children: UIComponent[] = [];
 
@@ -74,6 +77,7 @@ export class UIScrollContainer extends UIComponent {
 
   constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
 
     this.props = {
       width: props.width,
@@ -165,7 +169,7 @@ export class UIScrollContainer extends UIComponent {
    */
   private setupInteractivity(): void {
     // Mouse wheel scrolling
-    this.container.eventMode = 'static';
+    this.makeInteractive('default');
     this.container.on('wheel', this.handleWheel.bind(this));
 
     // Scrollbar thumb dragging
@@ -479,24 +483,20 @@ export class UIScrollContainer extends UIComponent {
    * Measures the size needed for this container
    */
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.props.width,
       height: this.props.height
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /**
    * Performs layout for this container
    */
   layout(availableWidth: number, availableHeight: number): void {
-    const measured = this.measure();
-
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
-
+    super.layout(availableWidth, availableHeight);
     this.updateContentBounds();
-    this.layoutDirty = false;
-    this.render();
   }
 
   /**

@@ -3,6 +3,7 @@ import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIFocusManager } from '../core/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { LayoutEngine } from '../services';
 
 /**
  * Props for configuring a UIRadioButton
@@ -49,11 +50,12 @@ export interface UIRadioButtonProps {
  * ```
  */
 export class UIRadioButton extends UIComponent {
+  // Services (composition)
   private props: Required<Omit<UIRadioButtonProps, 'onChange' | 'selected' | 'defaultSelected' | 'themeResolver'>>;
   private onChange?: (selected: boolean) => void;
   private selected: boolean;
   private isControlled: boolean;
-  protected themeResolver?: ThemeResolver;
+  // Theme resolver is now in base class
 
   private radioGraphics: PIXI.Graphics;
   private dotGraphics: PIXI.Graphics;
@@ -120,8 +122,7 @@ export class UIRadioButton extends UIComponent {
 
   /** @internal */
   private setupInteractivity(): void {
-    this.container.eventMode = 'static';
-    this.container.cursor = 'pointer';
+    this.makeInteractive('pointer');
 
     this.container.on('pointerover', this.handlePointerOver.bind(this));
     this.container.on('pointerout', this.handlePointerOut.bind(this));
@@ -215,17 +216,17 @@ export class UIRadioButton extends UIComponent {
 
   /** @internal */
   measure(): MeasuredSize {
-    return {
+    const contentSize: MeasuredSize = {
       width: this.props.size,
       height: this.props.size
     };
+    
+    return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
   /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
-    const measured = this.measure();
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
+    super.layout(availableWidth, availableHeight);
     
     // Ensure hitArea is set after layout (in case container was repositioned)
     this.container.hitArea = new PIXI.Rectangle(0, 0, this.props.size, this.props.size);
@@ -234,9 +235,6 @@ export class UIRadioButton extends UIComponent {
     if (this.container.eventMode === 'none' || this.container.eventMode === 'passive') {
       this.container.eventMode = 'static';
     }
-    
-    this.layoutDirty = false;
-    this.render();
   }
 
   /** @internal */

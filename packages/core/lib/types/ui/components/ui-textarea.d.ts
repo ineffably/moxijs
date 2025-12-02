@@ -21,17 +21,13 @@ export interface UITextAreaProps {
 }
 export declare class UITextArea extends UIComponent {
     private props;
-    private layoutEngine;
     private stateManager;
     private inputHandler;
-    private themeApplier;
     private background;
     private textDisplay;
     private cursor;
     private cursorBlinkInterval?;
     private cursorVisible;
-    private componentState;
-    private themeResolver?;
     private colorOverrides;
     constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>);
     private createVisuals;

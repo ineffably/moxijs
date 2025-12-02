@@ -26,8 +26,7 @@ export interface UISelectProps {
 export declare class UISelect extends UIComponent {
     private props;
     private onChange?;
-    private selectedValue;
-    private isControlled;
+    private stateManager;
     private background;
     private label;
     private textInput?;
@@ -42,7 +41,6 @@ export declare class UISelect extends UIComponent {
     private filterText;
     private hoverColor;
     private selectedColor;
-    private themeResolver?;
     private keydownHandler?;
     constructor(props: UISelectProps, boxModel?: Partial<BoxModel>);
     private getDisplayText;

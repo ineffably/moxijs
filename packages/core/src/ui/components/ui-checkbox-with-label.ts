@@ -4,6 +4,7 @@ import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UICheckbox, UICheckboxProps } from './ui-checkbox';
 import { UILabel } from './ui-label';
 import { EdgeInsets } from '../core/edge-insets';
+import { LayoutEngine } from '../services';
 
 /**
  * Props for configuring a UICheckboxWithLabel
@@ -43,9 +44,12 @@ export class UICheckboxWithLabel extends UIComponent {
   private checkbox: UICheckbox;
   private label: UILabel;
   private labelPosition: 'left' | 'right';
+  
+  // Services (composition)
 
   constructor(props: UICheckboxWithLabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
 
     this.labelPosition = props.labelPosition ?? 'right';
 
@@ -111,21 +115,38 @@ export class UICheckboxWithLabel extends UIComponent {
   /** @internal */
   private setupLabelClickability(): void {
     // Make the entire component container clickable
+    // This ensures clicks work correctly regardless of label position
     this.container.eventMode = 'static';
     this.container.cursor = 'pointer';
     
-    // Make label container clickable to toggle checkbox
-    this.label.container.eventMode = 'static';
-    this.label.container.cursor = 'pointer';
-    this.label.container.on('pointerdown', () => {
+    // Handle clicks on the entire component container
+    // This covers the full area including label on left or right
+    this.container.on('pointerdown', () => {
       if (!this.props.disabled) {
+        // Toggle when clicking anywhere in the component
         this.checkbox.toggle();
       }
     });
     
-    // Also make checkbox container clickable (in case label doesn't cover it)
+    // Make label container clickable to toggle checkbox
+    this.label.container.eventMode = 'static';
+    this.label.container.cursor = 'pointer';
+    this.label.container.on('pointerdown', (e) => {
+      if (!this.props.disabled) {
+        e.stopPropagation(); // Prevent double-toggle from parent
+        this.checkbox.toggle();
+      }
+    });
+    
+    // Make checkbox container clickable
+    // The checkbox has its own handlers, but we ensure it's interactive
     this.checkbox.container.eventMode = 'static';
     this.checkbox.container.cursor = 'pointer';
+    // Don't add handler here - let checkbox handle its own clicks
+    // But stop propagation to prevent parent from also toggling
+    this.checkbox.container.on('pointerdown', (e) => {
+      e.stopPropagation();
+    });
   }
 
   /**
@@ -216,6 +237,8 @@ export class UICheckboxWithLabel extends UIComponent {
     const labelHeight = labelMeasured.height;
     const labelWidth = labelMeasured.width;
 
+    super.layout(availableWidth, availableHeight);
+
     // Position checkbox and label based on labelPosition
     // Vertically center both checkbox and label
     const checkboxY = (measured.height - checkboxSize) / 2;
@@ -232,15 +255,19 @@ export class UICheckboxWithLabel extends UIComponent {
     }
 
     // Update hit area to include both checkbox and label
+    // Hit area covers entire component regardless of label position
     this.container.hitArea = new PIXI.Rectangle(0, 0, measured.width, measured.height);
     
     // Ensure container is interactive
     if (this.container.eventMode === 'none' || this.container.eventMode === 'passive') {
       this.container.eventMode = 'static';
     }
+    
+    // The checkbox's own hitArea is relative to its container position
+    // Since we're positioning the checkbox container, its hitArea will be correct
+    // But we need to ensure the checkbox doesn't override it in its layout
+    // The checkbox container's hitArea should remain relative to its own position
 
-    this.computedLayout.width = measured.width;
-    this.computedLayout.height = measured.height;
     this.layoutDirty = false;
     this.render();
   }

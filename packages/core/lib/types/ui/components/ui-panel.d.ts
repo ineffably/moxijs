@@ -19,11 +19,9 @@ export interface UIPanelProps {
 export declare class UIPanel extends UIComponent {
     private props;
     private background?;
-    private layoutEngine;
     constructor(props?: UIPanelProps, boxModel?: Partial<BoxModel>);
     private createBackground;
     measure(): MeasuredSize;
-    layout(availableWidth: number, availableHeight: number): void;
     protected render(): void;
     setBackgroundColor(color: number, alpha?: number): void;
     setTexture(texture: PIXI.Texture): void;

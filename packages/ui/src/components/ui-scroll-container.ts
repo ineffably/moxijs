@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
-import { EdgeInsets } from '../core/edge-insets';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
+import { EdgeInsets } from '../base/edge-insets';
 import { LayoutEngine } from '../services';
 
 /**

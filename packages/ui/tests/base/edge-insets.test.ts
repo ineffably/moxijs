@@ -1,4 +1,4 @@
-import { EdgeInsets } from '../src/core/edge-insets';
+import { EdgeInsets } from '../../src/base/edge-insets';
 
 describe('EdgeInsets', () => {
   describe('all', () => {

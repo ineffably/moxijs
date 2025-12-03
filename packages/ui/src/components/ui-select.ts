@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
 import { UILabel } from './ui-label';
 import { UITextInput } from './ui-text-input';
-import { EdgeInsets } from '../core/edge-insets';
-import { UIFocusManager } from '../core/ui-focus-manager';
+import { EdgeInsets } from '../base/edge-insets';
+import { UIFocusManager } from '../base/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { ActionManager } from '@moxijs/core';
 // Theme resolver is now in base class
 import {
   FormStateManager
@@ -111,8 +112,8 @@ export class UISelect extends UIComponent {
   // Component state (data-driven)
   // State is now in base class (enabled, focused, hovered, pressed)
 
-  // Keyboard handler for cleanup
-  private keydownHandler?: (e: KeyboardEvent) => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   /**
    * Safely invoke the onChange callback with error handling
@@ -377,53 +378,54 @@ export class UISelect extends UIComponent {
 
     // Keyboard support
     if (typeof window !== 'undefined') {
-      this.keydownHandler = (e: KeyboardEvent) => {
-        if (!this.focused || this.props.disabled) return;
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
+    }
+  }
 
-        if (this.isOpen) {
-          // Handle keyboard navigation when dropdown is open
-          switch (e.key) {
-            case 'ArrowDown':
-              e.preventDefault();
-              e.stopPropagation();
-              this.highlightNext();
-              break;
-            case 'ArrowUp':
-              e.preventDefault();
-              e.stopPropagation();
-              this.highlightPrevious();
-              break;
-            case 'Enter':
-            case ' ':
-              e.preventDefault();
-              e.stopPropagation();
-              if (this.highlightedIndex >= 0) {
-                const optionsToShow = this.props.filterable ? this.filteredOptions : this.props.options;
-                const option = optionsToShow[this.highlightedIndex];
-                if (option && !option.disabled) {
-                  this.selectOption(option.value);
-                }
-              } else if (this.props.filterable && this.props.allowCustomValue && this.filterText.trim()) {
-                // Allow custom value in filterable mode
-                this.selectOption(this.filterText.trim());
-              }
-              break;
-            case 'Escape':
-              e.preventDefault();
-              e.stopPropagation();
-              this.closeDropdown();
-              break;
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (!this.focused || this.props.disabled) return;
+
+    if (this.isOpen) {
+      // Handle keyboard navigation when dropdown is open
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          e.stopPropagation();
+          this.highlightNext();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          e.stopPropagation();
+          this.highlightPrevious();
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          e.stopPropagation();
+          if (this.highlightedIndex >= 0) {
+            const optionsToShow = this.props.filterable ? this.filteredOptions : this.props.options;
+            const option = optionsToShow[this.highlightedIndex];
+            if (option && !option.disabled) {
+              this.selectOption(option.value);
+            }
+          } else if (this.props.filterable && this.props.allowCustomValue && this.filterText.trim()) {
+            // Allow custom value in filterable mode
+            this.selectOption(this.filterText.trim());
           }
-        } else {
-          // Open dropdown with Space or Enter
-          if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            e.stopPropagation();
-            this.openDropdown();
-          }
-        }
-      };
-      window.addEventListener('keydown', this.keydownHandler);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          e.stopPropagation();
+          this.closeDropdown();
+          break;
+      }
+    } else {
+      // Open dropdown with Space or Enter
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openDropdown();
+      }
     }
   }
 
@@ -854,9 +856,7 @@ export class UISelect extends UIComponent {
    * Cleanup keyboard handler
    */
   public destroy(): void {
-    if (this.keydownHandler && typeof window !== 'undefined') {
-      window.removeEventListener('keydown', this.keydownHandler);
-    }
+    this.actions.removeAll();
     if (this.isOpen) {
       this.closeDropdown();
     }

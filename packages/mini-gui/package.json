@@ -1,6 +1,6 @@
 {
   "name": "@moxijs/mini-gui",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "description": "Minimal debug GUI for MoxiJS - lightweight control panels inspired by rad-gui",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

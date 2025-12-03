@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { createPixelButton } from '../components/pixel-button';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { createManagedCard } from '../utilities/managed-card';
 import { CardResult } from '../interfaces/components';

@@ -34,6 +34,9 @@ import { initSpriteLibrary } from './examples/05-tools/sprite-library';
 import { initSpriteEditor } from './examples/05-tools/sprite-editor';
 import { initParticleEmitterSandbox } from './examples/05-tools/particle-sandbox';
 
+// === MINI-GUI ===
+import { initGUIBasics } from './examples/07-mini-gui/gui-basics';
+
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -70,6 +73,9 @@ import newtonsCradleSource from './examples/06-physics/newtons-cradle.ts?raw';
 import spriteLibrarySource from './examples/05-tools/sprite-library.ts?raw';
 import spriteEditorSource from './examples/05-tools/sprite-editor.ts?raw';
 import particleSandboxSource from './examples/05-tools/particle-sandbox.ts?raw';
+
+// === MINI-GUI ===
+import guiBasicsSource from './examples/07-mini-gui/gui-basics.ts?raw';
 
 // Cleanup function type - examples can return this to clean up resources
 type CleanupFunction = () => void;
@@ -236,6 +242,18 @@ const categories: Record<string, Category> = {
         description: 'Particle system editor with presets',
         init: initParticleEmitterSandbox,
         source: particleSandboxSource
+      }
+    }
+  },
+  'mini-gui': {
+    name: 'Mini-GUI',
+    collapsed: true,
+    examples: {
+      'gui-basics': {
+        name: 'GUI Basics',
+        description: 'Draggable, collapsible debug panels with folders',
+        init: initGUIBasics,
+        source: guiBasicsSource
       }
     }
   }

@@ -1,0 +1,507 @@
+# MoxiJS
+
+> A game framework built on PIXI.js with Entity-Component-System architecture, physics integration, and UI components.
+
+## Package: @moxijs/core
+
+All imports from `@moxijs/core` unless noted.
+
+---
+
+## Quick Start
+
+```ts
+import { setupMoxi, asEntity, Logic } from '@moxijs/core';
+
+// Initialize engine
+const { scene, engine } = await setupMoxi({
+  hostElement: document.getElementById('game'),
+  backgroundColor: 0x1a1a2e,
+});
+
+// Create entity with logic
+const player = asEntity(new PIXI.Sprite(texture));
+player.moxiEntity.addLogic(new PlayerLogic());
+scene.addChild(player);
+
+engine.start();
+```
+
+---
+
+## Core Engine
+
+### setupMoxi
+Main initialization function.
+```ts
+const { scene, engine, camera, physicsWorld, loadAssets } = await setupMoxi({
+  hostElement: HTMLElement,
+  backgroundColor?: number,
+  physics?: boolean | PhysicsWorldOptions,
+  showLoadingScene?: boolean,
+});
+```
+
+### Engine
+Game loop manager.
+```ts
+engine.start();
+engine.stop();
+engine.loadStage(newScene);
+```
+
+### Scene
+Root container for game objects. Extends PIXI.Container.
+```ts
+scene.addChild(entity);
+scene.init();
+scene.update(deltaTime);
+```
+
+---
+
+## Entity System
+
+### asEntity
+Wrap any PIXI.Container as an entity with logic support.
+```ts
+const entity = asEntity(new PIXI.Sprite(texture));
+entity.moxiEntity.addLogic(new MyLogic());
+entity.moxiEntity.getLogic<MyLogic>('MyLogic');
+```
+
+### Logic
+Base class for entity behavior. Extend to create custom logic.
+```ts
+class MyLogic extends Logic<PIXI.Sprite> {
+  name = 'MyLogic';
+
+  init(entity, renderer) {
+    // Called once when scene initializes
+  }
+
+  update(entity, deltaTime) {
+    // Called every frame while active
+    entity.rotation += 0.01 * deltaTime;
+  }
+}
+```
+
+### StateMachine
+Finite state machine for entity states.
+```ts
+const fsm = new StateMachine();
+fsm.addState(new IdleState());
+fsm.addState(new WalkState());
+fsm.setState('idle');
+fsm.addEventListener('stateChange', (e) => console.log(e.detail));
+```
+
+### StateLogic
+Base class for FSM states.
+```ts
+class IdleState extends StateLogic {
+  name = 'idle';
+  onEnter() { /* play idle animation */ }
+  onExit() { /* cleanup */ }
+  update(entity, deltaTime) { /* state logic */ }
+}
+```
+
+---
+
+## Camera
+
+### Camera
+Viewport with smooth following and zoom.
+```ts
+const camera = new Camera(scene, renderer);
+camera.desiredPosition = { x: 100, y: 100 };
+camera.desiredScale = { x: 2, y: 2 };
+camera.speed = 0.1; // 0-1 interpolation speed
+```
+
+### CameraLogic
+Follow a target entity.
+```ts
+const cameraLogic = camera.moxiEntity.getLogic<CameraLogic>('CameraLogic');
+cameraLogic.target = player;
+cameraLogic.speed = 0.05;
+```
+
+---
+
+## Physics (Planck.js)
+
+### PhysicsWorld
+Physics simulation manager.
+```ts
+const physicsWorld = new PhysicsWorld({
+  gravity: { x: 0, y: 10 },
+  pixelsPerMeter: 30,
+});
+
+// Create body
+const body = physicsWorld.createBody({
+  type: 'dynamic', // 'static' | 'dynamic' | 'kinematic'
+  position: { x: 100, y: 100 },
+  shape: { type: 'box', width: 32, height: 32 },
+  tags: ['player'],
+});
+
+// Collision detection
+physicsWorld.onCollision('player', 'enemy', (event) => {
+  console.log('Hit!', event.bodyA, event.bodyB);
+});
+
+// Debug visualization
+physicsWorld.enableDebugRenderer(scene);
+```
+
+### PhysicsBodyLogic
+Attach physics to entity.
+```ts
+const entity = asEntity(sprite);
+entity.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
+  type: 'dynamic',
+  shape: { type: 'circle', radius: 16 },
+}));
+```
+
+---
+
+## UI System
+
+### UILabel
+Text display with layout.
+```ts
+const label = new UILabel({
+  text: 'Score: 0',
+  fontSize: 24,
+  fontFamily: 'Arial',
+  color: 0xffffff,
+  align: 'center',
+  wordWrap: true,
+  wordWrapWidth: 200,
+});
+label.setText('Score: 100');
+label.setColor(0xff0000);
+```
+
+### UIButton
+Interactive button.
+```ts
+const button = new UIButton({
+  label: 'Start Game',
+  width: 120,
+  height: 40,
+  backgroundColor: 0x4444ff,
+  textColor: 0xffffff,
+  onClick: () => startGame(),
+});
+```
+
+### FlexContainer
+Flexbox-style layout.
+```ts
+const container = new FlexContainer({
+  direction: FlexDirection.Column,
+  justify: FlexJustify.Center,
+  align: FlexAlign.Center,
+  gap: 10,
+  padding: EdgeInsets.all(20),
+});
+container.addChild(label);
+container.addChild(button);
+```
+
+### UIPanel
+Nine-slice panel background.
+```ts
+const panel = new UIPanel({
+  width: 300,
+  height: 200,
+  nineSliceConfig: { texture, leftWidth, rightWidth, topHeight, bottomHeight },
+});
+```
+
+### UITabs
+Tab navigation.
+```ts
+const tabs = new UITabs({
+  tabs: [
+    { label: 'Tab 1', content: panel1 },
+    { label: 'Tab 2', content: panel2 },
+  ],
+  onChange: (index) => console.log('Tab:', index),
+});
+```
+
+### UITextInput / UITextArea
+Text input fields.
+```ts
+const input = new UITextInput({
+  placeholder: 'Enter name...',
+  onChange: (value) => console.log(value),
+  onSubmit: (value) => saveName(value),
+});
+```
+
+### UISelect
+Dropdown selection.
+```ts
+const select = new UISelect({
+  options: [
+    { label: 'Easy', value: 1 },
+    { label: 'Hard', value: 2 },
+  ],
+  onChange: (option) => setDifficulty(option.value),
+});
+```
+
+### UIScrollContainer
+Scrollable content.
+```ts
+const scroll = new UIScrollContainer({ width: 200, height: 300 });
+scroll.addChild(longContent);
+```
+
+---
+
+## Pixel Grid System
+
+### PixelGrid
+Pixel-perfect measurements.
+```ts
+const grid = new PixelGrid({ scale: 2, unit: 8 });
+const width = grid.px(10);  // 10 units = 160px at 2x scale
+const units = grid.units(160); // 160px = 10 units
+```
+
+### UIScaleMode
+UI scaling strategies.
+```ts
+const layer = new UILayer({
+  scaleMode: UIScaleMode.LockRatio, // None | ScaleUI | LockRatio
+  targetWidth: 1280,
+  targetHeight: 720,
+});
+```
+
+---
+
+## Parallax Backgrounds
+
+### ParallaxBackground
+Container for parallax layers.
+```ts
+const parallax = new ParallaxBackground({ camera });
+parallax.autoscroll = { x: -0.5, y: 0 }; // Auto-scroll speed
+```
+
+### ParallaxLayer
+Individual parallax layer.
+```ts
+const layer = new ParallaxLayer({
+  scrollScale: { x: 0.5, y: 0.5 }, // Half speed = farther away
+  scrollOffset: { x: 0, y: 0 },
+  mirroring: true,
+});
+layer.addChild(backgroundSprite);
+parallax.addLayer(layer);
+```
+
+---
+
+## Texture & Animation
+
+### asTextureFrames
+Split texture into frames.
+```ts
+const frames = asTextureFrames(PIXI, spritesheet, {
+  frameWidth: 32,
+  frameHeight: 32,
+  columns: 8,
+  rows: 4,
+});
+const animatedSprite = new PIXI.AnimatedSprite(frames);
+```
+
+### TextureFrameSequences
+Manage animation sequences.
+```ts
+const sequences = new TextureFrameSequences(frames);
+sequences.addSequence('walk', [0, 1, 2, 3], 0.15);
+sequences.addSequence('jump', [4, 5, 6], 0.1);
+const walkFrames = sequences.getFrameSequence('walk');
+```
+
+---
+
+## PIXI Helpers
+
+### asSprite / asText / asGraphics / asContainer
+Create configured PIXI objects.
+```ts
+const sprite = asSprite(texture, {
+  x: 100, y: 100,
+  anchor: { x: 0.5, y: 0.5 },
+  scale: { x: 2, y: 2 },
+  rotation: Math.PI / 4,
+  tint: 0xff0000,
+  alpha: 0.8,
+});
+```
+
+---
+
+## Events
+
+### EventEmitter
+Type-safe pub/sub.
+```ts
+interface GameEvents {
+  'score': (points: number) => void;
+  'gameOver': () => void;
+}
+const events = new EventEmitter<GameEvents>();
+events.on('score', (points) => updateScore(points));
+events.emit('score', 100);
+```
+
+### ClientEvents
+Singleton input manager.
+```ts
+const input = ClientEvents.getInstance();
+if (input.isKeyDown('ArrowLeft')) moveLeft();
+const mousePos = input.movePosition;
+const wheelDelta = input.wheelDelta;
+```
+
+---
+
+## Utilities
+
+### ActionManager
+Manage event listener lifecycle.
+```ts
+const actions = new ActionManager();
+actions.add(window, 'resize', handleResize);
+actions.removeAll(); // Cleanup all listeners
+```
+
+### Utils
+Common helpers.
+```ts
+import { utils } from '@moxijs/core';
+utils.lerp(0, 100, 0.5);        // 50
+utils.getRandomInt(1, 10);      // Random 1-10
+utils.rad2deg(Math.PI);         // 180
+utils.deg2rad(90);              // PI/2
+utils.metersToPixels(1);        // 30 (default PPM)
+```
+
+### createTileGrid
+Generate tile grids.
+```ts
+const grid = createTileGrid(
+  { width: 10, height: 10, cellWidth: 32, cellHeight: 32 },
+  tileTextures,
+  (pos) => pos.index % tileTextures.length // Texture selector
+);
+```
+
+---
+
+## Package: @moxijs/mini-gui
+
+Debug GUI panels inspired by dat.gui/lil-gui.
+
+```ts
+import { GUI } from '@moxijs/mini-gui';
+
+const gui = new GUI({ title: 'Settings', x: 10, y: 10 });
+
+// Auto-detects control type from value
+gui.add(object, 'speed', 0, 100);        // NumberControl (slider)
+gui.add(object, 'enabled');               // BooleanControl (checkbox)
+gui.add(object, 'name');                  // StringControl (text input)
+gui.add(object, 'mode', ['easy', 'hard']); // OptionControl (dropdown)
+
+// Folders
+const folder = gui.addFolder('Position');
+folder.add(object, 'x', 0, 500);
+folder.add(object, 'y', 0, 500);
+
+// Callbacks
+gui.add(object, 'volume', 0, 1)
+  .onChange((v) => console.log('Changing:', v))
+  .onFinishChange((v) => saveVolume(v));
+
+// Add to scene
+scene.addChild(gui.container);
+```
+
+---
+
+## Common Patterns
+
+### Game Entity with Multiple Behaviors
+```ts
+const enemy = asEntity(new PIXI.AnimatedSprite(frames));
+enemy.moxiEntity.addLogic(new PhysicsBodyLogic(world, { type: 'dynamic' }));
+enemy.moxiEntity.addLogic(new AILogic());
+enemy.moxiEntity.addLogic(new HealthLogic(100));
+scene.addChild(enemy);
+```
+
+### Responsive UI Layer
+```ts
+const ui = new UILayer({ scaleMode: UIScaleMode.LockRatio });
+const hud = new FlexContainer({ direction: FlexDirection.Row, gap: 20 });
+hud.addChild(new UILabel({ text: 'HP: 100' }));
+hud.addChild(new UILabel({ text: 'Score: 0' }));
+ui.addChild(hud.container);
+scene.addChild(ui);
+```
+
+### Physics Platformer Setup
+```ts
+const { scene, physicsWorld } = await setupMoxi({
+  hostElement: container,
+  physics: { gravity: { x: 0, y: 20 } },
+});
+
+// Ground
+physicsWorld.createBody({
+  type: 'static',
+  position: { x: 400, y: 550 },
+  shape: { type: 'box', width: 800, height: 100 },
+  tags: ['ground'],
+});
+
+// Player
+const player = asEntity(playerSprite);
+player.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
+  type: 'dynamic',
+  shape: { type: 'box', width: 32, height: 48 },
+  tags: ['player'],
+}));
+player.moxiEntity.addLogic(new PlatformerControlLogic());
+```
+
+---
+
+## File Structure
+
+```
+@moxijs/core
+├── main/          # Engine, Scene, Entity, Logic, Camera
+├── library/       # Physics, Parallax, State Machine, Utilities
+└── ui/            # Components, Layout, Pixel Grid
+
+@moxijs/mini-gui
+├── gui.ts         # Main GUI class
+├── gui-grid.ts    # Grid constants, colors
+└── controls/      # NumberControl, BooleanControl, etc.
+```

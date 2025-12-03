@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "webpack serve --mode development --open",
     "build": "webpack --mode production",
+    "build:clean": "npm run clean && npm run build",
     "watch": "webpack --mode development --watch",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist node_modules/.cache",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
@@ -47,6 +48,7 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "@moxijs/core": "file:../core"
+    "@moxijs/core": "file:../core",
+    "@moxijs/ui": "file:../moxi-ui"
   }
 }

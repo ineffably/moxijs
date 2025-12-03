@@ -6,50 +6,67 @@
  * at any scale. MSDF fonts are loaded by PixiJS v8 and rendered with special shaders.
  *
  * Usage:
- *   node scripts/generate-msdf-font.mjs <input-font.ttf> [output-name]
+ *   npm run generate-msdf-font -- <input.ttf> [output-dir] [output-name]
  *
  * Examples:
- *   node scripts/generate-msdf-font.mjs assets/fonts/Roboto-Regular.ttf Roboto
- *   node scripts/generate-msdf-font.mjs assets/fonts/pixel_operator/PixelOperator8.ttf PixelOperator8-MSDF
+ *   npm run generate-msdf-font -- fonts/Roboto.ttf ./assets/msdf Roboto
+ *   npm run generate-msdf-font -- fonts/PixelOperator8.ttf ./msdf
  */
 import { spawn } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs';
-import { basename, join, dirname } from 'path';
+import { basename, join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = join(__dirname, '..');
 
 // Character set for font generation - written to temp file to avoid shell escaping issues
 const CHAR_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()-=_+[]{}|;:\'",.<>?/\\`~';
 
-// Output directory for generated MSDF fonts
-const OUTPUT_DIR = join(PROJECT_ROOT, 'assets/fonts/msdf');
-
 const inputFont = process.argv[2];
-const outputName = process.argv[3] || basename(inputFont, '.ttf').replace(/[^a-zA-Z0-9]/g, '-');
+const outputDir = process.argv[3] || '.';
+const outputName = process.argv[4] || basename(inputFont || '', '.ttf').replace(/[^a-zA-Z0-9]/g, '-');
 
 if (!inputFont) {
   console.log(`
 MSDF Font Generator for MoxiJS
 ==============================
 
-Usage: node scripts/generate-msdf-font.mjs <input-font.ttf> [output-name]
+Generates MSDF (Multi-channel Signed Distance Field) fonts for crisp text
+rendering at any scale. Uses msdf-bmfont-xml under the hood.
+
+Usage:
+  npm run generate-msdf-font -- <input.ttf> [output-dir] [output-name]
+
+Arguments:
+  input.ttf       Path to TTF font file (required)
+  output-dir      Output directory (default: current directory)
+  output-name     Output file name without extension (default: derived from input)
 
 Examples:
-  node scripts/generate-msdf-font.mjs assets/fonts/Roboto-Regular.ttf Roboto
-  node scripts/generate-msdf-font.mjs assets/fonts/pixel_operator/PixelOperator8.ttf PixelOperator8-MSDF
+  npm run generate-msdf-font -- fonts/Roboto.ttf ./assets/msdf Roboto
+  npm run generate-msdf-font -- fonts/PixelOperator8.ttf ./msdf
 
 Output:
-  Files will be generated in: public/assets/fonts/msdf/
-  - <output-name>.json  (font metrics)
+  - <output-name>.json  (font metrics for PixiJS)
   - <output-name>.png   (MSDF texture atlas)
+
+Usage in code:
+  import { Assets } from 'pixi.js';
+  import { asMSDFText } from '@moxijs/core';
+
+  await Assets.load('path/to/font.json');
+  const text = asMSDFText({
+    text: 'Hello',
+    style: { fontFamily: 'FontName', fontSize: 24 }
+  });
 `);
   process.exit(1);
 }
 
-// Resolve input path relative to project root
-const inputPath = join(PROJECT_ROOT, inputFont);
+// Resolve paths relative to current working directory
+const cwd = process.cwd();
+const inputPath = resolve(cwd, inputFont);
+const outputDirPath = resolve(cwd, outputDir);
 
 if (!existsSync(inputPath)) {
   console.error(`Error: Font file not found: ${inputPath}`);
@@ -57,15 +74,15 @@ if (!existsSync(inputPath)) {
 }
 
 // Create output directory if needed
-if (!existsSync(OUTPUT_DIR)) {
-  mkdirSync(OUTPUT_DIR, { recursive: true });
-  console.log(`Created output directory: ${OUTPUT_DIR}`);
+if (!existsSync(outputDirPath)) {
+  mkdirSync(outputDirPath, { recursive: true });
+  console.log(`Created output directory: ${outputDirPath}`);
 }
 
-const outputPath = join(OUTPUT_DIR, outputName);
+const outputPath = join(outputDirPath, outputName);
 
 // Write charset to temp file to avoid shell escaping issues
-const charsetFile = join(PROJECT_ROOT, '.msdf-charset.txt');
+const charsetFile = join(cwd, '.msdf-charset.txt');
 writeFileSync(charsetFile, CHAR_SET);
 
 console.log('\nGenerating MSDF font...');
@@ -89,7 +106,7 @@ const args = [
 ];
 
 const child = spawn('npx', args, {
-  cwd: PROJECT_ROOT,
+  cwd: cwd,
   stdio: 'inherit'
 });
 
@@ -100,8 +117,9 @@ child.on('close', (code) => {
   if (code === 0) {
     console.log(`\n✅ MSDF font generated successfully!`);
     console.log(`\nUsage in code:`);
-    console.log(`  await Assets.load('assets/fonts/msdf/${outputName}.json');`);
-    console.log(`  const text = new BitmapText({ text: 'Hello', style: { fontFamily: '${outputName}' } });`);
+    console.log(`  import { asMSDFText } from '@moxijs/core';`);
+    console.log(`  await Assets.load('${outputDir}/${outputName}.json');`);
+    console.log(`  const text = asMSDFText({ text: 'Hello', style: { fontFamily: '${outputName}', fontSize: 24 } });`);
   } else {
     console.error(`\n❌ Failed to generate MSDF font (exit code: ${code})`);
     process.exit(1);

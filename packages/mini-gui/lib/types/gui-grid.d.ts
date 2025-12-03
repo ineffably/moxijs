@@ -1,4 +1,4 @@
-import { PixelGrid } from '@moxijs/core';
+import { PixelGrid } from '@moxijs/ui';
 export declare const GUI_GRID: PixelGrid;
 export declare const px: (units: number) => number;
 export declare const units: (pixels: number) => number;

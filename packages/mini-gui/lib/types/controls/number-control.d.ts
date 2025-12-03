@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { UILabel } from '@moxijs/core';
+import { UILabel } from '@moxijs/ui';
 import { Control, ControlOptions } from './base-control';
 export interface NumberControlOptions extends ControlOptions {
     min?: number;

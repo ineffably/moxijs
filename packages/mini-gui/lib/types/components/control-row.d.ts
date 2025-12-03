@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js';
-import { UIComponent, UILabel } from '@moxijs/core';
+import { UIComponent, UILabel } from '@moxijs/ui';
 import type { GUIConfig } from '../gui';
 export interface ControlRowOptions {
     label: string;

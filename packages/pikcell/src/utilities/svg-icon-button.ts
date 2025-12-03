@@ -3,7 +3,8 @@
  */
 import * as PIXI from 'pixi.js';
 import { createPixelButton, PixelButtonOptions, PixelButtonResult } from '../components/pixel-button';
-import { svgToTexture, px } from '@moxijs/core';
+import { px } from '@moxijs/ui';
+import { svgToTexture } from '@moxijs/core';
 
 // Re-export icons from consolidated config for backward compatibility
 export { TOOL_ICONS, SPT_ICONS, ACTION_ICONS } from '../config/icons';

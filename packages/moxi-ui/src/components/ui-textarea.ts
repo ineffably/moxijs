@@ -2,9 +2,8 @@ import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIPanel } from './ui-panel';
-import { EdgeInsets } from '../core/edge-insets';
 import { UIFocusManager } from '../core/ui-focus-manager';
-import { asTextDPR } from '../../library/as-pixi';
+import { asTextDPR } from '../helpers/as-text-dpr';
 import { ThemeResolver } from '../theming/theme-resolver';
 // Theme resolver is now in base class
 import {
@@ -13,11 +12,11 @@ import {
 } from '../services';
 
 /**
- * Props for configuring a UITextInput
+ * Props for configuring a UITextArea
  *
  * @category UI
  */
-export interface UITextInputProps {
+export interface UITextAreaProps {
   /** Current value (controlled) */
   value?: string;
   /** Default value (uncontrolled) */
@@ -28,11 +27,11 @@ export interface UITextInputProps {
   placeholder?: string;
   /** Maximum character length */
   maxLength?: number;
-  /** Width of the input */
+  /** Width of the textarea */
   width?: number;
-  /** Height of the input */
+  /** Height of the textarea */
   height?: number;
-  /** Whether the input is disabled */
+  /** Whether the textarea is disabled */
   disabled?: boolean;
   /** Background color (overrides theme) */
   backgroundColor?: number;
@@ -44,30 +43,34 @@ export interface UITextInputProps {
   borderRadius?: number;
   /** Font size */
   fontSize?: number;
-  /** Input type for validation */
-  type?: 'text' | 'number';
+  /** Line height multiplier (e.g., 1.5 means 1.5x the font size) */
+  lineHeight?: number;
+  /** Number of visible rows */
+  rows?: number;
   /** Optional ThemeResolver for automatic color resolution */
   themeResolver?: ThemeResolver;
 }
 
 /**
- * A text input component following Ant Design patterns
- * Supports both controlled and uncontrolled modes
+ * A multi-line text area component
+ * Supports word wrapping and scrolling
  *
  * @category UI
  *
  * @example
  * ```typescript
- * const input = new UITextInput({
- *   placeholder: 'Enter your name...',
- *   onChange: (value) => console.log('Input:', value),
- *   maxLength: 50
+ * const textarea = new UITextArea({
+ *   placeholder: 'Enter your message...',
+ *   onChange: (value) => console.log('Message:', value),
+ *   width: 400,
+ *   height: 120,
+ *   rows: 4
  * });
  * ```
  */
-export class UITextInput extends UIComponent {
+export class UITextArea extends UIComponent {
   // Props
-  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
+  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
   
   // Services (composition)
   private stateManager: FormStateManager<string>;
@@ -85,6 +88,7 @@ export class UITextInput extends UIComponent {
   
   // State is now in base class (enabled, focused, hovered, pressed)
   
+  // Theme data
   // Theme resolver is now in base class
   private colorOverrides: {
     backgroundColor?: number;
@@ -92,21 +96,25 @@ export class UITextInput extends UIComponent {
     placeholderColor?: number;
   } = {};
 
-  constructor(props: UITextInputProps, boxModel?: Partial<BoxModel>) {
+  constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
+    const defaultLineHeight = props.lineHeight ?? 1.2; // Tighter spacing for pixel fonts
+    const defaultHeight = (props.rows ?? 4) * (props.fontSize ?? 14) * defaultLineHeight + 24;
 
     this.props = {
       placeholder: props.placeholder ?? '',
-      maxLength: props.maxLength ?? 100,
-      width: props.width ?? 200,
-      height: props.height ?? 36,
+      maxLength: props.maxLength ?? 1000,
+      width: props.width ?? 400,
+      height: props.height ?? defaultHeight,
       disabled: props.disabled ?? false,
       backgroundColor: props.backgroundColor ?? 0xffffff,
       textColor: props.textColor ?? 0x000000,
       placeholderColor: props.placeholderColor ?? 0x999999,
       borderRadius: props.borderRadius ?? 4,
       fontSize: props.fontSize ?? 14,
-      type: props.type ?? 'text'
+      lineHeight: defaultLineHeight,
+      rows: props.rows ?? 4
     };
 
     // Store color overrides
@@ -128,15 +136,12 @@ export class UITextInput extends UIComponent {
     this.inputHandler = new TextInputHandler({
       stateManager: this.stateManager,
       maxLength: this.props.maxLength,
-      type: this.props.type,
-      multiline: false
+      type: 'text', // Textarea doesn't support number type
+      multiline: true
     });
 
     // Update component state
     this.enabled = !this.props.disabled;
-
-    // Make text input focusable by default
-    this.tabIndex = 0;
 
     // Set box model dimensions
     this.boxModel.width = this.props.width;
@@ -144,6 +149,11 @@ export class UITextInput extends UIComponent {
 
     // Create visual elements
     this.createVisuals();
+
+    // Create cursor
+    this.cursor = new PIXI.Graphics();
+    this.cursor.visible = false;
+    this.container.addChild(this.cursor);
 
     // Setup interactivity
     this.setupInteractivity();
@@ -164,8 +174,9 @@ export class UITextInput extends UIComponent {
     });
     this.container.addChild(this.background.container);
 
-    // Create text display
+    // Create text display with word wrapping and high-DPI DPR rendering
     const displayText = this.getDisplayText();
+    const dprScale = 2;
     const textColor = displayText === this.props.placeholder
       ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
       : this.resolveTextColor(this.colorOverrides.textColor);
@@ -176,20 +187,17 @@ export class UITextInput extends UIComponent {
         fontFamily: 'PixelOperator8',
         fontSize: this.props.fontSize,
         fill: textColor,
-        align: 'left'
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: (this.props.width - 24) * dprScale,
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
       },
-      dprScale: 2,
+      dprScale,
       pixelPerfect: true
     });
-    const textY = Math.round((this.props.height - this.props.fontSize) / 2);
-    this.textDisplay.position.set(12, textY);
+    this.textDisplay.position.set(12, 12);
     this.textDisplay.roundPixels = true;
     this.container.addChild(this.textDisplay);
-
-    // Create cursor
-    this.cursor = new PIXI.Graphics();
-    this.cursor.visible = false;
-    this.container.addChild(this.cursor);
   }
 
   /**
@@ -209,7 +217,7 @@ export class UITextInput extends UIComponent {
     // Click to focus
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
 
-    // Listen for global click to blur
+    // Listen for global keyboard events
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
@@ -230,7 +238,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Called when input receives focus
+   * Called when textarea receives focus
    */
   override onFocus(): void {
     if (this.focused) return;
@@ -249,7 +257,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Called when input loses focus
+   * Called when textarea loses focus
    */
   override onBlur(): void {
     if (!this.focused) return;
@@ -266,8 +274,13 @@ export class UITextInput extends UIComponent {
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
-    // Handle Enter/Escape for blur (before delegating to handler)
-    if (e.key === 'Enter' || e.key === 'Escape') {
+    // Don't prevent default for Tab (allow tab navigation)
+    if (e.key === 'Tab') {
+      return; // Let tab navigation work
+    }
+
+    // Handle Enter/Escape for blur
+    if (e.key === 'Escape') {
       this.onBlur();
       return;
     }
@@ -277,7 +290,7 @@ export class UITextInput extends UIComponent {
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
-      // Handler updates stateManager directly, so we just need to update visuals
+      // Handler updates stateManager directly, so we need to update visuals
       this.updateText();
       this.updateCursor();
     }
@@ -332,11 +345,9 @@ export class UITextInput extends UIComponent {
     const value = this.stateManager.getValue();
     const cursorPos = this.inputHandler.getCursorPosition();
     const textUpToCursor = value.substring(0, cursorPos);
-    
-    // Ensure cursor position is valid
-    if (cursorPos > value.length) {
-      this.inputHandler.setCursorPosition(value.length);
-    }
+
+    // Create temporary text to measure
+    // Note: wordWrapWidth needs to account for DPR scaling (multiply by dprScale)
     const dprScale = 2;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
@@ -344,7 +355,10 @@ export class UITextInput extends UIComponent {
         fontFamily: 'PixelOperator8', // Match the display font
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
-        align: 'left'
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: (this.props.width - 24) * dprScale,
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
       }
     });
     // Ensure effects is initialized to prevent null reference errors
@@ -352,16 +366,40 @@ export class UITextInput extends UIComponent {
       tempText.effects = [];
     }
 
+    // Get the bounds to find cursor position
+    const metrics = tempText.getLocalBounds();
+
+    // For multi-line, we need to find the last line position
+    const lines = textUpToCursor.split('\n');
+    const lastLine = lines[lines.length - 1];
+
+    const lastLineText = new PIXI.Text({
+      text: lastLine,
+      style: {
+        fontFamily: 'PixelOperator8', // Match the display font
+        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
+        fill: this.textDisplay.style.fill,
+        align: 'left',
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
+      }
+    });
+    // Ensure effects is initialized to prevent null reference errors
+    if (lastLineText.effects === null) {
+      lastLineText.effects = [];
+    }
+
     // Account for DPR scaling when calculating cursor position
-    const cursorX = 12 + (tempText.width / dprScale);
-    const cursorY = (this.props.height - this.props.fontSize) / 2;
+    const cursorX = 12 + (lastLineText.width / dprScale);
+    const cursorY = 12 + (lines.length - 1) * (this.props.fontSize * this.props.lineHeight);
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
     const cursorColor = this.resolveTextColor(this.colorOverrides.textColor);
     this.cursor.fill({ color: cursorColor });
 
+    // Clean up temp objects
     tempText.destroy();
+    lastLineText.destroy();
   }
 
   /**
@@ -388,7 +426,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Measures the size needed for this input
+   * Measures the size needed for this textarea
    */
   measure(): MeasuredSize {
     const contentSize: MeasuredSize = {
@@ -400,7 +438,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Performs layout for this input
+   * Performs layout for this textarea
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
@@ -411,7 +449,7 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Renders the input
+   * Renders the textarea
    */
   protected render(): void {
     // Rendering handled by background, text, and cursor
@@ -422,10 +460,9 @@ export class UITextInput extends UIComponent {
    */
   setValue(value: string): void {
     this.stateManager.setValue(value);
-    this.inputHandler.setValue(value);
+    // Handler uses stateManager directly, just update cursor position
     this.inputHandler.setCursorPosition(value.length);
     this.updateText();
-    this.updateCursor();
   }
 
   /**
@@ -443,7 +480,6 @@ export class UITextInput extends UIComponent {
     // Handler uses stateManager directly, just update cursor position
     this.inputHandler.setCursorPosition(value.length);
     this.updateText();
-    this.updateCursor();
   }
 
   /**

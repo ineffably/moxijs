@@ -2,7 +2,7 @@
  * UI Basics Tab
  * Demonstrates the UI system with FlexBox layouts and colored boxes
  */
-import { EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UIComponent } from '@moxijs/core';
+import { EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UIComponent } from '@moxijs/ui';
 
 export function createBasicsTab(): UIComponent {
   // Create a flex container for the main layout

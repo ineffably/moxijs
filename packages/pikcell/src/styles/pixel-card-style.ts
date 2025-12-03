@@ -19,9 +19,11 @@ import {
   CardStyle,
   CardThemeColors,
   CardSectionDimensions,
-  EdgeInsets
-} from '@moxijs/core';
-import { GRID, BORDER, px } from '@moxijs/core';
+  EdgeInsets,
+  GRID,
+  BORDER,
+  px
+} from '@moxijs/ui';
 import { getTheme, getFontDisplaySize } from '../theming/theme';
 
 /**

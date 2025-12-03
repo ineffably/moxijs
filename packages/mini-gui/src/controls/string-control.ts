@@ -5,7 +5,7 @@
  */
 
 import { Graphics } from 'pixi.js';
-import { UILabel } from '@moxijs/core';
+import { UILabel } from '@moxijs/ui';
 import { Control, ControlOptions } from './base-control';
 import { px, GUI_COLORS } from '../gui-grid';
 

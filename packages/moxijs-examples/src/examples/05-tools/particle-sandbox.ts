@@ -291,13 +291,15 @@ class EnhancedParticleEmitter extends Container {
     particle.rotation = Math.random() * Math.PI * 2;
 
     // Set blend mode (cast to any to avoid PixiJS type issues)
-    const blendModeMap: Record<string, any> = {
-      'NORMAL': 'normal',
-      'ADD': 'add',
-      'MULTIPLY': 'multiply',
-      'SCREEN': 'screen'
-    };
-    (particle.sprite as any).blendMode = blendModeMap[this.config.blendMode] || 'normal';
+    if (particle.sprite) {
+      const blendModeMap: Record<string, any> = {
+        'NORMAL': 'normal',
+        'ADD': 'add',
+        'MULTIPLY': 'multiply',
+        'SCREEN': 'screen'
+      };
+      (particle.sprite as any).blendMode = blendModeMap[this.config.blendMode] || 'normal';
+    }
 
     this.updateParticleSprite(particle);
   }
@@ -341,6 +343,7 @@ class EnhancedParticleEmitter extends Container {
   }
 
   private updateParticleSprite(particle: Particle): void {
+    if (!particle.sprite) return;
     particle.sprite.position.set(particle.x, particle.y);
     particle.sprite.scale.set(particle.scale);
     particle.sprite.alpha = particle.alpha;

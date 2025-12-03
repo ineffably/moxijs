@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { UILabel } from '@moxijs/core';
+import { UILabel } from '@moxijs/ui';
 import { Control, ControlOptions } from './base-control';
 export type OptionList<T> = T[] | Record<string, T>;
 export declare class OptionControl<T = unknown> extends Control<T> {

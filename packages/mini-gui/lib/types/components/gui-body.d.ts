@@ -1,5 +1,5 @@
 import { Container, Graphics } from 'pixi.js';
-import { UIComponent } from '@moxijs/core';
+import { UIComponent } from '@moxijs/ui';
 import type { GUIConfig } from '../gui';
 export interface GUIBodyOptions {
     config?: GUIConfig;

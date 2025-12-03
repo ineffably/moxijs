@@ -22,7 +22,7 @@
  * - Vertical: (11 - 9) / 2 = 1 grid unit margin each side
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import { getTheme, createText } from '../theming/theme';
 import { ComponentResult } from '../interfaces/components';
 import { createPixelExplosion, PixelExplosionResult } from '../effects/pixel-explosion';

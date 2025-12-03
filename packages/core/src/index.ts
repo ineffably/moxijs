@@ -15,26 +15,10 @@ import { asTextureFrames } from './library/texture-frames';
 import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
-import { EdgeInsets } from './ui/core/edge-insets';
-import { UIComponent } from './ui/core/ui-component';
-import { UIFocusManager } from './ui/core/ui-focus-manager';
-import { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from './ui/layout/flex-container';
-import { UIBox } from './ui/components/ui-box';
-import { UILabel } from './ui/components/ui-label';
-import { UIPanel } from './ui/components/ui-panel';
-import { UIButton, ButtonState } from './ui/components/ui-button';
-import { UISelect, SelectOption } from './ui/components/ui-select';
-import { UITextInput } from './ui/components/ui-text-input';
-import { UITextArea } from './ui/components/ui-textarea';
-import { UIScrollContainer } from './ui/components/ui-scroll-container';
-import { UITabs, TabItem } from './ui/components/ui-tabs';
-import { UILayer } from './ui/UILayer';
-import { UIScaleMode } from './ui/UIScaleMode';
 import { StateMachine } from './library/state-machine';
 import { StateLogic } from './library/state-logic';
 import { createTileGrid, getTextureRange } from './library/grid-generator';
 import { svgToTexture } from './library/svg-utils/svg-to-texture';
-import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './ui/pixel-grid';
 import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-background';
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
@@ -73,17 +57,6 @@ export type {
   CollisionEvent,
   RaycastCallback
 } from './library/physics';
-export type { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint } from './ui/core/box-model';
-export type { FlexContainerProps } from './ui/layout/flex-container';
-export type { UIBoxProps } from './ui/components/ui-box';
-export type { UILabelProps, TextAlign } from './ui/components/ui-label';
-export type { UIPanelProps, NineSliceConfig } from './ui/components/ui-panel';
-export type { UIButtonProps, SpriteBackgroundConfig } from './ui/components/ui-button';
-export type { UISelectProps, SelectOption } from './ui/components/ui-select';
-export type { UITextInputProps } from './ui/components/ui-text-input';
-export type { UITabsProps, TabItem } from './ui/components/ui-tabs';
-export type { UILayerOptions } from './ui/UILayer';
-export type { PixelGridConfig, BorderConfig } from './ui/pixel-grid';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 
 export type Asset = { src: string, alias?: string };
@@ -111,8 +84,8 @@ export type ClientEventsType = {
 }
 
 // Re-export types
-export { 
-  SequenceInfo, 
+export {
+  SequenceInfo,
   ResizeHandlerOptions
 };
 
@@ -163,32 +136,7 @@ const exportedObjects = {
   createShapeFromSprite,
   PhysicsMaterials,
   applyMaterial,
-  EdgeInsets,
-  UIComponent,
-  UIFocusManager,
-  FlexContainer,
-  FlexDirection,
-  FlexJustify,
-  FlexAlign,
-  UIBox,
-  UILabel,
-  UIPanel,
-  UIButton,
-  ButtonState,
-  UISelect,
-  UITextInput,
-  UITextArea,
-  UIScrollContainer,
-  UITabs,
-  UILayer,
-  UIScaleMode,
   svgToTexture,
-  PixelGrid,
-  px,
-  units,
-  GRID,
-  BORDER,
-  createBorderConfig,
   ActionManager
 };
 
@@ -242,32 +190,6 @@ export {
   createShapeFromSprite,
   PhysicsMaterials,
   applyMaterial,
-  EdgeInsets,
-  UIComponent,
-  UIFocusManager,
-  FlexContainer,
-  FlexDirection,
-  FlexJustify,
-  FlexAlign,
-  UIBox,
-  UILabel,
-  UIPanel,
-  UIButton,
-  ButtonState,
-  UISelect,
-  UITextInput,
-  UITextArea,
-  UIScrollContainer,
-  UITabs,
-  UILayer,
-  UIScaleMode,
   svgToTexture,
-  PixelGrid,
-  px,
-  units,
-  GRID,
-  BORDER,
-  createBorderConfig,
   ActionManager
 };
-

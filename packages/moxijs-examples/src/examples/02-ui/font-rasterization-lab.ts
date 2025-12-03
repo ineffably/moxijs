@@ -4,7 +4,8 @@
  * Exploring solutions to remove Canvas 2D anti-aliasing from pixel fonts.
  * The key insight: Canvas 2D ALWAYS anti-aliases text. We need post-processing.
  */
-import { setupMoxi, GRID, px, asBitmapText } from '@moxijs/core';
+import { setupMoxi, asBitmapText } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import * as PIXI from 'pixi.js';
 import { Assets, BitmapFont, BitmapText, Text, Container, Graphics, Texture, Sprite, RenderTexture, Filter, GlProgram } from 'pixi.js';
 import { ASSETS } from '../../assets-config';

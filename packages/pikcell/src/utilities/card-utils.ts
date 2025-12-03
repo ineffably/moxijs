@@ -11,7 +11,7 @@
  * 
  * @see ../README.md for grid system documentation
  */
-import { GRID, BORDER, px } from '@moxijs/core';
+import { GRID, BORDER, px } from '@moxijs/ui';
 import { CARD_CONSTANTS } from '../config/constants';
 import { getFontDisplaySize } from '../theming/theme';
 

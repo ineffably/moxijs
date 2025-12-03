@@ -1,3 +1,12 @@
+// Mock window for Node.js environment
+if (typeof window === 'undefined') {
+  (global as any).window = {
+    devicePixelRatio: 1,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+  };
+}
+
 // Mock PIXI.js for unit tests
 jest.mock('pixi.js', () => {
   const mockPoint = class {

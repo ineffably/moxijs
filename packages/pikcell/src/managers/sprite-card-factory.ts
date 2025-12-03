@@ -5,7 +5,7 @@
  * Handles sprite card creation, updates, zoom handlers, and card pairing.
  */
 import * as PIXI from 'pixi.js';
-import { GRID, BORDER, px } from '@moxijs/core';
+import { GRID, BORDER, px } from '@moxijs/ui';
 import { SpriteController } from '../controllers/sprite-controller';
 import { createSpriteEditorCard, SpriteEditorCardResult } from '../components/sprite-editor-card';
 import { PixelCard } from '../components/pixel-card';

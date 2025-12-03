@@ -7,7 +7,7 @@
  *
  * This demo helps developers choose the right method for their use case.
  */
-import { setupMoxi, Logic, asEntity } from '@moxijs/core';
+import { setupMoxi, Logic, asEntity, asMSDFText } from '@moxijs/core';
 import { UIScrollContainer, UIComponent, EdgeInsets } from '@moxijs/ui';
 import type { MeasuredSize } from '@moxijs/ui';
 import * as PIXI from 'pixi.js';
@@ -21,11 +21,12 @@ export async function initFontRenderingComparison() {
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
     showLoadingScene: true,
-    pixelPerfect: true, // Enable all pixel-perfect settings
+    pixelPerfect: false, // Disabled for MSDF rendering (requires smooth texture filtering)
     renderOptions: {
       width: 1600,
       height: 900,
       backgroundColor: 0x0a0a0a,
+      antialias: true,
     }
   });
 
@@ -48,6 +49,12 @@ export async function initFontRenderingComparison() {
     ASSETS.VHS_GOTHIC_FONT,
     ASSETS.RAINYHEARTS_FONT
   ]);
+
+  // Load MSDF font
+  await Assets.load({
+    alias: 'PixelOperator8-MSDF',
+    src: ASSETS.PIXEL_OPERATOR8_MSDF_JSON
+  });
 
   // Generate bitmap fonts from TTF - data-driven approach
   // Pixel fonts use smaller sizes for crisp rasterization
@@ -81,9 +88,9 @@ export async function initFontRenderingComparison() {
     });
   });
 
-  // Create three columns for comparison
-  const columnWidths = [420, 420, 640];
-  const columnX = [50, 500, 950];
+  // Create four columns for comparison
+  const columnWidths = [360, 360, 360, 480];
+  const columnX = [20, 400, 780, 1160];
   const startY = 20;
 
   // ===== COLUMN 1: Text =====
@@ -92,8 +99,11 @@ export async function initFontRenderingComparison() {
   // ===== COLUMN 2: BitmapText =====
   createBitmapTextColumn(scene, engine, columnX[1], startY, columnWidths[1]);
 
-  // ===== COLUMN 3: Font Samples =====
-  createFontSamplesColumn(scene, columnX[2], startY, columnWidths[2]);
+  // ===== COLUMN 3: MSDF Text =====
+  createMSDFColumn(scene, engine, columnX[2], startY, columnWidths[2]);
+
+  // ===== COLUMN 4: Font Samples =====
+  createFontSamplesColumn(scene, columnX[3], startY, columnWidths[3]);
 
   // Initialize and start
   scene.init();
@@ -380,7 +390,103 @@ function createBitmapTextColumn(scene: PIXI.Container, engine: any, x: number, y
   scene.addChild(prosLabel);
 }
 
-// ===== COLUMN 3: Font Samples =====
+// ===== COLUMN 3: MSDF Text =====
+function createMSDFColumn(scene: PIXI.Container, engine: any, x: number, y: number, width: number) {
+  // Header
+  const header = new PIXI.Graphics();
+  header.rect(0, 0, width, 50);
+  header.fill({ color: 0xe67e22 });
+  header.position.set(x, y);
+  scene.addChild(header);
+
+  const headerText = new Text({
+    text: 'MSDF Text',
+    style: {
+      fontSize: 26,
+      fill: 0xffffff,
+      fontWeight: 'bold'
+    },
+    resolution: 2
+  });
+  headerText.anchor.set(0.5, 0.5);
+  headerText.position.set(x + width / 2, y + 25);
+  scene.addChild(headerText);
+
+  // Background panel
+  const panel = new PIXI.Graphics();
+  panel.rect(0, 0, width, 825);
+  panel.fill({ color: 0xd35400 });
+  panel.alpha = 0.3;
+  panel.position.set(x, y + 55);
+  scene.addChild(panel);
+
+  let currentY = y + 75;
+
+  // Example 1: Basic MSDF Text
+  const basic = asMSDFText({
+    text: 'MSDF Text',
+    style: { fontFamily: 'PixelOperator8', fontSize: 26 }
+  }, { x: x + 20, y: currentY });
+  scene.addChild(basic);
+  currentY += 40;
+
+  // Example 2: Tinted MSDF
+  const tinted = asMSDFText({
+    text: 'Color Tinted',
+    style: { fontFamily: 'PixelOperator8', fontSize: 26 }
+  }, { x: x + 20, y: currentY });
+  tinted.tint = 0xff6b35;
+  scene.addChild(tinted);
+  currentY += 50;
+
+  // Example 3: Multiple sizes (same as BitmapText column)
+  [8, 12, 16, 20, 24, 28, 32].forEach(size => {
+    const sizeText = asMSDFText({
+      text: `${size}px MSDF Text`,
+      style: { fontFamily: 'PixelOperator8', fontSize: size }
+    }, { x: x + 20, y: currentY });
+    scene.addChild(sizeText);
+    currentY += size + 10;
+  });
+  currentY += 10;
+
+  // Example 4: Live counter (MSDF)
+  const counterLabel = new Text({
+    text: 'Live Counter (MSDF):',
+    style: { fontSize: 14, fill: 0xcccccc }
+  });
+  counterLabel.position.set(x + 20, currentY);
+  scene.addChild(counterLabel);
+  currentY += 20;
+
+  const counter = asMSDFText({
+    text: '00000000',
+    style: { fontFamily: 'PixelOperator8', fontSize: 28 }
+  }, { x: x + 20, y: currentY });
+  scene.addChild(counter);
+
+  let count = 0;
+  engine.ticker.add(() => {
+    count += 123;
+    counter.text = count.toString().padStart(8, '0');
+  });
+  currentY += 60;
+
+  // Pros/Cons
+  const prosLabel = new Text({
+    text: '✅ Crisp at any scale\n✅ Small texture size\n✅ GPU efficient\n✅ Unity-quality text\n\n❌ Requires font prep\n❌ Smooths pixel edges',
+    style: {
+      fontSize: 14,
+      fill: 0xcccccc,
+      lineHeight: 18
+    },
+    resolution: 2
+  });
+  prosLabel.position.set(x + 20, currentY);
+  scene.addChild(prosLabel);
+}
+
+// ===== COLUMN 4: Font Samples =====
 function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, width: number) {
   // Header
   const header = new PIXI.Graphics();

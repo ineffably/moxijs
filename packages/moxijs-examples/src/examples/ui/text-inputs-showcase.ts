@@ -11,6 +11,7 @@ import {
   UIScrollContainer,
   EdgeInsets
 } from '@moxijs/ui';
+import { MSDF_FONT } from '../02-ui/ui-showcase';
 
 /**
  * Text Inputs Showcase
@@ -45,7 +46,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Basic Text Inputs',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const section1Container = new FlexContainer({
@@ -57,7 +59,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const nameLabel = new UILabel({
     text: 'Full Name:',
     fontSize: 16,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const nameInput = new UITextInput({
@@ -80,7 +83,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const emailLabel = new UILabel({
     text: 'Email Address:',
     fontSize: 16,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const emailInput = new UITextInput({
@@ -103,7 +107,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const ageLabel = new UILabel({
     text: 'Age:',
     fontSize: 16,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const ageInput = new UITextInput({
@@ -134,7 +139,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Input Variations',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const section2Container = new FlexContainer({
@@ -181,7 +187,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Form Grid',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const gridContainer = new FlexContainer({
@@ -202,7 +209,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const firstNameLabel = new UILabel({
     text: 'First Name:',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const firstNameInput = new UITextInput({
     placeholder: 'John',
@@ -222,7 +230,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const lastNameLabel = new UILabel({
     text: 'Last Name:',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const lastNameInput = new UITextInput({
     placeholder: 'Doe',
@@ -251,7 +260,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const phoneLabel = new UILabel({
     text: 'Phone:',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const phoneInput = new UITextInput({
     placeholder: '(555) 123-4567',
@@ -271,7 +281,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const cityLabel = new UILabel({
     text: 'City:',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const cityInput = new UITextInput({
     placeholder: 'San Francisco',
@@ -295,7 +306,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Multi-line Text Areas',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
 
   const section4Container = new FlexContainer({
@@ -311,7 +323,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const smallTextareaLabel = new UILabel({
     text: 'Comments (3 rows):',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const smallTextarea = new UITextArea({
     placeholder: 'Enter your comments here...',
@@ -333,7 +346,8 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const largeTextareaLabel = new UILabel({
     text: 'Description (6 rows):',
     fontSize: 14,
-    color: 0xffffff
+    color: 0xffffff,
+    msdfFontFamily: MSDF_FONT.family
   });
   const largeTextarea = new UITextArea({
     placeholder: 'Enter a detailed description...\nSupports multiple lines.\nPress Enter to add new lines.\nPress Escape to unfocus.',

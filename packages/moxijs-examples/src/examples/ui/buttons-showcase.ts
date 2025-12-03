@@ -1,6 +1,9 @@
 /**
  * Buttons Showcase Tab
  * Demonstrates different ways to style and create buttons
+ *
+ * Uses MSDF (Multi-channel Signed Distance Field) text rendering
+ * for crisp text at any scale.
  */
 import * as PIXI from 'pixi.js';
 import {
@@ -15,6 +18,7 @@ import {
   UIComponent
 } from '@moxijs/ui';
 import { ASSETS } from '../../assets-config';
+import { MSDF_FONT } from '../02-ui/ui-showcase';
 
 export async function createButtonsShowcase(): Promise<UIComponent> {
   // Load the spritesheet with pixel-perfect settings
@@ -118,6 +122,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x4a90e2,
     textColor: 0xffffff,
     borderRadius: 6,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Primary clicked')
   });
 
@@ -129,6 +134,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x6c757d,
     textColor: 0xffffff,
     borderRadius: 6,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Secondary clicked')
   });
 
@@ -140,6 +146,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x28a745,
     textColor: 0xffffff,
     borderRadius: 6,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Success clicked')
   });
 
@@ -151,6 +158,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0xdc3545,
     textColor: 0xffffff,
     borderRadius: 6,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Danger clicked')
   });
 
@@ -177,6 +185,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x9b59b6,
     textColor: 0xffffff,
     borderRadius: 20,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Pill clicked')
   });
 
@@ -187,6 +196,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0xe74c3c,
     textColor: 0xffffff,
     borderRadius: 15,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Rounded clicked')
   });
 
@@ -197,6 +207,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x3498db,
     textColor: 0xffffff,
     borderRadius: 10,
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Smooth clicked')
   });
 
@@ -224,6 +235,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     textColor: 0xffffff,
     fontSize: 12,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Small clicked')
   });
 
@@ -235,6 +247,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     textColor: 0xffffff,
     fontSize: 16,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Medium clicked')
   });
 
@@ -246,6 +259,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     textColor: 0xffffff,
     fontSize: 20,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Large clicked')
   });
 
@@ -271,6 +285,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0xff6b6b,
     textColor: 0xffffff,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Sunset clicked')
   });
 
@@ -281,6 +296,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x4ecdc4,
     textColor: 0xffffff,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Ocean clicked')
   });
 
@@ -291,6 +307,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0xb19cd9,
     textColor: 0xffffff,
     borderRadius: 6, // Uniform border radius
+    msdfFontFamily: MSDF_FONT.family,
     onClick: () => console.log('Lavender clicked')
   });
 
@@ -500,8 +517,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    msdfFontFamily: MSDF_FONT.family,
     fontSize: 12,
     textColor: 0x333333,
     onClick: () => console.log('Grey clicked!')
@@ -520,8 +536,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    msdfFontFamily: MSDF_FONT.family,
     fontSize: 14,
     textColor: 0x4a3728,
     onClick: () => console.log('Beige clicked!')
@@ -540,8 +555,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    msdfFontFamily: MSDF_FONT.family,
     fontSize: 16,
     textColor: 0xf5deb3,
     onClick: () => console.log('Brown clicked!')
@@ -729,7 +743,8 @@ function createSection(title: string): FlexContainer {
     text: title,
     fontSize: 18,
     color: 0xffffff,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    msdfFontFamily: MSDF_FONT.family
   });
 
   section.addChild(titleLabel);

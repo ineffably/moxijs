@@ -13,6 +13,12 @@ import { createTextInputsShowcase } from '../ui/text-inputs-showcase';
 import { createOptionControlsShowcase } from '../ui/option-controls-showcase';
 import { createThemingShowcase } from '../ui/theming-showcase';
 
+/** MSDF Font configuration for UI showcase */
+export const MSDF_FONT = {
+  family: 'PixelOperator8',
+  alias: 'PixelOperator8-MSDF'
+};
+
 /**
  * Example 14: UI Showcase - Buttons
  *
@@ -39,7 +45,7 @@ export async function initUIShowcase() {
     }
   });
 
-  // Load PixelOperator8 font for crisp UI text
+  // Load PixelOperator8 font for Canvas text (fallback)
   await Assets.load({
     alias: 'PixelOperator8',
     src: ASSETS.PIXEL_OPERATOR8_FONT,
@@ -47,6 +53,13 @@ export async function initUIShowcase() {
       family: 'PixelOperator8'
     }
   });
+
+  // Load MSDF font for crisp UI text at any scale
+  await Assets.load({
+    alias: MSDF_FONT.alias,
+    src: ASSETS.PIXEL_OPERATOR8_MSDF_JSON
+  });
+  console.log('✅ MSDF font loaded:', MSDF_FONT.family);
 
   // Create a single focus manager for all tabs
   const focusManager = new UIFocusManager();

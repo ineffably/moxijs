@@ -12,7 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './main/moxi-entity';
 import { Camera, CameraLogic } from './main/camera';
 import { asTextureFrames } from './library/texture-frames';
-import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, TextDPROptions } from './library/as-pixi';
+import { asBitmapText, asSprite, asText, asTextDPR, asMSDFText, asGraphics, asContainer, PixiProps, TextDPROptions, MSDFTextOptions } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
@@ -100,6 +100,7 @@ const exportedObjects = {
   asSprite,
   asText,
   asTextDPR,
+  asMSDFText,
   asGraphics,
   asContainer,
   Logic,
@@ -159,10 +160,12 @@ export {
   asSprite,
   asText,
   asTextDPR,
+  asMSDFText,
   asGraphics,
   asContainer,
   PixiProps,
   TextDPROptions,
+  MSDFTextOptions,
   Logic,
   Camera,
   CameraLogic,

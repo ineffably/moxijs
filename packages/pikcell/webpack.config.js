@@ -92,10 +92,9 @@ const devConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './dev.html',
+      template: './index.html',
       title: 'PIKCELL - Pixel Sprite Editor',
-      inject: 'body',
-      scriptLoading: 'blocking'
+      inject: false
     })
   ],
   devServer: {

@@ -7,8 +7,8 @@
  * @category UI Services
  */
 
-import { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint } from '../core/box-model';
-import { EdgeInsets } from '../core/edge-insets';
+import { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint } from '../base/box-model';
+import { EdgeInsets } from '../base/edge-insets';
 
 /**
  * Size constraints for layout calculation

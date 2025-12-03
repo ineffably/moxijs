@@ -52,14 +52,26 @@ export class FormStateManager<T> {
   setValue(value: T): void {
     if (this.isControlled) {
       // Controlled mode: notify parent, don't update internal state
-      this.onChange?.(value);
+      this.safeInvokeCallback(value);
     } else {
       // Uncontrolled mode: update internal state and notify
       const wasChanged = this.value !== value;
       this.value = value;
       if (wasChanged) {
-        this.onChange?.(value);
+        this.safeInvokeCallback(value);
       }
+    }
+  }
+
+  /**
+   * Safely invoke the onChange callback with error handling
+   */
+  private safeInvokeCallback(value: T): void {
+    if (!this.onChange) return;
+    try {
+      this.onChange(value);
+    } catch (error) {
+      console.error('Error in onChange callback:', error);
     }
   }
 

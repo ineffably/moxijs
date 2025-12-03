@@ -1,6 +1,6 @@
 {
   "name": "moxijs",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "description": "Monorepo for MoxiJS game framework and related packages",
   "private": true,
   "workspaces": [
@@ -20,7 +20,7 @@
     "examples": "npm run local --workspace=moxijs-examples",
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspace=@moxijs/core",
-    "test:ci": "npm run test:ci --workspace=@moxijs/core",
+    "test:ci": "npm run test:ci --workspace=@moxijs/core && npm run test:ci --workspace=@moxijs/ui",
     "pikcell": "npm run dev --workspace=@moxijs/pikcell"
   },
   "keywords": [

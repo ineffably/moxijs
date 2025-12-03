@@ -1,8 +1,9 @@
-import PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
-import { UIFocusManager } from '../core/ui-focus-manager';
+import * as PIXI from 'pixi.js';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
+import { UIFocusManager } from '../base/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { ActionManager } from '@moxijs/core';
 // Theme resolver is now in base class
 import {
   FormStateManager
@@ -77,8 +78,8 @@ export class UICheckbox extends UIComponent {
     checkedBackgroundColor?: number;
   } = {};
 
-  // Keyboard handler for cleanup
-  private keydownHandler?: (e: KeyboardEvent) => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   constructor(props: UICheckboxProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -158,17 +159,18 @@ export class UICheckbox extends UIComponent {
 
     // Keyboard support
     if (typeof window !== 'undefined') {
-      this.keydownHandler = (e: KeyboardEvent) => {
-        if (!this.focused || this.props.disabled) return;
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
+    }
+  }
 
-        // Space to toggle
-        if (e.key === ' ' || e.key === 'Spacebar') {
-          e.preventDefault();
-          e.stopPropagation();
-          this.toggle();
-        }
-      };
-      window.addEventListener('keydown', this.keydownHandler);
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (!this.focused || this.props.disabled) return;
+
+    // Space to toggle
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.toggle();
     }
   }
 
@@ -324,7 +326,6 @@ export class UICheckbox extends UIComponent {
   public setDisabled(disabled: boolean): void {
     this.props.disabled = disabled;
     this.enabled = !disabled;
-    this.enabled = !disabled;
     this.container.cursor = disabled ? 'default' : 'pointer';
     this.updateVisuals(); // updateVisuals will handle alpha
   }
@@ -333,9 +334,7 @@ export class UICheckbox extends UIComponent {
    * Clean up event listeners
    */
   public destroy(): void {
-    if (typeof window !== 'undefined' && this.keydownHandler) {
-      window.removeEventListener('keydown', this.keydownHandler);
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "moxijs-examples",
-  "version": "1.0.0",
+  "version": "0.2.4",
   "description": "Interactive examples for the MoxiJS game framework",
   "main": "index.js",
   "scripts": {

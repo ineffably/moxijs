@@ -1,15 +1,16 @@
-import PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import * as PIXI from 'pixi.js';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
-import { UIFocusManager } from '../core/ui-focus-manager';
-import { asTextDPR } from '@moxijs/core';
+import { UIFocusManager } from '../base/ui-focus-manager';
+import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
 // Theme resolver is now in base class
 import {
   FormStateManager,
   TextInputHandler
 } from '../services';
+import { UI_DEFAULTS } from '../theming/theme-data';
 
 /**
  * Props for configuring a UITextArea
@@ -85,7 +86,10 @@ export class UITextArea extends UIComponent {
   // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
-  
+
+  // Event listener management
+  private actions = new ActionManager();
+
   // State is now in base class (enabled, focused, hovered, pressed)
   
   // Theme data
@@ -176,7 +180,7 @@ export class UITextArea extends UIComponent {
 
     // Create text display with word wrapping and high-DPI DPR rendering
     const displayText = this.getDisplayText();
-    const dprScale = 2;
+    const dprScale = UI_DEFAULTS.DPR_SCALE;
     const textColor = displayText === this.props.placeholder
       ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
       : this.resolveTextColor(this.colorOverrides.textColor);
@@ -184,7 +188,7 @@ export class UITextArea extends UIComponent {
     this.textDisplay = asTextDPR({
       text: displayText,
       style: {
-        fontFamily: 'PixelOperator8',
+        fontFamily: UI_DEFAULTS.FONT_FAMILY,
         fontSize: this.props.fontSize,
         fill: textColor,
         align: 'left',
@@ -219,7 +223,7 @@ export class UITextArea extends UIComponent {
 
     // Listen for global keyboard events
     if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', this.handleKeyDown.bind(this));
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
     }
   }
 
@@ -322,20 +326,8 @@ export class UITextArea extends UIComponent {
       ? this.resolveColor('focus', this.colorOverrides.backgroundColor)
       : this.resolveColor('background', this.colorOverrides.backgroundColor);
 
-    // Recreate background panel with new color
-    const oldBackground = this.background;
-    this.background = new UIPanel({
-      backgroundColor: bgColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
-    
-    // Replace in container
-    const index = this.container.getChildIndex(oldBackground.container);
-    this.container.removeChild(oldBackground.container);
-    this.container.addChildAt(this.background.container, index);
-    oldBackground.destroy();
+    // Update existing panel color instead of recreating
+    this.background.setBackgroundColor(bgColor);
   }
 
   /**
@@ -348,11 +340,11 @@ export class UITextArea extends UIComponent {
 
     // Create temporary text to measure
     // Note: wordWrapWidth needs to account for DPR scaling (multiply by dprScale)
-    const dprScale = 2;
+    const dprScale = UI_DEFAULTS.DPR_SCALE;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
       style: {
-        fontFamily: 'PixelOperator8', // Match the display font
+        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left',
@@ -376,7 +368,7 @@ export class UITextArea extends UIComponent {
     const lastLineText = new PIXI.Text({
       text: lastLine,
       style: {
-        fontFamily: 'PixelOperator8', // Match the display font
+        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left',
@@ -412,7 +404,7 @@ export class UITextArea extends UIComponent {
     this.cursorBlinkInterval = window.setInterval(() => {
       this.cursorVisible = !this.cursorVisible;
       this.cursor.visible = this.cursorVisible;
-    }, 530);
+    }, UI_DEFAULTS.CURSOR_BLINK_INTERVAL);
   }
 
   /**
@@ -487,9 +479,7 @@ export class UITextArea extends UIComponent {
    */
   destroy(): void {
     this.stopCursorBlink();
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 }

@@ -1,16 +1,17 @@
-import PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import * as PIXI from 'pixi.js';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
-import { EdgeInsets } from '../core/edge-insets';
-import { UIFocusManager } from '../core/ui-focus-manager';
-import { asTextDPR } from '@moxijs/core';
+import { EdgeInsets } from '../base/edge-insets';
+import { UIFocusManager } from '../base/ui-focus-manager';
+import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
 // Theme resolver is now in base class
 import {
   FormStateManager,
   TextInputHandler
 } from '../services';
+import { UI_DEFAULTS } from '../theming/theme-data';
 
 /**
  * Props for configuring a UITextInput
@@ -82,7 +83,10 @@ export class UITextInput extends UIComponent {
   // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
-  
+
+  // Event listener management
+  private actions = new ActionManager();
+
   // State is now in base class (enabled, focused, hovered, pressed)
   
   // Theme resolver is now in base class
@@ -173,12 +177,12 @@ export class UITextInput extends UIComponent {
     this.textDisplay = asTextDPR({
       text: displayText,
       style: {
-        fontFamily: 'PixelOperator8',
+        fontFamily: UI_DEFAULTS.FONT_FAMILY,
         fontSize: this.props.fontSize,
         fill: textColor,
         align: 'left'
       },
-      dprScale: 2,
+      dprScale: UI_DEFAULTS.DPR_SCALE,
       pixelPerfect: true
     });
     const textY = Math.round((this.props.height - this.props.fontSize) / 2);
@@ -209,9 +213,9 @@ export class UITextInput extends UIComponent {
     // Click to focus
     this.container.on('pointerdown', this.handlePointerDown.bind(this));
 
-    // Listen for global click to blur
+    // Listen for global keyboard events
     if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', this.handleKeyDown.bind(this));
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
     }
   }
 
@@ -309,20 +313,8 @@ export class UITextInput extends UIComponent {
       ? this.resolveColor('focus', this.colorOverrides.backgroundColor)
       : this.resolveColor('background', this.colorOverrides.backgroundColor);
 
-    // Recreate background panel with new color
-    const oldBackground = this.background;
-    this.background = new UIPanel({
-      backgroundColor: bgColor,
-      width: this.props.width,
-      height: this.props.height,
-      borderRadius: this.props.borderRadius
-    });
-    
-    // Replace in container
-    const index = this.container.getChildIndex(oldBackground.container);
-    this.container.removeChild(oldBackground.container);
-    this.container.addChildAt(this.background.container, index);
-    oldBackground.destroy();
+    // Update existing panel color instead of recreating
+    this.background.setBackgroundColor(bgColor);
   }
 
   /**
@@ -337,11 +329,11 @@ export class UITextInput extends UIComponent {
     if (cursorPos > value.length) {
       this.inputHandler.setCursorPosition(value.length);
     }
-    const dprScale = 2;
+    const dprScale = UI_DEFAULTS.DPR_SCALE;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
       style: {
-        fontFamily: 'PixelOperator8', // Match the display font
+        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left'
@@ -374,7 +366,7 @@ export class UITextInput extends UIComponent {
     this.cursorBlinkInterval = window.setInterval(() => {
       this.cursorVisible = !this.cursorVisible;
       this.cursor.visible = this.cursorVisible;
-    }, 530);
+    }, UI_DEFAULTS.CURSOR_BLINK_INTERVAL);
   }
 
   /**
@@ -451,9 +443,7 @@ export class UITextInput extends UIComponent {
    */
   destroy(): void {
     this.stopCursorBlink();
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 }

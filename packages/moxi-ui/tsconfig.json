@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "declarationDir": "./lib/types",
+    "declaration": true,
+    "composite": false,
+    "types": ["node", "jest"]
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./lib/**/*",
+    "./tests/**/*"
+  ]
+}

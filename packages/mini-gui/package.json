@@ -1,0 +1,54 @@
+{
+  "name": "@moxijs/mini-gui",
+  "version": "0.1.0",
+  "description": "Minimal debug GUI for MoxiJS - lightweight control panels inspired by rad-gui",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rimraf ./lib && webpack --mode production",
+    "build:clean": "npm run clean && npm run build",
+    "clean": "rimraf ./lib",
+    "build:dev": "webpack --mode development",
+    "watch": "webpack watch --mode development",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "moxijs",
+    "pixi",
+    "pixijs",
+    "gui",
+    "debug",
+    "mini-gui",
+    "controls",
+    "rad-gui",
+    "dat-gui"
+  ],
+  "author": "Chad Neff <ccneff@gmail.com> (https://github.com/ineffably)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ineffably/moxijs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ineffably/moxijs/issues"
+  },
+  "homepage": "https://github.com/ineffably/moxijs#readme",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "peerDependencies": {
+    "@moxijs/ui": "^0.1.0",
+    "pixi.js": "^8.14.0"
+  }
+}

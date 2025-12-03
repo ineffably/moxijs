@@ -8,7 +8,7 @@
  * It works in grid units (not raw pixels) for consistency with the pikcell UI system.
  */
 import * as PIXI from 'pixi.js';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 
 /** Individual pixel particle for the explosion */
 interface Particle {

@@ -23,7 +23,7 @@ describe('Type Definitions', () => {
     it('should have expected type definition directories', () => {
       expect(fs.existsSync(path.join(libTypesDir, 'main'))).toBe(true);
       expect(fs.existsSync(path.join(libTypesDir, 'library'))).toBe(true);
-      expect(fs.existsSync(path.join(libTypesDir, 'ui'))).toBe(true);
+      // Note: ui directory moved to @moxijs/ui package
     });
 
     it('should NOT have src subdirectory in lib/types', () => {
@@ -62,11 +62,7 @@ describe('Type Definitions', () => {
       expect(indexDtsContent).toContain('MoxiEntity');
     });
 
-    it('should export UI types', () => {
-      expect(indexDtsContent).toContain('UIComponent');
-      expect(indexDtsContent).toContain('UILabel');
-      expect(indexDtsContent).toContain('UIButton');
-    });
+    // Note: UI types moved to @moxijs/ui package
 
     it('should export library types', () => {
       expect(indexDtsContent).toContain('StateMachine');
@@ -105,10 +101,10 @@ describe('Type Definitions', () => {
     });
 
     it('should import from relative paths (not from src/)', () => {
-      // Should import from './main/', './library/', './ui/' not './src/main/'
+      // Should import from './main/', './library/' not './src/main/'
       expect(indexDtsContent).toMatch(/from ['"]\.\/main\//);
       expect(indexDtsContent).toMatch(/from ['"]\.\/library\//);
-      expect(indexDtsContent).toMatch(/from ['"]\.\/ui\//);
+      // Note: ui directory moved to @moxijs/ui package
 
       // Should NOT import from './src/'
       expect(indexDtsContent).not.toMatch(/from ['"]\.\/src\//);

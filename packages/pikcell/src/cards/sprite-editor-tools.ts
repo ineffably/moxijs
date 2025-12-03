@@ -4,7 +4,7 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import { createCardZoomHandler } from '../utilities/card-zoom-handler';
 import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonColumn } from '../utilities/button-layout';

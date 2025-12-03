@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { createPixelCheckbox, PixelCheckboxResult } from './pixel-checkbox';
 import { getTheme, createText } from '../theming/theme';

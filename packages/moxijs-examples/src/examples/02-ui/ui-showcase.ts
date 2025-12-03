@@ -1,13 +1,18 @@
+import { setupMoxi } from '@moxijs/core';
 import {
-  setupMoxi,
   UITabs,
   TabItem,
   UILayer,
   UIScaleMode,
   UIFocusManager
-} from '@moxijs/core';
+} from '@moxijs/ui';
+import { Assets } from 'pixi.js';
+import { ASSETS } from '../../assets-config';
 import { createButtonsShowcase } from '../ui/buttons-showcase';
 import { createTextInputsShowcase } from '../ui/text-inputs-showcase';
+import { createOptionControlsShowcase } from '../ui/option-controls-showcase';
+import { createThemingShowcase } from '../ui/theming-showcase';
+import { createPanelsShowcase } from '../ui/panels-showcase';
 
 /**
  * Example 14: UI Showcase - Buttons
@@ -29,7 +34,18 @@ export async function initUIShowcase() {
     renderOptions: {
       width: 1600,
       height: 900,
-      backgroundColor: 0x1a1a2e
+      backgroundColor: 0x1e1e1e, // Dark neutral gray theme
+      resolution: window.devicePixelRatio || 2, // Match device DPR for crisp rendering
+      antialias: false // Disable anti-aliasing for sharper text
+    }
+  });
+
+  // Load PixelOperator8 font for crisp UI text
+  await Assets.load({
+    alias: 'PixelOperator8',
+    src: ASSETS.PIXEL_OPERATOR8_FONT,
+    data: {
+      family: 'PixelOperator8'
     }
   });
 
@@ -47,6 +63,21 @@ export async function initUIShowcase() {
       key: 'text-inputs',
       label: 'Text Inputs',
       content: await createTextInputsShowcase()
+    },
+    {
+      key: 'option-controls',
+      label: 'Option Controls',
+      content: await createOptionControlsShowcase()
+    },
+    {
+      key: 'theming',
+      label: 'Theming & Forms',
+      content: await createThemingShowcase()
+    },
+    {
+      key: 'panels',
+      label: 'Panels',
+      content: await createPanelsShowcase()
     }
   ];
 

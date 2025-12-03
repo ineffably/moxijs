@@ -32,13 +32,32 @@ jobs:
       - name: Build all packages
         run: npm run build
 
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p _site
+
+          # Examples at root
+          cp -r packages/moxijs-examples/dist/* _site/
+          cp -r packages/moxijs-examples/assets _site/assets
+
+          # Pikcell at /pikcell/
+          mkdir -p _site/pikcell
+          cp -r packages/pikcell/dist/* _site/pikcell/
+          cp -r packages/pikcell/assets _site/pikcell/assets
+
+          # Package builds at /packages/*/lib/
+          mkdir -p _site/packages/core/lib
+          mkdir -p _site/packages/ui/lib
+          cp -r packages/core/lib/* _site/packages/core/lib/
+          cp -r packages/ui/lib/* _site/packages/ui/lib/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/moxijs-examples/dist
+          path: _site
 
   deploy:
     environment:

@@ -31,7 +31,7 @@ import { LayoutStateManager, LayoutSlotState } from './state/layout-state-manage
 import { UndoManager, StrokeOperation } from './state/undo-manager';
 import { getTheme } from './theming/theme';
 import { PICO8_PALETTE, getPalette, PaletteType } from './theming/palettes';
-import { GRID, BORDER, px } from '@moxijs/ui';
+import { GRID, BORDER, px } from '@moxijs/core';
 
 // Card imports
 import { createPaletteCard, PaletteCardResult } from './cards/palette-card';

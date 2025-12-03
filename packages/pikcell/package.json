@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "@moxijs/core": "file:../core",
-    "@moxijs/ui": "file:../moxi-ui"
+    "@moxijs/ui": "file:../ui"
   }
 }

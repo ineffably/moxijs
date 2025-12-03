@@ -5,7 +5,7 @@
   "private": true,
   "workspaces": [
     "packages/core",
-    "packages/moxi-ui",
+    "packages/ui",
     "packages/mini-gui",
     "packages/moxijs-examples",
     "packages/pikcell"

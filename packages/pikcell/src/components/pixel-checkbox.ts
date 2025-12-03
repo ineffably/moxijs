@@ -2,7 +2,7 @@
  * Pixel-perfect checkbox component
  */
 import * as PIXI from 'pixi.js';
-import { px } from '@moxijs/ui';
+import { GRID, px } from '@moxijs/core';
 import { createPixelButton, PixelButtonResult } from './pixel-button';
 import { ComponentResult } from '../interfaces/components';
 import { getTheme, createText } from '../theming/theme';

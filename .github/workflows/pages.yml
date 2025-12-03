@@ -39,11 +39,13 @@ jobs:
           # Examples at root
           cp -r packages/moxijs-examples/dist/* _site/
           cp -r packages/moxijs-examples/assets _site/assets
+          cp packages/moxijs-examples/*.css _site/
 
           # Pikcell at /pikcell/
           mkdir -p _site/pikcell
           cp -r packages/pikcell/dist/* _site/pikcell/
           cp -r packages/pikcell/assets _site/pikcell/assets
+          cp packages/pikcell/index.css _site/pikcell/
 
           # Package builds at /packages/*/lib/
           mkdir -p _site/packages/core/lib

@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIFocusManager } from '../core/ui-focus-manager';
@@ -62,6 +62,18 @@ export class UIRadioButton extends UIComponent {
 
   // Keyboard handler for cleanup
   private keydownHandler?: (e: KeyboardEvent) => void;
+
+  /**
+   * Safely invoke the onChange callback with error handling
+   */
+  private safeInvokeOnChange(selected: boolean): void {
+    if (!this.onChange) return;
+    try {
+      this.onChange(selected);
+    } catch (error) {
+      console.error('Error in onChange callback:', error);
+    }
+  }
 
   constructor(props: UIRadioButtonProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -176,24 +188,24 @@ export class UIRadioButton extends UIComponent {
    */
   public setSelected(selected: boolean): void {
     if (this.props.disabled) return;
-    
+
     // In controlled mode, don't update internal state
     // Parent should update the prop via updateSelected()
     if (this.isControlled) {
       if (selected === this.selected) return;
       // Call onChange to notify parent, but don't update internal state
-      this.onChange?.(selected);
+      this.safeInvokeOnChange(selected);
       return;
     }
 
     // Uncontrolled mode: update internal state
     const wasSelected = this.selected;
     this.selected = selected;
-    
+
     // Only update visuals if state actually changed
     if (wasSelected !== selected) {
       this.updateVisuals();
-      this.onChange?.(selected);
+      this.safeInvokeOnChange(selected);
     }
   }
 

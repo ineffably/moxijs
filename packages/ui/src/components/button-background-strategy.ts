@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { ButtonState } from './ui-button';
 import { UIPanel } from './ui-panel';
 

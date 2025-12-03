@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIPanel } from './ui-panel';
@@ -113,6 +113,18 @@ export class UISelect extends UIComponent {
 
   // Keyboard handler for cleanup
   private keydownHandler?: (e: KeyboardEvent) => void;
+
+  /**
+   * Safely invoke the onChange callback with error handling
+   */
+  private safeInvokeOnChange(value: any): void {
+    if (!this.onChange) return;
+    try {
+      this.onChange(value);
+    } catch (error) {
+      console.error('Error in onChange callback:', error);
+    }
+  }
 
   constructor(props: UISelectProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -700,7 +712,7 @@ export class UISelect extends UIComponent {
       this.label.setColor(this.props.textColor);
     }
 
-    this.onChange?.(value);
+    this.safeInvokeOnChange(value);
     this.closeDropdown();
   }
 

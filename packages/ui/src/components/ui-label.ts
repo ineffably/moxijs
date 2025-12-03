@@ -1,8 +1,9 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { asTextDPR } from '@moxijs/core';
 import { LayoutEngine } from '../services';
+import { UI_DEFAULTS } from '../theming/theme-data';
 
 /** Text alignment options. */
 export type TextAlign = 'left' | 'center' | 'right';
@@ -69,7 +70,7 @@ export class UILabel extends UIComponent {
     this.props = {
       text: props.text,
       fontSize: props.fontSize ?? 16,
-      fontFamily: props.fontFamily ?? 'PixelOperator8', // Default to pixel-perfect font
+      fontFamily: props.fontFamily ?? UI_DEFAULTS.FONT_FAMILY, // Default to pixel-perfect font
       color: props.color ?? 0xffffff,
       align: props.align ?? 'left',
       wordWrap: props.wordWrap ?? false,

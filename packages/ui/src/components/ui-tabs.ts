@@ -101,7 +101,7 @@ export class UITabs extends UIComponent {
   }
 
   private getKeyFromHash(): string | null {
-    if (!this.hashPrefix) return null;
+    if (!this.hashPrefix || typeof window === 'undefined') return null;
     const hash = window.location.hash.slice(1); // Remove #
     const prefix = `${this.hashPrefix}/`;
     if (hash.startsWith(prefix)) {
@@ -111,7 +111,7 @@ export class UITabs extends UIComponent {
   }
 
   private updateHash(key: string): void {
-    if (!this.hashPrefix) return;
+    if (!this.hashPrefix || typeof window === 'undefined') return;
     const newHash = `#${this.hashPrefix}/${key}`;
     if (window.location.hash !== newHash) {
       window.location.hash = newHash;
@@ -119,6 +119,7 @@ export class UITabs extends UIComponent {
   }
 
   private setupHashListener(): void {
+    if (typeof window === 'undefined') return;
     this.hashChangeHandler = () => {
       const hashKey = this.getKeyFromHash();
       if (hashKey && hashKey !== this.activeKey) {

@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { BoxModel, ComputedLayout, MeasuredSize, createDefaultBoxModel } from './box-model';
 import { LayoutEngine } from '../services';
 import { ThemeResolver } from '../theming/theme-resolver';

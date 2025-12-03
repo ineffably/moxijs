@@ -7,7 +7,7 @@
  * @category UI Services
  */
 
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { DefaultUITheme } from '../theming/theme-data';
 import { ThemeResolver } from '../theming/theme-resolver';
 

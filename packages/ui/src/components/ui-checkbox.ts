@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
 import { UIFocusManager } from '../core/ui-focus-manager';
@@ -323,7 +323,6 @@ export class UICheckbox extends UIComponent {
    */
   public setDisabled(disabled: boolean): void {
     this.props.disabled = disabled;
-    this.enabled = !disabled;
     this.enabled = !disabled;
     this.container.cursor = disabled ? 'default' : 'pointer';
     this.updateVisuals(); // updateVisuals will handle alpha

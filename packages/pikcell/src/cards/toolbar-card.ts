@@ -7,7 +7,7 @@ import { createPixelButton, PixelButtonResult } from '../components/pixel-button
 import { createPopupToolbar, PopupToolbarResult } from '../components/popup-toolbar';
 import { drawToolIconInto, drawShapeIconInto, ShapeType, ToolType } from '../theming/tool-icons';
 import { getTheme } from '../theming/theme';
-import { GRID, px } from '@moxijs/ui';
+import { GRID, px } from '@moxijs/core';
 import { CardResult } from '../interfaces/components';
 import { TOOLBAR_CARD_CONFIG } from '../config/card-configs';
 

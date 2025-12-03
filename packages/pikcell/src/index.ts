@@ -41,7 +41,7 @@ export async function initPikcell(hostElement?: HTMLElement) {
 
   // Load pixel fonts (for Canvas 2D DPR text rendering)
   await Assets.load([ASSETS.PIXEL_OPERATOR8_FONT, ASSETS.KENNEY_BLOCKS_FONT]);
-  
+
   // Install Kenney Blocks as BitmapFont for the ALPHA! stamp (needs rotation/special styling)
   PIXI.BitmapFont.install({
     name: 'KennyBlocksBitmap',

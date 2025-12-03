@@ -12,7 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './main/moxi-entity';
 import { Camera, CameraLogic } from './main/camera';
 import { asTextureFrames } from './library/texture-frames';
-import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps } from './library/as-pixi';
+import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, TextDPROptions } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
@@ -23,6 +23,7 @@ import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
 import { ActionManager, OnAction } from './library/action-manager';
+import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './library/pixel-grid';
 import {
   PhysicsWorld,
   PhysicsBodyLogic,
@@ -37,6 +38,7 @@ import {
   applyMaterial
 } from './library/physics';
 
+// Type exports
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsEntity, MoxiLogic } from './main/moxi-entity';
 export type { AsTextureFramesOptions } from './library/texture-frames';
@@ -58,6 +60,7 @@ export type {
   RaycastCallback
 } from './library/physics';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
+export type { PixelGridConfig, BorderConfig } from './library/pixel-grid';
 
 export type Asset = { src: string, alias?: string };
 
@@ -84,8 +87,8 @@ export type ClientEventsType = {
 }
 
 // Re-export types
-export {
-  SequenceInfo,
+export { 
+  SequenceInfo, 
   ResizeHandlerOptions
 };
 
@@ -137,7 +140,13 @@ const exportedObjects = {
   PhysicsMaterials,
   applyMaterial,
   svgToTexture,
-  ActionManager
+  ActionManager,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig
 };
 
 export default exportedObjects;
@@ -153,6 +162,7 @@ export {
   asGraphics,
   asContainer,
   PixiProps,
+  TextDPROptions,
   Logic,
   Camera,
   CameraLogic,
@@ -191,5 +201,11 @@ export {
   PhysicsMaterials,
   applyMaterial,
   svgToTexture,
-  ActionManager
+  ActionManager,
+  PixelGrid,
+  px,
+  units,
+  GRID,
+  BORDER,
+  createBorderConfig
 };

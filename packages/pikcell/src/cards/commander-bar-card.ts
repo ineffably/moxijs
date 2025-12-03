@@ -7,7 +7,7 @@ import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { createPixelButton } from '../components/pixel-button';
 import { createPixelDialog } from '../components/pixel-dialog';
-import { BORDER, GRID, px } from '@moxijs/ui';
+import { BORDER, GRID, px } from '@moxijs/core';
 import { getAllThemes, setTheme, ThemeInfo } from '../theming/theme';
 import { createManagedCard } from '../utilities/managed-card';
 import { layoutButtonRow } from '../utilities/button-layout';

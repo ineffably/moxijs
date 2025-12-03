@@ -21,7 +21,7 @@
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
 import { ILayoutManager, LayoutSpec, CardPosition } from '../interfaces/managers';
-import { GRID, BORDER, px } from '@moxijs/ui';
+import { GRID, BORDER, px } from '@moxijs/core';
 import { LAYOUT_CONSTANTS, CARD_CONSTANTS } from '../config/constants';
 import { getFontDisplaySize } from '../theming/theme';
 import layoutsConfig from '../config/layouts.json';

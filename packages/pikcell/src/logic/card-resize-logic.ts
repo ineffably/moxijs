@@ -6,7 +6,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme, createText } from '../theming/theme';
-import { GRID, BORDER, px } from '@moxijs/ui';
+import { GRID, BORDER, px } from '@moxijs/core';
 
 export type ResizeDirection = 'e' | 'w' | 's' | 'n' | 'se' | 'sw' | 'ne' | 'nw';
 

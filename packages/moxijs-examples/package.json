@@ -50,7 +50,7 @@
     "@codemirror/theme-one-dark": "^6.1.3",
     "codemirror": "^6.0.2",
     "@moxijs/core": "file:../core",
-    "@moxijs/ui": "file:../moxi-ui",
+    "@moxijs/ui": "file:../ui",
     "@moxijs/mini-gui": "file:../mini-gui",
     "pikcell": "file:../pikcell",
     "pixi.js": "^8.14.0"

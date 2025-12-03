@@ -27,8 +27,8 @@ export { createPopupToolbar, PopupToolbarOptions, PopupToolbarResult, PopupToolb
 export { ComponentResult, CardResult, RefreshableComponent, SelectableComponent, ControllableComponent, hasDestroy, isCardResult } from './interfaces/components';
 
 // Re-export pixel grid utilities from moxi
-export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from '@moxijs/ui';
-export type { PixelGridConfig, BorderConfig } from '@moxijs/ui';
+export { GRID, BORDER, px, units, PixelGrid, createBorderConfig } from '@moxijs/core';
+export type { PixelGridConfig, BorderConfig } from '@moxijs/core';
 
 // Controllers
 export { SpriteSheetController, SpriteSheetConfig, SpriteSheetControllerOptions, SpriteSheetType } from './controllers/sprite-sheet-controller';

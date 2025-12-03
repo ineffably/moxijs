@@ -12,8 +12,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { getTheme, createText, getFontDisplaySize } from '../theming/theme';
-import { GRID, BORDER, px } from '@moxijs/ui';
-import { asBitmapText } from '@moxijs/core';
+import { GRID, BORDER, px, asBitmapText } from '@moxijs/core';
 import { CardDragHandler } from '../logic/card-drag-logic';
 import { CardResizeHandler, ResizeDirection } from '../logic/card-resize-logic';
 

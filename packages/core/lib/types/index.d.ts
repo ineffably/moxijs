@@ -12,7 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './main/moxi-entity';
 import { Camera, CameraLogic } from './main/camera';
 import { asTextureFrames } from './library/texture-frames';
-import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps } from './library/as-pixi';
+import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, TextDPROptions } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
@@ -23,6 +23,7 @@ import { ParallaxBackground, ParallaxBackgroundLogic } from './library/parallax-
 import { ParallaxLayer, TilingParallaxLayer } from './library/parallax-layer';
 import { LoadingScene, FallingSquaresAnimation } from './library/loading-scene';
 import { ActionManager } from './library/action-manager';
+import { PixelGrid, px, units, GRID, BORDER, createBorderConfig } from './library/pixel-grid';
 import { PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial } from './library/physics';
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsEntity, MoxiLogic } from './main/moxi-entity';
@@ -34,6 +35,7 @@ export type { LoadingSceneOptions, LoadingAnimation, LoadingAnimationContext, Fa
 export type { OnAction } from './library/action-manager';
 export type { BodyType, SyncMode, ShapeType, CollisionTag, ShapeConfig, PhysicsWorldOptions, PhysicsBodyOptions, PhysicsDebugOptions, CollisionEvent, RaycastCallback } from './library/physics';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
+export type { PixelGridConfig, BorderConfig } from './library/pixel-grid';
 export type Asset = {
     src: string;
     alias?: string;
@@ -149,6 +151,25 @@ declare const exportedObjects: {
     applyMaterial: typeof applyMaterial;
     svgToTexture: typeof svgToTexture;
     ActionManager: typeof ActionManager;
+    PixelGrid: typeof PixelGrid;
+    px: (units: number) => number;
+    units: (pixels: number) => number;
+    GRID: {
+        readonly unit: number;
+        readonly scale: number;
+        readonly border: number;
+        readonly padding: number;
+        readonly gap: number;
+        readonly margin: number;
+        readonly fontScale: number;
+    };
+    BORDER: {
+        readonly outer: 1;
+        readonly middle: 1;
+        readonly inner: 1;
+        readonly total: 3;
+    };
+    createBorderConfig: typeof createBorderConfig;
 };
 export default exportedObjects;
-export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, svgToTexture, ActionManager };
+export { AssetLoader, asEntity, asTextureFrames, asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, PixiProps, TextDPROptions, Logic, Camera, CameraLogic, ClientEvents, createResizeHandler, createTileGrid, defaultRenderOptions, Engine, EventEmitter, getTextureRange, loadFonts, MoxiEntity, ParallaxBackground, ParallaxBackgroundLogic, ParallaxLayer, LoadingScene, FallingSquaresAnimation, setupMoxi, RenderManager, Scene, setupResponsiveCanvas, TextureFrameSequences, TilingParallaxLayer, utils, StateMachine, StateLogic, PhysicsWorld, PhysicsBodyLogic, PhysicsDebugRenderer, CollisionRegistry, CollisionManager, asPhysicsEntity, hasPhysics, getPhysicsBody, createShapeFromSprite, PhysicsMaterials, applyMaterial, svgToTexture, ActionManager, PixelGrid, px, units, GRID, BORDER, createBorderConfig };

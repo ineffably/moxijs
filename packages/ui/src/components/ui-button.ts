@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UILabel } from './ui-label';
-import { EdgeInsets } from '../core/edge-insets';
-import { UIFocusManager } from '../core/ui-focus-manager';
+import { EdgeInsets } from '../base/edge-insets';
+import { UIFocusManager } from '../base/ui-focus-manager';
 import {
   ButtonBackgroundStrategy,
   SolidColorBackgroundStrategy,
@@ -11,6 +11,7 @@ import {
   SpriteBackgroundConfig
 } from './button-background-strategy';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { ActionManager } from '@moxijs/core';
 // Theme resolver is now in base class
 // ComponentState removed - using base class state properties
 
@@ -110,8 +111,8 @@ export class UIButton extends UIComponent {
 
   // Theme resolver is now in base class
 
-  // Keyboard handler for cleanup
-  private keydownHandler?: (e: KeyboardEvent) => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   /**
    * Safely invoke a callback with error handling
@@ -234,27 +235,28 @@ export class UIButton extends UIComponent {
 
     // Handle keyboard interaction when focused
     if (typeof window !== 'undefined') {
-      this.keydownHandler = (e: KeyboardEvent) => {
-        if (this.isFocused() && this.props.enabled) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
+    }
+  }
 
-            // Show pressed state
-            this.setState(ButtonState.Pressed);
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (this.isFocused() && this.props.enabled) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
 
-            // Trigger click
-            this.safeInvokeCallback(this.onClick, 'onClick');
+        // Show pressed state
+        this.setState(ButtonState.Pressed);
 
-            // Return to hover state after a short delay (simulating button release)
-            setTimeout(() => {
-              if (this.props.enabled) {
-                this.setState(ButtonState.Normal);
-              }
-            }, 100);
+        // Trigger click
+        this.safeInvokeCallback(this.onClick, 'onClick');
+
+        // Return to hover state after a short delay (simulating button release)
+        setTimeout(() => {
+          if (this.props.enabled) {
+            this.setState(ButtonState.Normal);
           }
-        }
-      };
-      window.addEventListener('keydown', this.keydownHandler);
+        }, 100);
+      }
     }
   }
 
@@ -410,9 +412,7 @@ export class UIButton extends UIComponent {
 
   /** Clean up event listeners. */
   destroy(): void {
-    if (typeof window !== 'undefined' && this.keydownHandler) {
-      window.removeEventListener('keydown', this.keydownHandler);
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 

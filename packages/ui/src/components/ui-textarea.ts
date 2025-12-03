@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
-import { UIFocusManager } from '../core/ui-focus-manager';
-import { asTextDPR } from '@moxijs/core';
+import { UIFocusManager } from '../base/ui-focus-manager';
+import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
 // Theme resolver is now in base class
 import {
@@ -87,8 +87,8 @@ export class UITextArea extends UIComponent {
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
 
-  // Bound event handlers for proper cleanup
-  private boundHandleKeyDown?: (e: KeyboardEvent) => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   // State is now in base class (enabled, focused, hovered, pressed)
   
@@ -223,8 +223,7 @@ export class UITextArea extends UIComponent {
 
     // Listen for global keyboard events
     if (typeof window !== 'undefined') {
-      this.boundHandleKeyDown = this.handleKeyDown.bind(this);
-      window.addEventListener('keydown', this.boundHandleKeyDown);
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
     }
   }
 
@@ -480,9 +479,7 @@ export class UITextArea extends UIComponent {
    */
   destroy(): void {
     this.stopCursorBlink();
-    if (typeof window !== 'undefined' && this.boundHandleKeyDown) {
-      window.removeEventListener('keydown', this.boundHandleKeyDown);
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 }

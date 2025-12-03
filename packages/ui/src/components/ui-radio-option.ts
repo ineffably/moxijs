@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIRadioButton } from './ui-radio-button';
 import { UILabel } from './ui-label';
-import { EdgeInsets } from '../core/edge-insets';
+import { EdgeInsets } from '../base/edge-insets';
 import { ThemeResolver } from '../theming/theme-resolver';
 import { LayoutEngine } from '../services';
 

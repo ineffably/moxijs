@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { asTextDPR } from '@moxijs/core';
 import { LayoutEngine } from '../services';
 import { UI_DEFAULTS } from '../theming/theme-data';

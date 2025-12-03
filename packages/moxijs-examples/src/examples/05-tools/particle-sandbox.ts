@@ -86,6 +86,8 @@ class ParticlePool {
   }
 
   spawn(texture: Texture): Particle | null {
+    if (!texture) return null;
+
     for (const particle of this.particles) {
       if (!particle.active) {
         particle.active = true;
@@ -97,6 +99,12 @@ class ParticlePool {
           this.container.addChild(particle.sprite);
         } else {
           particle.sprite.texture = texture;
+        }
+
+        // Verify sprite is properly initialized
+        if (!particle.sprite?.position) {
+          particle.active = false;
+          return null;
         }
 
         particle.sprite.visible = true;
@@ -343,12 +351,14 @@ class EnhancedParticleEmitter extends Container {
   }
 
   private updateParticleSprite(particle: Particle): void {
-    if (!particle.sprite) return;
-    particle.sprite.position.set(particle.x, particle.y);
-    particle.sprite.scale.set(particle.scale);
-    particle.sprite.alpha = particle.alpha;
-    particle.sprite.tint = particle.tint;
-    particle.sprite.rotation = particle.rotation;
+    const sprite = particle.sprite;
+    if (!sprite?.position) return;
+
+    sprite.position.set(particle.x, particle.y);
+    sprite.scale?.set(particle.scale);
+    sprite.alpha = particle.alpha;
+    sprite.tint = particle.tint;
+    sprite.rotation = particle.rotation;
   }
 
   private lerp(start: number, end: number, t: number): number {

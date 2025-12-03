@@ -1,8 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
-import { UIFocusManager } from '../core/ui-focus-manager';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
+import { UIFocusManager } from '../base/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
+import { ActionManager } from '@moxijs/core';
 import { LayoutEngine } from '../services';
 
 /**
@@ -60,8 +61,8 @@ export class UIRadioButton extends UIComponent {
   private radioGraphics: PIXI.Graphics;
   private dotGraphics: PIXI.Graphics;
 
-  // Keyboard handler for cleanup
-  private keydownHandler?: (e: KeyboardEvent) => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   /**
    * Safely invoke the onChange callback with error handling
@@ -144,17 +145,18 @@ export class UIRadioButton extends UIComponent {
 
     // Keyboard support
     if (typeof window !== 'undefined') {
-      this.keydownHandler = (e: KeyboardEvent) => {
-        if (!this.focused || this.props.disabled) return;
+      this.actions.add(window, 'keydown', this.handleKeyDown.bind(this) as EventListener);
+    }
+  }
 
-        // Space to select
-        if (e.key === ' ' || e.key === 'Spacebar') {
-          e.preventDefault();
-          e.stopPropagation();
-          this.setSelected(true);
-        }
-      };
-      window.addEventListener('keydown', this.keydownHandler);
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (!this.focused || this.props.disabled) return;
+
+    // Space to select
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setSelected(true);
     }
   }
 
@@ -310,9 +312,7 @@ export class UIRadioButton extends UIComponent {
    * Clean up event listeners
    */
   public destroy(): void {
-    if (typeof window !== 'undefined' && this.keydownHandler) {
-      window.removeEventListener('keydown', this.keydownHandler);
-    }
+    this.actions.removeAll();
     super.destroy();
   }
 }

@@ -7,10 +7,10 @@
  */
 
 // Core
-export { EdgeInsets } from './core/edge-insets';
-export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBoxModel } from './core/box-model';
-export { UIComponent } from './core/ui-component';
-export { UIFocusManager, Focusable } from './core/ui-focus-manager';
+export { EdgeInsets } from './base/edge-insets';
+export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBoxModel } from './base/box-model';
+export { UIComponent } from './base/ui-component';
+export { UIFocusManager, Focusable } from './base/ui-focus-manager';
 
 // Services (Composition services for UI components)
 export {

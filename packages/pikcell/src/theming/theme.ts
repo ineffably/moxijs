@@ -393,7 +393,7 @@ export function getFontDPR(): { family: string; size: number; dprScale: number }
 
 // Import for createText helper
 import * as PIXI from 'pixi.js';
-import { asTextDPR, PixiProps } from '@moxijs/core';
+import { asTextDPR, PixiProps } from '@moxijs/ui';
 
 /**
  * Create a PIKCELL-styled text element using Canvas 2D DPR rendering.

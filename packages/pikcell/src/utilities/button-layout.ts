@@ -5,7 +5,7 @@
  * All dimensions are in grid units unless otherwise noted.
  */
 import * as PIXI from 'pixi.js';
-import { px, GRID } from '@moxijs/core';
+import { px, GRID } from '@moxijs/ui';
 
 /**
  * Interface for items that can be positioned

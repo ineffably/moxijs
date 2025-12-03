@@ -3,7 +3,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from '../components/pixel-card';
-import { GRID, px } from '@moxijs/core';
+import { GRID, px } from '@moxijs/ui';
 import { getTheme, createText } from '../theming/theme';
 import { CardResult } from '../interfaces/components';
 import { createManagedCard } from '../utilities/managed-card';

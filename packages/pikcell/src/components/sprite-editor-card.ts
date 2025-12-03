@@ -10,7 +10,7 @@
  */
 import * as PIXI from 'pixi.js';
 import { PixelCard } from './pixel-card';
-import { px, GRID } from '@moxijs/core';
+import { px, GRID } from '@moxijs/ui';
 import { SpriteController } from '../controllers/sprite-controller';
 import { CardResult, ControllableComponent, RefreshableComponent } from '../interfaces/components';
 import { ShapeType, drawToolIconInto, drawShapeIconInto, ToolType } from '../theming/tool-icons';

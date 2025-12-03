@@ -21,6 +21,8 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
     '^moxi$': '<rootDir>/../core/src/index.ts',
+    '^@moxijs/core$': '<rootDir>/../core/src/index.ts',
+    '^@moxijs/ui$': '<rootDir>/../moxi-ui/src/index.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/unit/setup.ts'],
   testTimeout: 10000,

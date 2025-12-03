@@ -1,6 +1,6 @@
 {
   "name": "@moxijs/core",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Game framework built on PIXI.js with Entity-Component-System architecture, physics integration, and UI components.",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "rimraf ./lib && webpack --mode production",
+    "build:clean": "npm run clean && npm run build",
     "clean": "rimraf ./lib",
     "build:dev:clean": "npm run clean && npm run build",
     "build:dev": "webpack --mode development",

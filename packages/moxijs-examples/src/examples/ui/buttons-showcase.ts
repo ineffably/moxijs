@@ -13,7 +13,7 @@ import {
   UIButton,
   UILabel,
   UIComponent
-} from '@moxijs/core';
+} from '@moxijs/ui';
 import { ASSETS } from '../../assets-config';
 
 export async function createButtonsShowcase(): Promise<UIComponent> {
@@ -124,7 +124,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
   // Secondary button
   const secondaryBtn = new UIButton({
     label: 'Secondary',
-    width: 120,
+    width: 140, // Increased for PixelOperator8 font
     height: 40,
     backgroundColor: 0x6c757d,
     textColor: 0xffffff,
@@ -172,7 +172,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
 
   const roundedBtn1 = new UIButton({
     label: 'Pill Button',
-    width: 140,
+    width: 160, // Increased for PixelOperator8 font
     height: 40,
     backgroundColor: 0x9b59b6,
     textColor: 0xffffff,
@@ -182,7 +182,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
 
   const roundedBtn2 = new UIButton({
     label: 'Rounded',
-    width: 120,
+    width: 130, // Increased for PixelOperator8 font
     height: 40,
     backgroundColor: 0xe74c3c,
     textColor: 0xffffff,
@@ -223,7 +223,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x16a085,
     textColor: 0xffffff,
     fontSize: 12,
-    borderRadius: 4,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Small clicked')
   });
 
@@ -234,7 +234,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x16a085,
     textColor: 0xffffff,
     fontSize: 16,
-    borderRadius: 6,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Medium clicked')
   });
 
@@ -245,7 +245,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     backgroundColor: 0x16a085,
     textColor: 0xffffff,
     fontSize: 20,
-    borderRadius: 8,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Large clicked')
   });
 
@@ -270,7 +270,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     height: 40,
     backgroundColor: 0xff6b6b,
     textColor: 0xffffff,
-    borderRadius: 8,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Sunset clicked')
   });
 
@@ -280,17 +280,17 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     height: 40,
     backgroundColor: 0x4ecdc4,
     textColor: 0xffffff,
-    borderRadius: 8,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Ocean clicked')
   });
 
   const modernBtn3 = new UIButton({
     label: 'Lavender',
-    width: 120,
+    width: 140, // Increased for PixelOperator8 font
     height: 40,
     backgroundColor: 0xb19cd9,
     textColor: 0xffffff,
-    borderRadius: 8,
+    borderRadius: 6, // Uniform border radius
     onClick: () => console.log('Lavender clicked')
   });
 
@@ -456,7 +456,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
 
   const largeSpriteBtn = new UIButton({
     label: 'Large Button',
-    width: 220,
+    width: 240, // Increased for PixelOperator8 font
     height: 50,
     spriteBackground: {
       spritesheet: spriteSheet,

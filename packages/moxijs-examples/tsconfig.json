@@ -14,7 +14,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "pikcell": ["../pikcell/src/index.ts"]
+      "pikcell": ["../pikcell/src/index.ts"],
+      "@moxijs/mini-gui": ["../mini-gui/src/index.ts"]
     }
   },
   "include": [

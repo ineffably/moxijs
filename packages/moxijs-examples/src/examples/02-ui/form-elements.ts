@@ -1,5 +1,5 @@
+import { setupMoxi } from '@moxijs/core';
 import {
-  setupMoxi,
   FlexContainer,
   FlexDirection,
   FlexJustify,
@@ -10,7 +10,7 @@ import {
   UISelect,
   UITextInput,
   SelectOption
-} from '@moxijs/core';
+} from '@moxijs/ui';
 
 /**
  * Example 13: Form Elements

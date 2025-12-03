@@ -7,7 +7,7 @@ PixiJS handles rendering beautifully, but game logic can get messy fast. MoxiJS 
 ![Alpha Status](https://img.shields.io/badge/Status-ALPHA-blue)
 [![npm version](https://img.shields.io/npm/v/@moxijs/core.svg)](https://www.npmjs.com/package/@moxijs/core)
 
-### 🎮 [View Live Examples](https://ineffably.github.io/moxijs/packages/moxijs-examples/) - See it in action with source code viewer
+### 🎮 [View Live Examples](https://ineffably.github.io/moxijs/) - See it in action with source code viewer
 
 > **Fair warning**: This thing is still in alpha. The API might change. Things might break. If you're building something critical, maybe wait. If you're experimenting and don't mind things being a little rough around the edges, let's go.
 

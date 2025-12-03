@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests/unit'],
+  roots: ['<rootDir>/src', '<rootDir>/tests/unit'],
   testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', {
@@ -16,9 +16,10 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/index.ts',
     '!src/main.ts',
+    '!src/editor-exports.ts',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   moduleNameMapper: {
     '^moxi$': '<rootDir>/../core/src/index.ts',
     '^@moxijs/core$': '<rootDir>/../core/src/index.ts',

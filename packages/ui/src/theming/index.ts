@@ -20,7 +20,8 @@ export {
 export {
   DefaultUITheme,
   createDefaultDarkTheme,
-  createDefaultLightTheme
+  createDefaultLightTheme,
+  UI_DEFAULTS
 } from './theme-data';
 
 export {

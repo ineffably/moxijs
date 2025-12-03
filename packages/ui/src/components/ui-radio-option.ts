@@ -1,9 +1,9 @@
-import PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import * as PIXI from 'pixi.js';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIRadioButton } from './ui-radio-button';
 import { UILabel } from './ui-label';
-import { EdgeInsets } from '../core/edge-insets';
+import { EdgeInsets } from '../base/edge-insets';
 import { ThemeResolver } from '../theming/theme-resolver';
 import { LayoutEngine } from '../services';
 
@@ -34,8 +34,20 @@ class UIRadioOption extends UIComponent {
   private onChange?: (selected: boolean) => void;
   private radioButton: UIRadioButton;
   private label: UILabel;
-  
+
   // Services (composition)
+
+  /**
+   * Safely invoke the onChange callback with error handling
+   */
+  private safeInvokeOnChange(selected: boolean): void {
+    if (!this.onChange) return;
+    try {
+      this.onChange(selected);
+    } catch (error) {
+      console.error('Error in onChange callback:', error);
+    }
+  }
 
   constructor(props: UIRadioOptionProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -68,7 +80,7 @@ class UIRadioOption extends UIComponent {
       selectedColor: this.props.selectedColor,
       themeResolver: resolver,
       onChange: (selected) => {
-        this.onChange?.(selected);
+        this.safeInvokeOnChange(selected);
       }
     }, {
       padding: EdgeInsets.zero()
@@ -92,7 +104,7 @@ class UIRadioOption extends UIComponent {
     this.label.container.cursor = 'pointer';
     this.label.container.on('pointerdown', () => {
       if (!this.props.disabled) {
-        this.onChange?.(true);
+        this.safeInvokeOnChange(true);
       }
     });
 

@@ -8,7 +8,7 @@
  */
 
 import * as PIXI from 'pixi.js';
-import { EdgeInsets } from '../../core/edge-insets';
+import { EdgeInsets } from '../../base/edge-insets';
 import {
   BaseCardStyle,
   CardThemeColors,

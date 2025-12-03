@@ -6,8 +6,6 @@ import {
   EdgeInsets,
   FlexContainer,
   FlexDirection,
-  FlexJustify,
-  FlexAlign,
   UILabel,
   UIButton,
   UITextInput,
@@ -445,104 +443,14 @@ export async function createThemingShowcase(): Promise<UIComponent> {
   // Initial form elements
   createFormElements(initialTheme, formContainer);
 
-  // Section 3: Theme Properties
-  const section3Title = new UILabel({
-    text: 'Current Theme Properties',
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: initialTheme.text
-  });
-
-  const propertiesContainer = new FlexContainer({
-    direction: FlexDirection.Column,
-    gap: 8,
-    padding: EdgeInsets.symmetric(10, 0)
-  });
-
-  function updateThemeProperties(currentTheme: DefaultUITheme, container: FlexContainer): void {
-    // Remove all children
-    while (container.children.length > 0) {
-      container.removeChild(container.children[0]);
-    }
-
-    const properties: Array<{ label: string; value: number }> = [
-      { label: 'Background', value: currentTheme.background },
-      { label: 'Panel Background', value: currentTheme.panelBackground },
-      { label: 'Surface Background', value: currentTheme.surfaceBackground },
-      { label: 'Border', value: currentTheme.border },
-      { label: 'Text', value: currentTheme.text },
-      { label: 'Text Secondary', value: currentTheme.textSecondary },
-      { label: 'Control Background', value: currentTheme.controlBackground },
-      { label: 'Control Border', value: currentTheme.controlBorder },
-      { label: 'Control Text', value: currentTheme.controlText },
-      { label: 'Control Selected', value: currentTheme.controlSelected },
-      { label: 'Control Hover', value: currentTheme.controlHover },
-      { label: 'Control Focus', value: currentTheme.controlFocus },
-      { label: 'Control Disabled', value: currentTheme.controlDisabled },
-      { label: 'Control Disabled Text', value: currentTheme.controlDisabledText },
-      { label: 'Accent', value: currentTheme.accent },
-      { label: 'Error', value: currentTheme.error },
-      { label: 'Success', value: currentTheme.success }
-    ];
-
-    properties.forEach(prop => {
-      const row = new FlexContainer({
-        direction: FlexDirection.Row,
-        gap: 15,
-        align: FlexAlign.Center
-      });
-
-      const label = new UILabel({
-        text: `${prop.label}:`,
-        fontSize: 14,
-        color: currentTheme.textSecondary,
-        fontWeight: 'normal'
-      });
-      label.container.width = 180;
-
-      const colorSwatch = new FlexContainer({
-        direction: FlexDirection.Row,
-        gap: 0
-      });
-      // Create a simple color swatch using a button
-      const swatch = new UIButton({
-        label: '',
-        width: 60,
-        height: 30,
-        backgroundColor: prop.value,
-        borderRadius: 4
-      });
-
-      const hexLabel = new UILabel({
-        text: `0x${prop.value.toString(16).padStart(6, '0')}`,
-        fontSize: 12,
-        color: currentTheme.text,
-        fontWeight: 'normal'
-      });
-      hexLabel.container.position.set(70, 0);
-
-      row.addChild(label);
-      row.addChild(swatch);
-      row.addChild(hexLabel);
-      container.addChild(row);
-    });
-  }
-
-  // Initial properties
-  updateThemeProperties(initialTheme, propertiesContainer);
-
   // Listen for theme changes
   themeManager.addListener((newTheme, info) => {
     // Update form elements without recreating (maintains positioning)
     updateFormElementsTheme(newTheme);
 
-    // Update theme properties
-    updateThemeProperties(newTheme, propertiesContainer);
-
     // Update section titles
     section1Title.setColor(newTheme.text);
     section2Title.setColor(newTheme.text);
-    section3Title.setColor(newTheme.text);
   });
 
   // Add all sections
@@ -550,8 +458,6 @@ export async function createThemingShowcase(): Promise<UIComponent> {
   mainContainer.addChild(themeSelectorContainer);
   mainContainer.addChild(section2Title);
   mainContainer.addChild(formContainer);
-  mainContainer.addChild(section3Title);
-  mainContainer.addChild(propertiesContainer);
 
   scrollContainer.addChild(mainContainer);
 

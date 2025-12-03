@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UILabel } from './ui-label';
 import { UIPanel } from './ui-panel';
 import { LayoutEngine } from '../services';
+import { ActionManager } from '@moxijs/core';
 
 export interface TabItem {
   key: string;
@@ -52,7 +53,8 @@ export class UITabs extends UIComponent {
   private contentArea: PIXI.Container;
   private tabButtons: Map<string, { container: PIXI.Container; label: UILabel; bg: PIXI.Graphics }> = new Map();
   private activeIndicator?: PIXI.Graphics;
-  private hashChangeHandler?: () => void;
+  // Event listener management
+  private actions = new ActionManager();
 
   constructor(props: UITabsProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
@@ -101,7 +103,7 @@ export class UITabs extends UIComponent {
   }
 
   private getKeyFromHash(): string | null {
-    if (!this.hashPrefix) return null;
+    if (!this.hashPrefix || typeof window === 'undefined') return null;
     const hash = window.location.hash.slice(1); // Remove #
     const prefix = `${this.hashPrefix}/`;
     if (hash.startsWith(prefix)) {
@@ -111,7 +113,7 @@ export class UITabs extends UIComponent {
   }
 
   private updateHash(key: string): void {
-    if (!this.hashPrefix) return;
+    if (!this.hashPrefix || typeof window === 'undefined') return;
     const newHash = `#${this.hashPrefix}/${key}`;
     if (window.location.hash !== newHash) {
       window.location.hash = newHash;
@@ -119,19 +121,20 @@ export class UITabs extends UIComponent {
   }
 
   private setupHashListener(): void {
-    this.hashChangeHandler = () => {
-      const hashKey = this.getKeyFromHash();
-      if (hashKey && hashKey !== this.activeKey) {
-        this.setActiveKey(hashKey, false); // false = don't update hash (already changed)
-      }
-    };
-    window.addEventListener('hashchange', this.hashChangeHandler);
+    if (typeof window === 'undefined') return;
+    this.actions.add(window, 'hashchange', this.handleHashChange.bind(this) as EventListener);
+  }
+
+  private handleHashChange(): void {
+    const hashKey = this.getKeyFromHash();
+    if (hashKey && hashKey !== this.activeKey) {
+      this.setActiveKey(hashKey, false); // false = don't update hash (already changed)
+    }
   }
 
   public destroy(): void {
-    if (this.hashChangeHandler) {
-      window.removeEventListener('hashchange', this.hashChangeHandler);
-    }
+    this.actions.removeAll();
+    super.destroy();
   }
 
   private buildTabs(): void {

@@ -9,7 +9,7 @@
  */
 
 import * as PIXI from 'pixi.js';
-import { EdgeInsets } from '../../core/edge-insets';
+import { EdgeInsets } from '../../base/edge-insets';
 
 /**
  * Theme colors used by card styles.

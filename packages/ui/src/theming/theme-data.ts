@@ -1,11 +1,25 @@
 /**
  * Simplified Theme Data Structures
- * 
+ *
  * Pure data structures - no logic.
  * Follows KISS, SRP, and Separation of Concerns principles.
  */
 
 import { BaseTheme } from './theme-manager';
+
+/**
+ * UI Default Constants
+ *
+ * Centralized defaults for UI components to avoid hardcoded values.
+ */
+export const UI_DEFAULTS = {
+  /** Default font family for UI text */
+  FONT_FAMILY: 'PixelOperator8',
+  /** Default DPR scale for crisp text rendering */
+  DPR_SCALE: 2,
+  /** Default cursor blink interval in milliseconds */
+  CURSOR_BLINK_INTERVAL: 530
+} as const;
 
 /**
  * Default UI Theme Interface

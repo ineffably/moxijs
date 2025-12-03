@@ -1,8 +1,8 @@
-import PIXI from 'pixi.js';
-import { UIComponent } from '../core/ui-component';
-import { BoxModel, MeasuredSize } from '../core/box-model';
+import * as PIXI from 'pixi.js';
+import { UIComponent } from '../base/ui-component';
+import { BoxModel, MeasuredSize } from '../base/box-model';
 import { FlexContainer, FlexDirection } from '../layout/flex-container';
-import { EdgeInsets } from '../core/edge-insets';
+import { EdgeInsets } from '../base/edge-insets';
 import { UIRadioOption } from './ui-radio-option';
 import { ThemeResolver } from '../theming/theme-resolver';
 // Theme resolver is now in base class

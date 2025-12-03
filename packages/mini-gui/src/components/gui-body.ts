@@ -6,7 +6,7 @@
  */
 
 import { Container, Graphics, Ticker } from 'pixi.js';
-import { UIComponent } from '@moxijs/core';
+import { UIComponent } from '@moxijs/ui';
 import { px, GUI_CONST } from '../gui-grid';
 import type { GUIConfig } from '../gui';
 

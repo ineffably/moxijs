@@ -1,11 +1,11 @@
+import { setupMoxi } from '@moxijs/core';
 import {
-  setupMoxi,
   UITabs,
   TabItem,
   UILayer,
   UIScaleMode,
   UIFocusManager
-} from '@moxijs/core';
+} from '@moxijs/ui';
 import { Assets } from 'pixi.js';
 import { ASSETS } from '../../assets-config';
 import { createButtonsShowcase } from '../ui/buttons-showcase';

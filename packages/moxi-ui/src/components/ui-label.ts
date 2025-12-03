@@ -1,7 +1,7 @@
 import PIXI from 'pixi.js';
 import { UIComponent } from '../core/ui-component';
 import { BoxModel, MeasuredSize } from '../core/box-model';
-import { asTextDPR } from '../../library/as-pixi';
+import { asTextDPR } from '../helpers/as-text-dpr';
 import { LayoutEngine } from '../services';
 
 /** Text alignment options. */

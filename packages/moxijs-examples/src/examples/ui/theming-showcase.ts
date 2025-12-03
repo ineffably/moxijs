@@ -19,7 +19,7 @@ import {
   DefaultUITheme,
   createDefaultDarkTheme,
   createDefaultLightTheme
-} from '@moxijs/core';
+} from '@moxijs/ui';
 
 let globalThemeManager: ThemeManager<DefaultUITheme> | null = null;
 

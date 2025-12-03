@@ -6,7 +6,7 @@
  */
 
 import { Container, Graphics } from 'pixi.js';
-import { UIComponent, UILabel } from '@moxijs/core';
+import { UIComponent, UILabel } from '@moxijs/ui';
 import { px, GUI_CONST, GUI_COLORS } from '../gui-grid';
 import type { GUIConfig } from '../gui';
 

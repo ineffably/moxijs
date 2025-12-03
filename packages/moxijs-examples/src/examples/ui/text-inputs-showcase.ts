@@ -10,7 +10,7 @@ import {
   UILabel,
   UIScrollContainer,
   EdgeInsets
-} from '@moxijs/core';
+} from '@moxijs/ui';
 
 /**
  * Text Inputs Showcase

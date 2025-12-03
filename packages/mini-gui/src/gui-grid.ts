@@ -14,7 +14,7 @@
  * ```
  */
 
-import { PixelGrid } from '@moxijs/core';
+import { PixelGrid } from '@moxijs/ui';
 
 /** 2x scale grid for GUI */
 export const GUI_GRID = new PixelGrid({ scale: 2 });

@@ -48,6 +48,7 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "@moxijs/core": "file:../core"
+    "@moxijs/core": "file:../core",
+    "@moxijs/ui": "file:../moxi-ui"
   }
 }

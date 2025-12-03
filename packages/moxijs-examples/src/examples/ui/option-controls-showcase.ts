@@ -17,7 +17,7 @@ import {
   SelectOption,
   UIComponent,
   UIScrollContainer
-} from '@moxijs/core';
+} from '@moxijs/ui';
 
 export async function createOptionControlsShowcase(): Promise<UIComponent> {
   // Create scroll container with dark neutral theme

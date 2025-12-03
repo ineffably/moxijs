@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { UIComponent } from '@moxijs/core';
+import { UIComponent } from '@moxijs/ui';
 import { Control } from './controls';
 import { GUIHeader, GUIBody } from './components';
 export interface GUIOptions {

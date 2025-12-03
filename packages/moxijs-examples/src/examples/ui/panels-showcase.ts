@@ -19,7 +19,7 @@ import {
   CardPanel,
   FlatCardStyle,
   CardStyle
-} from '@moxijs/core';
+} from '@moxijs/ui';
 import { ASSETS } from '../../assets-config';
 import { PixelCardStyle, createPixelCardColors } from '@moxijs/pikcell/src/styles/pixel-card-style';
 

@@ -2,8 +2,7 @@
  * Tests for ThemeResolver
  */
 
-import { ThemeResolver } from './theme-resolver';
-import { DefaultUITheme, createDefaultDarkTheme, createDefaultLightTheme } from './theme-data';
+import { ThemeResolver, DefaultUITheme, createDefaultDarkTheme, createDefaultLightTheme } from '../../src/theming';
 
 describe('ThemeResolver', () => {
   let darkTheme: DefaultUITheme;

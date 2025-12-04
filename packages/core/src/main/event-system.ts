@@ -1,4 +1,5 @@
-type MoxiEvents<T extends string | symbol = string, A = any> = {
+/** @internal */
+export type MoxiEvents<T extends string | symbol = string, A = any> = {
   [event in T]: (...args: A extends any[] ? A : [A]) => void;
 };
 

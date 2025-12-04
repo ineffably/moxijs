@@ -1,0 +1,25 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs",
+  "name": "@moxijs/core",
+  "readme": "./README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "excludeInternal": true,
+  "theme": "default",
+  "treatWarningsAsErrors": false,
+  "logLevel": "Warn",
+  "validation": {
+    "notDocumented": false,
+    "invalidLink": false
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/tests/**",
+    "**/node_modules/**"
+  ]
+}
+

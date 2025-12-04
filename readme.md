@@ -1,25 +1,67 @@
 # MOXIJS
 
-**A game framework written in TypeScript built to work with PixiJS**
+**A game framework kit written in TypeScript built to work with PixiJS**
 
-PixiJS handles rendering beautifully, but game logic can get messy fast. MoxiJS adds structure - an ECS architecture, reusable components, and game-ready utilities - so you can focus on building instead of boilerplate.
+PixiJS has a pretty great api for handling rendering beautifully, but, when I start adding game logic, if I want to take it past a toy phase, it got messy fast. So, I wanted to build a final framework that had the utilities and objects I would write around PIXIJS. 
 
 ![Alpha Status](https://img.shields.io/badge/Status-ALPHA-blue)
 [![npm version](https://img.shields.io/npm/v/@moxijs/core.svg)](https://www.npmjs.com/package/@moxijs/core)
 
 ### 🎮 [View Live Examples](https://ineffably.github.io/moxijs/) - See it in action with source code viewer
 
-> **Fair warning**: This thing is still in alpha. The API might change. Things might break. If you're building something critical, maybe wait. If you're experimenting and don't mind things being a little rough around the edges, let's go.
+> **Fair warning**: I am currently building this for me for my utility and for fun. I've enjoyed making little web games here and there, I've written disposable utilities in the past, and, I finally wanted to preserve them. This thing is still in alpha. The API might change. Things might break. Yes, this is agentically enhanced, mostly using Claude Code and Anthropic LLMs. Feel free to try it out and give feedback...if you're curious and don't mind things being a little rough around the edges. 
+
+### 📚 Documentation
+- **[Core API Docs](https://ineffably.github.io/moxijs/packages/core/docs/)** - Complete API reference for `@moxijs/core`
+- **[UI API Docs](https://ineffably.github.io/moxijs/packages/ui/docs/)** - Complete API reference for `@moxijs/ui`
 
 ---
 
-## Why would I use this?
+## Why 
 
-- You know PixiJS and want structure without learning a new paradigm
-- Entity-Component pattern keeps code modular instead of one giant pile
-- Comes with physics (Planck.js), camera system, parallax scrolling, state machines
-- Full TypeScript support with autocomplete
-- Not locked in - it's still just PixiJS objects underneath
+* I like to quickly prototype experiences and games and share them with folks.
+* I wanted a rapid development framework for doing just that.
+* A framework I can iterate on and create editors and useful tools and QoL toys for fun and enhancing development experience. 
+* I've written a lot of typescript and web interfaces for many years, so, this feels very natural to me.
+* I'm trying to solve some frustrating issues with web canvas and text and capturing those utilties and techniques in a re-usable package. 
+* What if could get this working smoothly in three.js? 
+* I wanted an editorless framework to work with LLMs to rapidly prototype 2D games and experimental user interfaces.
+* the ui components are many times a hurdle when writing game UI so I wanted to make that SUPER easy for me and an LLM to write. 
+* I figured others might think the same? 
+
+## Loose Feature Plan
+
+- Easy Setup and Management
+- Text rendering utilies and more Text options
+- QoL Utilities
+- Entitiy objects
+- Camera and Parallax Scrolling
+- PIXIJS / PhaserJS plugins
+- Flexible User Interface Components
+  - Themable
+  - Panels
+  - Input Components
+  - Tab Manager
+- Editors
+  - Sprite
+  - TileMap
+  - Particle Emitter
+  - Sound
+  - Music
+  - Scene
+  - Project
+
+BETA: don't even consider a BETA until late Jan. I'm going to keep it fluid while I solve issues and make things happen.
+
+Most of this was written for myself while writing the examples and games.
+Ever since the first publish I've been testing it writing examples and games with it, so that feedback look is tight. 
+
+I plan to keep this mostly "editor free", I like everything to be in code. 
+If/When get to the point of having `moxijs.project.json` files, there will always be code based loaders/exporters. 
+
+Why not PhaserJS? I really like PhaserJS and have used it a lot in the past. I just wanted to compose my own ECS from a drawing, physics, text and other libraries to form opinions and/or provide flexibility to swap out one for another as things evolve.
+
+I move pretty fast so keep an eye out for updates. 
 
 ---
 
@@ -267,6 +309,4 @@ Built on [PixiJS](https://pixijs.com/) for rendering and [Planck.js](https://piq
 - **[Cup Nooble](https://cupnooble.itch.io/)** - Sprout Lands asset packs
 - **Fonts** - PixelOperator (CC0), Dogica Pixel (SIL OFL), VHS Gothic (CC BY-SA 3.0)
 
----
 
-Made for people who like TypeScript and want to make games without the ceremony.

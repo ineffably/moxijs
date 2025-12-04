@@ -32,6 +32,11 @@ jobs:
       - name: Build all packages
         run: npm run build
 
+      - name: Generate documentation
+        run: |
+          cd packages/core && npm run gendocs
+          cd ../ui && npm run gendocs
+
       - name: Prepare deployment folder
         run: |
           mkdir -p _site
@@ -52,6 +57,12 @@ jobs:
           mkdir -p _site/packages/ui/lib
           cp -r packages/core/lib/* _site/packages/core/lib/
           cp -r packages/ui/lib/* _site/packages/ui/lib/
+
+          # Documentation at /packages/*/docs/
+          mkdir -p _site/packages/core/docs
+          mkdir -p _site/packages/ui/docs
+          cp -r packages/core/docs/* _site/packages/core/docs/
+          cp -r packages/ui/docs/* _site/packages/ui/docs/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

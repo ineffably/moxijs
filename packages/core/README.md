@@ -2,12 +2,23 @@
 
 Game framework built on PIXI.js with Entity-Component-System (ECS) architecture, physics integration, and UI components.
 
-🎮 **[View Live Examples](https://ineffably.github.io/moxijs/)** - Interactive examples with source code viewer
+🎮 **[View Live Examples](https://ineffably.github.io/moxijs/)** - Interactive examples with source code viewer  
+📚 **[API Documentation](https://ineffably.github.io/moxijs/packages/core/docs/)** - Complete API reference
 
 ## Quick Start
 
 ```typescript
 import { setupMoxi, asEntity, Logic } from '@moxijs/core';
+import { Assets } from 'pixi.js';
+
+// Define a simple logic component
+class RotateLogic extends Logic<PIXI.Sprite> {
+  speed = 0.02; // Rotation speed per frame
+
+  update(entity: PIXI.Sprite, deltaTime: number) {
+    entity.rotation += this.speed * deltaTime;
+  }
+}
 
 // Initialize
 const { scene, engine, renderer } = await setupMoxi({
@@ -15,9 +26,14 @@ const { scene, engine, renderer } = await setupMoxi({
   renderOptions: { width: 1280, height: 720, backgroundColor: 0x1a1a2e }
 });
 
+// Load texture
+const texture = await Assets.load('./sprite.png');
+
 // Create entity with logic
 const sprite = asEntity(new PIXI.Sprite(texture));
-sprite.moxiEntity.addLogic(new MyLogic());
+sprite.anchor.set(0.5); // Center the sprite
+sprite.position.set(640, 360); // Position in center
+sprite.moxiEntity.addLogic(new RotateLogic());
 scene.addChild(sprite);
 
 // Start

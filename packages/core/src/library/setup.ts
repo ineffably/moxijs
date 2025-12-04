@@ -60,15 +60,33 @@ export const defaultRenderOptions = {
  *
  * @example
  * ```ts
- * const { scene, engine, loadAssets, camera } = await setupMoxi({
+ * import { setupMoxi, asEntity, Logic } from '@moxijs/core';
+ * import { Assets } from 'pixi.js';
+ *
+ * // Simple rotation logic
+ * class RotateLogic extends Logic<PIXI.Sprite> {
+ *   speed = 0.02;
+ *   update(entity: PIXI.Sprite, deltaTime: number) {
+ *     entity.rotation += this.speed * deltaTime;
+ *   }
+ * }
+ *
+ * const { scene, engine, camera } = await setupMoxi({
  *   hostElement: document.getElementById('app'),
  *   renderOptions: { width: 1280, height: 720 },
  *   physics: true,
  *   pixelPerfect: true
  * });
  *
- * await loadAssets([{ src: './sprite.png', alias: 'sprite' }]);
- * scene.addChild(asEntity(new PIXI.Sprite(PIXIAssets.get('sprite'))));
+ * // Load texture
+ * const texture = await Assets.load('./sprite.png');
+ *
+ * // Create entity with rotation logic
+ * const sprite = asEntity(new PIXI.Sprite(texture));
+ * sprite.anchor.set(0.5);
+ * sprite.position.set(640, 360);
+ * sprite.moxiEntity.addLogic(new RotateLogic());
+ * scene.addChild(sprite);
  * scene.init();
  * engine.start();
  * ```

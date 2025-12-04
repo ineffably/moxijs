@@ -18,6 +18,8 @@
     "test": "jest --config ./jest.config.js --coverage",
     "test:watch": "jest --config ./jest.config.js --watch",
     "test:ci": "jest --config ./jest.config.js --ci --coverage --maxWorkers=2",
+    "gendocs": "typedoc --out ./docs ./src",
+    "docs": "typedoc",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -51,6 +53,8 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.9.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"

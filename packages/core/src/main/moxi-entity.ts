@@ -1,8 +1,11 @@
 import PIXI from 'pixi.js';
 import { Logic } from './logic';
 
-/** @internal */
-interface MoxiEntityClass<T> {
+/**
+ * @internal
+ * Interface for MoxiEntity implementation
+ */
+export interface MoxiEntityClass<T> {
   logic: MoxiLogic<T>;
   update: (delta: number, entity: T) => void;
   init: (...args: any[]) => void;
@@ -10,8 +13,17 @@ interface MoxiEntityClass<T> {
   getLogic: (name: string) => Logic<T> | undefined;
 }
 
-/** PIXI.Container with attached MoxiEntity for logic management. */
-export type AsEntity<T> = PIXI.Container & {
+/**
+ * PIXI.Container with attached MoxiEntity for logic management.
+ * 
+ * This is a type alias that adds the `moxiEntity` property to any PIXI.Container.
+ * Use `asEntity()` function to create instances of this type.
+ * 
+ * @typeParam T - The PIXI container type (Sprite, Graphics, Container, etc.)
+ * @hidden
+ */
+export type AsEntity<T extends PIXI.Container = PIXI.Container> = T & {
+  /** The MoxiEntity instance managing logic for this container */
   moxiEntity: MoxiEntity<T>;
 };
 

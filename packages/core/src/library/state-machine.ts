@@ -7,7 +7,8 @@ export type StateChangeEvent = {
 };
 
 type StateChangeEventListener = (event: StateChangeEvent) => void;
-type StateLogicRecords = Record<string, StateLogic>;
+/** @internal */
+export type StateLogicRecords = Record<string, StateLogic>;
 
 /**
  * Finite State Machine for managing entity states.

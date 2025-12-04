@@ -172,6 +172,18 @@ entity.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
 
 ## UI System
 
+**Package: @moxijs/ui**
+
+All UI components are now in the separate `@moxijs/ui` package.
+
+```ts
+import { 
+  FlexContainer, FlexDirection, UIButton, UILabel, 
+  UITextInput, UITextArea, UISelect, UIScrollContainer,
+  UITabs, UIPanel, UICheckbox, UIRadioGroup, CardPanel
+} from '@moxijs/ui';
+```
+
 ### UILabel
 Text display with layout.
 ```ts
@@ -266,6 +278,26 @@ const scroll = new UIScrollContainer({ width: 200, height: 300 });
 scroll.addChild(longContent);
 ```
 
+### UICheckbox / UIRadioGroup
+Form controls.
+```ts
+const checkbox = new UICheckbox({ checked: true, onChange: (checked) => {} });
+const radioGroup = new UIRadioGroup({
+  options: [{ label: 'Option 1', value: 1 }, { label: 'Option 2', value: 2 }],
+  onChange: (option) => {}
+});
+```
+
+### CardPanel
+Flexible card component with title/body/footer sections.
+```ts
+const card = new CardPanel({
+  title: 'Settings',
+  width: 300,
+  height: 200,
+});
+```
+
 ---
 
 ## Pixel Grid System
@@ -353,6 +385,17 @@ const sprite = asSprite(texture, {
 });
 ```
 
+### asTextDPR
+Canvas 2D Device Pixel Ratio text rendering for crisp, pixel-perfect text.
+```ts
+const text = asTextDPR('Hello World', {
+  fontSize: 24,
+  fontFamily: 'Arial',
+  color: 0xffffff,
+  dpr: 2, // Default: 2 for 2× supersampling
+});
+```
+
 ---
 
 ## Events
@@ -388,6 +431,28 @@ Manage event listener lifecycle.
 const actions = new ActionManager();
 actions.add(window, 'resize', handleResize);
 actions.removeAll(); // Cleanup all listeners
+```
+
+### LoadingScene
+Customizable loading screen with animations.
+```ts
+const loadingScene = new LoadingScene({
+  backgroundColor: 0x1a1a2e,
+  animation: new FallingSquaresAnimation({ count: 20 }),
+  onComplete: () => console.log('Loaded!'),
+});
+scene.addChild(loadingScene);
+loadingScene.start();
+```
+
+### FallingSquaresAnimation
+Animated loading indicator with falling squares.
+```ts
+const animation = new FallingSquaresAnimation({
+  count: 30,
+  speed: 2,
+  colors: [0xff6b6b, 0x4ecdc4, 0x45b7d1],
+});
 ```
 
 ### Utils
@@ -457,6 +522,8 @@ scene.addChild(enemy);
 
 ### Responsive UI Layer
 ```ts
+import { UILayer, UIScaleMode, FlexContainer, FlexDirection, UILabel } from '@moxijs/ui';
+
 const ui = new UILayer({ scaleMode: UIScaleMode.LockRatio });
 const hud = new FlexContainer({ direction: FlexDirection.Row, gap: 20 });
 hud.addChild(new UILabel({ text: 'HP: 100' }));
@@ -497,8 +564,14 @@ player.moxiEntity.addLogic(new PlatformerControlLogic());
 ```
 @moxijs/core
 ├── main/          # Engine, Scene, Entity, Logic, Camera
-├── library/       # Physics, Parallax, State Machine, Utilities
-└── ui/            # Components, Layout, Pixel Grid
+└── library/       # Physics, Parallax, State Machine, Utilities, Loading Scene
+
+@moxijs/ui
+├── base/          # UIComponent, BoxModel, EdgeInsets, UIFocusManager
+├── components/    # UIButton, UILabel, UITextInput, etc.
+├── layout/        # FlexContainer
+├── services/      # LayoutEngine, FormStateManager, ThemeApplier
+└── theming/        # ThemeManager, ThemeResolver
 
 @moxijs/mini-gui
 ├── gui.ts         # Main GUI class

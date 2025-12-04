@@ -41,6 +41,9 @@ import {
 // Type exports
 export type { StateChangeEvent } from './library/state-machine';
 export type { AsEntity, MoxiLogic } from './main/moxi-entity';
+export type { StateLogicRecords } from './library/state-machine';
+export type { MoxiEntityClass } from './main/moxi-entity';
+export type { MoxiEvents } from './main/event-system';
 export type { AsTextureFramesOptions } from './library/texture-frames';
 export type { GridOptions, CellPosition } from './library/grid-generator';
 export type { ParallaxBackgroundOptions } from './library/parallax-background';
@@ -61,6 +64,9 @@ export type {
 } from './library/physics';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 export type { PixelGridConfig, BorderConfig } from './library/pixel-grid';
+export type { SpriteOptions, TextOptions, TextDPROptions, BitmapTextOptions, PixiProps } from './library/as-pixi';
+export type { SetupMoxiArgs, PixelPerfectOptions } from './library/setup';
+export type { AssetLoaderEvents } from './main/asset-loader';
 
 export type Asset = { src: string, alias?: string };
 
@@ -161,8 +167,6 @@ export {
   asTextDPR,
   asGraphics,
   asContainer,
-  PixiProps,
-  TextDPROptions,
   Logic,
   Camera,
   CameraLogic,

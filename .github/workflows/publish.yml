@@ -96,6 +96,7 @@ jobs:
           git push origin "core@${{ env.NEW_VERSION }}"
 
   publish-ui:
+    runs-on: ubuntu-latest
     needs: [test, publish-core]
     # Always run after test, but only wait for publish-core if it ran
     if: |

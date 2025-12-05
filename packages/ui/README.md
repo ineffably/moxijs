@@ -3,7 +3,7 @@
 UI component library for MoxiJS - PIXI.js based game UI with theming, layout, and form controls.
 
 🎮 **[View Live Examples](https://ineffably.github.io/moxijs/)** - Interactive UI demos  
-📚 **[API Documentation](https://ineffably.github.io/moxijs/packages/ui/docs/)** - Complete API reference
+📚 **[API Documentation](https://ineffably.github.io/moxijs/docs/ui/)** - Complete API reference
 
 ## Installation
 

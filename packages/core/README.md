@@ -3,7 +3,7 @@
 Game framework built on PIXI.js with Entity-Component-System (ECS) architecture, physics integration, and UI components.
 
 🎮 **[View Live Examples](https://ineffably.github.io/moxijs/)** - Interactive examples with source code viewer  
-📚 **[API Documentation](https://ineffably.github.io/moxijs/packages/core/docs/)** - Complete API reference
+📚 **[API Documentation](https://ineffably.github.io/moxijs/docs/core/)** - Complete API reference
 
 ## Quick Start
 

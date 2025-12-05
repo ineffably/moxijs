@@ -12,8 +12,8 @@ PixiJS has a pretty great api for handling rendering beautifully, but, when I st
 > **Fair warning**: I am currently building this for me for my utility and for fun. I've enjoyed making little web games here and there, I've written disposable utilities in the past, and, I finally wanted to preserve them. This thing is still in alpha. The API might change. Things might break. Yes, this is agentically enhanced, mostly using Claude Code and Anthropic LLMs. Feel free to try it out and give feedback...if you're curious and don't mind things being a little rough around the edges. 
 
 ### 📚 Documentation
-- **[Core API Docs](https://ineffably.github.io/moxijs/packages/core/docs/)** - Complete API reference for `@moxijs/core`
-- **[UI API Docs](https://ineffably.github.io/moxijs/packages/ui/docs/)** - Complete API reference for `@moxijs/ui`
+- **[Core API Docs](https://ineffably.github.io/moxijs/docs/core/)** - Complete API reference for `@moxijs/core`
+- **[UI API Docs](https://ineffably.github.io/moxijs/docs/ui/)** - Complete API reference for `@moxijs/ui`
 
 ---
 

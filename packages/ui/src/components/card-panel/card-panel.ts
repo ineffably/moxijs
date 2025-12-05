@@ -44,6 +44,10 @@ export type DrawIconFn = (
 export interface CardPanelTitle {
   /** Title text */
   text?: string;
+  /** Font family for title text (default: 'Arial') */
+  fontFamily?: string;
+  /** Font size for title text (default: 14) */
+  fontSize?: number;
   /** Custom icon draw function */
   icon?: DrawIconFn;
   /** Icon width in pixels (for positioning text after icon) */
@@ -409,8 +413,8 @@ export class CardPanel extends UIComponent {
       this.titleText = new PIXI.Text({
         text: title.text,
         style: {
-          fontFamily: 'Arial',
-          fontSize: 14,
+          fontFamily: title.fontFamily ?? 'Arial',
+          fontSize: title.fontSize ?? 14,
           fill: this.colors.titleText
         }
       });

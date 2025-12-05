@@ -15,6 +15,7 @@ import { createButtonsShowcase } from '../ui/buttons-showcase';
 import { createTextInputsShowcase } from '../ui/text-inputs-showcase';
 import { createOptionControlsShowcase } from '../ui/option-controls-showcase';
 import { createThemingShowcase } from '../ui/theming-showcase';
+import { createPanelsShowcase } from '../ui/panels-showcase';
 
 /** MSDF Font configuration for UI showcase - children inherit this */
 export const MSDF_FONT: UIFontConfig = {
@@ -89,6 +90,11 @@ export async function initUIShowcase() {
       key: 'theming',
       label: 'Theming & Forms',
       content: await createThemingShowcase(MSDF_FONT)
+    },
+    {
+      key: 'panels',
+      label: 'Panels',
+      content: await createPanelsShowcase(MSDF_FONT)
     }
   ];
 
@@ -158,14 +164,14 @@ export async function initUIShowcase() {
   zoomInstructions.container.position.set(-100, 0);
   controlsDisplay.addChild(zoomInstructions.container);
 
-  // Line 2: Reset instructions
+  // Line 2: Reset instructions + MSDF note
   const resetInstructions = new UILabel({
-    text: 'Double-click: Reset',
+    text: 'Double-click: Reset  |  MSDF Text',
     fontSize: 14,
     color: 0xcccccc,
     msdfFontFamily: MSDF_FONT.msdfFontFamily
   });
-  resetInstructions.layout(160, 18);
+  resetInstructions.layout(260, 18);
   resetInstructions.container.position.set(-100, 18);
   controlsDisplay.addChild(resetInstructions.container);
 

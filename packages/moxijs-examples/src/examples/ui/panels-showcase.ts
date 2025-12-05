@@ -56,7 +56,9 @@ interface CardPanelConfig {
   borderRadius: number;
 }
 
-export async function createPanelsShowcase(): Promise<UIComponent> {
+import { UIFontConfig } from '@moxijs/ui';
+
+export async function createPanelsShowcase(fontConfig?: UIFontConfig): Promise<UIComponent> {
   // Load the spritesheet with pixel-perfect settings
   await PIXI.Assets.load({
     alias: 'uipackSpace',
@@ -140,7 +142,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       text: 'Color Panel',
       fontSize: 18,
       color: 0xffffff,
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      msdfFontFamily: fontConfig?.msdfFontFamily
     });
     content.addChild(title);
 
@@ -151,6 +154,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       wordWrap: true,
       wordWrapWidth: contentWidth,
       lineHeight: 2.0
+      // No MSDF for word-wrapped text
     });
     content.addChild(desc);
 
@@ -209,7 +213,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       text: 'Textured Panel',
       fontSize: 18,
       color: 0xffffff,
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      msdfFontFamily: fontConfig?.msdfFontFamily
     });
     content.addChild(title);
 
@@ -220,6 +225,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       wordWrap: true,
       wordWrapWidth: contentWidth,
       lineHeight: 2.0
+      // No MSDF for word-wrapped text
     });
     content.addChild(desc);
 
@@ -280,7 +286,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     const panel = new CardPanel({
       style,
       colors,
-      title: config.hasTitle ? { text: config.title } : undefined,
+      title: config.hasTitle ? { text: config.title, fontFamily: 'PixelOperator8', fontSize: 18 } : undefined,
       bodyWidth: config.bodyWidth,
       bodyHeight: config.bodyHeight,
       draggable: config.draggable,
@@ -292,26 +298,32 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     bodyContent.rect(0, 0, config.bodyWidth, config.bodyHeight);
     bodyContent.fill({ color: 0x3a3a3a, alpha: 0.5 });
 
-    const contentLabel = new PIXI.Text({
+    const contentLabel = new UILabel({
       text: 'Body Content',
-      style: { fontSize: 12, fill: 0x888888 }
+      fontSize: 18,
+      color: 0x888888,
+      msdfFontFamily: fontConfig?.msdfFontFamily
     });
-    contentLabel.position.set(
-      (config.bodyWidth - contentLabel.width) / 2,
-      (config.bodyHeight - contentLabel.height) / 2
+    contentLabel.layout(config.bodyWidth, 20);
+    contentLabel.container.position.set(
+      (config.bodyWidth - contentLabel.container.width) / 2,
+      (config.bodyHeight - contentLabel.container.height) / 2
     );
 
     panel.getBodyContainer().addChild(bodyContent);
-    panel.getBodyContainer().addChild(contentLabel);
+    panel.getBodyContainer().addChild(contentLabel.container);
 
     // Add footer content if present
     if (config.hasFooter) {
-      const footerLabel = new PIXI.Text({
+      const footerLabel = new UILabel({
         text: 'Footer',
-        style: { fontSize: 11, fill: 0x666666 }
+        fontSize: 12,
+        color: 0x666666,
+        msdfFontFamily: fontConfig?.msdfFontFamily
       });
-      footerLabel.position.set(8, 6);
-      panel.getFooterContainer().addChild(footerLabel);
+      footerLabel.layout(100, 20);
+      footerLabel.container.position.set(8, 4);
+      panel.getFooterContainer().addChild(footerLabel.container);
     }
 
     return panel;
@@ -357,7 +369,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     text: 'Color Panels',
     fontSize: FORM_STYLES.titleFontSize,
     color: FORM_STYLES.labelColor,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    msdfFontFamily: fontConfig?.msdfFontFamily
   });
   colorColumn.addChild(colorTitle);
 
@@ -375,7 +388,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   });
 
   // Background color input
-  const colorLabel = new UILabel({ text: 'Background Color:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const colorLabel = new UILabel({ text: 'Background Color:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   colorForm.addChild(colorLabel);
   
   const colorInput = new UITextInput({
@@ -394,7 +407,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(colorInput);
 
   // Alpha input
-  const alphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const alphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   colorForm.addChild(alphaLabel);
   
   const alphaInput = new UITextInput({
@@ -412,7 +425,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(alphaInput);
 
   // Border radius input
-  const radiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const radiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   colorForm.addChild(radiusLabel);
   
   const radiusInput = new UITextInput({
@@ -430,7 +443,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(radiusInput);
 
   // Width input
-  const widthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const widthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   colorForm.addChild(widthLabel);
   
   const widthInput = new UITextInput({
@@ -448,7 +461,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   colorForm.addChild(widthInput);
 
   // Height input
-  const heightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const heightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   colorForm.addChild(heightLabel);
   
   const heightInput = new UITextInput({
@@ -492,7 +505,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     text: 'Textured Panels',
     fontSize: FORM_STYLES.titleFontSize,
     color: FORM_STYLES.labelColor,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    msdfFontFamily: fontConfig?.msdfFontFamily
   });
   texturedColumn.addChild(texturedTitle);
 
@@ -510,7 +524,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   });
 
   // Texture select
-  const textureLabel = new UILabel({ text: 'Panel Texture:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const textureLabel = new UILabel({ text: 'Panel Texture:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   texturedForm.addChild(textureLabel);
   
   const textureSelect = new UISelect({
@@ -525,7 +539,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(textureSelect);
 
   // Alpha input
-  const texAlphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const texAlphaLabel = new UILabel({ text: 'Alpha (0-100):', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   texturedForm.addChild(texAlphaLabel);
   
   const texAlphaInput = new UITextInput({
@@ -543,7 +557,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(texAlphaInput);
 
   // Width input
-  const texWidthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const texWidthLabel = new UILabel({ text: 'Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   texturedForm.addChild(texWidthLabel);
   
   const texWidthInput = new UITextInput({
@@ -561,7 +575,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   texturedForm.addChild(texWidthInput);
 
   // Height input
-  const texHeightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const texHeightLabel = new UILabel({ text: 'Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   texturedForm.addChild(texHeightLabel);
   
   const texHeightInput = new UITextInput({
@@ -603,7 +617,8 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
     text: 'CardPanel',
     fontSize: FORM_STYLES.titleFontSize,
     color: FORM_STYLES.labelColor,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    msdfFontFamily: fontConfig?.msdfFontFamily
   });
   cardColumn.addChild(cardTitle);
 
@@ -626,7 +641,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   });
 
   // Style select
-  const styleLabel = new UILabel({ text: 'Style:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const styleLabel = new UILabel({ text: 'Style:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   cardForm.addChild(styleLabel);
 
   const styleSelect = new UISelect({
@@ -644,7 +659,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   cardForm.addChild(styleSelect);
 
   // Border radius (flat style only)
-  const borderRadiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const borderRadiusLabel = new UILabel({ text: 'Border Radius:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   cardForm.addChild(borderRadiusLabel);
 
   const borderRadiusInput = new UITextInput({
@@ -662,7 +677,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   cardForm.addChild(borderRadiusInput);
 
   // Title text input
-  const titleLabel = new UILabel({ text: 'Title Text:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const titleLabel = new UILabel({ text: 'Title Text:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   cardForm.addChild(titleLabel);
 
   const titleInput = new UITextInput({
@@ -692,7 +707,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       updateCardDemo();
     }
   });
-  const hasTitleLabel = new UILabel({ text: 'Has Title', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const hasTitleLabel = new UILabel({ text: 'Has Title', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   hasTitleRow.addChild(hasTitleCheckbox);
   hasTitleRow.addChild(hasTitleLabel);
   cardForm.addChild(hasTitleRow);
@@ -711,7 +726,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       updateCardDemo();
     }
   });
-  const draggableLabel = new UILabel({ text: 'Draggable', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const draggableLabel = new UILabel({ text: 'Draggable', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   draggableRow.addChild(draggableCheckbox);
   draggableRow.addChild(draggableLabel);
   cardForm.addChild(draggableRow);
@@ -730,13 +745,13 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
       updateCardDemo();
     }
   });
-  const hasFooterLabel = new UILabel({ text: 'Has Footer', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const hasFooterLabel = new UILabel({ text: 'Has Footer', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   hasFooterRow.addChild(hasFooterCheckbox);
   hasFooterRow.addChild(hasFooterLabel);
   cardForm.addChild(hasFooterRow);
 
   // Body width input
-  const bodyWidthLabel = new UILabel({ text: 'Body Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const bodyWidthLabel = new UILabel({ text: 'Body Width:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   cardForm.addChild(bodyWidthLabel);
 
   const bodyWidthInput = new UITextInput({
@@ -754,7 +769,7 @@ export async function createPanelsShowcase(): Promise<UIComponent> {
   cardForm.addChild(bodyWidthInput);
 
   // Body height input
-  const bodyHeightLabel = new UILabel({ text: 'Body Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor });
+  const bodyHeightLabel = new UILabel({ text: 'Body Height:', fontSize: FORM_STYLES.labelFontSize, color: FORM_STYLES.labelColor, msdfFontFamily: fontConfig?.msdfFontFamily });
   cardForm.addChild(bodyHeightLabel);
 
   const bodyHeightInput = new UITextInput({

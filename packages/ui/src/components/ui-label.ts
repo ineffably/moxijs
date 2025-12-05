@@ -63,14 +63,18 @@ export class UILabel extends UIComponent {
   private textObject: PIXI.Text | null = null;
   private msdfTextObject: PIXI.BitmapText | null = null;
   private readonly dprScale = 2; // DPR scaling factor for crisp text
-  private readonly msdfFontFamily?: string;
+  /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
+  private readonly localMsdfFontFamily?: string;
+  /** Track if text object has been initialized */
+  private textInitialized = false;
 
   // Services (composition)
 
   constructor(props: UILabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    this.msdfFontFamily = props.msdfFontFamily;
+    // Store local prop - actual value will be resolved via inheritance
+    this.localMsdfFontFamily = props.msdfFontFamily;
 
     this.props = {
       text: props.text,
@@ -84,12 +88,27 @@ export class UILabel extends UIComponent {
       lineHeight: props.lineHeight ?? 1.2
     };
 
-    if (this.msdfFontFamily) {
+    // Note: Text object creation is deferred to ensureTextObject()
+    // to allow font inheritance from parent containers
+  }
+
+  /**
+   * Ensures text object is created (lazy initialization).
+   * Called before measure/render to allow parent inheritance to work.
+   */
+  private ensureTextObject(): void {
+    if (this.textInitialized) return;
+    this.textInitialized = true;
+
+    // Resolve MSDF font family - check local prop first, then inherit from parent
+    const effectiveMsdfFont = this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
+
+    if (effectiveMsdfFont) {
       // Create PIXI.BitmapText for MSDF rendering (crisp at any scale)
       this.msdfTextObject = new PIXI.BitmapText({
         text: this.props.text,
         style: {
-          fontFamily: this.msdfFontFamily,
+          fontFamily: effectiveMsdfFont,
           fontSize: this.props.fontSize,
           fill: this.props.color,
           align: this.props.align
@@ -152,6 +171,9 @@ export class UILabel extends UIComponent {
 
   /** @internal */
   measure(): MeasuredSize {
+    // Ensure text object exists (lazy init for inheritance support)
+    this.ensureTextObject();
+
     const padding = this.boxModel.padding;
 
     // Get text bounds from the appropriate text object
@@ -256,6 +278,7 @@ export class UILabel extends UIComponent {
   /** Update displayed text. */
   setText(text: string): void {
     this.props.text = text;
+    this.ensureTextObject();
     if (this.msdfTextObject) {
       this.msdfTextObject.text = text;
     } else if (this.textObject) {
@@ -267,6 +290,7 @@ export class UILabel extends UIComponent {
   /** Update text color. */
   setColor(color: number): void {
     this.props.color = color;
+    this.ensureTextObject();
     if (this.msdfTextObject) {
       this.msdfTextObject.style.fill = color;
     } else if (this.textObject) {
@@ -276,6 +300,7 @@ export class UILabel extends UIComponent {
 
   /** Set the position of the label (overrides layout positioning) */
   setPosition(x: number, y: number): void {
+    this.ensureTextObject();
     if (this.msdfTextObject) {
       this.msdfTextObject.position.set(Math.round(x), Math.round(y));
     } else if (this.textObject) {
@@ -286,6 +311,7 @@ export class UILabel extends UIComponent {
   /** Update font size. */
   setFontSize(size: number): void {
     this.props.fontSize = size;
+    this.ensureTextObject();
     if (this.msdfTextObject) {
       this.msdfTextObject.style.fontSize = size;
     } else if (this.textObject) {
@@ -302,8 +328,8 @@ export class UILabel extends UIComponent {
     return this.props.text;
   }
 
-  /** Check if this label uses MSDF text rendering */
+  /** Check if this label uses MSDF text rendering (includes inherited) */
   isMSDF(): boolean {
-    return !!this.msdfFontFamily;
+    return !!this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
   }
 }

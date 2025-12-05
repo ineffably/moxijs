@@ -9,9 +9,9 @@ import {
   UITextArea,
   UILabel,
   UIScrollContainer,
-  EdgeInsets
+  EdgeInsets,
+  UIFontConfig
 } from '@moxijs/ui';
-import { MSDF_FONT } from '../02-ui/ui-showcase';
 
 /**
  * Text Inputs Showcase
@@ -21,7 +21,7 @@ import { MSDF_FONT } from '../02-ui/ui-showcase';
  * - Grid layout of label-input pairs
  * - Tab focus navigation
  */
-export async function createTextInputsShowcase(): Promise<UIComponent> {
+export async function createTextInputsShowcase(fontConfig?: UIFontConfig): Promise<UIComponent> {
   // Create scroll container
   const scrollContainer = new UIScrollContainer({
     width: 1280,
@@ -35,10 +35,12 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   });
 
   // Main container with vertical layout (content inside scroll container)
+  // Set fontConfig here so all children inherit MSDF font settings
   const mainContainer = new FlexContainer({
     direction: FlexDirection.Column,
     gap: 30,
-    padding: EdgeInsets.all(20)
+    padding: EdgeInsets.all(20),
+    fontConfig: fontConfig
   });
 
   // Section 1: Basic Text Inputs with Labels
@@ -46,9 +48,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Basic Text Inputs',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const section1Container = new FlexContainer({
     direction: FlexDirection.Column,
@@ -59,9 +59,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const nameLabel = new UILabel({
     text: 'Full Name:',
     fontSize: 16,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const nameInput = new UITextInput({
     placeholder: 'Enter your full name...',
@@ -83,9 +81,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const emailLabel = new UILabel({
     text: 'Email Address:',
     fontSize: 16,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const emailInput = new UITextInput({
     placeholder: 'your.email@example.com',
@@ -107,9 +103,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const ageLabel = new UILabel({
     text: 'Age:',
     fontSize: 16,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const ageInput = new UITextInput({
     placeholder: 'Enter age',
@@ -139,9 +133,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Input Variations',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const section2Container = new FlexContainer({
     direction: FlexDirection.Row,
@@ -187,9 +179,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Form Grid',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const gridContainer = new FlexContainer({
     direction: FlexDirection.Column,
@@ -209,9 +199,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const firstNameLabel = new UILabel({
     text: 'First Name:',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const firstNameInput = new UITextInput({
     placeholder: 'John',
     width: 250,
@@ -230,9 +218,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const lastNameLabel = new UILabel({
     text: 'Last Name:',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const lastNameInput = new UITextInput({
     placeholder: 'Doe',
     width: 250,
@@ -260,9 +246,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const phoneLabel = new UILabel({
     text: 'Phone:',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const phoneInput = new UITextInput({
     placeholder: '(555) 123-4567',
     width: 250,
@@ -281,9 +265,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const cityLabel = new UILabel({
     text: 'City:',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const cityInput = new UITextInput({
     placeholder: 'San Francisco',
     width: 250,
@@ -306,9 +288,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
     text: 'Multi-line Text Areas',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
 
   const section4Container = new FlexContainer({
     direction: FlexDirection.Row,
@@ -323,9 +303,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const smallTextareaLabel = new UILabel({
     text: 'Comments (3 rows):',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const smallTextarea = new UITextArea({
     placeholder: 'Enter your comments here...',
     width: 300,
@@ -346,9 +324,7 @@ export async function createTextInputsShowcase(): Promise<UIComponent> {
   const largeTextareaLabel = new UILabel({
     text: 'Description (6 rows):',
     fontSize: 14,
-    color: 0xffffff,
-    msdfFontFamily: MSDF_FONT.family
-  });
+    color: 0xffffff  });
   const largeTextarea = new UITextArea({
     placeholder: 'Enter a detailed description...\nSupports multiple lines.\nPress Enter to add new lines.\nPress Escape to unfocus.',
     width: 500,

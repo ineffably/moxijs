@@ -54,9 +54,11 @@ export async function initMsdfTextRendering() {
     data: { family: 'PixelOperator8' }
   });
 
+  // Load MSDF font - PixiJS needs to know it's a bitmap font
   await Assets.load({
     alias: 'PixelOperator8-MSDF',
-    src: MSDF_FONT_JSON
+    src: MSDF_FONT_JSON,
+    data: { type: 'font' }  // Tell PixiJS this is a font
   });
 
   // Install BitmapFont with 256px supersampling (for pixel-perfect rendering)
@@ -134,7 +136,7 @@ export async function initMsdfTextRendering() {
 
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const zoomFactor = e.deltaY > 0 ? 0.98 : 1.02;
     currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom * zoomFactor));
     contentContainer.scale.set(currentZoom);
     zoomLabel.text = `Zoom: ${currentZoom.toFixed(2)}x | Drag to pan, scroll to zoom`;

@@ -168,7 +168,7 @@ const categories: Record<string, Category> = {
       },
       'msdf-text-rendering': {
         name: 'MSDF Text (SDF)',
-        description: 'Unity-quality text that stays crisp at any scale',
+        description: 'MSDF is a technique for text so that it stays crisp at any scale',
         init: initMsdfTextRendering,
         source: msdfTextRenderingSource
       }

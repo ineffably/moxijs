@@ -31,6 +31,8 @@ export interface SetupMoxiArgs {
   loadingSceneOptions?: LoadingSceneOptions;
   /** Enable pixel-perfect rendering. Pass true for defaults. */
   pixelPerfect?: boolean | PixelPerfectOptions;
+  /** Suppress right-click context menu on the canvas. Default false. */
+  suppressContextMenu?: boolean;
 }
 
 /** Return value from setupMoxi(). */
@@ -98,7 +100,8 @@ export async function setupMoxi({
   physics,
   showLoadingScene = false,
   loadingSceneOptions = {},
-  pixelPerfect
+  pixelPerfect,
+  suppressContextMenu = false
 } = {} as SetupMoxiArgs) {
   // Process pixel-perfect options
   let finalRenderOptions = { ...renderOptions };
@@ -135,6 +138,12 @@ export async function setupMoxi({
     canvas.style.imageRendering = 'pixelated';
     canvas.style.imageRendering = '-moz-crisp-edges';
     canvas.style.imageRendering = 'crisp-edges';
+  }
+
+  // Suppress right-click context menu if requested
+  if (suppressContextMenu) {
+    const canvas = renderer.canvas as HTMLCanvasElement;
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
   const scene = new Scene(renderer);

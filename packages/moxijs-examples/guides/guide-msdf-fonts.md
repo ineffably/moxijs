@@ -59,14 +59,14 @@ The MSDF generator uses `msdf-bmfont-xml` which is already installed as a dev de
 Use the provided script:
 
 ```bash
-cd packages/moxijs-examples
+cd packages/core
 
 # Basic usage
 node scripts/generate-msdf-font.mjs <input-font.ttf> [output-name]
 
 # Examples
-node scripts/generate-msdf-font.mjs assets/fonts/pixel_operator/PixelOperator8.ttf PixelOperator8-MSDF
-node scripts/generate-msdf-font.mjs assets/fonts/Roboto-Regular.ttf Roboto
+node scripts/generate-msdf-font.mjs ../moxijs-examples/assets/fonts/pixel_operator/PixelOperator8.ttf PixelOperator8
+node scripts/generate-msdf-font.mjs path/to/Roboto-Regular.ttf Roboto
 ```
 
 ### Step 2: Output Files
@@ -75,7 +75,7 @@ The script generates two files in `assets/fonts/msdf/`:
 
 ```
 assets/fonts/msdf/
-├── PixelOperator8-MSDF.json   # Font metrics (glyph positions, kerning)
+├── PixelOperator8.json        # Font metrics (glyph positions, kerning)
 └── PixelOperator8-MSDF.png    # MSDF texture atlas
 ```
 
@@ -95,6 +95,8 @@ The JSON file contains a `distanceField` property that tells PixiJS this is an M
   }
 }
 ```
+
+> **Note**: The JSON filename may vary (e.g., `PixelOperator8.json` or `PixelOperator8-MSDF.json`) depending on the generator options used.
 
 ### Generator Options
 
@@ -122,7 +124,8 @@ import { Assets } from 'pixi.js';
 // Load MSDF font (PixiJS auto-detects MSDF from distanceField in JSON)
 await Assets.load({
   alias: 'PixelOperator8-MSDF',
-  src: 'assets/fonts/msdf/PixelOperator8-MSDF.json'
+  src: 'assets/fonts/msdf/PixelOperator8.json',
+  data: { type: 'font' }
 });
 ```
 
@@ -324,19 +327,20 @@ setupMoxi({
 ## File Structure
 
 ```
-packages/moxijs-examples/
-├── scripts/
-│   └── generate-msdf-font.mjs     # MSDF generation script
-├── assets/fonts/
-│   ├── msdf/                      # Generated MSDF fonts
-│   │   ├── PixelOperator8-MSDF.json
-│   │   └── PixelOperator8-MSDF.png
-│   └── pixel_operator/            # Source TTF files
-│       └── PixelOperator8.ttf
-└── src/examples/
-    └── 02-ui/
-        ├── msdf-text-rendering.ts      # MSDF demo
-        └── font-rendering-comparison.ts # Side-by-side comparison
+packages/
+├── core/
+│   └── scripts/
+│       └── generate-msdf-font.mjs     # MSDF generation script
+└── moxijs-examples/
+    ├── assets/fonts/
+    │   ├── msdf/                      # Generated MSDF fonts
+    │   │   ├── PixelOperator8.json
+    │   │   └── PixelOperator8-MSDF.png
+    │   └── pixel_operator/            # Source TTF files
+    │       └── PixelOperator8.ttf
+    └── src/examples/
+        └── 02-ui/
+            └── msdf-text-rendering.ts # MSDF demo
 ```
 
 ## API Reference

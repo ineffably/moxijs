@@ -94,7 +94,8 @@ export class UIButton extends UIComponent {
   private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily' | 'msdfFontFamily' | 'themeResolver'>>;
   private useBitmapText: boolean;
   private bitmapFontFamily?: string;
-  private msdfFontFamily?: string;
+  /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
+  private localMsdfFontFamily?: string;
   private onClick?: () => void;
   private onHover?: () => void;
 
@@ -105,6 +106,8 @@ export class UIButton extends UIComponent {
   private backgroundStrategy: ButtonBackgroundStrategy;
   private label?: UILabel;
   private bitmapLabel?: PIXI.BitmapText;
+  /** Track if label has been initialized */
+  private labelInitialized = false;
 
   // Cached label center position
   private labelCenterX: number = 0;
@@ -146,7 +149,7 @@ export class UIButton extends UIComponent {
 
     this.useBitmapText = props.useBitmapText ?? false;
     this.bitmapFontFamily = props.bitmapFontFamily;
-    this.msdfFontFamily = props.msdfFontFamily;
+    this.localMsdfFontFamily = props.msdfFontFamily;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
 
@@ -183,37 +186,7 @@ export class UIButton extends UIComponent {
     const backgroundContainer = this.backgroundStrategy.create(this.props.width, this.props.height);
     this.container.addChild(backgroundContainer);
 
-    // Create label if text provided
-    if (this.props.label) {
-      if (this.useBitmapText && this.bitmapFontFamily) {
-        this.createBitmapLabel();
-      } else if (this.msdfFontFamily) {
-        // Use MSDF text rendering via UILabel
-        this.label = new UILabel({
-          text: this.props.label,
-          fontSize: this.props.fontSize,
-          color: this.props.textColor,
-          align: 'center',
-          msdfFontFamily: this.msdfFontFamily
-        }, {
-          padding: EdgeInsets.zero() // No padding - we'll position manually
-        });
-        this.label.container.position.set(0, 0);
-        this.container.addChild(this.label.container);
-      } else {
-        this.label = new UILabel({
-          text: this.props.label,
-          fontSize: this.props.fontSize,
-          color: this.props.textColor,
-          align: 'center'
-        }, {
-          padding: EdgeInsets.zero() // No padding - we'll position manually
-        });
-        // Disable UILabel's automatic render positioning since we'll center manually
-        this.label.container.position.set(0, 0);
-        this.container.addChild(this.label.container);
-      }
-    }
+    // Note: Label creation is deferred to ensureLabel() for font inheritance support
 
     // Setup interactivity
     this.setupInteractivity();
@@ -238,6 +211,50 @@ export class UIButton extends UIComponent {
     });
 
     this.container.addChild(this.bitmapLabel);
+  }
+
+  /**
+   * Ensures label is created (lazy initialization).
+   * Called before measure/render to allow font inheritance from parent.
+   */
+  private ensureLabel(): void {
+    if (this.labelInitialized || !this.props.label) return;
+    this.labelInitialized = true;
+
+    if (this.useBitmapText && this.bitmapFontFamily) {
+      this.createBitmapLabel();
+    } else {
+      // Resolve MSDF font family - check local prop first, then inherit from parent
+      const effectiveMsdfFont = this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
+
+      if (effectiveMsdfFont) {
+        // Use MSDF text rendering via UILabel (UILabel will also inherit)
+        this.label = new UILabel({
+          text: this.props.label,
+          fontSize: this.props.fontSize,
+          color: this.props.textColor,
+          align: 'center',
+          msdfFontFamily: effectiveMsdfFont
+        }, {
+          padding: EdgeInsets.zero()
+        });
+      } else {
+        // Regular canvas text
+        this.label = new UILabel({
+          text: this.props.label,
+          fontSize: this.props.fontSize,
+          color: this.props.textColor,
+          align: 'center'
+        }, {
+          padding: EdgeInsets.zero()
+        });
+      }
+
+      // Set parent for inheritance chain (important!)
+      this.label.parent = this;
+      this.label.container.position.set(0, 0);
+      this.container.addChild(this.label.container);
+    }
   }
 
   /** @internal */
@@ -367,6 +384,9 @@ export class UIButton extends UIComponent {
 
   /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
+    // Ensure label exists (lazy init for inheritance support)
+    this.ensureLabel();
+
     const measured = this.measure();
 
     this.computedLayout.width = measured.width;

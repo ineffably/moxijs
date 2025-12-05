@@ -5,6 +5,21 @@ import { ThemeResolver } from '../theming/theme-resolver';
 import { createDefaultDarkTheme } from '../theming/theme-data';
 
 /**
+ * Font configuration that can be inherited from parent containers.
+ * Like CSS, these settings cascade down the component tree.
+ */
+export interface UIFontConfig {
+  /** MSDF font family name for crisp text at any scale */
+  msdfFontFamily?: string;
+  /** Default font family for canvas text */
+  fontFamily?: string;
+  /** Default font size */
+  fontSize?: number;
+  /** Default text color */
+  textColor?: number;
+}
+
+/**
  * Base abstract class for all UI components
  * Provides box model, layout, and rendering functionality
  *
@@ -87,6 +102,12 @@ export abstract class UIComponent {
    * Default theme resolver (lazy initialized)
    */
   private defaultThemeResolver?: ThemeResolver;
+
+  /**
+   * Font configuration for this component.
+   * If set, children will inherit these settings (like CSS).
+   */
+  protected fontConfig?: UIFontConfig;
 
   constructor(boxModel?: Partial<BoxModel>) {
     this.container = new PIXI.Container();
@@ -401,6 +422,89 @@ export abstract class UIComponent {
   protected makeInteractive(cursor: string = 'pointer'): void {
     this.container.eventMode = 'static';
     this.container.cursor = cursor;
+  }
+
+  /**
+   * Sets font configuration for this component.
+   * Children will inherit these settings (like CSS).
+   */
+  public setFontConfig(config: UIFontConfig): void {
+    this.fontConfig = config;
+  }
+
+  /**
+   * Gets the font configuration for this component.
+   * Returns local config if set, otherwise undefined.
+   */
+  public getFontConfig(): UIFontConfig | undefined {
+    return this.fontConfig;
+  }
+
+  /**
+   * Resolves a font setting by walking up the parent chain.
+   * Like CSS inheritance - returns local value if set, otherwise inherits from parent.
+   *
+   * @param key - The font config key to resolve
+   * @param localOverride - Optional local override value
+   * @returns The resolved value or undefined
+   */
+  protected resolveInheritedFont<K extends keyof UIFontConfig>(
+    key: K,
+    localOverride?: UIFontConfig[K]
+  ): UIFontConfig[K] | undefined {
+    // Local override takes precedence
+    if (localOverride !== undefined) {
+      return localOverride;
+    }
+
+    // Check local font config
+    if (this.fontConfig?.[key] !== undefined) {
+      return this.fontConfig[key];
+    }
+
+    // Walk up parent chain to find inherited value
+    let currentParent = this.parent;
+    while (currentParent) {
+      const parentConfig = currentParent.getFontConfig();
+      if (parentConfig?.[key] !== undefined) {
+        return parentConfig[key];
+      }
+      currentParent = currentParent.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Gets the inherited MSDF font family (convenience method).
+   * @param localOverride - Optional local override
+   */
+  protected getInheritedMsdfFontFamily(localOverride?: string): string | undefined {
+    return this.resolveInheritedFont('msdfFontFamily', localOverride);
+  }
+
+  /**
+   * Gets the inherited font family (convenience method).
+   * @param localOverride - Optional local override
+   */
+  protected getInheritedFontFamily(localOverride?: string): string | undefined {
+    return this.resolveInheritedFont('fontFamily', localOverride);
+  }
+
+  /**
+   * Gets the inherited font size (convenience method).
+   * @param localOverride - Optional local override
+   */
+  protected getInheritedFontSize(localOverride?: number): number | undefined {
+    return this.resolveInheritedFont('fontSize', localOverride);
+  }
+
+  /**
+   * Gets the inherited text color (convenience method).
+   * @param localOverride - Optional local override
+   */
+  protected getInheritedTextColor(localOverride?: number): number | undefined {
+    return this.resolveInheritedFont('textColor', localOverride);
   }
 
   /**

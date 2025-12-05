@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-12-05
+
+### Added
+- `suppressContextMenu` option in `setupMoxi()` to prevent right-click context menu on canvas
+- Tests for `suppressContextMenu` functionality
+
+## [0.3.0] - 2025-12-04
+
 ### Added
 - `asTextDPR()` function for Canvas 2D Device Pixel Ratio (DPR) text rendering
   - Renders text at higher resolution (e.g., 2×) then scales down for crisp, pixel-perfect text
@@ -14,10 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enables pixel-perfect rendering by default
   - Handles scale props correctly with DPR scaling
 - Comprehensive tests for `asTextDPR()` function
+- Re-implemented MSDF font rendering with proper integration
 
 ### Changed
 - Renamed `src/core/` directory to `src/main/` for clearer project structure
 - Updated test imports to use new `src/main/` paths
+- UI components moved to separate `@moxijs/ui` package
 
 ## [0.2.3] - 2025-11-29
 

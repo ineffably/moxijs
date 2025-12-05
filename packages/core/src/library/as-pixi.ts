@@ -278,7 +278,7 @@ export function asGraphics(props?: PixiProps): PIXI.Graphics {
 
 /**
  * Creates a Container instance with optional properties
- * 
+ *
  * @example
  * ```typescript
  * const container = asContainer({ x: 100, y: 100 });
@@ -287,5 +287,51 @@ export function asGraphics(props?: PixiProps): PIXI.Graphics {
 export function asContainer(props?: PixiProps): PIXI.Container {
   const container = new PIXI.Container();
   return applyProps(container, props);
+}
+
+/**
+ * Options for creating an MSDF BitmapText instance
+ */
+export interface MSDFTextOptions {
+  text?: string | number | { toString: () => string };
+  style?: {
+    fontFamily: string;  // Must be an MSDF-loaded font
+    fontSize?: number;
+    letterSpacing?: number;
+    align?: 'left' | 'center' | 'right';
+  };
+  [key: string]: any;
+}
+
+/**
+ * Creates an MSDF BitmapText instance for resolution-independent crisp text.
+ *
+ * MSDF (Multi-channel Signed Distance Field) fonts render sharp text at any scale,
+ * similar to Unity's TextMesh Pro. Unlike regular BitmapText which pixelates when
+ * scaled, MSDF text maintains crisp edges.
+ *
+ * MSDF fonts must be pre-generated using msdf-bmfont-xml and loaded via Assets.load().
+ *
+ * @example
+ * ```typescript
+ * // First, load the MSDF font (the .json file, not .fnt)
+ * await Assets.load('assets/fonts/msdf/Roboto.json');
+ *
+ * // Then create text - scales perfectly at any size
+ * const title = asMSDFText(
+ *   { text: 'Hello World', style: { fontFamily: 'Roboto', fontSize: 48 } },
+ *   { x: 100, y: 50, anchor: 0.5 }
+ * );
+ *
+ * // MSDF text stays crisp even when scaled up
+ * title.scale.set(2); // Still sharp!
+ * ```
+ */
+export function asMSDFText(
+  constructorArgs: MSDFTextOptions,
+  props?: PixiProps
+): PIXI.BitmapText {
+  const text = new PIXI.BitmapText(constructorArgs as any);
+  return applyProps(text, props);
 }
 

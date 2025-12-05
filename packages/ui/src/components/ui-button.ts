@@ -50,6 +50,8 @@ export interface UIButtonProps {
   useBitmapText?: boolean;
   /** BitmapText font family (required if useBitmapText is true) */
   bitmapFontFamily?: string;
+  /** MSDF font family name. If provided, uses MSDF (Multi-channel Signed Distance Field) text rendering for crisp text at any scale. Must match the loaded MSDF font's family name. */
+  msdfFontFamily?: string;
   /** Click callback */
   onClick?: () => void;
   /** Hover callback */
@@ -89,9 +91,10 @@ export interface UIButtonProps {
  */
 export class UIButton extends UIComponent {
   // Props
-  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily' | 'themeResolver'>>;
+  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily' | 'msdfFontFamily' | 'themeResolver'>>;
   private useBitmapText: boolean;
   private bitmapFontFamily?: string;
+  private msdfFontFamily?: string;
   private onClick?: () => void;
   private onHover?: () => void;
 
@@ -143,6 +146,7 @@ export class UIButton extends UIComponent {
 
     this.useBitmapText = props.useBitmapText ?? false;
     this.bitmapFontFamily = props.bitmapFontFamily;
+    this.msdfFontFamily = props.msdfFontFamily;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
 
@@ -183,6 +187,19 @@ export class UIButton extends UIComponent {
     if (this.props.label) {
       if (this.useBitmapText && this.bitmapFontFamily) {
         this.createBitmapLabel();
+      } else if (this.msdfFontFamily) {
+        // Use MSDF text rendering via UILabel
+        this.label = new UILabel({
+          text: this.props.label,
+          fontSize: this.props.fontSize,
+          color: this.props.textColor,
+          align: 'center',
+          msdfFontFamily: this.msdfFontFamily
+        }, {
+          padding: EdgeInsets.zero() // No padding - we'll position manually
+        });
+        this.label.container.position.set(0, 0);
+        this.container.addChild(this.label.container);
       } else {
         this.label = new UILabel({
           text: this.props.label,

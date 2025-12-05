@@ -1,6 +1,9 @@
 /**
  * Theming Showcase Tab
  * Demonstrates the theming system with theme switching and real-world form elements
+ *
+ * Uses MSDF (Multi-channel Signed Distance Field) text rendering
+ * for crisp text at any scale.
  */
 import {
   EdgeInsets,
@@ -16,12 +19,13 @@ import {
   ThemeManager,
   DefaultUITheme,
   createDefaultDarkTheme,
-  createDefaultLightTheme
+  createDefaultLightTheme,
+  UIFontConfig
 } from '@moxijs/ui';
 
 let globalThemeManager: ThemeManager<DefaultUITheme> | null = null;
 
-export async function createThemingShowcase(): Promise<UIComponent> {
+export async function createThemingShowcase(fontConfig?: UIFontConfig): Promise<UIComponent> {
   // Create theme manager
   const themeManager = new ThemeManager<DefaultUITheme>('ui-showcase-theme', 'Dark');
   globalThemeManager = themeManager;
@@ -122,10 +126,12 @@ export async function createThemingShowcase(): Promise<UIComponent> {
   });
 
   // Main container
+  // Set fontConfig here so all children inherit MSDF font settings
   const mainContainer = new FlexContainer({
     direction: FlexDirection.Column,
     gap: 30,
-    padding: EdgeInsets.all(20)
+    padding: EdgeInsets.all(20),
+    fontConfig: fontConfig
   });
 
   // Section 1: Theme Selector
@@ -199,8 +205,7 @@ export async function createThemingShowcase(): Promise<UIComponent> {
       text: 'User Profile Form',
       fontSize: 20,
       fontWeight: 'bold',
-      color: currentTheme.text
-    });
+      color: currentTheme.text    });
     container.addChild(profileTitle);
 
     profileForm = new FlexContainer({
@@ -214,8 +219,7 @@ export async function createThemingShowcase(): Promise<UIComponent> {
       text: 'Full Name',
       fontSize: 14,
       color: currentTheme.textSecondary,
-      fontWeight: 'normal'
-    });
+      fontWeight: 'normal'    });
     nameInput = new UITextInput({
       placeholder: 'Enter your full name',
       width: 400,
@@ -242,8 +246,7 @@ export async function createThemingShowcase(): Promise<UIComponent> {
       text: 'Email Address',
       fontSize: 14,
       color: currentTheme.textSecondary,
-      fontWeight: 'normal'
-    });
+      fontWeight: 'normal'    });
     emailInput = new UITextInput({
       placeholder: 'your.email@example.com',
       width: 400,
@@ -270,8 +273,7 @@ export async function createThemingShowcase(): Promise<UIComponent> {
       text: 'Bio',
       fontSize: 14,
       color: currentTheme.textSecondary,
-      fontWeight: 'normal'
-    });
+      fontWeight: 'normal'    });
     bioInput = new UITextArea({
       placeholder: 'Tell us about yourself...',
       width: 400,
@@ -298,8 +300,7 @@ export async function createThemingShowcase(): Promise<UIComponent> {
       text: 'Preferences',
       fontSize: 16,
       fontWeight: 'bold',
-      color: currentTheme.text
-    });
+      color: currentTheme.text    });
     profileForm.addChild(preferencesLabel);
 
     const preferencesContainer = new FlexContainer({
@@ -445,6 +446,9 @@ export async function createThemingShowcase(): Promise<UIComponent> {
 
   // Listen for theme changes
   themeManager.addListener((newTheme, info) => {
+    // Update scroll container background
+    scrollContainer.setBackgroundColor(newTheme.background);
+
     // Update form elements without recreating (maintains positioning)
     updateFormElementsTheme(newTheme);
 

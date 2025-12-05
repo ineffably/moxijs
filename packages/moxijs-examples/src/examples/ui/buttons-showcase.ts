@@ -1,6 +1,9 @@
 /**
  * Buttons Showcase Tab
  * Demonstrates different ways to style and create buttons
+ *
+ * Uses MSDF (Multi-channel Signed Distance Field) text rendering
+ * for crisp text at any scale.
  */
 import * as PIXI from 'pixi.js';
 import {
@@ -12,11 +15,12 @@ import {
   UIBox,
   UIButton,
   UILabel,
-  UIComponent
+  UIComponent,
+  UIFontConfig
 } from '@moxijs/ui';
 import { ASSETS } from '../../assets-config';
 
-export async function createButtonsShowcase(): Promise<UIComponent> {
+export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<UIComponent> {
   // Load the spritesheet with pixel-perfect settings
   await PIXI.Assets.load({
     alias: 'uipackSpace',
@@ -70,6 +74,7 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
   });
 
   // Create main container with vertical layout
+  // Set fontConfig here so all children inherit MSDF font settings
   const mainContainer = new FlexContainer({
     direction: FlexDirection.Column,
     justify: FlexJustify.Start,
@@ -77,7 +82,8 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
     gap: 30,
     padding: EdgeInsets.all(40),
     width: 1280,
-    height: 800
+    height: 800,
+    fontConfig: fontConfig
   });
 
   // Create row container for two columns
@@ -500,8 +506,6 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
     fontSize: 12,
     textColor: 0x333333,
     onClick: () => console.log('Grey clicked!')
@@ -520,8 +524,6 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
     fontSize: 14,
     textColor: 0x4a3728,
     onClick: () => console.log('Beige clicked!')
@@ -540,8 +542,6 @@ export async function createButtonsShowcase(): Promise<UIComponent> {
       useNineSlice: true,
       nineSliceBorders: { left: 16, top: 16, right: 16, bottom: 20 }
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
     fontSize: 16,
     textColor: 0xf5deb3,
     onClick: () => console.log('Brown clicked!')
@@ -725,6 +725,7 @@ function createSection(title: string): FlexContainer {
     gap: 10
   });
 
+  // msdfFontFamily will be inherited from parent container
   const titleLabel = new UILabel({
     text: title,
     fontSize: 18,

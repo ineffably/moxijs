@@ -15,6 +15,7 @@ import { initTextRendering } from './examples/02-ui/text-rendering';
 import { initFontRenderingComparison } from './examples/02-ui/font-rendering-comparison';
 import { initUIShowcase } from './examples/02-ui/ui-showcase';
 import { initBitmapFontGenerator } from './examples/02-ui/bitmap-font-generator';
+import { initMsdfTextRendering } from './examples/02-ui/msdf-text-rendering';
 // import { initFontRasterizationLab } from './examples/02-ui/font-rasterization-lab'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -55,6 +56,7 @@ import textRenderingSource from './examples/02-ui/text-rendering.ts?raw';
 import fontRenderingComparisonSource from './examples/02-ui/font-rendering-comparison.ts?raw';
 import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
 import bitmapFontGeneratorSource from './examples/02-ui/bitmap-font-generator.ts?raw';
+import msdfTextRenderingSource from './examples/02-ui/msdf-text-rendering.ts?raw';
 // import fontRasterizationLabSource from './examples/02-ui/font-rasterization-lab.ts?raw'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -163,6 +165,12 @@ const categories: Record<string, Category> = {
         description: 'High-DPI supersampling for pixel-perfect fonts',
         init: initBitmapFontGenerator,
         source: bitmapFontGeneratorSource
+      },
+      'msdf-text-rendering': {
+        name: 'MSDF Text (SDF)',
+        description: 'MSDF is a technique for text so that it stays crisp at any scale',
+        init: initMsdfTextRendering,
+        source: msdfTextRenderingSource
       }
       // 'font-rasterization-lab' disabled - experimental
     }

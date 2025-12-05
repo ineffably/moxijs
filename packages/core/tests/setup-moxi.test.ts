@@ -42,7 +42,8 @@ describe('setupMoxi', () => {
       width: 1280,
       height: 720,
       canvas: {
-        style: {}
+        style: {},
+        addEventListener: jest.fn()
       } as any,
       background: {
         color: 0x000000
@@ -113,6 +114,63 @@ describe('setupMoxi', () => {
         mockHostElement,
         expect.any(Object)
       );
+    });
+  });
+
+  describe('suppressContextMenu option', () => {
+    it('should add contextmenu listener when suppressContextMenu is true', async () => {
+      await setupMoxi({
+        hostElement: mockHostElement,
+        suppressContextMenu: true
+      });
+
+      expect(mockRenderer.canvas.addEventListener).toHaveBeenCalledWith(
+        'contextmenu',
+        expect.any(Function)
+      );
+    });
+
+    it('should not add contextmenu listener when suppressContextMenu is false', async () => {
+      await setupMoxi({
+        hostElement: mockHostElement,
+        suppressContextMenu: false
+      });
+
+      expect(mockRenderer.canvas.addEventListener).not.toHaveBeenCalledWith(
+        'contextmenu',
+        expect.any(Function)
+      );
+    });
+
+    it('should not add contextmenu listener when suppressContextMenu is not provided', async () => {
+      await setupMoxi({
+        hostElement: mockHostElement
+      });
+
+      expect(mockRenderer.canvas.addEventListener).not.toHaveBeenCalledWith(
+        'contextmenu',
+        expect.any(Function)
+      );
+    });
+
+    it('should prevent default on contextmenu event', async () => {
+      await setupMoxi({
+        hostElement: mockHostElement,
+        suppressContextMenu: true
+      });
+
+      // Get the listener that was registered
+      const addEventListenerCall = (mockRenderer.canvas.addEventListener as jest.Mock).mock.calls
+        .find(call => call[0] === 'contextmenu');
+
+      expect(addEventListenerCall).toBeDefined();
+
+      const listener = addEventListenerCall[1];
+      const mockEvent = { preventDefault: jest.fn() };
+
+      listener(mockEvent);
+
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
     });
   });
 });

@@ -1,6 +1,9 @@
 /**
  * Option Controls Showcase Tab
  * Demonstrates checkboxes, toggles, radio groups, and select boxes
+ *
+ * Uses MSDF (Multi-channel Signed Distance Field) text rendering
+ * for crisp text at any scale.
  */
 import {
   EdgeInsets,
@@ -16,10 +19,11 @@ import {
   UISelect,
   SelectOption,
   UIComponent,
-  UIScrollContainer
+  UIScrollContainer,
+  UIFontConfig
 } from '@moxijs/ui';
 
-export async function createOptionControlsShowcase(): Promise<UIComponent> {
+export async function createOptionControlsShowcase(fontConfig?: UIFontConfig): Promise<UIComponent> {
   // Create scroll container with dark neutral theme
   const scrollContainer = new UIScrollContainer({
     width: 1280,
@@ -33,11 +37,13 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
   });
 
   // Main container with two columns
+  // Set fontConfig here so all children inherit MSDF font settings
   const mainContainer = new FlexContainer({
     direction: FlexDirection.Row,
     gap: 40,
     padding: EdgeInsets.all(20),
-    align: FlexAlign.Start
+    align: FlexAlign.Start,
+    fontConfig: fontConfig
   });
 
   // Left column container
@@ -59,8 +65,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Basic Checkboxes',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section1Container = new FlexContainer({
     direction: FlexDirection.Row,
@@ -108,8 +113,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Checkbox Sizes',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section2Container = new FlexContainer({
     direction: FlexDirection.Row,
@@ -148,8 +152,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Custom Colors',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section3Container = new FlexContainer({
     direction: FlexDirection.Row,
@@ -193,8 +196,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Checkboxes with Labels',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section4Container = new FlexContainer({
     direction: FlexDirection.Column,
@@ -250,8 +252,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Radio Groups',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section5Container = new FlexContainer({
     direction: FlexDirection.Column,
@@ -264,8 +265,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Basic Radio Group',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const basicRadioGroup = new UIRadioGroup({
     options: [
       { label: 'Option 1', value: 'opt1' },
@@ -289,8 +289,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Horizontal Radio Group',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const horizontalRadioGroup = new UIRadioGroup({
     options: [
       { label: 'Small', value: 'small' },
@@ -316,8 +315,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Radio Group with Disabled Options',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const disabledRadioGroup = new UIRadioGroup({
     options: [
       { label: 'Available Option 1', value: 'opt1' },
@@ -342,8 +340,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Disabled Radio Group',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const disabledGroup = new UIRadioGroup({
     options: [
       { label: 'Option 1', value: 'opt1' },
@@ -371,8 +368,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Select Boxes',
     fontSize: 24,
     fontWeight: 'bold',
-    color: 0xffffff
-  });
+    color: 0xffffff  });
 
   const section6Container = new FlexContainer({
     direction: FlexDirection.Column,
@@ -385,8 +381,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Basic Select',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const basicSelect = new UISelect({
     options: [
       { label: 'Option 1', value: 'opt1' },
@@ -416,8 +411,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Select with Default Value',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const defaultSelect = new UISelect({
     options: [
       { label: 'Red', value: 'red' },
@@ -447,8 +441,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Select with Disabled Options',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const disabledSelect = new UISelect({
     options: [
       { label: 'Available Option 1', value: 'opt1' },
@@ -478,8 +471,7 @@ export async function createOptionControlsShowcase(): Promise<UIComponent> {
     text: 'Disabled Select',
     fontSize: 14,
     color: 0xcccccc,
-    fontWeight: 'normal'
-  });
+    fontWeight: 'normal'  });
   const disabledSelectBox = new UISelect({
     options: [
       { label: 'Option 1', value: 'opt1' },

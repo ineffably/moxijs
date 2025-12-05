@@ -148,6 +148,14 @@ export class UIScrollContainer extends UIComponent {
   }
 
   /**
+   * Sets the background color and redraws
+   */
+  setBackgroundColor(color: number): void {
+    this.props.backgroundColor = color;
+    this.updateBackground();
+  }
+
+  /**
    * Updates the content mask
    */
   private updateMask(): void {

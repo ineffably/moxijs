@@ -6,10 +6,12 @@
   "types": "lib/types/index.d.ts",
   "files": [
     "lib",
+    "scripts",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
+    "generate-msdf-font": "node scripts/generate-msdf-font.mjs",
     "build": "rimraf ./lib && webpack --mode production",
     "build:clean": "npm run clean && npm run build",
     "clean": "rimraf ./lib",

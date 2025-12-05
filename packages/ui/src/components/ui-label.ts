@@ -28,6 +28,8 @@ export interface UILabelProps {
   fontWeight?: string;
   /** Line height multiplier */
   lineHeight?: number;
+  /** MSDF font family name. If provided, uses MSDF (Multi-channel Signed Distance Field) text rendering for crisp text at any scale. Must match the loaded MSDF font's family name. */
+  msdfFontFamily?: string;
 }
 
 /**
@@ -57,15 +59,22 @@ export interface UILabelProps {
  * ```
  */
 export class UILabel extends UIComponent {
-  private props: Required<UILabelProps>;
-  private textObject: PIXI.Text;
+  private props: Required<Omit<UILabelProps, 'msdfFontFamily'>>;
+  private textObject: PIXI.Text | null = null;
+  private msdfTextObject: PIXI.BitmapText | null = null;
   private readonly dprScale = 2; // DPR scaling factor for crisp text
-  
+  /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
+  private readonly localMsdfFontFamily?: string;
+  /** Track if text object has been initialized */
+  private textInitialized = false;
+
   // Services (composition)
 
   constructor(props: UILabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
+    // Store local prop - actual value will be resolved via inheritance
+    this.localMsdfFontFamily = props.msdfFontFamily;
 
     this.props = {
       text: props.text,
@@ -79,16 +88,45 @@ export class UILabel extends UIComponent {
       lineHeight: props.lineHeight ?? 1.2
     };
 
-    // Create PIXI.Text with high-DPI DPR rendering for crisp text
-    this.textObject = asTextDPR({
-      text: this.props.text,
-      style: this.getTextStyle(),
-      dprScale: this.dprScale,
-      pixelPerfect: true
-    });
-    this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
+    // Note: Text object creation is deferred to ensureTextObject()
+    // to allow font inheritance from parent containers
+  }
 
-    this.container.addChild(this.textObject);
+  /**
+   * Ensures text object is created (lazy initialization).
+   * Called before measure/render to allow parent inheritance to work.
+   */
+  private ensureTextObject(): void {
+    if (this.textInitialized) return;
+    this.textInitialized = true;
+
+    // Resolve MSDF font family - check local prop first, then inherit from parent
+    const effectiveMsdfFont = this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
+
+    if (effectiveMsdfFont) {
+      // Create PIXI.BitmapText for MSDF rendering (crisp at any scale)
+      this.msdfTextObject = new PIXI.BitmapText({
+        text: this.props.text,
+        style: {
+          fontFamily: effectiveMsdfFont,
+          fontSize: this.props.fontSize,
+          fill: this.props.color,
+          align: this.props.align
+        }
+      });
+      this.msdfTextObject.roundPixels = true;
+      this.container.addChild(this.msdfTextObject);
+    } else {
+      // Create PIXI.Text with high-DPI DPR rendering for crisp text
+      this.textObject = asTextDPR({
+        text: this.props.text,
+        style: this.getTextStyle(),
+        dprScale: this.dprScale,
+        pixelPerfect: true
+      });
+      this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
+      this.container.addChild(this.textObject);
+    }
   }
 
   /** @internal */
@@ -114,6 +152,8 @@ export class UILabel extends UIComponent {
 
   /** @internal */
   private updateTextStyle(): void {
+    if (!this.textObject) return;
+
     // Update the text style, accounting for DPR scaling
     const style = this.getTextStyle();
     // asTextDPR already multiplied fontSize by dprScale, so we need to update it
@@ -131,12 +171,25 @@ export class UILabel extends UIComponent {
 
   /** @internal */
   measure(): MeasuredSize {
-    const padding = this.boxModel.padding;
-    const metrics = this.textObject;
+    // Ensure text object exists (lazy init for inheritance support)
+    this.ensureTextObject();
 
-    // Get text bounds
-    const textWidth = metrics.width;
-    const textHeight = metrics.height;
+    const padding = this.boxModel.padding;
+
+    // Get text bounds from the appropriate text object
+    let textWidth: number;
+    let textHeight: number;
+
+    if (this.msdfTextObject) {
+      textWidth = this.msdfTextObject.width;
+      textHeight = this.msdfTextObject.height;
+    } else if (this.textObject) {
+      textWidth = this.textObject.width;
+      textHeight = this.textObject.height;
+    } else {
+      textWidth = 0;
+      textHeight = 0;
+    }
 
     const contentSize: MeasuredSize = {
       width: textWidth,
@@ -199,52 +252,84 @@ export class UILabel extends UIComponent {
   protected render(): void {
     const padding = this.boxModel.padding;
     const x = Math.round(padding.left);
-    
+
+    // Get text height from the appropriate object
+    const textHeight = this.msdfTextObject?.height ?? this.textObject?.height ?? 0;
+
     // Vertically center text if height is specified and larger than text height
     let y: number;
     if (this.computedLayout.height > 0 && this.computedLayout.contentHeight > 0) {
-      const textHeight = this.textObject.height;
       const availableHeight = this.computedLayout.contentHeight;
       // Center vertically within available content height
       y = Math.round(padding.top + (availableHeight - textHeight) / 2);
     } else {
       y = Math.round(padding.top);
     }
-    
-    this.textObject.position.set(x, y);
-    this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
+
+    if (this.msdfTextObject) {
+      this.msdfTextObject.position.set(x, y);
+      this.msdfTextObject.roundPixels = true;
+    } else if (this.textObject) {
+      this.textObject.position.set(x, y);
+      this.textObject.roundPixels = true; // Ensure pixel-perfect positioning
+    }
   }
 
   /** Update displayed text. */
   setText(text: string): void {
     this.props.text = text;
-    this.textObject.text = text;
+    this.ensureTextObject();
+    if (this.msdfTextObject) {
+      this.msdfTextObject.text = text;
+    } else if (this.textObject) {
+      this.textObject.text = text;
+    }
     this.markLayoutDirty();
   }
 
   /** Update text color. */
   setColor(color: number): void {
     this.props.color = color;
-    this.textObject.style.fill = color;
+    this.ensureTextObject();
+    if (this.msdfTextObject) {
+      this.msdfTextObject.style.fill = color;
+    } else if (this.textObject) {
+      this.textObject.style.fill = color;
+    }
   }
 
   /** Set the position of the label (overrides layout positioning) */
   setPosition(x: number, y: number): void {
-    this.textObject.position.set(Math.round(x), Math.round(y));
+    this.ensureTextObject();
+    if (this.msdfTextObject) {
+      this.msdfTextObject.position.set(Math.round(x), Math.round(y));
+    } else if (this.textObject) {
+      this.textObject.position.set(Math.round(x), Math.round(y));
+    }
   }
 
   /** Update font size. */
   setFontSize(size: number): void {
     this.props.fontSize = size;
-    // Account for DPR scaling - fontSize in style is display size * dprScale
-    this.textObject.style.fontSize = size * this.dprScale;
-    // Also update line height
-    this.textObject.style.lineHeight = size * this.props.lineHeight * this.dprScale;
+    this.ensureTextObject();
+    if (this.msdfTextObject) {
+      this.msdfTextObject.style.fontSize = size;
+    } else if (this.textObject) {
+      // Account for DPR scaling - fontSize in style is display size * dprScale
+      this.textObject.style.fontSize = size * this.dprScale;
+      // Also update line height
+      this.textObject.style.lineHeight = size * this.props.lineHeight * this.dprScale;
+    }
     this.markLayoutDirty();
   }
 
   /** Get current text. */
   getText(): string {
     return this.props.text;
+  }
+
+  /** Check if this label uses MSDF text rendering (includes inherited) */
+  isMSDF(): boolean {
+    return !!this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
   }
 }

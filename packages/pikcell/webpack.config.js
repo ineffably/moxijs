@@ -92,7 +92,8 @@ const devConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './index.html',
+      template: './dev.html',
+      filename: 'dev.html',
       title: 'PIKCELL - Pixel Sprite Editor',
       inject: false
     })
@@ -107,7 +108,8 @@ const devConfig = {
     },
     compress: true,
     port: 9001,
-    hot: true
+    hot: true,
+    open: '/dev.html'
   },
   devtool: 'source-map'
 };

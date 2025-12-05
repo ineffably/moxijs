@@ -1,6 +1,6 @@
 # Why MoxiJS?
 
-MoxiJS is a game framework written in TypeScript built to work with PixiJS, designed for rapid development of WebGL-based games, POCs, and prototypes. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
+MoxiJS is a game framework written in TypeScript built to work with PixiJS, designed for rapid development of WebGL-based games, POCs, and prototypes. It's split into modular packages (`@moxijs/core` for game logic, `@moxijs/ui` for interface components) so you only import what you need. It's also LLM-friendly - clean, well-documented code that AI assistants can easily understand and help you build with.
 
 ## The Problem
 
@@ -20,6 +20,7 @@ const { scene, engine, renderer, camera, loadAssets } = await setupMoxi({
   width: 1280,
   height: 720,
   pixelPerfect: true,
+  suppressContextMenu: true,  // Prevent right-click menu
   physics: { gravity: { x: 0, y: 9.8 } }
 });
 ```
@@ -95,9 +96,14 @@ CollisionRegistry.onCollision('player', 'enemy', (a, b) => {
 
 2D physics with tag-based collision system. Toggle debug rendering with one flag.
 
-### 7. Production-Ready UI
+### 7. Production-Ready UI (via @moxijs/ui)
 
 ```typescript
+import { FlexContainer, FlexDirection, UIButton, ThemeManager } from '@moxijs/ui';
+
+// Theming system with CSS-like inheritance
+const themeManager = new ThemeManager(darkTheme);
+
 const menu = new FlexContainer({
   direction: FlexDirection.Column,
   justify: FlexJustify.Center,
@@ -108,11 +114,27 @@ menu.addChild(new UIButton({
   text: 'Start Game',
   onClick: () => startGame()
 }));
+
+// Switch themes at runtime
+themeManager.setTheme(lightTheme);
 ```
 
-Flexbox layout, focus management, responsive scaling - in PixiJS.
+Flexbox layout, theming, scroll containers, focus management, responsive scaling - all in PixiJS.
 
-### 8. Pixel-Perfect Helpers
+### 8. MSDF Text Rendering
+
+```typescript
+// High-quality text at any scale using MSDF fonts
+const label = new UILabel({
+  text: 'Crisp Text',
+  fontFamily: 'PixelOperator8',  // MSDF font
+  fontSize: 24
+});
+```
+
+Generate MSDF fonts with the included script. Text stays sharp when scaled - perfect for UI.
+
+### 9. Pixel-Perfect Helpers
 
 ```typescript
 // Grid-based positioning
@@ -157,16 +179,17 @@ const walkFrames = TextureFrameSequences.getFrameSequence('hero', 'walk');
 ## Getting Started
 
 ```typescript
-import MoxiJS from '@moxijs/core';
+import { setupMoxi, asSprite } from '@moxijs/core';
+import { UIButton, FlexContainer } from '@moxijs/ui';  // Optional UI package
 
-const { scene, engine, loadAssets } = await MoxiJS.setupMoxi({
+const { scene, engine, loadAssets } = await setupMoxi({
   width: 800,
   height: 600
 });
 
 await loadAssets([{ src: 'sprites.json' }]);
 
-const sprite = MoxiJS.asSprite({ texture: 'hero', x: 400, y: 300 });
+const sprite = asSprite({ texture: 'hero', x: 400, y: 300 });
 scene.addChild(sprite);
 
 // You're rendering. Now build your game.

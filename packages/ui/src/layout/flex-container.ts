@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, UIFontConfig } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { EdgeInsets } from '../base/edge-insets';
 
@@ -39,6 +39,8 @@ export interface FlexContainerProps {
   padding?: EdgeInsets;
   width?: number | 'fill';
   height?: number | 'fill';
+  /** Font configuration that children will inherit (like CSS) */
+  fontConfig?: UIFontConfig;
 }
 
 /**
@@ -69,7 +71,7 @@ export interface FlexContainerProps {
  * ```
  */
 export class FlexContainer extends UIComponent {
-  private props: Required<Omit<FlexContainerProps, 'padding' | 'width' | 'height'>>;
+  private props: Required<Omit<FlexContainerProps, 'padding' | 'width' | 'height' | 'fontConfig'>>;
   public children: UIComponent[] = [];
 
   constructor(props: FlexContainerProps = {}) {
@@ -88,6 +90,11 @@ export class FlexContainer extends UIComponent {
       gap: props.gap ?? 0,
       wrap: props.wrap ?? false
     };
+
+    // Set font config if provided (children will inherit this)
+    if (props.fontConfig) {
+      this.setFontConfig(props.fontConfig);
+    }
   }
 
   /** Add child component. */

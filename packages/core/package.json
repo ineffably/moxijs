@@ -21,8 +21,7 @@
     "test": "jest --config ./jest.config.js --collect-coverage",
     "test:watch": "jest --config ./jest.config.js --watch",
     "test:ci": "jest --config ./jest.config.js --ci --coverage --maxWorkers=2",
-    "gendocs": "typedoc --out ./docs ./src",
-    "docs": "typedoc",
+    "typedoc": "typedoc",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

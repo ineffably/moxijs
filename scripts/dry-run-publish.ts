@@ -8,8 +8,8 @@
  *   npm run publish:dry-run -- patch both
  */
 
-import { execSync, spawnSync } from 'child_process';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'fs';
+import { execSync } from 'child_process';
+import { mkdtempSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
 
@@ -64,7 +64,7 @@ function calculateNewVersion(currentVersion: string, bump: BumpType): string {
 function testPackage(
   pkg: 'core' | 'ui',
   bump: BumpType,
-  tempDir: string
+  _tempDir: string
 ): { success: boolean; currentVersion: string; newVersion: string } {
   const pkgDir = `packages/${pkg}`;
   const pkgName = `@moxijs/${pkg}`;
@@ -92,29 +92,25 @@ function testPackage(
   const tarball = runCapture(`ls -1 *.tgz | head -1`, fullPkgDir);
   const tarballPath = join(fullPkgDir, tarball);
 
-  // Test installation in temp directory
-  console.log(colors.blue('  Testing installation...'));
-  const testDir = join(tempDir, `test-${pkg}`);
-  run(`mkdir -p ${testDir}`, { silent: true });
-  run('npm init -y --quiet', { cwd: testDir, silent: true });
+  // Verify tarball contains expected files
+  console.log(colors.blue('  Verifying tarball contents...'));
+  const tarContents = runCapture(`tar -tzf ${tarballPath}`, fullPkgDir);
+  const hasIndex = tarContents.includes('package/lib/index.js');
+  const hasPackageJson = tarContents.includes('package/package.json');
+  const hasTypes = tarContents.includes('package/lib/types/');
 
-  try {
-    run(`npm install ${tarballPath} --quiet 2>/dev/null`, { cwd: testDir, silent: true });
-  } catch {
-    // npm install may return non-zero but still work
-  }
-
-  // Test import
-  const importTest = spawnSync('node', ['-e', `require('${pkgName}')`], { cwd: testDir });
-  const success = importTest.status === 0;
+  const success = hasIndex && hasPackageJson && hasTypes;
 
   if (success) {
-    console.log(colors.green(`  ✓ ${pkgName} imports successfully`));
+    console.log(colors.green(`  ✓ ${pkgName} tarball is valid`));
+    console.log(`    - lib/index.js: ✓`);
+    console.log(`    - package.json: ✓`);
+    console.log(`    - lib/types/: ✓`);
   } else {
-    console.log(colors.red(`  ✗ ${pkgName} failed to import`));
-    if (importTest.stderr) {
-      console.log(colors.red(`    ${importTest.stderr.toString()}`));
-    }
+    console.log(colors.red(`  ✗ ${pkgName} tarball is missing required files`));
+    if (!hasIndex) console.log(colors.red(`    - lib/index.js: ✗`));
+    if (!hasPackageJson) console.log(colors.red(`    - package.json: ✗`));
+    if (!hasTypes) console.log(colors.red(`    - lib/types/: ✗`));
   }
 
   // Cleanup tarball

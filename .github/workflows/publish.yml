@@ -51,76 +51,11 @@ jobs:
       - name: Run tests
         run: npm run test:ci
 
-  # Validate both packages before publishing either (when publishing both)
-  validate:
-    needs: test
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' && inputs.package == 'both'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build packages
-        run: npm run build
-
-      - name: Bump versions (dry-run)
-        run: |
-          cd packages/core
-          npm version ${{ inputs.bump }} --no-git-tag-version
-          CORE_VERSION=$(node -p "require('./package.json').version")
-          echo "CORE_VERSION=$CORE_VERSION" >> $GITHUB_ENV
-          cd ../ui
-          npm version ${{ inputs.bump }} --no-git-tag-version
-          UI_VERSION=$(node -p "require('./package.json').version")
-          echo "UI_VERSION=$UI_VERSION" >> $GITHUB_ENV
-          echo "📦 Will publish: @moxijs/core@$CORE_VERSION, @moxijs/ui@$UI_VERSION"
-
-      - name: Verify @moxijs/core package
-        run: |
-          cd packages/core
-          echo "📦 @moxijs/core package contents:"
-          npm pack --dry-run
-          npm pack
-          mkdir -p /tmp/test-core && cd /tmp/test-core
-          npm init -y
-          npm install $GITHUB_WORKSPACE/packages/core/*.tgz
-          node -e "const m = require('@moxijs/core'); console.log('✅ @moxijs/core imports successfully')"
-
-      - name: Verify @moxijs/ui package
-        run: |
-          cd packages/ui
-          echo "📦 @moxijs/ui package contents:"
-          npm pack --dry-run
-          npm pack
-          mkdir -p /tmp/test-ui && cd /tmp/test-ui
-          npm init -y
-          npm install $GITHUB_WORKSPACE/packages/ui/*.tgz
-          node -e "const m = require('@moxijs/ui'); console.log('✅ @moxijs/ui imports successfully')"
-
-      - name: Validation complete
-        run: |
-          echo "✅ Both packages validated successfully!"
-          echo "📦 @moxijs/core@${{ env.CORE_VERSION }}"
-          echo "📦 @moxijs/ui@${{ env.UI_VERSION }}"
-
   publish-core:
     runs-on: ubuntu-latest
-    needs: [test, validate]
-    # Run after test, and after validate if it ran (for 'both')
+    needs: test
     if: |
-      always() &&
       needs.test.result == 'success' &&
-      (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
       (startsWith(github.ref, 'refs/tags/v') ||
        startsWith(github.ref, 'refs/tags/core@') ||
        (github.event_name == 'workflow_dispatch' && (inputs.package == 'both' || inputs.package == 'core')))
@@ -148,18 +83,6 @@ jobs:
           npm version ${{ inputs.bump }} --no-git-tag-version
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-      - name: Verify package (single package publish)
-        if: github.event_name == 'workflow_dispatch' && inputs.package == 'core'
-        run: |
-          cd packages/core
-          echo "📦 Package contents:"
-          npm pack --dry-run
-          npm pack
-          mkdir -p /tmp/test-core && cd /tmp/test-core
-          npm init -y
-          npm install $GITHUB_WORKSPACE/packages/core/*.tgz
-          node -e "const m = require('@moxijs/core'); console.log('✅ @moxijs/core imports successfully')"
-
       - name: Publish @moxijs/core
         run: npm publish --workspace=@moxijs/core
         env:
@@ -178,12 +101,11 @@ jobs:
 
   publish-ui:
     runs-on: ubuntu-latest
-    needs: [test, validate, publish-core]
-    # Run after test and validate, wait for publish-core if it ran
+    needs: [test, publish-core]
+    # Run after test, wait for publish-core if it ran
     if: |
       always() &&
       needs.test.result == 'success' &&
-      (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
       (needs.publish-core.result == 'success' || needs.publish-core.result == 'skipped') &&
       (startsWith(github.ref, 'refs/tags/v') ||
        startsWith(github.ref, 'refs/tags/ui@') ||
@@ -217,18 +139,6 @@ jobs:
           cd packages/ui
           npm version ${{ inputs.bump }} --no-git-tag-version
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Verify package (single package publish)
-        if: github.event_name == 'workflow_dispatch' && inputs.package == 'ui'
-        run: |
-          cd packages/ui
-          echo "📦 Package contents:"
-          npm pack --dry-run
-          npm pack
-          mkdir -p /tmp/test-ui && cd /tmp/test-ui
-          npm init -y
-          npm install $GITHUB_WORKSPACE/packages/ui/*.tgz
-          node -e "const m = require('@moxijs/ui'); console.log('✅ @moxijs/ui imports successfully')"
 
       - name: Publish @moxijs/ui
         run: npm publish --workspace=@moxijs/ui

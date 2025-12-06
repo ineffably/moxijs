@@ -10,7 +10,8 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, outDir),
       filename: `index.js`,
-      library: { name: 'moxiUI', type: 'umd' }
+      library: { name: 'moxiUI', type: 'umd' },
+      globalObject: 'this'
     },
     externals: {
       'pixi.js': {

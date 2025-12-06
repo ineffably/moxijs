@@ -12,7 +12,8 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, outDir),
       filename: `index.js`,
-      library: { name: 'moxi', type: 'umd' }
+      library: { name: 'moxi', type: 'umd' },
+      globalObject: 'this'
     },
     externals: {
       'pixi.js': {

@@ -145,12 +145,13 @@ const dropdownBg = resolver.getSelectDropdownBackground(); // → selectDropdown
 Currently supported:
 - ✅ `UICheckbox`
 - ✅ `UICheckboxWithLabel`
-- 🔄 `UIRadioButton` (planned)
-- 🔄 `UIRadioOption` (planned)
-- 🔄 `UISelect` (planned)
-- 🔄 `UIButton` (planned)
-- 🔄 `UITextInput` (planned)
-- 🔄 `UITextArea` (planned)
+- ✅ `UIRadioButton`
+- ✅ `UIRadioOption`
+- ✅ `UIRadioGroup`
+- ✅ `UISelect`
+- ✅ `UIButton`
+- ✅ `UITextInput`
+- ✅ `UITextArea`
 
 ### Usage Pattern
 

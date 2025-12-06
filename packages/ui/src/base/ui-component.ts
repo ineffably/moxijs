@@ -1,8 +1,23 @@
 import * as PIXI from 'pixi.js';
-import { BoxModel, ComputedLayout, MeasuredSize, createDefaultBoxModel } from './box-model';
+import { BoxModel, ComputedLayout, MeasuredSize, createDefaultBoxModel, FlexProps } from './box-model';
 import { LayoutEngine } from '../services';
 import { ThemeResolver } from '../theming/theme-resolver';
 import { createDefaultDarkTheme } from '../theming/theme-data';
+import {
+  LayoutNode,
+  createLayoutNode,
+  ComputedLayout as FlexComputedLayout,
+} from '../layout/layout-types';
+import {
+  IFlexLayoutParticipant,
+  syncBoxModelToLayoutStyle,
+} from '../layout/layout-participant';
+
+// Unique ID counter for layout nodes
+let nextLayoutId = 0;
+function generateLayoutId(): string {
+  return `ui-${nextLayoutId++}`;
+}
 
 /**
  * Font configuration that can be inherited from parent containers.
@@ -15,17 +30,38 @@ export interface UIFontConfig {
   fontFamily?: string;
   /** Default font size */
   fontSize?: number;
+  /** Default font weight ('normal', 'bold', or numeric 100-900) */
+  fontWeight?: 'normal' | 'bold' | number;
   /** Default text color */
   textColor?: number;
 }
 
 /**
+ * Layout configuration that can be inherited.
+ * Allows setting shared layout defaults (like control height, border radius)
+ * that cascade down to children.
+ */
+export interface UILayoutConfig {
+  /** Default padding for children containers */
+  defaultPadding?: number;
+  /** Default margin for children */
+  defaultMargin?: number;
+  /** Default border radius for controls/panels */
+  borderRadius?: number;
+  /** Standard height for interactive controls (buttons, inputs) */
+  controlHeight?: number;
+}
+
+/**
  * Base abstract class for all UI components
- * Provides box model, layout, and rendering functionality
+ * Provides box model, layout, and rendering functionality.
+ *
+ * Implements IFlexLayoutParticipant for integration with the new flex layout system.
+ * Components can be added to a LayoutTree for automatic layout management.
  *
  * @category UI
  */
-export abstract class UIComponent {
+export abstract class UIComponent implements IFlexLayoutParticipant {
   /**
    * The PIXI container that holds this component's visual representation
    */
@@ -105,9 +141,36 @@ export abstract class UIComponent {
 
   /**
    * Font configuration for this component.
-   * If set, children will inherit these settings (like CSS).
+   * Children inherit these settings (like CSS font inheritance).
+   * Set via setFontConfig() and resolved via getInheritedFont* methods.
    */
   protected fontConfig?: UIFontConfig;
+
+  /**
+   * Layout configuration for this component.
+   * Children inherit these defaults unless overridden.
+   */
+  protected layoutConfig?: UILayoutConfig;
+
+  // === IFlexLayoutParticipant Implementation ===
+
+  /**
+   * Unique identifier for this component in the layout tree
+   */
+  public readonly id: string;
+
+  /**
+   * Layout node for the new flex layout system.
+   * Synced from boxModel when using LayoutTree.
+   */
+  private _layoutNode: LayoutNode;
+
+  /**
+   * Get the layout node (IFlexLayoutParticipant)
+   */
+  get layoutNode(): LayoutNode {
+    return this._layoutNode;
+  }
 
   constructor(boxModel?: Partial<BoxModel>) {
     this.container = new PIXI.Container();
@@ -123,8 +186,18 @@ export abstract class UIComponent {
       contentHeight: 0
     };
 
-    // Initialize layout engine service (available to all components)
-    this.layoutEngine = new LayoutEngine();
+    // Use shared layout engine singleton (stateless, pure functions)
+    this.layoutEngine = LayoutEngine.getInstance();
+
+    // Initialize flex layout integration
+    this.id = generateLayoutId();
+    this._layoutNode = createLayoutNode(this.id);
+
+    // Set up measurement function for layout node
+    this._layoutNode.measureFn = () => this.measureContent();
+
+    // Initial sync
+    this.syncLayoutStyle();
 
     // Create focus ring (initially hidden)
     this.createFocusRing();
@@ -141,7 +214,8 @@ export abstract class UIComponent {
   }
 
   /**
-   * Updates the focus ring appearance based on component size
+   * Updates the focus ring appearance based on component size.
+   * Uses theme colors for consistent styling.
    */
   protected updateFocusRing(): void {
     if (!this.focusRing) return;
@@ -152,6 +226,9 @@ export abstract class UIComponent {
     const height = this.computedLayout.height;
 
     if (width <= 0 || height <= 0) return;
+
+    // Get focus color from theme
+    const focusColor = this.resolveColor('focus');
 
     // Animated pulsing effect with dashed outline
     const offset = 4;
@@ -166,7 +243,7 @@ export abstract class UIComponent {
       8
     );
     this.focusRing.stroke({
-      color: 0x00d9ff,
+      color: focusColor,
       width: strokeWidth + 2,
       alpha: 0.3
     });
@@ -180,11 +257,12 @@ export abstract class UIComponent {
       8
     );
     this.focusRing.stroke({
-      color: 0x00d9ff,
+      color: focusColor,
       width: strokeWidth
     });
 
-    // Draw inner highlight
+    // Draw inner highlight (use text color for contrast)
+    const highlightColor = this.resolveColor('text');
     this.focusRing.roundRect(
       -offset + strokeWidth,
       -offset + strokeWidth,
@@ -193,7 +271,7 @@ export abstract class UIComponent {
       6
     );
     this.focusRing.stroke({
-      color: 0xffffff,
+      color: highlightColor,
       width: 1,
       alpha: 0.6
     });
@@ -216,7 +294,7 @@ export abstract class UIComponent {
    */
   layout(availableWidth: number, availableHeight: number): void {
     const measured = this.measure();
-    
+
     // Use LayoutEngine to calculate layout
     this.computedLayout = this.layoutEngine.layout(
       this.boxModel,
@@ -239,6 +317,10 @@ export abstract class UIComponent {
    */
   public markLayoutDirty(): void {
     this.layoutDirty = true;
+
+    // Sync to layout node when dirty
+    this.syncLayoutStyle();
+
     if (this.parent) {
       this.parent.markLayoutDirty();
     }
@@ -425,6 +507,59 @@ export abstract class UIComponent {
   }
 
   /**
+   * Sets flex properties for this component
+   */
+  public setFlex(props: FlexProps): void {
+    this.boxModel.flex = { ...this.boxModel.flex, ...props };
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets flex grow factor
+   */
+  public setFlexGrow(grow: number): void {
+    this.ensureFlex();
+    this.boxModel.flex!.grow = grow;
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets flex shrink factor
+   */
+  public setFlexShrink(shrink: number): void {
+    this.ensureFlex();
+    this.boxModel.flex!.shrink = shrink;
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets flex basis
+   */
+  public setFlexBasis(basis: number | 'auto'): void {
+    this.ensureFlex();
+    this.boxModel.flex!.basis = basis;
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets align-self property
+   */
+  public setAlignSelf(align: 'auto' | 'start' | 'end' | 'center' | 'stretch'): void {
+    this.ensureFlex();
+    this.boxModel.flex!.alignSelf = align;
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Helper to ensure flex object exists
+   */
+  private ensureFlex(): void {
+    if (!this.boxModel.flex) {
+      this.boxModel.flex = {};
+    }
+  }
+
+  /**
    * Sets font configuration for this component.
    * Children will inherit these settings (like CSS).
    */
@@ -441,6 +576,45 @@ export abstract class UIComponent {
   }
 
   /**
+   * Generic helper for resolving inherited configuration values.
+   * Walks up the parent chain to find a value, like CSS inheritance.
+   *
+   * @param key - The config key to resolve
+   * @param localOverride - Optional local override value (highest priority)
+   * @param localConfig - Local config object to check
+   * @param getParentConfig - Function to get config from a parent component
+   * @returns The resolved value or undefined
+   */
+  private resolveInheritedConfig<C, K extends keyof C>(
+    key: K,
+    localOverride: C[K] | undefined,
+    localConfig: C | undefined,
+    getParentConfig: (parent: UIComponent) => C | undefined
+  ): C[K] | undefined {
+    // Local override takes precedence
+    if (localOverride !== undefined) {
+      return localOverride;
+    }
+
+    // Check local config
+    if (localConfig?.[key] !== undefined) {
+      return localConfig[key];
+    }
+
+    // Walk up parent chain to find inherited value
+    let currentParent = this.parent;
+    while (currentParent) {
+      const parentConfig = getParentConfig(currentParent);
+      if (parentConfig?.[key] !== undefined) {
+        return parentConfig[key];
+      }
+      currentParent = currentParent.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Resolves a font setting by walking up the parent chain.
    * Like CSS inheritance - returns local value if set, otherwise inherits from parent.
    *
@@ -452,27 +626,12 @@ export abstract class UIComponent {
     key: K,
     localOverride?: UIFontConfig[K]
   ): UIFontConfig[K] | undefined {
-    // Local override takes precedence
-    if (localOverride !== undefined) {
-      return localOverride;
-    }
-
-    // Check local font config
-    if (this.fontConfig?.[key] !== undefined) {
-      return this.fontConfig[key];
-    }
-
-    // Walk up parent chain to find inherited value
-    let currentParent = this.parent;
-    while (currentParent) {
-      const parentConfig = currentParent.getFontConfig();
-      if (parentConfig?.[key] !== undefined) {
-        return parentConfig[key];
-      }
-      currentParent = currentParent.parent;
-    }
-
-    return undefined;
+    return this.resolveInheritedConfig(
+      key,
+      localOverride,
+      this.fontConfig,
+      (parent) => parent.getFontConfig()
+    );
   }
 
   /**
@@ -508,6 +667,97 @@ export abstract class UIComponent {
   }
 
   /**
+   * Sets layout configuration for this component.
+   * Children will inherit these settings.
+   */
+  public setLayoutConfig(config: UILayoutConfig): void {
+    this.layoutConfig = config;
+  }
+
+  /**
+   * Gets the layout configuration for this component.
+   */
+  public getLayoutConfig(): UILayoutConfig | undefined {
+    return this.layoutConfig;
+  }
+
+  /**
+   * Resolves a layout setting by walking up the parent chain.
+   * Allows components to adapt to their context (e.g. using parent's default padding).
+   *
+   * @param key - The layout config key to resolve
+   * @param localOverride - Optional local override value
+   * @returns The resolved value or undefined
+   */
+  protected resolveInheritedLayoutParam<K extends keyof UILayoutConfig>(
+    key: K,
+    localOverride?: UILayoutConfig[K]
+  ): UILayoutConfig[K] | undefined {
+    return this.resolveInheritedConfig(
+      key,
+      localOverride,
+      this.layoutConfig,
+      (parent) => parent.getLayoutConfig()
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // IFlexLayoutParticipant Methods
+  // ════════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Measure the intrinsic content size of this component.
+   * Called by the flex layout engine during Pass 2 (measure).
+   *
+   * Override in subclasses that have intrinsic content size.
+   * For containers that size based on children, return { width: 0, height: 0 }.
+   *
+   * @returns The content size in pixels
+   */
+  measureContent(): { width: number; height: number } {
+    // Default implementation uses existing measure() method
+    const measured = this.measure();
+    return { width: measured.width, height: measured.height };
+  }
+
+  /**
+   * Apply computed layout from the flex layout engine.
+   * Called after layout computation completes.
+   *
+   * Updates both the internal computedLayout and PIXI container position.
+   *
+   * @param computed - The computed layout values
+   */
+  applyLayout(computed: FlexComputedLayout): void {
+    // Update internal computed layout
+    this.computedLayout = {
+      x: computed.x,
+      y: computed.y,
+      width: computed.width,
+      height: computed.height,
+      contentX: computed.contentX,
+      contentY: computed.contentY,
+      contentWidth: computed.contentWidth,
+      contentHeight: computed.contentHeight,
+    };
+
+    // Update PIXI container position
+    this.container.position.set(computed.x, computed.y);
+
+    // Mark as clean and render
+    this.layoutDirty = false;
+    this.render();
+  }
+
+  /**
+   * Sync BoxModel properties to the layout node's style.
+   * Called when BoxModel changes to keep the layout system in sync.
+   */
+  syncLayoutStyle(): void {
+    syncBoxModelToLayoutStyle(this.boxModel, this._layoutNode.style);
+  }
+
+  /**
    * Destroys this component and cleans up resources
    */
   public destroy(): void {
@@ -515,6 +765,9 @@ export abstract class UIComponent {
     if (this.container.parent) {
       this.container.parent.removeChild(this.container);
     }
+    // Clean up layout node reference
+    this._layoutNode.measureFn = null;
+
     // Ensure effects is initialized to prevent null reference errors during destruction
     if (this.container.effects === null) {
       this.container.effects = [];

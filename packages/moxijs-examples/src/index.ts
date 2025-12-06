@@ -16,6 +16,7 @@ import { initFontRenderingComparison } from './examples/02-ui/font-rendering-com
 import { initUIShowcase } from './examples/02-ui/ui-showcase';
 import { initBitmapFontGenerator } from './examples/02-ui/bitmap-font-generator';
 import { initMsdfTextRendering } from './examples/02-ui/msdf-text-rendering';
+import { initFlexArchitecture } from './examples/02-ui/flex-architecture';
 // import { initFontRasterizationLab } from './examples/02-ui/font-rasterization-lab'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -34,9 +35,6 @@ import { initNewtonsCradle } from './examples/06-physics/newtons-cradle';
 import { initSpriteLibrary } from './examples/05-tools/sprite-library';
 import { initSpriteEditor } from './examples/05-tools/sprite-editor';
 import { initParticleEmitterSandbox } from './examples/05-tools/particle-sandbox';
-
-// === MINI-GUI ===
-import { initGUIBasics } from './examples/07-mini-gui/gui-basics';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -57,6 +55,7 @@ import fontRenderingComparisonSource from './examples/02-ui/font-rendering-compa
 import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
 import bitmapFontGeneratorSource from './examples/02-ui/bitmap-font-generator.ts?raw';
 import msdfTextRenderingSource from './examples/02-ui/msdf-text-rendering.ts?raw';
+import flexArchitectureSource from './examples/02-ui/flex-architecture.ts?raw';
 // import fontRasterizationLabSource from './examples/02-ui/font-rasterization-lab.ts?raw'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -75,9 +74,6 @@ import newtonsCradleSource from './examples/06-physics/newtons-cradle.ts?raw';
 import spriteLibrarySource from './examples/05-tools/sprite-library.ts?raw';
 import spriteEditorSource from './examples/05-tools/sprite-editor.ts?raw';
 import particleSandboxSource from './examples/05-tools/particle-sandbox.ts?raw';
-
-// === MINI-GUI ===
-import guiBasicsSource from './examples/07-mini-gui/gui-basics.ts?raw';
 
 // Cleanup function type - examples can return this to clean up resources
 type CleanupFunction = () => void;
@@ -171,6 +167,12 @@ const categories: Record<string, Category> = {
         description: 'MSDF is a technique for text so that it stays crisp at any scale',
         init: initMsdfTextRendering,
         source: msdfTextRenderingSource
+      },
+      'flex-architecture': {
+        name: 'Flex Layout - Tabs & Form',
+        description: 'Tabs with address form using flex layout',
+        init: initFlexArchitecture,
+        source: flexArchitectureSource
       }
       // 'font-rasterization-lab' disabled - experimental
     }
@@ -250,18 +252,6 @@ const categories: Record<string, Category> = {
         description: 'Particle system editor with presets',
         init: initParticleEmitterSandbox,
         source: particleSandboxSource
-      }
-    }
-  },
-  'mini-gui': {
-    name: 'Mini-GUI',
-    collapsed: true,
-    examples: {
-      'gui-basics': {
-        name: 'GUI Basics',
-        description: 'Draggable, collapsible debug panels with folders',
-        init: initGUIBasics,
-        source: guiBasicsSource
       }
     }
   }

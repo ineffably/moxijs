@@ -397,4 +397,167 @@ describe('UIFocusManager', () => {
       expect(focusManager.getFocusableComponents().length).toBe(1);
     });
   });
+
+  describe('registerContainer', () => {
+    it('should discover focusable components in container', () => {
+      const container = new MockContainerComponent();
+      const child1 = new MockFocusableComponent(0);
+      const child2 = new MockFocusableComponent(1);
+      container.children = [child1, child2];
+
+      focusManager.registerContainer(container);
+
+      const components = focusManager.getFocusableComponents();
+      expect(components).toContain(child1);
+      expect(components).toContain(child2);
+    });
+
+    it('should discover nested focusable components', () => {
+      const container = new MockContainerComponent();
+      const nestedContainer = new MockContainerComponent();
+      const nestedChild = new MockFocusableComponent(0);
+      nestedContainer.children = [nestedChild];
+      container.children = [nestedContainer];
+
+      focusManager.registerContainer(container);
+
+      expect(focusManager.getFocusableComponents()).toContain(nestedChild);
+    });
+
+    it('should register container itself if focusable', () => {
+      const container = new MockFocusableContainerComponent(0);
+
+      focusManager.registerContainer(container);
+
+      expect(focusManager.getFocusableComponents()).toContain(container);
+    });
+
+    it('should sort all discovered components by tabIndex', () => {
+      const container = new MockContainerComponent();
+      const child1 = new MockFocusableComponent(2);
+      const child2 = new MockFocusableComponent(0);
+      const child3 = new MockFocusableComponent(1);
+      container.children = [child1, child2, child3];
+
+      focusManager.registerContainer(container);
+
+      const components = focusManager.getFocusableComponents();
+      expect(components[0].tabIndex).toBe(0);
+      expect(components[1].tabIndex).toBe(1);
+      expect(components[2].tabIndex).toBe(2);
+    });
+  });
+
+  describe('unregister edge cases', () => {
+    it('should adjust focus index when unregistering before current', () => {
+      const comp1 = new MockFocusableComponent(0);
+      const comp2 = new MockFocusableComponent(1);
+      const comp3 = new MockFocusableComponent(2);
+
+      focusManager.register(comp1);
+      focusManager.register(comp2);
+      focusManager.register(comp3);
+      focusManager.focus(comp3);
+
+      focusManager.unregister(comp1);
+
+      // comp3 should still be focused
+      expect(focusManager.getCurrentFocus()).toBe(comp3);
+    });
+
+    it('should handle unregistering non-existent component', () => {
+      const component = new MockFocusableComponent(0);
+
+      // Should not throw
+      expect(() => focusManager.unregister(component)).not.toThrow();
+    });
+  });
+
+  describe('focusNext edge cases', () => {
+    it('should handle all components being unfocusable', () => {
+      const comp1 = new MockFocusableComponent(0);
+      const comp2 = new MockFocusableComponent(1);
+      comp1.setCanFocus(false);
+      comp2.setCanFocus(false);
+
+      focusManager.register(comp1);
+      focusManager.register(comp2);
+
+      focusManager.focusNext();
+
+      expect(focusManager.getCurrentFocus()).toBeNull();
+    });
+  });
+
+  describe('focusPrevious edge cases', () => {
+    it('should do nothing with empty list', () => {
+      focusManager.focusPrevious();
+      expect(focusManager.getCurrentFocus()).toBeNull();
+    });
+
+    it('should handle all components being unfocusable', () => {
+      const comp1 = new MockFocusableComponent(0);
+      const comp2 = new MockFocusableComponent(1);
+      comp1.setCanFocus(false);
+      comp2.setCanFocus(false);
+
+      focusManager.register(comp1);
+      focusManager.register(comp2);
+
+      focusManager.focusPrevious();
+
+      expect(focusManager.getCurrentFocus()).toBeNull();
+    });
+  });
+
+  describe('focusLast edge cases', () => {
+    it('should do nothing with empty list', () => {
+      focusManager.focusLast();
+      expect(focusManager.getCurrentFocus()).toBeNull();
+    });
+  });
 });
+
+// Mock container component for registerContainer tests
+class MockContainerComponent extends UIComponent {
+  public children: UIComponent[] = [];
+
+  measure(): MeasuredSize {
+    return { width: 200, height: 100 };
+  }
+
+  protected render(): void {}
+}
+
+// Mock focusable container component
+class MockFocusableContainerComponent extends UIComponent implements Focusable {
+  public children: UIComponent[] = [];
+  private _focused = false;
+
+  constructor(tabIdx: number) {
+    super();
+    this.tabIndex = tabIdx;
+  }
+
+  measure(): MeasuredSize {
+    return { width: 200, height: 100 };
+  }
+
+  protected render(): void {}
+
+  canFocus(): boolean {
+    return this.enabled && this.visible && this.tabIndex >= 0;
+  }
+
+  onFocus(): void {
+    this._focused = true;
+  }
+
+  onBlur(): void {
+    this._focused = false;
+  }
+
+  isFocused(): boolean {
+    return this._focused;
+  }
+}

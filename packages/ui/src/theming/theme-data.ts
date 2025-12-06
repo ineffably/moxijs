@@ -22,6 +22,24 @@ export const UI_DEFAULTS = {
 } as const;
 
 /**
+ * UI Layout Defaults
+ * 
+ * Centralized layout constants to ensure consistent spacing and sizing.
+ */
+export const UI_LAYOUT_DEFAULTS = {
+  /** Default padding for containers */
+  PADDING: 10,
+  /** Default margin between components */
+  MARGIN: 5,
+  /** Default gap for flex containers */
+  GAP: 10,
+  /** Default border radius */
+  BORDER_RADIUS: 4,
+  /** Default control height (buttons, inputs) */
+  CONTROL_HEIGHT: 32
+} as const;
+
+/**
  * Default UI Theme Interface
  * 
  * Simplified to ~15 generic properties + minimal control-specific overrides.
@@ -37,13 +55,13 @@ export interface DefaultUITheme extends BaseTheme {
   surfaceBackground: number;
   /** General border color */
   border: number;
-  
+
   // === Text Colors ===
   /** Primary text color */
   text: number;
   /** Secondary/muted text color */
   textSecondary: number;
-  
+
   // === Generic Control Colors (Used by ALL controls) ===
   /** Default background for all controls (buttons, inputs, checkboxes, etc.) */
   controlBackground: number;
@@ -61,7 +79,7 @@ export interface DefaultUITheme extends BaseTheme {
   controlDisabled: number;
   /** Text color when disabled */
   controlDisabledText: number;
-  
+
   // === Minimal Control-Specific Overrides (Only when truly different) ===
   /** Checkbox checkmark color (checkbox-specific) */
   checkboxCheckmark?: number;
@@ -69,7 +87,7 @@ export interface DefaultUITheme extends BaseTheme {
   textInputPlaceholder?: number;
   /** Select dropdown panel background (select-specific) */
   selectDropdown?: number;
-  
+
   // === Accent & Status Colors ===
   /** Primary accent color */
   accent: number;
@@ -91,11 +109,11 @@ export function createDefaultDarkTheme(): DefaultUITheme {
     panelBackground: 0x2a2a2a,
     surfaceBackground: 0x333333,
     border: 0x404040,
-    
+
     // Text colors
     text: 0xffffff,
     textSecondary: 0xcccccc,
-    
+
     // Generic control colors (used by ALL controls)
     controlBackground: 0x2a2a2a,
     controlBorder: 0x404040,
@@ -105,12 +123,12 @@ export function createDefaultDarkTheme(): DefaultUITheme {
     controlFocus: 0x353535,
     controlDisabled: 0x3a3a3a,
     controlDisabledText: 0x666666,
-    
+
     // Control-specific overrides (only when different)
     checkboxCheckmark: 0xffffff,     // White checkmark on blue
     textInputPlaceholder: 0x999999,  // Muted placeholder
     selectDropdown: 0x2a2a2a,        // Same as controlBackground
-    
+
     // Accent & status
     accent: 0x4a90e2,
     accentSecondary: 0x6a8a9a,
@@ -129,11 +147,11 @@ export function createDefaultLightTheme(): DefaultUITheme {
     panelBackground: 0xf5f5f5,
     surfaceBackground: 0xeeeeee,
     border: 0xdddddd,
-    
+
     // Text colors
     text: 0x000000,
     textSecondary: 0x666666,
-    
+
     // Generic control colors (used by ALL controls)
     controlBackground: 0xffffff,
     controlBorder: 0xdddddd,
@@ -143,12 +161,12 @@ export function createDefaultLightTheme(): DefaultUITheme {
     controlFocus: 0xf0f0f0,
     controlDisabled: 0xf5f5f5,
     controlDisabledText: 0x999999,
-    
+
     // Control-specific overrides (only when different)
     checkboxCheckmark: 0xffffff,     // White checkmark on blue
     textInputPlaceholder: 0x999999,  // Muted placeholder
     selectDropdown: 0xffffff,        // Same as controlBackground
-    
+
     // Accent & status
     accent: 0x4a90e2,
     accentSecondary: 0x6a8a9a,

@@ -171,6 +171,7 @@ export class CardPanel extends UIComponent {
   private resizeStartSize: { width: number; height: number } = { width: 0, height: 0 };
   private resizeStartPos: PIXI.Point = new PIXI.Point();
   private resizeStartCardPos: PIXI.Point = new PIXI.Point();
+  private resizeHandles: Map<ResizeDirection, PIXI.Graphics> = new Map();
 
   // Bound event handlers for cleanup
   private onPointerMoveBound: (e: PIXI.FederatedPointerEvent) => void;
@@ -386,6 +387,15 @@ export class CardPanel extends UIComponent {
     // Update computed layout
     this.computedLayout.width = totalWidth;
     this.computedLayout.height = totalHeight;
+
+    // Update resize handles positions - ensure they're on top
+    if (this.props.resizable) {
+      this.updateResizeHandles();
+      // Move handles to top of display list
+      for (const handle of this.resizeHandles.values()) {
+        this.container.setChildIndex(handle, this.container.children.length - 1);
+      }
+    }
   }
 
   private renderTitle(borderInsets: EdgeInsets, headerHeight: number): void {
@@ -525,8 +535,104 @@ export class CardPanel extends UIComponent {
   private setupResizing(): void {
     if (!this.props.resizable) return;
 
-    // Resize handles will be added in a future enhancement
-    // For now, edge-based resizing can be implemented
+    // Determine which directions are allowed
+    const allowedDirections: ResizeDirection[] = Array.isArray(this.props.resizable)
+      ? this.props.resizable
+      : ['e', 's', 'se']; // Default: right, bottom, and corner
+
+    // Create resize handles
+    for (const direction of allowedDirections) {
+      this.createResizeHandle(direction);
+    }
+  }
+
+  private createResizeHandle(direction: ResizeDirection): void {
+    const handle = new PIXI.Graphics();
+    handle.eventMode = 'static';
+    handle.cursor = this.getCursorForDirection(direction);
+
+    handle.on('pointerdown', (e: PIXI.FederatedPointerEvent) => {
+      this.onResizeStart(e, direction);
+    });
+
+    this.resizeHandles.set(direction, handle);
+    this.container.addChild(handle);
+  }
+
+  private getCursorForDirection(direction: ResizeDirection): string {
+    const cursorMap: Record<ResizeDirection, string> = {
+      'n': 'ns-resize',
+      's': 'ns-resize',
+      'e': 'ew-resize',
+      'w': 'ew-resize',
+      'ne': 'nesw-resize',
+      'sw': 'nesw-resize',
+      'nw': 'nwse-resize',
+      'se': 'nwse-resize'
+    };
+    return cursorMap[direction];
+  }
+
+  private updateResizeHandles(): void {
+    const handleSize = 12;
+    const edgeThickness = 8;
+    const width = this.computedLayout.width;
+    const height = this.computedLayout.height;
+
+    for (const [direction, handle] of this.resizeHandles) {
+      handle.clear();
+
+      // Draw hit area - use a visible color for debugging, can set alpha to 0 later
+      // For now using slight visibility so we can see the handles
+      switch (direction) {
+        case 'n':
+          handle.rect(handleSize, 0, width - handleSize * 2, edgeThickness);
+          break;
+        case 's':
+          handle.rect(handleSize, height - edgeThickness, width - handleSize * 2, edgeThickness);
+          break;
+        case 'e':
+          handle.rect(width - edgeThickness, handleSize, edgeThickness, height - handleSize * 2);
+          break;
+        case 'w':
+          handle.rect(0, handleSize, edgeThickness, height - handleSize * 2);
+          break;
+        case 'ne':
+          handle.rect(width - handleSize, 0, handleSize, handleSize);
+          break;
+        case 'nw':
+          handle.rect(0, 0, handleSize, handleSize);
+          break;
+        case 'se':
+          handle.rect(width - handleSize, height - handleSize, handleSize, handleSize);
+          break;
+        case 'sw':
+          handle.rect(0, height - handleSize, handleSize, handleSize);
+          break;
+      }
+
+      // Fill AFTER drawing the shape - using slight alpha for visibility during debug
+      handle.fill({ color: 0x4a90e2, alpha: 0.3 });
+    }
+  }
+
+  private onResizeStart(e: PIXI.FederatedPointerEvent, direction: ResizeDirection): void {
+    this.isResizing = true;
+    this.resizeDirection = direction;
+    this.resizeStartPos.set(e.global.x, e.global.y);
+    this.resizeStartSize = { width: this.props.bodyWidth, height: this.props.bodyHeight };
+    this.resizeStartCardPos.set(this.container.x, this.container.y);
+
+    // Add global listeners
+    const stage = this.container.parent;
+    if (stage) {
+      stage.eventMode = 'static';
+      stage.on('pointermove', this.onPointerMoveBound);
+      stage.on('pointerup', this.onPointerUpBound);
+      stage.on('pointerupoutside', this.onPointerUpBound);
+    }
+
+    e.stopPropagation();
   }
 
   private handleResize(e: PIXI.FederatedPointerEvent): void {

@@ -13,7 +13,6 @@ import {
   UITextInput,
   UISelect,
   UIPanel,
-  UIBox,
   UIComponent,
   UICheckbox,
   CardPanel,
@@ -622,9 +621,9 @@ export async function createPanelsShowcase(fontConfig?: UIFontConfig): Promise<U
   });
   cardColumn.addChild(cardTitle);
 
-  // CardPanel demo - use UIBox as a spacer to reserve space for the card
+  // CardPanel demo - use UIPanel as a spacer to reserve space for the card
   // Card size: body (320x180) + title (28) + footer (28) + borders (2) + shadow (4) = ~330x246
-  const cardDemoSpacer = new UIBox({
+  const cardDemoSpacer = new UIPanel({
     width: 330,
     height: 246
   });

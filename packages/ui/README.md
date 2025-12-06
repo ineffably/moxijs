@@ -88,10 +88,10 @@ const input = new UITextInput({
 });
 ```
 
-#### UITextarea
+#### UITextArea
 
 ```typescript
-const textarea = new UITextarea({
+const textarea = new UITextArea({
   width: 300,
   height: 100,
   placeholder: 'Enter description...',
@@ -162,19 +162,6 @@ const panel = new UIPanel({
   borderRadius: 8,
   borderColor: 0x444444,
   borderWidth: 1
-});
-```
-
-#### UIBox
-
-Simple colored box for backgrounds and dividers.
-
-```typescript
-const box = new UIBox({
-  width: 100,
-  height: 100,
-  backgroundColor: 0xff0000,
-  borderRadius: 4
 });
 ```
 
@@ -309,8 +296,8 @@ export { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from '@moxijs/ui
 export { EdgeInsets, BoxModel, UIComponent } from '@moxijs/ui';
 
 // Components
-export { UIButton, UILabel, UIPanel, UIBox } from '@moxijs/ui';
-export { UITextInput, UITextarea, UICheckbox, UIRadioGroup, UISelect } from '@moxijs/ui';
+export { UIButton, UILabel, UIPanel } from '@moxijs/ui';
+export { UITextInput, UITextArea, UICheckbox, UIRadioGroup, UISelect } from '@moxijs/ui';
 export { UITabs, UIScrollContainer } from '@moxijs/ui';
 
 // Theming

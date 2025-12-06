@@ -20,11 +20,27 @@ export interface SizeConstraints {
 
 /**
  * Layout Engine
- * 
+ *
  * Pure service for calculating component layouts.
  * Takes box model + constraints → computed layout.
+ *
+ * Implemented as a singleton since it's stateless - all methods are pure functions.
  */
 export class LayoutEngine {
+  /** Singleton instance */
+  private static _instance: LayoutEngine | null = null;
+
+  /**
+   * Get the shared singleton instance.
+   * Creates the instance on first access.
+   */
+  static getInstance(): LayoutEngine {
+    if (!LayoutEngine._instance) {
+      LayoutEngine._instance = new LayoutEngine();
+    }
+    return LayoutEngine._instance;
+  }
+
   /**
    * Measure the size needed for a component based on its box model and content size
    * 

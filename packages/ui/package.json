@@ -1,6 +1,6 @@
 {
   "name": "@moxijs/ui",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "UI component library for MoxiJS - PIXI.js based game UI with theming, layout, and form controls",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

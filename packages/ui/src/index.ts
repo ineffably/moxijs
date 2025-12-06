@@ -27,13 +27,17 @@ export {
 // Layout (existing FlexContainer)
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
 
-// New Flex Layout System
+// New Flex Layout System (flat structure)
 export {
-  // Core types
+  // Size value utilities
   SizeValue,
   ParsedSize,
   parseSizeValue,
   resolveParsedSize,
+} from './layout/size-value';
+
+export {
+  // Core types
   LayoutNode,
   LayoutStyle,
   ResolvedStyle,
@@ -57,12 +61,12 @@ export {
   Display,
   Position,
   EdgeInsetsInput,
-} from './layout/core';
+} from './layout/layout-types';
 
 export {
   // Engine
   FlexLayoutEngine,
-} from './layout/engine';
+} from './layout/flex-layout-engine';
 
 export {
   // Tree
@@ -70,27 +74,31 @@ export {
   LayoutTreeOptions,
   LayoutCompleteCallback,
   createLayoutTree,
-} from './layout/tree';
+} from './layout/layout-tree';
 
 export {
   // Integration
   IFlexLayoutParticipant,
   isFlexLayoutParticipant,
   syncBoxModelToLayoutStyle,
+} from './layout/layout-participant';
+
+export {
+  // Layout wrapper
   LayoutWrapper,
   LayoutWrapperOptions,
   LayoutWrapperStyle,
   wrapForLayout,
   wrapText,
   wrapSprite,
-} from './layout/integration';
+} from './layout/layout-wrapper';
 
 export {
   // Debug
   LayoutDebugOverlay,
   LayoutDebugOverlayOptions,
   createLayoutDebugOverlay,
-} from './layout/debug';
+} from './layout/layout-debug-overlay';
 
 // Theming
 export {

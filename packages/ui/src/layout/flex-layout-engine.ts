@@ -9,7 +9,7 @@
  * @module layout/engine/flex-layout-engine
  */
 
-import { EdgeInsets } from '../../base/edge-insets';
+import { EdgeInsets } from '../base/edge-insets';
 import {
   LayoutNode,
   LayoutStyle,
@@ -19,8 +19,8 @@ import {
   FlexLine,
   FlexItem,
   EdgeInsetsInput,
-} from '../core/layout-types';
-import { parseSizeValue, resolveParsedSize } from '../core/size-value';
+} from './layout-types';
+import { parseSizeValue, resolveParsedSize } from './size-value';
 
 /**
  * 3-pass flex layout engine
@@ -353,7 +353,10 @@ export class FlexLayoutEngine {
     offsetX: number,
     offsetY: number,
     availWidth: number,
-    availHeight: number
+    availHeight: number,
+    forcedMainSize?: number,
+    forcedCrossSize?: number,
+    isRow: boolean = true
   ): void {
     if (!node._resolved) {
       node._computed = null;
@@ -363,21 +366,38 @@ export class FlexLayoutEngine {
     const resolved = node._resolved;
     const measured = node._measured!;
 
-    // Calculate final size
-    const finalWidth = this.resolveFinalSize(
-      resolved.width,
-      availWidth,
-      measured.width,
-      resolved.minWidth,
-      resolved.maxWidth
-    );
-    const finalHeight = this.resolveFinalSize(
-      resolved.height,
-      availHeight,
-      measured.height,
-      resolved.minHeight,
-      resolved.maxHeight
-    );
+    // Calculate final size - use forced sizes from flex calculation if provided
+    let finalWidth: number;
+    let finalHeight: number;
+
+    if (forcedMainSize !== undefined && forcedCrossSize !== undefined) {
+      // Flex sizing has determined our size
+      if (isRow) {
+        finalWidth = forcedMainSize;
+        finalHeight = forcedCrossSize;
+      } else {
+        finalWidth = forcedCrossSize;
+        finalHeight = forcedMainSize;
+      }
+      // Apply constraints
+      finalWidth = Math.max(resolved.minWidth, Math.min(resolved.maxWidth, finalWidth));
+      finalHeight = Math.max(resolved.minHeight, Math.min(resolved.maxHeight, finalHeight));
+    } else {
+      finalWidth = this.resolveFinalSize(
+        resolved.width,
+        availWidth,
+        measured.width,
+        resolved.minWidth,
+        resolved.maxWidth
+      );
+      finalHeight = this.resolveFinalSize(
+        resolved.height,
+        availHeight,
+        measured.height,
+        resolved.minHeight,
+        resolved.maxHeight
+      );
+    }
 
     // Apply margin
     const x = offsetX + resolved.margin.left;
@@ -728,22 +748,26 @@ export class FlexLayoutEngine {
       let childX: number, childY: number;
       let childAvailWidth: number, childAvailHeight: number;
 
+      // Calculate the size the flex item should have (minus margins)
+      const mainSize = item.mainFinalSize - (isRow ? childResolved.margin.horizontal : childResolved.margin.vertical);
+      const crossSize = crossItemSize - (isRow ? childResolved.margin.vertical : childResolved.margin.horizontal);
+
       if (isRow) {
         childX = resolved.padding.left + currentMain;
         childY =
           resolved.padding.top + (line.crossOffset ?? crossOffset) + itemCrossOffset;
-        childAvailWidth = item.mainFinalSize - childResolved.margin.horizontal;
-        childAvailHeight = crossItemSize - childResolved.margin.vertical;
+        childAvailWidth = mainSize;
+        childAvailHeight = crossSize;
       } else {
         childX =
           resolved.padding.left + (line.crossOffset ?? crossOffset) + itemCrossOffset;
         childY = resolved.padding.top + currentMain;
-        childAvailWidth = crossItemSize - childResolved.margin.horizontal;
-        childAvailHeight = item.mainFinalSize - childResolved.margin.vertical;
+        childAvailWidth = crossSize;
+        childAvailHeight = mainSize;
       }
 
-      // Recurse
-      this.positionPass(child, childX, childY, childAvailWidth, childAvailHeight);
+      // Recurse - pass forced sizes to override measured sizes for flex items
+      this.positionPass(child, childX, childY, childAvailWidth, childAvailHeight, mainSize, crossSize, isRow);
 
       currentMain += item.mainFinalSize + mainGap + extraSpace;
     }

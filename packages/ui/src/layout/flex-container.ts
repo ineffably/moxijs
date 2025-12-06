@@ -3,7 +3,7 @@ import { UIComponent, UIFontConfig } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { EdgeInsets } from '../base/edge-insets';
 import { UI_LAYOUT_DEFAULTS } from '../theming/theme-data';
-import { IFlexLayoutParticipant, isFlexLayoutParticipant } from './integration/layout-participant';
+import { IFlexLayoutParticipant, isFlexLayoutParticipant } from './layout-participant';
 import { UIFocusManager, Focusable } from '../base/ui-focus-manager';
 
 /** Flexbox direction. */

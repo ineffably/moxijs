@@ -15,8 +15,8 @@ import {
   DirtyInfo,
   ComputedLayout,
   createLayoutNode,
-} from '../core/layout-types';
-import { FlexLayoutEngine } from '../engine/flex-layout-engine';
+} from './layout-types';
+import { FlexLayoutEngine } from './flex-layout-engine';
 
 /**
  * Callback fired when layout computation completes

@@ -15,9 +15,9 @@ import {
   ComputedLayout,
   createLayoutNode,
   createDefaultLayoutStyle,
-} from '../core/layout-types';
+} from './layout-types';
 import { IFlexLayoutParticipant, syncBoxModelToLayoutStyle } from './layout-participant';
-import { SizeValue } from '../core/size-value';
+import { SizeValue } from './size-value';
 
 // Unique ID counter for wrappers
 let nextWrapperId = 0;

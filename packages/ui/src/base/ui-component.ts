@@ -7,11 +7,11 @@ import {
   LayoutNode,
   createLayoutNode,
   ComputedLayout as FlexComputedLayout,
-} from '../layout/core/layout-types';
+} from '../layout/layout-types';
 import {
   IFlexLayoutParticipant,
   syncBoxModelToLayoutStyle,
-} from '../layout/integration/layout-participant';
+} from '../layout/layout-participant';
 
 // Unique ID counter for layout nodes
 let nextLayoutId = 0;

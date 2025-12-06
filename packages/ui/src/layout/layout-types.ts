@@ -6,7 +6,7 @@
  * @module layout/core/layout-types
  */
 
-import { EdgeInsets } from '../../base/edge-insets';
+import { EdgeInsets } from '../base/edge-insets';
 import { SizeValue } from './size-value';
 
 // ════════════════════════════════════════════════════════════════════════════

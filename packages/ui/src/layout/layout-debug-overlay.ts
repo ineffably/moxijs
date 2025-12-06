@@ -8,7 +8,7 @@
  */
 
 import * as PIXI from 'pixi.js';
-import { LayoutNode, ComputedLayout } from '../core/layout-types';
+import { LayoutNode, ComputedLayout } from './layout-types';
 
 /**
  * Debug overlay options

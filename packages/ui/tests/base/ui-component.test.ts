@@ -242,4 +242,86 @@ describe('UIComponent', () => {
       expect(component.container.destroy).toHaveBeenCalled();
     });
   });
+
+  describe('flex properties', () => {
+    it('should set flex grow', () => {
+      component.setFlexGrow(2);
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.grow).toBe(2);
+    });
+
+    it('should set flex shrink', () => {
+      component.setFlexShrink(0);
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.shrink).toBe(0);
+    });
+
+    it('should set flex basis as number', () => {
+      component.setFlexBasis(100);
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.basis).toBe(100);
+    });
+
+    it('should set flex basis as auto', () => {
+      component.setFlexBasis('auto');
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.basis).toBe('auto');
+    });
+
+    it('should set align self', () => {
+      component.setAlignSelf('center');
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.alignSelf).toBe('center');
+    });
+
+    it('should set multiple flex properties at once', () => {
+      component.setFlex({ grow: 1, shrink: 0, basis: 200 });
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.grow).toBe(1);
+      expect(boxModel.flex?.shrink).toBe(0);
+      expect(boxModel.flex?.basis).toBe(200);
+    });
+
+    it('should preserve existing flex properties when setting individual values', () => {
+      component.setFlexGrow(2);
+      component.setFlexShrink(1);
+
+      const boxModel = component.getBoxModel();
+      expect(boxModel.flex?.grow).toBe(2);
+      expect(boxModel.flex?.shrink).toBe(1);
+    });
+  });
+
+  describe('font config', () => {
+    it('should set and get font config', () => {
+      const fontConfig = {
+        fontFamily: 'Arial',
+        fontSize: 16,
+        fontWeight: 'bold' as const,
+        color: 0xffffff
+      };
+
+      component.setFontConfig(fontConfig);
+
+      expect(component.getFontConfig()).toEqual(fontConfig);
+    });
+
+    it('should return undefined when no font config set', () => {
+      expect(component.getFontConfig()).toBeUndefined();
+    });
+
+    it('should allow partial font config', () => {
+      component.setFontConfig({ fontFamily: 'Helvetica' });
+
+      const config = component.getFontConfig();
+      expect(config?.fontFamily).toBe('Helvetica');
+      expect(config?.fontSize).toBeUndefined();
+    });
+  });
 });

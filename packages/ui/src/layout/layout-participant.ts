@@ -8,7 +8,7 @@
  * @module layout/integration/layout-participant
  */
 
-import { LayoutNode, ComputedLayout, LayoutStyle } from '../core/layout-types';
+import { LayoutNode, ComputedLayout, LayoutStyle } from './layout-types';
 
 /**
  * Protocol for components that participate in the flex layout system.

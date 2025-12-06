@@ -88,10 +88,10 @@ const input = new UITextInput({
 });
 ```
 
-#### UITextarea
+#### UITextArea
 
 ```typescript
-const textarea = new UITextarea({
+const textarea = new UITextArea({
   width: 300,
   height: 100,
   placeholder: 'Enter description...',
@@ -297,7 +297,7 @@ export { EdgeInsets, BoxModel, UIComponent } from '@moxijs/ui';
 
 // Components
 export { UIButton, UILabel, UIPanel } from '@moxijs/ui';
-export { UITextInput, UITextarea, UICheckbox, UIRadioGroup, UISelect } from '@moxijs/ui';
+export { UITextInput, UITextArea, UICheckbox, UIRadioGroup, UISelect } from '@moxijs/ui';
 export { UITabs, UIScrollContainer } from '@moxijs/ui';
 
 // Theming

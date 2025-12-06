@@ -1,0 +1,273 @@
+# @moxijs/ui
+
+> UI component library for PIXI.js games with theming and flexbox layout.
+
+## Install
+
+```bash
+npm install @moxijs/ui pixi.js
+```
+
+## Quick Start
+
+```ts
+import { FlexContainer, FlexDirection, UIButton, UILabel, EdgeInsets } from '@moxijs/ui';
+
+const container = new FlexContainer({
+  direction: FlexDirection.Column,
+  gap: 16,
+  padding: EdgeInsets.all(20),
+});
+
+container.addChild(new UILabel({ text: 'Welcome!', fontSize: 24 }));
+container.addChild(new UIButton({
+  label: 'Start',
+  width: 150,
+  height: 40,
+  onClick: () => console.log('Clicked!'),
+}));
+
+container.layout(800, 600);
+stage.addChild(container.container);
+```
+
+## Layout
+
+### FlexContainer
+Flexbox-style layout container.
+
+```ts
+const row = new FlexContainer({
+  direction: FlexDirection.Row,       // Row | Column
+  justify: FlexJustify.SpaceBetween,  // Start | End | Center | SpaceBetween | SpaceAround
+  align: FlexAlign.Center,            // Start | End | Center | Stretch
+  gap: 8,
+  padding: EdgeInsets.symmetric(16, 24),
+  backgroundColor: 0x333333,
+});
+row.addChild(child1);
+row.addChild(child2);
+row.layout(width, height);
+```
+
+### EdgeInsets
+Padding/margin helper.
+
+```ts
+EdgeInsets.all(16);                     // All sides
+EdgeInsets.symmetric(8, 16);            // Vertical, Horizontal
+EdgeInsets.only({ top: 10, left: 20 }); // Specific sides
+EdgeInsets.zero();                      // No padding
+```
+
+## Components
+
+### UIButton
+
+```ts
+const button = new UIButton({
+  label: 'Click Me',
+  width: 120,
+  height: 40,
+  backgroundColor: 0x4a90e2,
+  textColor: 0xffffff,
+  onClick: () => {},
+  onHover: () => {},
+});
+```
+
+### UILabel
+
+```ts
+const label = new UILabel({
+  text: 'Hello',
+  fontSize: 16,
+  color: 0xffffff,
+  fontFamily: 'Arial',
+  align: 'center',  // 'left' | 'center' | 'right'
+});
+label.setText('Updated');
+label.setColor(0xff0000);
+```
+
+### UITextInput
+
+```ts
+const input = new UITextInput({
+  width: 200,
+  height: 32,
+  placeholder: 'Enter text...',
+  value: '',
+  onChange: (value) => {},
+});
+input.getValue();
+input.setValue('new value');
+```
+
+### UITextArea
+
+```ts
+const textarea = new UITextArea({
+  width: 300,
+  height: 100,
+  placeholder: 'Description...',
+  onChange: (value) => {},
+});
+```
+
+### UICheckbox
+
+```ts
+const checkbox = new UICheckbox({
+  checked: false,
+  size: 20,
+  onChange: (checked) => {},
+});
+```
+
+### UIRadioGroup
+
+```ts
+const radio = new UIRadioGroup({
+  options: [
+    { value: 'a', label: 'Option A' },
+    { value: 'b', label: 'Option B' },
+  ],
+  value: 'a',
+  direction: 'vertical',
+  onChange: (value) => {},
+});
+```
+
+### UISelect
+
+```ts
+const select = new UISelect({
+  width: 200,
+  options: [
+    { value: 'opt1', label: 'Option 1' },
+    { value: 'opt2', label: 'Option 2' },
+  ],
+  value: 'opt1',
+  onChange: (value) => {},
+});
+```
+
+### UIPanel
+
+```ts
+const panel = new UIPanel({
+  width: 300,
+  height: 200,
+  backgroundColor: 0x222222,
+  borderRadius: 8,
+  borderColor: 0x444444,
+  borderWidth: 1,
+});
+```
+
+### UITabs
+
+```ts
+const tabs = new UITabs({
+  width: 400,
+  height: 300,
+  items: [
+    { key: 'tab1', label: 'Tab 1', content: panel1 },
+    { key: 'tab2', label: 'Tab 2', content: panel2 },
+  ],
+  activeKey: 'tab1',
+  onChange: (key) => {},
+});
+```
+
+### UIScrollContainer
+
+```ts
+const scroll = new UIScrollContainer({
+  width: 300,
+  height: 400,
+  scrollbarWidth: 12,
+});
+scroll.setContent(content);
+scroll.scrollTo(y);
+scroll.scrollToBottom();
+```
+
+### CardPanel
+
+```ts
+const card = new CardPanel({
+  title: 'Settings',
+  width: 300,
+  height: 200,
+});
+card.body.addChild(content);
+```
+
+## Theming
+
+### ThemeManager
+
+```ts
+import { ThemeManager, createDefaultDarkTheme, createDefaultLightTheme } from '@moxijs/ui';
+
+const manager = new ThemeManager('app-theme');
+manager.registerTheme({ name: 'Dark', variant: 'dark', theme: createDefaultDarkTheme() });
+manager.registerTheme({ name: 'Light', variant: 'light', theme: createDefaultLightTheme() });
+manager.setTheme('Dark');
+manager.addListener((theme, info) => { /* rebuild UI */ });
+```
+
+### ThemeResolver
+
+```ts
+import { ThemeResolver } from '@moxijs/ui';
+
+const resolver = new ThemeResolver(manager.getTheme());
+
+// Pass to components for automatic theming
+const button = new UIButton({ themeResolver: resolver, label: 'OK' });
+const input = new UITextInput({ themeResolver: resolver });
+```
+
+## Focus Management
+
+```ts
+import { UIFocusManager } from '@moxijs/ui';
+
+const focus = new UIFocusManager();
+focus.register(input1);
+focus.register(input2);
+focus.focusFirst();
+focus.focusNext();  // Tab navigation
+```
+
+## UILayer & Scaling
+
+```ts
+import { UILayer, UIScaleMode } from '@moxijs/ui';
+
+const ui = new UILayer({
+  scaleMode: UIScaleMode.LockRatio,  // None | ScaleUI | LockRatio
+  targetWidth: 1280,
+  targetHeight: 720,
+});
+stage.addChild(ui);
+```
+
+## Exports Summary
+
+**Layout:** `FlexContainer`, `FlexDirection`, `FlexJustify`, `FlexAlign`, `EdgeInsets`, `BoxModel`
+
+**Components:** `UIButton`, `UILabel`, `UIPanel`, `UITextInput`, `UITextArea`, `UICheckbox`, `UIRadioGroup`, `UISelect`, `UITabs`, `UIScrollContainer`, `CardPanel`
+
+**Theming:** `ThemeManager`, `ThemeResolver`, `createDefaultDarkTheme`, `createDefaultLightTheme`
+
+**Base:** `UIComponent`, `UIFocusManager`, `UILayer`, `UIScaleMode`
+
+## See Also
+
+- **@moxijs/core** - Game engine, physics, entity system
+- **Docs:** https://ineffably.github.io/moxijs/docs/ui/
+- **Examples:** https://ineffably.github.io/moxijs/

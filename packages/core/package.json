@@ -8,7 +8,8 @@
     "lib",
     "scripts",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "llms.txt"
   ],
   "scripts": {
     "generate-msdf-font": "node scripts/generate-msdf-font.mjs",

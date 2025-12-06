@@ -1,0 +1,213 @@
+# @moxijs/core
+
+> Game framework on PIXI.js with ECS architecture and physics.
+
+## Install
+
+```bash
+npm install @moxijs/core pixi.js
+```
+
+## Quick Start
+
+```ts
+import { setupMoxi, asEntity, Logic } from '@moxijs/core';
+
+const { scene, engine } = await setupMoxi({
+  hostElement: document.getElementById('game'),
+});
+
+class RotateLogic extends Logic<PIXI.Sprite> {
+  update(entity, dt) { entity.rotation += 0.01 * dt; }
+}
+
+const sprite = asEntity(new PIXI.Sprite(texture));
+sprite.moxiEntity.addLogic(new RotateLogic());
+scene.addChild(sprite);
+engine.start();
+```
+
+## Core API
+
+### setupMoxi(options) → Promise
+Main entry point. Returns `{ scene, engine, camera, physicsWorld?, loadAssets }`.
+
+```ts
+await setupMoxi({
+  hostElement: HTMLElement,        // Required
+  renderOptions?: PIXIOptions,     // PIXI renderer options
+  physics?: boolean | PhysicsOpts, // Enable Planck.js physics
+  pixelPerfect?: boolean,          // Pixel-art mode
+});
+```
+
+### asEntity(displayObject) → AsEntity
+Wraps PIXI.Container with logic system.
+
+```ts
+const entity = asEntity(new PIXI.Sprite(texture));
+entity.moxiEntity.addLogic(logic);
+entity.moxiEntity.getLogic<T>('LogicName');
+entity.moxiEntity.removeLogic(logic);
+```
+
+### Logic<T>
+Base class for entity behaviors.
+
+```ts
+class MyLogic extends Logic<PIXI.Sprite> {
+  name = 'MyLogic';
+  active = true;
+
+  init(entity, renderer) { /* once on scene.init() */ }
+  update(entity, deltaTime) { /* every frame */ }
+}
+```
+
+### Scene
+Root container. Extends PIXI.Container.
+
+```ts
+scene.addChild(entity);
+scene.init();  // Initializes all entity logic
+```
+
+### Engine
+Game loop manager.
+
+```ts
+engine.start();
+engine.stop();
+engine.loadStage(newScene);
+```
+
+## Physics (Planck.js)
+
+```ts
+const { physicsWorld } = await setupMoxi({ physics: true });
+
+// Add physics body to entity
+entity.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
+  type: 'dynamic',  // 'static' | 'dynamic' | 'kinematic'
+  shape: { type: 'box', width: 32, height: 32 },
+  // or: { type: 'circle', radius: 16 }
+  // or: { type: 'polygon', vertices: [{x,y}...] }
+  collisionTags: ['player'],
+  collidesWith: ['enemy', 'ground'],
+}));
+
+// Collision events
+physicsWorld.onCollision('player', 'enemy', (event) => {
+  console.log(event.bodyA, event.bodyB);
+});
+
+// Debug visualization
+physicsWorld.enableDebugRenderer(scene);
+```
+
+### Physics Helpers
+
+```ts
+import { asPhysicsEntity, hasPhysics, getPhysicsBody } from '@moxijs/core';
+
+const entity = asPhysicsEntity(sprite, physicsWorld, bodyOptions);
+if (hasPhysics(entity)) {
+  const body = getPhysicsBody(entity);
+}
+```
+
+## State Machine
+
+```ts
+import { StateMachine, StateLogic } from '@moxijs/core';
+
+class IdleState extends StateLogic<Player> {
+  name = 'idle';
+  onEnter() { }
+  onExit() { }
+  update(entity, dt) {
+    if (jumping) this.machine.transition('jump');
+  }
+}
+
+const fsm = new StateMachine<Player>();
+fsm.addState(new IdleState());
+fsm.start('idle');
+```
+
+## Camera
+
+```ts
+camera.follow(entity);
+camera.setZoom(2);
+camera.pan(100, 50);
+camera.shake(intensity, duration);
+```
+
+## PIXI Helpers
+
+```ts
+import { asSprite, asText, asGraphics, asContainer } from '@moxijs/core';
+
+const sprite = asSprite(texture, { x: 100, y: 50, anchor: 0.5, scale: 2 });
+const text = asText('Hello', { style: { fill: 0xffffff } });
+```
+
+## Texture Utilities
+
+```ts
+import { asTextureFrames, TextureFrameSequences } from '@moxijs/core';
+
+// Split spritesheet
+const frames = asTextureFrames(texture, { frameWidth: 32, frameHeight: 32 });
+
+// Named sequences
+const seq = new TextureFrameSequences(texture, {
+  idle: { start: 0, end: 3 },
+  walk: { start: 4, end: 11 },
+});
+const walkFrames = seq.get('walk');
+```
+
+## Input
+
+```ts
+import { ClientEvents } from '@moxijs/core';
+
+const input = ClientEvents.getInstance();
+if (input.isKeyDown('ArrowRight')) player.x += 5;
+const mousePos = input.movePosition;
+```
+
+## Events
+
+```ts
+import { EventEmitter } from '@moxijs/core';
+
+interface Events {
+  'score': (n: number) => void;
+}
+const events = new EventEmitter<Events>();
+events.on('score', (n) => console.log(n));
+events.emit('score', 100);
+```
+
+## Exports Summary
+
+**Core:** `setupMoxi`, `Engine`, `Scene`, `asEntity`, `Logic`, `StateMachine`, `StateLogic`
+
+**Physics:** `PhysicsWorld`, `PhysicsBodyLogic`, `asPhysicsEntity`, `hasPhysics`, `getPhysicsBody`
+
+**Camera:** `Camera`, `CameraLogic`
+
+**Helpers:** `asSprite`, `asText`, `asGraphics`, `asContainer`, `asTextureFrames`, `TextureFrameSequences`
+
+**Input/Events:** `ClientEvents`, `EventEmitter`, `ActionManager`
+
+**Utils:** `utils.lerp`, `utils.clamp`, `utils.getRandomInt`, `utils.rad2deg`, `utils.deg2rad`
+
+## See Also
+
+- **@moxijs/ui** - UI components (UIButton, UILabel, FlexContainer, etc.)
+- **Docs:** https://ineffably.github.io/moxijs/docs/core/
+- **Examples:** https://ineffably.github.io/moxijs/

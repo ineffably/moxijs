@@ -64,6 +64,48 @@ class TestUIComponent extends UIComponent {
   getPressed(): boolean {
     return this.pressed;
   }
+
+  // Expose focus ring for testing
+  getFocusRing() {
+    return this.focusRing;
+  }
+
+  // Expose theme resolver methods for testing
+  testResolveColor(type: 'background' | 'border' | 'text' | 'selected' | 'hover' | 'focus' | 'disabled', override?: number) {
+    return this.resolveColor(type, override);
+  }
+
+  testMakeInteractive(cursor?: string) {
+    this.makeInteractive(cursor);
+  }
+
+  // Expose inherited font methods
+  testResolveInheritedFont<K extends keyof import('../../src/base/ui-component').UIFontConfig>(
+    key: K,
+    localOverride?: import('../../src/base/ui-component').UIFontConfig[K]
+  ) {
+    return this.resolveInheritedFont(key, localOverride);
+  }
+
+  testGetInheritedFontFamily(override?: string) {
+    return this.getInheritedFontFamily(override);
+  }
+
+  testGetInheritedFontSize(override?: number) {
+    return this.getInheritedFontSize(override);
+  }
+
+  testGetInheritedTextColor(override?: number) {
+    return this.getInheritedTextColor(override);
+  }
+
+  // Expose layout config methods
+  testResolveInheritedLayoutParam<K extends keyof import('../../src/base/ui-component').UILayoutConfig>(
+    key: K,
+    localOverride?: import('../../src/base/ui-component').UILayoutConfig[K]
+  ) {
+    return this.resolveInheritedLayoutParam(key, localOverride);
+  }
 }
 
 describe('UIComponent', () => {
@@ -322,6 +364,190 @@ describe('UIComponent', () => {
       const config = component.getFontConfig();
       expect(config?.fontFamily).toBe('Helvetica');
       expect(config?.fontSize).toBeUndefined();
+    });
+  });
+
+  describe('inherited font config', () => {
+    it('should return local override when provided', () => {
+      const result = component.testResolveInheritedFont('fontFamily', 'Override');
+      expect(result).toBe('Override');
+    });
+
+    it('should return local config when set', () => {
+      component.setFontConfig({ fontFamily: 'Local' });
+      const result = component.testResolveInheritedFont('fontFamily');
+      expect(result).toBe('Local');
+    });
+
+    it('should inherit from parent', () => {
+      const parent = new TestUIComponent();
+      parent.setFontConfig({ fontFamily: 'Parent', fontSize: 16 });
+      component.parent = parent;
+
+      expect(component.testGetInheritedFontFamily()).toBe('Parent');
+      expect(component.testGetInheritedFontSize()).toBe(16);
+    });
+
+    it('should inherit from grandparent', () => {
+      const grandparent = new TestUIComponent();
+      const parent = new TestUIComponent();
+      grandparent.setFontConfig({ textColor: 0xff0000 });
+      parent.parent = grandparent;
+      component.parent = parent;
+
+      expect(component.testGetInheritedTextColor()).toBe(0xff0000);
+    });
+
+    it('should prefer local config over parent', () => {
+      const parent = new TestUIComponent();
+      parent.setFontConfig({ fontFamily: 'Parent' });
+      component.setFontConfig({ fontFamily: 'Local' });
+      component.parent = parent;
+
+      expect(component.testGetInheritedFontFamily()).toBe('Local');
+    });
+
+    it('should return undefined when not set anywhere', () => {
+      expect(component.testGetInheritedFontFamily()).toBeUndefined();
+    });
+  });
+
+  describe('layout config', () => {
+    it('should set and get layout config', () => {
+      const layoutConfig = {
+        defaultPadding: 10,
+        borderRadius: 4,
+        controlHeight: 32,
+      };
+
+      component.setLayoutConfig(layoutConfig);
+
+      expect(component.getLayoutConfig()).toEqual(layoutConfig);
+    });
+
+    it('should return undefined when not set', () => {
+      expect(component.getLayoutConfig()).toBeUndefined();
+    });
+
+    it('should inherit layout config from parent', () => {
+      const parent = new TestUIComponent();
+      parent.setLayoutConfig({ controlHeight: 40 });
+      component.parent = parent;
+
+      expect(component.testResolveInheritedLayoutParam('controlHeight')).toBe(40);
+    });
+
+    it('should use local override over parent', () => {
+      const parent = new TestUIComponent();
+      parent.setLayoutConfig({ controlHeight: 40 });
+      component.parent = parent;
+
+      expect(component.testResolveInheritedLayoutParam('controlHeight', 32)).toBe(32);
+    });
+  });
+
+  describe('focus ring', () => {
+    it('should create focus ring on construction', () => {
+      expect(component.getFocusRing()).toBeDefined();
+    });
+
+    it('should hide focus ring initially', () => {
+      expect(component.getFocusRing()?.visible).toBe(false);
+    });
+  });
+
+  describe('theme resolver', () => {
+    it('should resolve colors from theme', () => {
+      const color = component.testResolveColor('background');
+      expect(typeof color).toBe('number');
+    });
+
+    it('should use override color when provided', () => {
+      const overrideColor = 0xff0000;
+      const color = component.testResolveColor('background', overrideColor);
+      expect(color).toBe(overrideColor);
+    });
+  });
+
+  describe('interactivity', () => {
+    it('should make container interactive with default cursor', () => {
+      component.testMakeInteractive();
+
+      expect(component.container.eventMode).toBe('static');
+      expect(component.container.cursor).toBe('pointer');
+    });
+
+    it('should make container interactive with custom cursor', () => {
+      component.testMakeInteractive('text');
+
+      expect(component.container.eventMode).toBe('static');
+      expect(component.container.cursor).toBe('text');
+    });
+  });
+
+  describe('global bounds', () => {
+    it('should return global bounds', () => {
+      component.layout(800, 600);
+      const bounds = component.getGlobalBounds();
+
+      expect(bounds.x).toBe(0);
+      expect(bounds.y).toBe(0);
+      expect(bounds.width).toBeGreaterThan(0);
+      expect(bounds.height).toBeGreaterThan(0);
+    });
+  });
+
+  describe('IFlexLayoutParticipant', () => {
+    it('should have unique id', () => {
+      const component1 = new TestUIComponent();
+      const component2 = new TestUIComponent();
+
+      expect(component1.id).toBeDefined();
+      expect(component2.id).toBeDefined();
+      expect(component1.id).not.toBe(component2.id);
+    });
+
+    it('should have layout node', () => {
+      expect(component.layoutNode).toBeDefined();
+      expect(component.layoutNode.id).toBe(component.id);
+    });
+
+    it('should measure content', () => {
+      component.measuredWidth = 150;
+      component.measuredHeight = 75;
+
+      const size = component.measureContent();
+
+      expect(size.width).toBe(150);
+      expect(size.height).toBe(75);
+    });
+
+    it('should apply layout', () => {
+      const computed = {
+        x: 10,
+        y: 20,
+        width: 200,
+        height: 100,
+        contentX: 5,
+        contentY: 5,
+        contentWidth: 190,
+        contentHeight: 90,
+      };
+
+      component.applyLayout(computed);
+
+      const layout = component.getLayout();
+      expect(layout.x).toBe(10);
+      expect(layout.y).toBe(20);
+      expect(layout.width).toBe(200);
+      expect(layout.height).toBe(100);
+      expect(component.container.position.set).toHaveBeenCalledWith(10, 20);
+    });
+
+    it('should sync layout style from box model', () => {
+      component.setFlexGrow(2);
+
+      expect(component.layoutNode.style.flexGrow).toBe(2);
     });
   });
 });

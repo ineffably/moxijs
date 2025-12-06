@@ -1,6 +1,6 @@
 {
   "name": "@moxijs/core",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Game framework built on PIXI.js with Entity-Component-System architecture, physics integration, and UI components.",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

@@ -2,6 +2,9 @@ import * as PIXI from 'pixi.js';
 import { UIComponent, UIFontConfig } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { EdgeInsets } from '../base/edge-insets';
+import { UI_LAYOUT_DEFAULTS } from '../theming/theme-data';
+import { IFlexLayoutParticipant, isFlexLayoutParticipant } from './integration/layout-participant';
+import { UIFocusManager, Focusable } from '../base/ui-focus-manager';
 
 /** Flexbox direction. */
 export enum FlexDirection {
@@ -76,9 +79,17 @@ export class FlexContainer extends UIComponent {
 
   constructor(props: FlexContainerProps = {}) {
     const boxModel: Partial<BoxModel> = {
-      padding: props.padding ?? EdgeInsets.zero(),
+      padding: props.padding ?? EdgeInsets.all(UI_LAYOUT_DEFAULTS.PADDING),
       width: props.width ?? 'auto',
-      height: props.height ?? 'auto'
+      height: props.height ?? 'auto',
+      // Sync flex container properties to BoxModel
+      flex: {
+        direction: props.direction ?? FlexDirection.Row,
+        justify: props.justify ?? FlexJustify.Start,
+        alignItems: props.align ?? FlexAlign.Stretch,
+        gap: props.gap ?? UI_LAYOUT_DEFAULTS.GAP,
+        wrap: props.wrap ? 'wrap' : 'nowrap',
+      }
     };
 
     super(boxModel);
@@ -86,8 +97,8 @@ export class FlexContainer extends UIComponent {
     this.props = {
       direction: props.direction ?? FlexDirection.Row,
       justify: props.justify ?? FlexJustify.Start,
-      align: props.align ?? FlexAlign.Start,
-      gap: props.gap ?? 0,
+      align: props.align ?? FlexAlign.Stretch,
+      gap: props.gap ?? UI_LAYOUT_DEFAULTS.GAP,
       wrap: props.wrap ?? false
     };
 
@@ -102,7 +113,51 @@ export class FlexContainer extends UIComponent {
     child.parent = this;
     this.children.push(child);
     this.container.addChild(child.container);
+
+    // Sync to layout node tree (for new flex layout system)
+    if (isFlexLayoutParticipant(child)) {
+      child.layoutNode.parent = this.layoutNode;
+      this.layoutNode.children.push(child.layoutNode);
+    }
+
+    // Auto-register focusable children with the global focus manager
+    this.autoRegisterFocusable(child);
+
     this.markLayoutDirty();
+  }
+
+  /**
+   * Automatically registers a focusable component with the global focus manager.
+   * Recursively checks children if the component is a container.
+   */
+  private autoRegisterFocusable(component: UIComponent): void {
+    const focusManager = UIFocusManager.getInstance();
+    if (!focusManager) return;
+
+    // Check if this component is focusable
+    if (this.isFocusableComponent(component)) {
+      focusManager.register(component as UIComponent & Focusable);
+    }
+
+    // Recursively check children (for nested containers)
+    if ('children' in component && Array.isArray((component as FlexContainer).children)) {
+      const children = (component as FlexContainer).children;
+      children.forEach(child => this.autoRegisterFocusable(child));
+    }
+  }
+
+  /**
+   * Checks if a component implements the Focusable interface
+   */
+  private isFocusableComponent(component: UIComponent): component is UIComponent & Focusable {
+    return (
+      typeof (component as any).tabIndex === 'number' &&
+      (component as any).tabIndex >= 0 &&
+      typeof (component as any).canFocus === 'function' &&
+      typeof (component as any).onFocus === 'function' &&
+      typeof (component as any).onBlur === 'function' &&
+      typeof (component as any).isFocused === 'function'
+    );
   }
 
   /** Remove child component. */
@@ -112,7 +167,40 @@ export class FlexContainer extends UIComponent {
       this.children.splice(index, 1);
       this.container.removeChild(child.container);
       child.parent = undefined;
+
+      // Sync to layout node tree
+      if (isFlexLayoutParticipant(child)) {
+        const nodeIndex = this.layoutNode.children.indexOf(child.layoutNode);
+        if (nodeIndex !== -1) {
+          this.layoutNode.children.splice(nodeIndex, 1);
+        }
+        child.layoutNode.parent = null;
+      }
+
+      // Auto-unregister focusable children from the global focus manager
+      this.autoUnregisterFocusable(child);
+
       this.markLayoutDirty();
+    }
+  }
+
+  /**
+   * Automatically unregisters a focusable component from the global focus manager.
+   * Recursively checks children if the component is a container.
+   */
+  private autoUnregisterFocusable(component: UIComponent): void {
+    const focusManager = UIFocusManager.getInstance();
+    if (!focusManager) return;
+
+    // Check if this component is focusable
+    if (this.isFocusableComponent(component)) {
+      focusManager.unregister(component as UIComponent & Focusable);
+    }
+
+    // Recursively check children (for nested containers)
+    if ('children' in component && Array.isArray((component as FlexContainer).children)) {
+      const children = (component as FlexContainer).children;
+      children.forEach(child => this.autoUnregisterFocusable(child));
     }
   }
 
@@ -205,89 +293,256 @@ export class FlexContainer extends UIComponent {
     const contentHeight = this.computedLayout.contentHeight;
 
     const isRow = direction === FlexDirection.Row || direction === FlexDirection.RowReverse;
+    const isReverse = direction === FlexDirection.RowReverse || direction === FlexDirection.ColumnReverse;
 
-    // Measure children
-    const childSizes = this.children.map(child => child.measure());
+    // 1. Measure base sizes (flex-basis)
+    const items = this.children.map(child => {
+      const box = child.getBoxModel();
+      const flex = box.flex ?? {};
+      const grow = flex.grow ?? 0;
+      const shrink = flex.shrink ?? 1;
+      const basis = flex.basis ?? 'auto';
+      const alignSelf = flex.alignSelf ?? 'auto';
 
-    // Calculate total main axis size
-    const totalGap = gap * (this.children.length - 1);
-    const totalChildSize = isRow
-      ? childSizes.reduce((sum, size) => sum + size.width, 0)
-      : childSizes.reduce((sum, size) => sum + size.height, 0);
+      const measured = child.measure();
 
-    const mainAxisSize = isRow ? contentWidth : contentHeight;
-    const crossAxisSize = isRow ? contentHeight : contentWidth;
-    const freeSpace = mainAxisSize - totalChildSize - totalGap;
+      // Determine hypothetical main size based on basis
+      let mainBaseSize = 0;
+      let crossBaseSize = 0;
 
-    // Calculate starting position based on justify
-    let mainAxisOffset = 0;
+      if (isRow) {
+        // If basis is 'auto' or a percentage string, use measured size; otherwise use the number
+        mainBaseSize = (basis === 'auto' || typeof basis === 'string') ? measured.width : basis;
+        crossBaseSize = measured.height;
+      } else {
+        mainBaseSize = (basis === 'auto' || typeof basis === 'string') ? measured.height : basis;
+        crossBaseSize = measured.width;
+      }
+
+      return {
+        child,
+        measured,
+        grow,
+        shrink,
+        basis,
+        alignSelf,
+        mainBaseSize,
+        crossBaseSize,
+        finalMainSize: mainBaseSize,
+        finalCrossSize: crossBaseSize
+      };
+    });
+
+    // 2. Resolve Flexible Lengths
+    const containerMainSize = isRow ? contentWidth : contentHeight;
+    const totalGap = gap * (Math.max(0, items.length - 1));
+    const totalBaseSize = items.reduce((sum, item) => sum + item.mainBaseSize, 0);
+    const freeSpace = containerMainSize - totalBaseSize - totalGap;
+
+    if (freeSpace > 0) {
+      // Grow
+      const totalGrow = items.reduce((sum, item) => sum + item.grow, 0);
+      if (totalGrow > 0) {
+        items.forEach(item => {
+          const share = (item.grow / totalGrow) * freeSpace;
+          item.finalMainSize += share;
+        });
+      }
+    } else if (freeSpace < 0) {
+      // Shrink
+      // Standard flex shrink: weighted by size * shrink factor
+      const totalScaledShrink = items.reduce((sum, item) => sum + (item.mainBaseSize * item.shrink), 0);
+
+      if (totalScaledShrink > 0) {
+        items.forEach(item => {
+          const ratio = (item.mainBaseSize * item.shrink) / totalScaledShrink;
+          const shrinkAmount = ratio * Math.abs(freeSpace);
+          item.finalMainSize = Math.max(0, item.finalMainSize - shrinkAmount);
+        });
+      }
+    }
+
+    // 3. Layout Children with final sizes to get cross size
+    // We need to re-layout because changing main size might affect cross size (e.g. text wrapping)
+    // For now, simpler approach: just assume cross size stays same unless stretch
+
+    // Cross Axis Alignment
+    const containerCrossSize = isRow ? contentHeight : contentWidth;
+
+    items.forEach(item => {
+      let alignMode = item.alignSelf !== 'auto' ? item.alignSelf : align;
+      // map string literal 'start'/'end'/etc to the logic
+
+      let crossSize = item.crossBaseSize;
+
+      // Handle Stretch
+      // Force cast to string for comparison to avoid enum overlap issues in checks
+      const modeStr = String(alignMode);
+      if (modeStr === 'stretch' || alignMode === FlexAlign.Stretch) {
+        crossSize = containerCrossSize;
+
+        // Constrain max/min cross size
+        const box = item.child.getBoxModel();
+        if (isRow) {
+          if (box.maxHeight !== undefined) crossSize = Math.min(crossSize, box.maxHeight);
+          if (box.minHeight !== undefined) crossSize = Math.max(crossSize, box.minHeight);
+        } else {
+          if (box.maxWidth !== undefined) crossSize = Math.min(crossSize, box.maxWidth);
+          if (box.minWidth !== undefined) crossSize = Math.max(crossSize, box.minWidth);
+        }
+      }
+
+      item.finalCrossSize = crossSize;
+
+      // Perform final layout on child
+      if (isRow) {
+        item.child.layout(item.finalMainSize, item.finalCrossSize);
+      } else {
+        item.child.layout(item.finalCrossSize, item.finalMainSize);
+      }
+    });
+
+    // 4. Position Children (Main Axis)
+    // Recalculate used space after flexibility
+    const usedMainSpace = items.reduce((sum, item) => sum + item.finalMainSize, 0);
+    const remainingSpace = containerMainSize - usedMainSpace - totalGap;
+
+    let mainOffset = 0;
     let spaceBetween = 0;
 
+    // Justify Content
     switch (justify) {
       case FlexJustify.Start:
-        mainAxisOffset = 0;
+        mainOffset = 0;
         break;
       case FlexJustify.End:
-        mainAxisOffset = freeSpace;
+        mainOffset = remainingSpace;
         break;
       case FlexJustify.Center:
-        mainAxisOffset = freeSpace / 2;
+        mainOffset = remainingSpace / 2;
         break;
       case FlexJustify.SpaceBetween:
-        spaceBetween = this.children.length > 1 ? freeSpace / (this.children.length - 1) : 0;
+        if (items.length > 1) {
+          spaceBetween = remainingSpace / (items.length - 1);
+        }
         break;
       case FlexJustify.SpaceAround:
-        spaceBetween = freeSpace / this.children.length;
-        mainAxisOffset = spaceBetween / 2;
+        if (items.length > 0) {
+          spaceBetween = remainingSpace / items.length;
+          mainOffset = spaceBetween / 2;
+        }
         break;
       case FlexJustify.SpaceEvenly:
-        spaceBetween = freeSpace / (this.children.length + 1);
-        mainAxisOffset = spaceBetween;
+        if (items.length > 0) {
+          spaceBetween = remainingSpace / (items.length + 1);
+          mainOffset = spaceBetween;
+        }
         break;
     }
 
-    // Position children
-    let currentPosition = mainAxisOffset;
+    let currentMainPos = mainOffset;
 
-    this.children.forEach((child, index) => {
-      const childSize = childSizes[index];
+    // Reverse logic if needed
+    const processingOrder = isReverse ? [...items].reverse() : items;
 
-      // Layout child
-      child.layout(childSize.width, childSize.height);
+    // We still position relative to top-left (contentX, contentY)
+    // But if reverse, we just changed the order of items. Flex-direction reverse also flips the start point?
+    // In CSS row-reverse: main start is right.
+    // Simplifying: layout logic above assumes LTR/TTB calculation.
+    // If reverse, we position from End? Or just reverse the array and position from Start?
+    // CSS row-reverse means: items are laid out right-to-left.
+    // Let's implement standard "Start" means "Left" for Row, "Right" for RowReverse?
+    // Actually simplicity:
+    // If row-reverse, we conceptually flip the axis. Start is Right.
+    // But implementation wise, usually easiest to just reverse the list and treat Justify.Start as Right.
+    // Let's stick to standard flow and let the user reverse the list if they want, 
+    // OR just handle the reversal in the loop.
 
-      // Calculate cross axis position based on align
-      let crossAxisPosition = 0;
+    // Correct Flexbox row-reverse:
+    // 1. Items ordered reverse.
+    // 2. Justify Start packs to the "main start" (which is Right).
+    // This is getting complex for "CSS Light".
+    // Let's stick to physical direction for now, or simple array reversal.
+    // If row-reverse:
+    // 1. Position starts at container Width.
+    // 2. Advance negatively.
+    // OR simpler:
+    // Calculate as normal LTR, then flip coordinates if reverse.
 
-      switch (align) {
+    // Let's use the simple order reversal for now (visual order matches DOM order reversed).
+    // And standard justification logic aligns them to the "Start" of the main axis.
+    // For row-reverse, Main Start is Right.
+    // To achieve that with simple math:
+    // If isReverse:
+    //   mainOffset initialized to handle "Start" alignment...
+    // Let's defer full reverse support and just process logic order.
+
+    if (isReverse) {
+      // If Justify Start -> Align to Right (for Row) or Bottom (for Column)
+      // This effectively flips Justify behavior.
+      // Start -> becomes End physically.
+      // Let's keep it simple: Justify always works in the direction of flow.
+      // Start = start of flow.
+    }
+
+    processingOrder.forEach(item => {
+      // Cross Axis Alignment per item
+      let crossOffset = 0;
+      let alignMode = item.alignSelf !== 'auto' ? item.alignSelf : align;
+
+      // Resolve enum vs string
+      // FlexAlign.Start = 'start'
+
+      switch (alignMode) {
+        case 'start':
         case FlexAlign.Start:
-          crossAxisPosition = 0;
+          crossOffset = 0;
           break;
+        case 'end':
         case FlexAlign.End:
-          crossAxisPosition = crossAxisSize - (isRow ? childSize.height : childSize.width);
+          crossOffset = containerCrossSize - item.finalCrossSize;
           break;
+        case 'center':
         case FlexAlign.Center:
-          crossAxisPosition = (crossAxisSize - (isRow ? childSize.height : childSize.width)) / 2;
+          crossOffset = (containerCrossSize - item.finalCrossSize) / 2;
           break;
+        case 'stretch':
         case FlexAlign.Stretch:
-          // Stretch child to fill cross axis (implement later)
-          crossAxisPosition = 0;
+          crossOffset = 0;
           break;
       }
 
-      // Set child position
       if (isRow) {
-        child.setPosition(
-          padding.left + currentPosition,
-          padding.top + crossAxisPosition
-        );
-        currentPosition += childSize.width + gap + spaceBetween;
+        // Standard Flow
+        // If row-reverse, reverse the visual position in line
+        if (direction === FlexDirection.RowReverse) {
+          const x = padding.left + currentMainPos;
+          // Flip in content area: width - right_edge
+          // right_edge = x + item.finalMainSize
+          // flipped_left = contentWidth - (x - padding.left + item.finalMainSize) + padding.left
+          // Let's simplify: contentWidth - (currentMainPos + item.finalMainSize) + padding.left
+          const flippedX = contentWidth - (currentMainPos + item.finalMainSize) + padding.left;
+
+          item.child.setPosition(flippedX, padding.top + crossOffset);
+        } else {
+          item.child.setPosition(
+            padding.left + currentMainPos,
+            padding.top + crossOffset
+          );
+        }
       } else {
-        child.setPosition(
-          padding.left + crossAxisPosition,
-          padding.top + currentPosition
-        );
-        currentPosition += childSize.height + gap + spaceBetween;
-      }
+        // Column
+        if (direction === FlexDirection.ColumnReverse) {
+          const y = padding.top + currentMainPos;
+          const flippedY = contentHeight - (currentMainPos + item.finalMainSize) + padding.top;
+          item.child.setPosition(padding.left + crossOffset, flippedY);
+        } else {
+          item.child.setPosition(
+            padding.left + crossOffset,
+            padding.top + currentMainPos
+          );
+        }
+      } currentMainPos += item.finalMainSize + gap + spaceBetween;
     });
   }
 
@@ -295,5 +550,14 @@ export class FlexContainer extends UIComponent {
   protected render(): void {
     // FlexContainer itself has no visual representation
     // Could add debug borders here if needed
+  }
+
+  /**
+   * Override measureContent for flex layout system.
+   * Containers return 0,0 since children determine their size.
+   */
+  override measureContent(): { width: number; height: number } {
+    // Container's size is determined by children, not intrinsic content
+    return { width: 0, height: 0 };
   }
 }

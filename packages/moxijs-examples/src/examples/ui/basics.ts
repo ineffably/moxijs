@@ -2,7 +2,7 @@
  * UI Basics Tab
  * Demonstrates the UI system with FlexBox layouts and colored boxes
  */
-import { EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIBox, UIComponent } from '@moxijs/ui';
+import { EdgeInsets, FlexContainer, FlexDirection, FlexJustify, FlexAlign, UIPanel, UIComponent } from '@moxijs/ui';
 
 export function createBasicsTab(): UIComponent {
   // Create a flex container for the main layout
@@ -17,7 +17,7 @@ export function createBasicsTab(): UIComponent {
   });
 
   // Add title (simulated with a box for now)
-  const titleBox = new UIBox({
+  const titleBox = new UIPanel({
     backgroundColor: 0x4a90e2,
     width: 400,
     height: 60,
@@ -37,7 +37,7 @@ export function createBasicsTab(): UIComponent {
   // Add colored boxes
   const colors = [0xff6b6b, 0x4ecdc4, 0xffe66d, 0x95e1d3, 0xf38181];
   colors.forEach(color => {
-    const box = new UIBox({
+    const box = new UIPanel({
       backgroundColor: color,
       width: 80,
       height: 80,
@@ -56,21 +56,21 @@ export function createBasicsTab(): UIComponent {
     width: 500
   });
 
-  const box1 = new UIBox({
+  const box1 = new UIPanel({
     backgroundColor: 0xa8dadc,
     width: 100,
     height: 60,
     borderRadius: 4
   });
 
-  const box2 = new UIBox({
+  const box2 = new UIPanel({
     backgroundColor: 0xf1faee,
     width: 150,
     height: 60,
     borderRadius: 4
   });
 
-  const box3 = new UIBox({
+  const box3 = new UIPanel({
     backgroundColor: 0xe63946,
     width: 120,
     height: 60,

@@ -30,3 +30,5 @@ coverage
 # generated docs (built by CI, not committed)
 docs
 
+# AntiGravity 
+.agent

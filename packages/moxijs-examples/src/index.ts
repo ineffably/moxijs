@@ -16,6 +16,7 @@ import { initFontRenderingComparison } from './examples/02-ui/font-rendering-com
 import { initUIShowcase } from './examples/02-ui/ui-showcase';
 import { initBitmapFontGenerator } from './examples/02-ui/bitmap-font-generator';
 import { initMsdfTextRendering } from './examples/02-ui/msdf-text-rendering';
+import { initFlexArchitecture } from './examples/02-ui/flex-architecture';
 // import { initFontRasterizationLab } from './examples/02-ui/font-rasterization-lab'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -57,6 +58,7 @@ import fontRenderingComparisonSource from './examples/02-ui/font-rendering-compa
 import uiShowcaseSource from './examples/02-ui/ui-showcase.ts?raw';
 import bitmapFontGeneratorSource from './examples/02-ui/bitmap-font-generator.ts?raw';
 import msdfTextRenderingSource from './examples/02-ui/msdf-text-rendering.ts?raw';
+import flexArchitectureSource from './examples/02-ui/flex-architecture.ts?raw';
 // import fontRasterizationLabSource from './examples/02-ui/font-rasterization-lab.ts?raw'; // Disabled - experimental
 
 // === GAMEPLAY ===
@@ -171,6 +173,12 @@ const categories: Record<string, Category> = {
         description: 'MSDF is a technique for text so that it stays crisp at any scale',
         init: initMsdfTextRendering,
         source: msdfTextRenderingSource
+      },
+      'flex-architecture': {
+        name: 'Flex Layout - Tabs & Form',
+        description: 'Tabs with address form using flex layout',
+        init: initFlexArchitecture,
+        source: flexArchitectureSource
       }
       // 'font-rasterization-lab' disabled - experimental
     }

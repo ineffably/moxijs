@@ -165,19 +165,6 @@ const panel = new UIPanel({
 });
 ```
 
-#### UIBox
-
-Simple colored box for backgrounds and dividers.
-
-```typescript
-const box = new UIBox({
-  width: 100,
-  height: 100,
-  backgroundColor: 0xff0000,
-  borderRadius: 4
-});
-```
-
 ### Navigation
 
 #### UITabs
@@ -309,7 +296,7 @@ export { FlexContainer, FlexDirection, FlexJustify, FlexAlign } from '@moxijs/ui
 export { EdgeInsets, BoxModel, UIComponent } from '@moxijs/ui';
 
 // Components
-export { UIButton, UILabel, UIPanel, UIBox } from '@moxijs/ui';
+export { UIButton, UILabel, UIPanel } from '@moxijs/ui';
 export { UITextInput, UITextarea, UICheckbox, UIRadioGroup, UISelect } from '@moxijs/ui';
 export { UITabs, UIScrollContainer } from '@moxijs/ui';
 

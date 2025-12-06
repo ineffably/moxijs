@@ -24,8 +24,73 @@ export {
   ComponentState
 } from './services';
 
-// Layout
+// Layout (existing FlexContainer)
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
+
+// New Flex Layout System
+export {
+  // Core types
+  SizeValue,
+  ParsedSize,
+  parseSizeValue,
+  resolveParsedSize,
+  LayoutNode,
+  LayoutStyle,
+  ResolvedStyle,
+  MeasuredLayout,
+  FlexLine,
+  FlexItem,
+  DirtyReason,
+  DirtyInfo,
+  createLayoutNode,
+  createDefaultLayoutStyle,
+  createEmptyComputedLayout,
+  // Aliased type to avoid conflict with base/box-model
+  ComputedLayout as FlexComputedLayout,
+  // Type aliases
+  FlexDirection as FlexDirectionType,
+  FlexWrap,
+  JustifyContent,
+  AlignItems,
+  AlignContent,
+  AlignSelf,
+  Display,
+  Position,
+  EdgeInsetsInput,
+} from './layout/core';
+
+export {
+  // Engine
+  FlexLayoutEngine,
+} from './layout/engine';
+
+export {
+  // Tree
+  LayoutTree,
+  LayoutTreeOptions,
+  LayoutCompleteCallback,
+  createLayoutTree,
+} from './layout/tree';
+
+export {
+  // Integration
+  IFlexLayoutParticipant,
+  isFlexLayoutParticipant,
+  syncBoxModelToLayoutStyle,
+  LayoutWrapper,
+  LayoutWrapperOptions,
+  LayoutWrapperStyle,
+  wrapForLayout,
+  wrapText,
+  wrapSprite,
+} from './layout/integration';
+
+export {
+  // Debug
+  LayoutDebugOverlay,
+  LayoutDebugOverlayOptions,
+  createLayoutDebugOverlay,
+} from './layout/debug';
 
 // Theming
 export {
@@ -45,7 +110,6 @@ export type {
 } from './theming';
 
 // Components
-export { UIBox, UIBoxProps } from './components/ui-box';
 export { UILabel, UILabelProps, TextAlign } from './components/ui-label';
 export { UIPanel, UIPanelProps, NineSliceConfig } from './components/ui-panel';
 export { UIButton, UIButtonProps, ButtonState, SpriteBackgroundConfig } from './components/ui-button';

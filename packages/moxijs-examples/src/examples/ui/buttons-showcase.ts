@@ -12,7 +12,7 @@ import {
   FlexDirection,
   FlexJustify,
   FlexAlign,
-  UIBox,
+  UIPanel,
   UIButton,
   UILabel,
   UIComponent,

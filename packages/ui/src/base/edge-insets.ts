@@ -96,4 +96,75 @@ export class EdgeInsets {
   clone(): EdgeInsets {
     return new EdgeInsets(this.top, this.right, this.bottom, this.left);
   }
+
+  /**
+   * Creates EdgeInsets from flexible input.
+   * Accepts a number (all sides equal), an EdgeInsets instance, or an object with individual sides.
+   *
+   * @param input - Number, EdgeInsets, or object with edge values
+   * @example
+   * ```typescript
+   * EdgeInsets.from(10);                    // All sides 10
+   * EdgeInsets.from({ top: 5, left: 10 }); // Top 5, left 10, others 0
+   * EdgeInsets.from(existingInsets);       // Clone
+   * ```
+   */
+  static from(
+    input:
+      | number
+      | EdgeInsets
+      | { top?: number; right?: number; bottom?: number; left?: number }
+      | undefined
+  ): EdgeInsets {
+    if (input === undefined) {
+      return EdgeInsets.zero();
+    }
+    if (typeof input === 'number') {
+      return EdgeInsets.all(input);
+    }
+    if (input instanceof EdgeInsets) {
+      return input.clone();
+    }
+    return new EdgeInsets(
+      input.top ?? 0,
+      input.right ?? 0,
+      input.bottom ?? 0,
+      input.left ?? 0
+    );
+  }
+
+  /**
+   * Checks if this EdgeInsets equals another
+   */
+  equals(other: EdgeInsets): boolean {
+    return (
+      this.top === other.top &&
+      this.right === other.right &&
+      this.bottom === other.bottom &&
+      this.left === other.left
+    );
+  }
+
+  /**
+   * Checks if all edges are zero
+   */
+  isZero(): boolean {
+    return this.top === 0 && this.right === 0 && this.bottom === 0 && this.left === 0;
+  }
+
+  /**
+   * Returns a string representation for debugging
+   */
+  toString(): string {
+    if (this.isZero()) {
+      return '0';
+    }
+    if (this.top === this.right && this.right === this.bottom && this.bottom === this.left) {
+      return `${this.top}`;
+    }
+    if (this.top === this.bottom && this.left === this.right) {
+      return `${this.top} ${this.right}`;
+    }
+    return `${this.top} ${this.right} ${this.bottom} ${this.left}`;
+  }
 }

@@ -12,6 +12,7 @@ import {
 } from './button-background-strategy';
 import { ThemeResolver } from '../theming/theme-resolver';
 import { ActionManager } from '@moxijs/core';
+import { UI_LAYOUT_DEFAULTS } from '../theming/theme-data';
 // Theme resolver is now in base class
 // ComponentState removed - using base class state properties
 
@@ -91,7 +92,7 @@ export interface UIButtonProps {
  */
 export class UIButton extends UIComponent {
   // Props
-  private props: Required<Omit<UIButtonProps, 'onClick' | 'onHover' | 'spriteBackground' | 'useBitmapText' | 'bitmapFontFamily' | 'msdfFontFamily' | 'themeResolver'>>;
+  private props: UIButtonProps;
   private useBitmapText: boolean;
   private bitmapFontFamily?: string;
   /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
@@ -135,16 +136,9 @@ export class UIButton extends UIComponent {
   constructor(props: UIButtonProps = {}, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
+    // Store props as-is (undefined values mean "inherit" or "default")
     this.props = {
-      label: props.label ?? '',
-      width: props.width ?? 120,
-      height: props.height ?? 40,
-      backgroundColor: props.backgroundColor ?? 0x4a90e2,
-      textColor: props.textColor ?? 0xffffff,
-      fontSize: props.fontSize ?? 16,
-      borderRadius: props.borderRadius ?? 4,
-      padding: props.padding ?? EdgeInsets.symmetric(8, 16),
-      enabled: props.enabled ?? true
+      ...props
     };
 
     this.useBitmapText = props.useBitmapText ?? false;
@@ -157,33 +151,42 @@ export class UIButton extends UIComponent {
     this.themeResolver = props.themeResolver;
 
     // Update component state
-    this.enabled = this.props.enabled;
+    this.enabled = this.props.enabled ?? true;
 
-    // Set box model dimensions
-    this.boxModel.width = this.props.width;
-    this.boxModel.height = this.props.height;
+    // Set box model dimensions if provided
+    if (this.props.width !== undefined) {
+      this.boxModel.width = this.props.width;
+    }
+    if (this.props.height !== undefined) {
+      this.boxModel.height = this.props.height;
+    }
 
     // Make buttons focusable by default
     this.tabIndex = 0;
 
     // Create background strategy based on configuration
+    // Initial size is 0 or explicit, updated in layout()
+    const initialWidth = this.props.width ?? 0;
+    const initialHeight = this.props.height ?? 0;
+    const initialRadius = this.props.borderRadius ?? 0;
+
     if (props.spriteBackground) {
       this.backgroundStrategy = new SpriteBackgroundStrategy(
         props.spriteBackground,
-        this.props.width,
-        this.props.height
+        initialWidth,
+        initialHeight
       );
     } else {
       this.backgroundStrategy = new SolidColorBackgroundStrategy(
-        this.props.backgroundColor,
-        this.props.width,
-        this.props.height,
-        this.props.borderRadius
+        this.props.backgroundColor ?? 0x4a90e2,
+        initialWidth,
+        initialHeight,
+        initialRadius
       );
     }
 
     // Create and add background
-    const backgroundContainer = this.backgroundStrategy.create(this.props.width, this.props.height);
+    const backgroundContainer = this.backgroundStrategy.create(initialWidth, initialHeight);
     this.container.addChild(backgroundContainer);
 
     // Note: Label creation is deferred to ensureLabel() for font inheritance support
@@ -192,10 +195,12 @@ export class UIButton extends UIComponent {
     this.setupInteractivity();
 
     // Initial state
-    if (!this.props.enabled) {
+    if (this.enabled === false) {
       this.setState(ButtonState.Disabled);
     }
   }
+
+
 
   /** @internal */
   private createBitmapLabel(): void {
@@ -384,6 +389,32 @@ export class UIButton extends UIComponent {
 
   /** @internal */
   layout(availableWidth: number, availableHeight: number): void {
+    // Resolve defaults and inheritance
+    const effectiveHeight = this.props.height
+      ?? this.resolveInheritedLayoutParam('controlHeight')
+      ?? UI_LAYOUT_DEFAULTS.CONTROL_HEIGHT;
+
+    const effectiveBorderRadius = this.props.borderRadius
+      ?? this.resolveInheritedLayoutParam('borderRadius')
+      ?? UI_LAYOUT_DEFAULTS.BORDER_RADIUS;
+
+    const effectivePadding = this.props.padding
+      ?? (this.resolveInheritedLayoutParam('defaultPadding') !== undefined
+        ? EdgeInsets.all(this.resolveInheritedLayoutParam('defaultPadding')!)
+        : EdgeInsets.symmetric(8, 16)); // Button default padding
+
+    // Update BoxModel with resolved values for measurement
+    if (this.boxModel.height === 'auto' || typeof this.boxModel.height === 'number') {
+      if (this.props.height === undefined && this.boxModel.height === 'auto') {
+        this.boxModel.height = effectiveHeight;
+      }
+    }
+
+    // Update padding
+    if (!this.props.padding) {
+      this.boxModel.padding = effectivePadding;
+    }
+
     // Ensure label exists (lazy init for inheritance support)
     this.ensureLabel();
 
@@ -400,15 +431,14 @@ export class UIButton extends UIComponent {
       this.label.layout(measured.width, measured.height);
 
       // Center the label and cache the position
-      // Use the label's layout dimensions which account for DPR scaling correctly
       const labelLayout = this.label.getLayout();
       this.labelCenterX = (measured.width - labelLayout.width) / 2;
       this.labelCenterY = (actualHeight - labelLayout.height) / 2;
-      
-      // Position the label container (not the text object directly)
+
+      // Position the label container
       this.label.container.position.set(this.labelCenterX, this.labelCenterY);
     } else if (this.bitmapLabel) {
-      // Center the bitmap text using actual background height
+      // Center the bitmap text
       this.labelCenterX = (measured.width - this.bitmapLabel.width) / 2;
       this.labelCenterY = (actualHeight - this.bitmapLabel.height) / 2;
       this.bitmapLabel.x = this.labelCenterX;

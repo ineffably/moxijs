@@ -9,6 +9,23 @@ describe('LayoutEngine', () => {
     engine = new LayoutEngine();
   });
 
+  describe('singleton', () => {
+    it('should return the same instance from getInstance()', () => {
+      const instance1 = LayoutEngine.getInstance();
+      const instance2 = LayoutEngine.getInstance();
+
+      expect(instance1).toBe(instance2);
+    });
+
+    it('should return a valid LayoutEngine instance', () => {
+      const instance = LayoutEngine.getInstance();
+
+      expect(instance).toBeInstanceOf(LayoutEngine);
+      expect(typeof instance.measure).toBe('function');
+      expect(typeof instance.layout).toBe('function');
+    });
+  });
+
   describe('measure', () => {
     it('should return content size with auto dimensions', () => {
       const boxModel = createDefaultBoxModel();

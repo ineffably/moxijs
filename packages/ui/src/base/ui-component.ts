@@ -30,6 +30,8 @@ export interface UIFontConfig {
   fontFamily?: string;
   /** Default font size */
   fontSize?: number;
+  /** Default font weight ('normal', 'bold', or numeric 100-900) */
+  fontWeight?: 'normal' | 'bold' | number;
   /** Default text color */
   textColor?: number;
 }
@@ -137,7 +139,13 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
    */
   private defaultThemeResolver?: ThemeResolver;
 
+  /**
+   * Font configuration for this component.
+   * Children inherit these settings (like CSS font inheritance).
+   * Set via setFontConfig() and resolved via getInheritedFont* methods.
+   */
   protected fontConfig?: UIFontConfig;
+
   /**
    * Layout configuration for this component.
    * Children inherit these defaults unless overridden.
@@ -178,8 +186,8 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
       contentHeight: 0
     };
 
-    // Initialize layout engine service (available to all components)
-    this.layoutEngine = new LayoutEngine();
+    // Use shared layout engine singleton (stateless, pure functions)
+    this.layoutEngine = LayoutEngine.getInstance();
 
     // Initialize flex layout integration
     this.id = generateLayoutId();
@@ -206,7 +214,8 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
   }
 
   /**
-   * Updates the focus ring appearance based on component size
+   * Updates the focus ring appearance based on component size.
+   * Uses theme colors for consistent styling.
    */
   protected updateFocusRing(): void {
     if (!this.focusRing) return;
@@ -217,6 +226,9 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
     const height = this.computedLayout.height;
 
     if (width <= 0 || height <= 0) return;
+
+    // Get focus color from theme
+    const focusColor = this.resolveColor('focus');
 
     // Animated pulsing effect with dashed outline
     const offset = 4;
@@ -231,7 +243,7 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
       8
     );
     this.focusRing.stroke({
-      color: 0x00d9ff,
+      color: focusColor,
       width: strokeWidth + 2,
       alpha: 0.3
     });
@@ -245,11 +257,12 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
       8
     );
     this.focusRing.stroke({
-      color: 0x00d9ff,
+      color: focusColor,
       width: strokeWidth
     });
 
-    // Draw inner highlight
+    // Draw inner highlight (use text color for contrast)
+    const highlightColor = this.resolveColor('text');
     this.focusRing.roundRect(
       -offset + strokeWidth,
       -offset + strokeWidth,
@@ -258,7 +271,7 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
       6
     );
     this.focusRing.stroke({
-      color: 0xffffff,
+      color: highlightColor,
       width: 1,
       alpha: 0.6
     });
@@ -563,6 +576,45 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
   }
 
   /**
+   * Generic helper for resolving inherited configuration values.
+   * Walks up the parent chain to find a value, like CSS inheritance.
+   *
+   * @param key - The config key to resolve
+   * @param localOverride - Optional local override value (highest priority)
+   * @param localConfig - Local config object to check
+   * @param getParentConfig - Function to get config from a parent component
+   * @returns The resolved value or undefined
+   */
+  private resolveInheritedConfig<C, K extends keyof C>(
+    key: K,
+    localOverride: C[K] | undefined,
+    localConfig: C | undefined,
+    getParentConfig: (parent: UIComponent) => C | undefined
+  ): C[K] | undefined {
+    // Local override takes precedence
+    if (localOverride !== undefined) {
+      return localOverride;
+    }
+
+    // Check local config
+    if (localConfig?.[key] !== undefined) {
+      return localConfig[key];
+    }
+
+    // Walk up parent chain to find inherited value
+    let currentParent = this.parent;
+    while (currentParent) {
+      const parentConfig = getParentConfig(currentParent);
+      if (parentConfig?.[key] !== undefined) {
+        return parentConfig[key];
+      }
+      currentParent = currentParent.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Resolves a font setting by walking up the parent chain.
    * Like CSS inheritance - returns local value if set, otherwise inherits from parent.
    *
@@ -574,27 +626,12 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
     key: K,
     localOverride?: UIFontConfig[K]
   ): UIFontConfig[K] | undefined {
-    // Local override takes precedence
-    if (localOverride !== undefined) {
-      return localOverride;
-    }
-
-    // Check local font config
-    if (this.fontConfig?.[key] !== undefined) {
-      return this.fontConfig[key];
-    }
-
-    // Walk up parent chain to find inherited value
-    let currentParent = this.parent;
-    while (currentParent) {
-      const parentConfig = currentParent.getFontConfig();
-      if (parentConfig?.[key] !== undefined) {
-        return parentConfig[key];
-      }
-      currentParent = currentParent.parent;
-    }
-
-    return undefined;
+    return this.resolveInheritedConfig(
+      key,
+      localOverride,
+      this.fontConfig,
+      (parent) => parent.getFontConfig()
+    );
   }
 
   /**
@@ -656,29 +693,12 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
     key: K,
     localOverride?: UILayoutConfig[K]
   ): UILayoutConfig[K] | undefined {
-    // Local override takes precedence
-    if (localOverride !== undefined) {
-      return localOverride;
-    }
-
-    // Check local layout config
-    if (this.layoutConfig?.[key] !== undefined) {
-      return this.layoutConfig[key];
-    }
-
-    // Walk up parent chain to find inherited value
-    let currentParent = this.parent;
-    while (currentParent) {
-      if (currentParent.getLayoutConfig) {
-        const parentConfig = currentParent.getLayoutConfig();
-        if (parentConfig?.[key] !== undefined) {
-          return parentConfig[key];
-        }
-      }
-      currentParent = currentParent.parent;
-    }
-
-    return undefined;
+    return this.resolveInheritedConfig(
+      key,
+      localOverride,
+      this.layoutConfig,
+      (parent) => parent.getLayoutConfig()
+    );
   }
 
   // ════════════════════════════════════════════════════════════════════════════

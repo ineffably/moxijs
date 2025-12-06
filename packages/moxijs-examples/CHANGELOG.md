@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-12-06
+
+### Removed
+- Mini-GUI example from catalog (package being rewritten)
+- Dead code: unused UI helper files (`basics.ts`, `components.ts`, `form-elements.ts`, `sprite-buttons.ts`)
+
 ### Changed
 - Sprite Library preview now shows sprites in fixed, centered position with auto-fit scaling
 - Removed mouse-based panning from sprite preview (zoom via scroll wheel still works)

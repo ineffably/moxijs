@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2025-12-06
+
+### Changed
+- No functional changes; version bump for monorepo consistency with `@moxijs/ui`
+
 ## [0.3.1] - 2025-12-05
 
 ### Added

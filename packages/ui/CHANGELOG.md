@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2025-12-06
+
+### Added
+- `fontWeight` property to `UIFontConfig` interface for font weight inheritance
+- `UILayoutConfig` interface for inheritable layout configuration (padding, margin, borderRadius, controlHeight)
+- `LayoutEngine.getInstance()` singleton pattern for shared layout engine instance
+- `UIComponent` now implements `IFlexLayoutParticipant` for flex layout tree integration
+- New flex layout system exports: `FlexLayoutEngine`, `LayoutTree`, `LayoutWrapper`, `LayoutDebugOverlay`
+- Package exports test to catch broken re-exports during refactoring
+- Tests for focus ring theming, fontWeight inheritance, and LayoutEngine singleton
+
+### Changed
+- Flattened layout folder structure (removed `core/`, `engine/`, `tree/`, `integration/`, `debug/` subfolders)
+- Focus ring now uses theme colors via `resolveColor('focus')` instead of hardcoded values
+- Refactored `resolveInheritedFont` and `resolveInheritedLayoutParam` to use generic helper
+
+### Fixed
+- Broken exports in `src/index.ts` after layout folder restructure
+
+### Breaking Changes
+- `UIComponent` now implements `IFlexLayoutParticipant`, adding required `id` and `layoutNode` properties
+- Subclasses extending `UIComponent` will inherit these new properties automatically
+
 ## [0.3.1] - 2025-12-05
 
 ### Added

@@ -36,6 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### FlexContainer
 - `removeAllChildren()` method for clearing all children at once
 
+#### UIScrollContainer
+- `fontConfig` prop for font inheritance to nested children
+
+#### UILabel
+- Now uses `getInheritedFontFamily()` for proper font inheritance from parent containers
+
+### Fixed
+- Font inheritance now works through deeply nested containers (FlexContainer → UIScrollContainer → UILabel)
+- Removed unnecessary `as any` cast in UIScrollContainer parent assignment
+
 ## [0.3.2] - 2025-12-06
 
 ### Added

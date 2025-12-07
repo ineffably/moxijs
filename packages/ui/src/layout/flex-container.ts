@@ -184,6 +184,14 @@ export class FlexContainer extends UIComponent {
     }
   }
 
+  /** Remove all children from this container. */
+  removeAllChildren(): void {
+    // Remove in reverse order to avoid index shifting issues
+    while (this.children.length > 0) {
+      this.removeChild(this.children[this.children.length - 1]);
+    }
+  }
+
   /**
    * Automatically unregisters a focusable component from the global focus manager.
    * Recursively checks children if the component is a container.

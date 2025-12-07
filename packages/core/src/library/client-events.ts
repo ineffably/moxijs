@@ -5,13 +5,27 @@ import { OnEvent, ClientEventsArgs } from '..';
  * Singleton input manager for keyboard, mouse, and wheel events.
  * Tracks current input state for polling-based input handling.
  *
+ * ## Key Format
+ * Keys are identified by `event.key` (the character or key name), NOT `event.code` (physical key).
+ *
+ * Common key values:
+ * - Letters: 'a', 'b', 'c', ... (lowercase when typed without shift)
+ * - Arrows: 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'
+ * - Modifiers: 'Shift', 'Control', 'Alt', 'Meta'
+ * - Special: 'Enter', 'Escape', 'Tab', 'Backspace', ' ' (space)
+ * - Numbers: '0', '1', '2', ... (the character, not 'Digit1')
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+ *
  * @example
  * ```ts
  * const input = ClientEvents.getInstance();
  *
  * // In update loop - check key state
+ * // Use event.key values (NOT event.code like 'KeyE' or 'Space')
  * if (input.isKeyDown('ArrowRight')) player.moveRight();
- * if (input.isKeyDown('Space')) player.jump();
+ * if (input.isKeyDown(' ')) player.jump();  // Space key
+ * if (input.isKeyDown('e')) player.interact(); // lowercase 'e'
  *
  * // Mouse position and movement
  * const mousePos = input.movePosition;
@@ -129,12 +143,18 @@ export class ClientEvents {
     ClientEvents.instance = this;
   }
 
-  /** True if key is currently pressed. */
+  /**
+   * True if key is currently pressed.
+   * @param key - The key value (event.key), e.g., 'a', 'ArrowRight', ' ' for space
+   */
   isKeyDown(key: string): boolean {
     return Boolean(this.keydown[key]);
   }
 
-  /** True if key is not pressed. */
+  /**
+   * True if key is not pressed.
+   * @param key - The key value (event.key), e.g., 'a', 'ArrowRight', ' ' for space
+   */
   isKeyUp(key: string): boolean {
     return !this.keydown[key];
   }

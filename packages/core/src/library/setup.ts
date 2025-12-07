@@ -15,10 +15,31 @@ export interface PixelPerfectOptions {
   imageRendering?: boolean;
 }
 
+/** Scale mode for canvas scaling within the host element. */
+export type ScaleMode = 'none' | 'fit' | 'fill' | 'stretch';
+
 /** Configuration for setupMoxi(). */
 export interface SetupMoxiArgs {
   /** Container element to attach the canvas. */
   hostElement: HTMLElement;
+  /**
+   * Canvas width in pixels. Convenience option (alternative to renderOptions.width).
+   * If both are provided, this takes precedence.
+   */
+  width?: number;
+  /**
+   * Canvas height in pixels. Convenience option (alternative to renderOptions.height).
+   * If both are provided, this takes precedence.
+   */
+  height?: number;
+  /**
+   * How to scale the canvas within the host element.
+   * - 'none': No scaling, canvas uses its native size (default)
+   * - 'fit': Scale to fit within host while maintaining aspect ratio (letterbox/pillarbox)
+   * - 'fill': Scale to fill host while maintaining aspect ratio (may crop)
+   * - 'stretch': Stretch to fill host (distorts aspect ratio)
+   */
+  scaleMode?: ScaleMode;
   /** PIXI render options (width, height, backgroundColor, etc). */
   renderOptions?: Partial<PIXI.AutoDetectOptions>;
   /** Background color (hex number like 0x1a1a2e). Convenience option. */
@@ -95,6 +116,9 @@ export const defaultRenderOptions = {
  */
 export async function setupMoxi({
   hostElement,
+  width,
+  height,
+  scaleMode = 'none',
   renderOptions = defaultRenderOptions,
   backgroundColor,
   physics,
@@ -105,6 +129,15 @@ export async function setupMoxi({
 } = {} as SetupMoxiArgs) {
   // Process pixel-perfect options
   let finalRenderOptions = { ...renderOptions };
+
+  // Apply top-level width/height if provided (takes precedence over renderOptions)
+  if (width !== undefined) {
+    finalRenderOptions.width = width;
+  }
+  if (height !== undefined) {
+    finalRenderOptions.height = height;
+  }
+
   let applyImageRendering = false;
 
   if (pixelPerfect) {
@@ -132,17 +165,22 @@ export async function setupMoxi({
     renderer.background.color = backgroundColor;
   }
 
+  const canvas = renderer.canvas as HTMLCanvasElement;
+
   // Apply canvas CSS for pixel-perfect scaling if requested
   if (applyImageRendering) {
-    const canvas = renderer.canvas as HTMLCanvasElement;
     canvas.style.imageRendering = 'pixelated';
     canvas.style.imageRendering = '-moz-crisp-edges';
     canvas.style.imageRendering = 'crisp-edges';
   }
 
+  // Apply scale mode CSS
+  if (scaleMode !== 'none') {
+    applyScaleMode(hostElement, canvas, scaleMode, finalRenderOptions.width as number, finalRenderOptions.height as number);
+  }
+
   // Suppress right-click context menu if requested
   if (suppressContextMenu) {
-    const canvas = renderer.canvas as HTMLCanvasElement;
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
@@ -200,5 +238,52 @@ export async function setupMoxi({
     physicsWorld,
     loadingScene
   };
+}
+
+/**
+ * Apply CSS styling for canvas scaling within host element.
+ * @internal
+ */
+function applyScaleMode(
+  hostElement: HTMLElement,
+  canvas: HTMLCanvasElement,
+  scaleMode: ScaleMode,
+  canvasWidth: number,
+  canvasHeight: number
+): void {
+  // Host element styles for centering
+  hostElement.style.display = 'flex';
+  hostElement.style.alignItems = 'center';
+  hostElement.style.justifyContent = 'center';
+  hostElement.style.overflow = 'hidden';
+
+  // Canvas styles based on scale mode
+  switch (scaleMode) {
+    case 'fit':
+      // Letterbox/pillarbox: fit within container while maintaining aspect ratio
+      canvas.style.maxWidth = '100%';
+      canvas.style.maxHeight = '100%';
+      canvas.style.width = 'auto';
+      canvas.style.height = 'auto';
+      canvas.style.aspectRatio = `${canvasWidth} / ${canvasHeight}`;
+      canvas.style.objectFit = 'contain';
+      break;
+
+    case 'fill':
+      // Fill container while maintaining aspect ratio (may crop)
+      canvas.style.minWidth = '100%';
+      canvas.style.minHeight = '100%';
+      canvas.style.width = 'auto';
+      canvas.style.height = 'auto';
+      canvas.style.aspectRatio = `${canvasWidth} / ${canvasHeight}`;
+      canvas.style.objectFit = 'cover';
+      break;
+
+    case 'stretch':
+      // Stretch to fill (distorts)
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      break;
+  }
 }
 

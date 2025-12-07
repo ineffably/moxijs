@@ -58,6 +58,9 @@ const row = new FlexContainer({
 row.addChild(button1);
 row.addChild(button2);
 row.layout(400, 100);
+
+// Clear all children
+row.removeAllChildren();
 ```
 
 ### Form Controls
@@ -71,6 +74,9 @@ const button = new UIButton({
   height: 40,
   backgroundColor: 0x4a90e2,
   textColor: 0xffffff,
+  fontFamily: 'PixelOperator',  // Optional: custom font for canvas text
+  // Or use MSDF for crisp scaling:
+  // msdfFontFamily: 'MyMsdfFont',
   onClick: () => console.log('Clicked!'),
   onHover: () => console.log('Hovered!')
 });
@@ -84,8 +90,13 @@ const input = new UITextInput({
   height: 32,
   placeholder: 'Enter text...',
   value: '',
+  fontFamily: 'PixelOperator',  // Optional: custom font (inherits from parent)
   onChange: (value) => console.log('Input:', value)
 });
+
+// Dynamic resizing (useful in resizable dialogs)
+input.setSize(300, 40);
+input.setWidth(250);
 ```
 
 #### UITextArea
@@ -97,6 +108,9 @@ const textarea = new UITextArea({
   placeholder: 'Enter description...',
   onChange: (value) => console.log('Text:', value)
 });
+
+// Dynamic resizing
+textarea.setSize(400, 150);
 ```
 
 #### UICheckbox
@@ -163,6 +177,10 @@ const panel = new UIPanel({
   borderColor: 0x444444,
   borderWidth: 1
 });
+
+// All UIComponents now have x/y getters/setters
+panel.x = 100;
+panel.y = 50;
 ```
 
 ### Navigation
@@ -188,11 +206,21 @@ const tabs = new UITabs({
 const scroll = new UIScrollContainer({
   width: 300,
   height: 400,
-  scrollbarWidth: 12
+  scrollbarWidth: 12,
+  // Smooth scrolling (enabled by default)
+  smoothScroll: true,
+  scrollEasing: 0.15,      // 0.1 = slow, 0.3 = snappy
+  scrollSpeed: 1,          // Wheel sensitivity multiplier
+  scrollPaddingBottom: 50  // Extra scroll space at bottom (for chat UIs)
 });
-scroll.setContent(tallContent);
-scroll.scrollTo(100);
+
+scroll.addChild(tallContent);
+scroll.scrollTo(100);           // Smooth scroll to position
+scroll.scrollTo(100, false);    // Instant scroll (no animation)
 scroll.scrollToBottom();
+
+// Dynamic scroll padding
+scroll.setScrollPaddingBottom(100);
 ```
 
 ## Theming

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### setupMoxi
+- `width` and `height` top-level props for convenient canvas sizing (alternative to `renderOptions.width/height`)
+- `scaleMode` option ('none' | 'fit' | 'fill' | 'stretch') for automatic canvas scaling with CSS injection
+
+#### Entity Helpers
+- `asEntityGraphics(props)` - Creates Graphics wrapped with `asEntity()` for Logic support
+- `asEntitySprite(constructorArgs, props)` - Creates Sprite wrapped with `asEntity()`
+- `asEntityContainer(props)` - Creates Container wrapped with `asEntity()`
+- `asEntityText(constructorArgs, props)` - Creates Text wrapped with `asEntity()`
+
+### Changed
+
+#### ClientEvents
+- Enhanced JSDoc documentation clarifying key format uses `event.key` (e.g., 'a', 'ArrowRight', ' ') not `event.code`
+- Added common key values table and MDN reference link
+
+#### ActionManager
+- Enhanced JSDoc with comprehensive examples for adding/removing listeners
+- Documented common event targets (window, document, canvas) and event types
+- Added cleanup pattern documentation for Logic components
+
 ## [0.3.2] - 2025-12-06
 
 ### Changed

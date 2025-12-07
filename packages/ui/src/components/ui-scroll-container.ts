@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, UIFontConfig } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { EdgeInsets } from '../base/edge-insets';
 import { LayoutEngine } from '../services';
@@ -30,6 +30,24 @@ export interface UIScrollContainerProps {
   scrollbarAutoHide?: boolean;
   /** Padding inside the scroll container */
   padding?: EdgeInsets;
+  /** Enable smooth/eased scrolling (default: true) */
+  smoothScroll?: boolean;
+  /** Easing factor for smooth scroll (0.1 = slow, 0.3 = snappy, default: 0.15) */
+  scrollEasing?: number;
+  /** Scroll speed multiplier for wheel events (default: 1) */
+  scrollSpeed?: number;
+  /**
+   * Extra height added to scrollable content area.
+   * Allows content to scroll beyond its natural bounds.
+   * Useful for chat interfaces where the last item should scroll to the top.
+   * (default: 0)
+   */
+  scrollPaddingBottom?: number;
+  /**
+   * Font configuration that children will inherit (like CSS).
+   * Allows setting fontFamily, fontSize, etc. once at container level.
+   */
+  fontConfig?: UIFontConfig;
 }
 
 /**
@@ -51,7 +69,7 @@ export interface UIScrollContainerProps {
  * ```
  */
 export class UIScrollContainer extends UIComponent {
-  private props: Required<UIScrollContainerProps>;
+  private props: Required<Omit<UIScrollContainerProps, 'fontConfig'>>;
   private background: PIXI.Graphics;
   private contentContainer: PIXI.Container;
   private contentMask: PIXI.Graphics;
@@ -64,12 +82,17 @@ export class UIScrollContainer extends UIComponent {
   public children: UIComponent[] = [];
 
   private scrollY: number = 0;
+  private targetScrollY: number = 0;
   private maxScrollY: number = 0;
   private contentHeight: number = 0;
   private isDragging: boolean = false;
   private dragStartY: number = 0;
   private dragStartScrollY: number = 0;
   private isHoveringThumb: boolean = false;
+
+  // Smooth scrolling animation
+  private animationFrameId: number | null = null;
+  private isAnimating: boolean = false;
 
   // Bound handlers for proper cleanup
   private boundGlobalPointerMove: ((e: PointerEvent) => void) | null = null;
@@ -78,6 +101,10 @@ export class UIScrollContainer extends UIComponent {
   constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
+    // Set font config if provided (children will inherit this)
+    if (props.fontConfig) {
+      this.setFontConfig(props.fontConfig);
+    }
 
     this.props = {
       width: props.width,
@@ -89,7 +116,11 @@ export class UIScrollContainer extends UIComponent {
       scrollbarThumbColor: props.scrollbarThumbColor ?? 0x888888,
       scrollbarThumbHoverColor: props.scrollbarThumbHoverColor ?? 0x555555,
       scrollbarAutoHide: props.scrollbarAutoHide ?? false,
-      padding: props.padding ?? EdgeInsets.all(0)
+      padding: props.padding ?? EdgeInsets.all(0),
+      smoothScroll: props.smoothScroll ?? true,
+      scrollEasing: props.scrollEasing ?? 0.15,
+      scrollSpeed: props.scrollSpeed ?? 1,
+      scrollPaddingBottom: props.scrollPaddingBottom ?? 0
     };
 
     // Set box model dimensions
@@ -211,12 +242,56 @@ export class UIScrollContainer extends UIComponent {
   private handleWheel(e: PIXI.FederatedWheelEvent): void {
     e.preventDefault();
 
-    const delta = e.deltaY;
-    this.scrollY += delta;
-    this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
+    const delta = e.deltaY * this.props.scrollSpeed;
 
+    if (this.props.smoothScroll) {
+      // Smooth scrolling: set target and animate
+      this.targetScrollY += delta;
+      this.targetScrollY = Math.max(0, Math.min(this.maxScrollY, this.targetScrollY));
+      this.startSmoothScroll();
+    } else {
+      // Instant scrolling (legacy behavior)
+      this.scrollY += delta;
+      this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
+      this.targetScrollY = this.scrollY;
+      this.updateContentPosition();
+      this.updateScrollbar();
+    }
+  }
+
+  /**
+   * Starts the smooth scroll animation loop
+   */
+  private startSmoothScroll(): void {
+    if (this.isAnimating) return;
+
+    this.isAnimating = true;
+    this.animateSmoothScroll();
+  }
+
+  /**
+   * Animation frame for smooth scrolling
+   */
+  private animateSmoothScroll(): void {
+    const diff = this.targetScrollY - this.scrollY;
+
+    // Stop animation when close enough
+    if (Math.abs(diff) < 0.5) {
+      this.scrollY = this.targetScrollY;
+      this.isAnimating = false;
+      this.animationFrameId = null;
+      this.updateContentPosition();
+      this.updateScrollbar();
+      return;
+    }
+
+    // Ease toward target
+    this.scrollY += diff * this.props.scrollEasing;
     this.updateContentPosition();
     this.updateScrollbar();
+
+    // Continue animation
+    this.animationFrameId = requestAnimationFrame(() => this.animateSmoothScroll());
   }
 
   /**
@@ -240,11 +315,17 @@ export class UIScrollContainer extends UIComponent {
 
     // Calculate target scroll position
     const clickRatio = (localY - trackTop) / (trackBottom - trackTop);
-    this.scrollY = clickRatio * this.maxScrollY;
-    this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
+    const targetY = Math.max(0, Math.min(this.maxScrollY, clickRatio * this.maxScrollY));
 
-    this.updateContentPosition();
-    this.updateScrollbar();
+    if (this.props.smoothScroll) {
+      this.targetScrollY = targetY;
+      this.startSmoothScroll();
+    } else {
+      this.scrollY = targetY;
+      this.targetScrollY = targetY;
+      this.updateContentPosition();
+      this.updateScrollbar();
+    }
   }
 
   /**
@@ -263,6 +344,8 @@ export class UIScrollContainer extends UIComponent {
     const scrollDelta = (deltaY / scrollableTrackHeight) * this.maxScrollY;
     this.scrollY = this.dragStartScrollY + scrollDelta;
     this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
+    // Sync target to prevent animation fighting with drag
+    this.targetScrollY = this.scrollY;
 
     this.updateContentPosition();
     this.updateScrollbar();
@@ -380,10 +463,12 @@ export class UIScrollContainer extends UIComponent {
     this.contentHeight = maxHeight;
 
     const viewportHeight = this.props.height - this.props.padding.top - this.props.padding.bottom;
-    this.maxScrollY = Math.max(0, this.contentHeight - viewportHeight);
+    // Add scrollPaddingBottom to allow content to scroll beyond its natural bounds
+    this.maxScrollY = Math.max(0, this.contentHeight + this.props.scrollPaddingBottom - viewportHeight);
 
-    // Clamp current scroll position
+    // Clamp current scroll position and target
     this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
+    this.targetScrollY = Math.max(0, Math.min(this.maxScrollY, this.targetScrollY));
 
     this.updateContentPosition();
     this.updateScrollbar();
@@ -393,8 +478,8 @@ export class UIScrollContainer extends UIComponent {
    * Adds a child to the scrollable content
    */
   addChild(child: UIComponent): void {
-    // Set parent reference for scroll-into-view support
-    child.parent = this as any;
+    // Set parent reference for font inheritance and scroll-into-view support
+    child.parent = this;
 
     // Track child for focus manager discovery
     this.children.push(child);
@@ -427,11 +512,22 @@ export class UIScrollContainer extends UIComponent {
 
   /**
    * Scrolls to a specific Y position
+   * @param y - Target scroll position
+   * @param animate - Whether to animate the scroll (default: uses smoothScroll prop)
    */
-  scrollTo(y: number): void {
-    this.scrollY = Math.max(0, Math.min(this.maxScrollY, y));
-    this.updateContentPosition();
-    this.updateScrollbar();
+  scrollTo(y: number, animate?: boolean): void {
+    const shouldAnimate = animate ?? this.props.smoothScroll;
+    const clampedY = Math.max(0, Math.min(this.maxScrollY, y));
+
+    if (shouldAnimate) {
+      this.targetScrollY = clampedY;
+      this.startSmoothScroll();
+    } else {
+      this.scrollY = clampedY;
+      this.targetScrollY = clampedY;
+      this.updateContentPosition();
+      this.updateScrollbar();
+    }
   }
 
   /**
@@ -460,6 +556,22 @@ export class UIScrollContainer extends UIComponent {
    */
   getMaxScrollY(): number {
     return this.maxScrollY;
+  }
+
+  /**
+   * Sets the scroll padding bottom (extra scrollable area at bottom)
+   * @param padding - Extra height in pixels
+   */
+  setScrollPaddingBottom(padding: number): void {
+    this.props.scrollPaddingBottom = padding;
+    this.updateContentBounds();
+  }
+
+  /**
+   * Gets the current scroll padding bottom
+   */
+  getScrollPaddingBottom(): number {
+    return this.props.scrollPaddingBottom;
   }
 
   /**
@@ -518,6 +630,13 @@ export class UIScrollContainer extends UIComponent {
    * Cleanup when destroying
    */
   destroy(): void {
+    // Cancel any pending animation frame
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    this.isAnimating = false;
+
     if (typeof window !== 'undefined') {
       if (this.boundGlobalPointerMove) {
         window.removeEventListener('pointermove', this.boundGlobalPointerMove);

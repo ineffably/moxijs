@@ -45,6 +45,8 @@ export interface UITextInputProps {
   borderRadius?: number;
   /** Font size */
   fontSize?: number;
+  /** Font family (inherits from parent if not specified) */
+  fontFamily?: string;
   /** Input type for validation */
   type?: 'text' | 'number';
   /** Optional ThemeResolver for automatic color resolution */
@@ -68,7 +70,9 @@ export interface UITextInputProps {
  */
 export class UITextInput extends UIComponent {
   // Props
-  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
+  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily'>>;
+  /** Local fontFamily prop (can be overridden by parent inheritance) */
+  private localFontFamily?: string;
   
   // Services (composition)
   private stateManager: FormStateManager<string>;
@@ -119,6 +123,9 @@ export class UITextInput extends UIComponent {
       textColor: props.textColor,
       placeholderColor: props.placeholderColor
     };
+
+    // Store fontFamily for inheritance
+    this.localFontFamily = props.fontFamily;
 
     // Initialize theme resolver
     this.themeResolver = props.themeResolver;
@@ -174,10 +181,13 @@ export class UITextInput extends UIComponent {
       ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
       : this.resolveTextColor(this.colorOverrides.textColor);
 
+    // Resolve font family - check local prop first, then inherit from parent
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+
     this.textDisplay = asTextDPR({
       text: displayText,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY,
+        fontFamily: effectiveFontFamily,
         fontSize: this.props.fontSize,
         fill: textColor,
         align: 'left'
@@ -330,10 +340,12 @@ export class UITextInput extends UIComponent {
       this.inputHandler.setCursorPosition(value.length);
     }
     const dprScale = UI_DEFAULTS.DPR_SCALE;
+    // Use same font family as display text
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
+        fontFamily: effectiveFontFamily, // Match the display font
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left'
@@ -435,6 +447,71 @@ export class UITextInput extends UIComponent {
     // Handler uses stateManager directly, just update cursor position
     this.inputHandler.setCursorPosition(value.length);
     this.updateText();
+    this.updateCursor();
+  }
+
+  /**
+   * Sets the size of the input and redraws
+   * @param width - New width in pixels
+   * @param height - New height in pixels (optional, keeps current if not provided)
+   */
+  setSize(width: number, height?: number): void {
+    this.props.width = width;
+    if (height !== undefined) {
+      this.props.height = height;
+    }
+    this.boxModel.width = this.props.width;
+    this.boxModel.height = this.props.height;
+
+    // Recreate visuals with new size
+    this.recreateVisuals();
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets the width of the input
+   */
+  setWidth(width: number): void {
+    this.setSize(width, this.props.height);
+  }
+
+  /**
+   * Gets the current width
+   */
+  getWidth(): number {
+    return this.props.width;
+  }
+
+  /**
+   * Gets the current height
+   */
+  getHeight(): number {
+    return this.props.height;
+  }
+
+  /**
+   * Recreates visual elements (used after size change)
+   */
+  private recreateVisuals(): void {
+    // Update background size
+    this.background.destroy();
+
+    const bgColor = this.resolveColor('background', this.colorOverrides.backgroundColor);
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+
+    // Insert background at position 0 (behind other elements)
+    this.container.addChildAt(this.background.container, 0);
+
+    // Update text position
+    const textY = Math.round((this.props.height - this.props.fontSize) / 2);
+    this.textDisplay.position.set(12, textY);
+
+    // Update cursor
     this.updateCursor();
   }
 

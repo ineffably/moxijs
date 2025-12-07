@@ -43,6 +43,8 @@ export interface UIButtonProps {
   textColor?: number;
   /** Font size */
   fontSize?: number;
+  /** Font family for canvas text (inherits from parent if not specified) */
+  fontFamily?: string;
   /** Border radius (only used with backgroundColor) */
   borderRadius?: number;
   /** Padding inside button */
@@ -97,6 +99,8 @@ export class UIButton extends UIComponent {
   private bitmapFontFamily?: string;
   /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
   private localMsdfFontFamily?: string;
+  /** Local fontFamily prop (can be overridden by parent inheritance) */
+  private localFontFamily?: string;
   private onClick?: () => void;
   private onHover?: () => void;
 
@@ -144,6 +148,7 @@ export class UIButton extends UIComponent {
     this.useBitmapText = props.useBitmapText ?? false;
     this.bitmapFontFamily = props.bitmapFontFamily;
     this.localMsdfFontFamily = props.msdfFontFamily;
+    this.localFontFamily = props.fontFamily;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
 
@@ -244,12 +249,14 @@ export class UIButton extends UIComponent {
           padding: EdgeInsets.zero()
         });
       } else {
-        // Regular canvas text
+        // Regular canvas text - resolve font family from local or parent
+        const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily);
         this.label = new UILabel({
           text: this.props.label,
           fontSize: this.props.fontSize,
           color: this.props.textColor,
-          align: 'center'
+          align: 'center',
+          fontFamily: effectiveFontFamily
         }, {
           padding: EdgeInsets.zero()
         });

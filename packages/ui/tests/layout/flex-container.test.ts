@@ -220,6 +220,34 @@ describe('FlexContainer', () => {
       // (we can't directly test layoutDirty, but we can verify behavior)
       expect(container.children.length).toBe(1);
     });
+
+    it('should remove all children', () => {
+      const container = new FlexContainer();
+      const child1 = new MockChildComponent();
+      const child2 = new MockChildComponent();
+      const child3 = new MockChildComponent();
+
+      container.addChild(child1);
+      container.addChild(child2);
+      container.addChild(child3);
+      expect(container.children.length).toBe(3);
+
+      container.removeAllChildren();
+
+      expect(container.children.length).toBe(0);
+      expect(child1.parent).toBeUndefined();
+      expect(child2.parent).toBeUndefined();
+      expect(child3.parent).toBeUndefined();
+    });
+
+    it('should handle removeAllChildren on empty container', () => {
+      const container = new FlexContainer();
+
+      // Should not throw
+      container.removeAllChildren();
+
+      expect(container.children.length).toBe(0);
+    });
   });
 
   describe('measure', () => {

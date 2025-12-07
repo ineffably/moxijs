@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### UIComponent
+- `x` and `y` getters/setters for convenient positioning (no need to access `.container` directly)
+
+#### UITextInput
+- `fontFamily` prop for custom font support (inherits from parent if not specified)
+- `setSize(width, height?)` method for dynamic resizing
+- `setWidth(width)`, `getWidth()`, `getHeight()` convenience methods
+
+#### UITextArea
+- `setSize(width, height?)` method for dynamic resizing
+- `setWidth(width)`, `getWidth()`, `getHeight()` convenience methods
+
+#### UIButton
+- `fontFamily` prop for canvas text (in addition to existing `msdfFontFamily` and `bitmapFontFamily`)
+
+#### UIScrollContainer
+- Smooth scrolling enabled by default with new props:
+  - `smoothScroll` - Enable/disable eased scrolling (default: `true`)
+  - `scrollEasing` - Easing factor, 0.1=slow, 0.3=snappy (default: `0.15`)
+  - `scrollSpeed` - Wheel event multiplier (default: `1`)
+- `scrollPaddingBottom` - Extra scrollable height at bottom (useful for chat UIs)
+- `setScrollPaddingBottom(padding)` and `getScrollPaddingBottom()` methods
+- `scrollTo(y, animate?)` now accepts optional `animate` parameter
+
+#### FlexContainer
+- `removeAllChildren()` method for clearing all children at once
+
 ## [0.3.2] - 2025-12-06
 
 ### Added

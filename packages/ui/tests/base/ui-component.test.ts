@@ -4,17 +4,32 @@ import { EdgeInsets } from '../../src/base/edge-insets';
 
 // Mock PIXI.js
 jest.mock('pixi.js', () => ({
-  Container: jest.fn().mockImplementation(() => ({
-    addChild: jest.fn(),
-    addChildAt: jest.fn(),
-    removeChild: jest.fn(),
-    destroy: jest.fn(),
-    position: { set: jest.fn() },
-    visible: true,
-    parent: null,
-    effects: [],
-    getGlobalPosition: jest.fn().mockReturnValue({ x: 0, y: 0 }),
-  })),
+  Container: jest.fn().mockImplementation(() => {
+    const container: any = {
+      addChild: jest.fn(),
+      addChildAt: jest.fn(),
+      removeChild: jest.fn(),
+      destroy: jest.fn(),
+      _x: 0,
+      _y: 0,
+      get x() { return this._x; },
+      set x(v: number) { this._x = v; },
+      get y() { return this._y; },
+      set y(v: number) { this._y = v; },
+      visible: true,
+      parent: null,
+      effects: [],
+      getGlobalPosition: jest.fn().mockReturnValue({ x: 0, y: 0 }),
+    };
+    // position.set should update both x and y like real PIXI
+    container.position = {
+      set: jest.fn((x: number, y: number) => {
+        container._x = x;
+        container._y = y;
+      })
+    };
+    return container;
+  }),
   Graphics: jest.fn().mockImplementation(() => ({
     clear: jest.fn().mockReturnThis(),
     roundRect: jest.fn().mockReturnThis(),
@@ -239,12 +254,44 @@ describe('UIComponent', () => {
   });
 
   describe('position', () => {
-    it('should set position', () => {
+    it('should set position via setPosition()', () => {
       component.setPosition(100, 200);
 
       const layout = component.getLayout();
       expect(layout.x).toBe(100);
       expect(layout.y).toBe(200);
+    });
+
+    it('should get x position', () => {
+      component.setPosition(150, 250);
+      expect(component.x).toBe(150);
+    });
+
+    it('should get y position', () => {
+      component.setPosition(150, 250);
+      expect(component.y).toBe(250);
+    });
+
+    it('should set x position via setter', () => {
+      component.x = 300;
+      expect(component.x).toBe(300);
+      expect(component.getLayout().x).toBe(300);
+    });
+
+    it('should set y position via setter', () => {
+      component.y = 400;
+      expect(component.y).toBe(400);
+      expect(component.getLayout().y).toBe(400);
+    });
+
+    it('should update container position when setting x', () => {
+      component.x = 100;
+      expect(component.container.x).toBe(100);
+    });
+
+    it('should update container position when setting y', () => {
+      component.y = 200;
+      expect(component.container.y).toBe(200);
     });
   });
 

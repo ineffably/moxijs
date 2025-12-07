@@ -475,6 +475,98 @@ export class UITextArea extends UIComponent {
   }
 
   /**
+   * Sets the size of the textarea and redraws
+   * @param width - New width in pixels
+   * @param height - New height in pixels (optional, keeps current if not provided)
+   */
+  setSize(width: number, height?: number): void {
+    this.props.width = width;
+    if (height !== undefined) {
+      this.props.height = height;
+    }
+    this.boxModel.width = this.props.width;
+    this.boxModel.height = this.props.height;
+
+    // Recreate visuals with new size
+    this.recreateVisuals();
+    this.markLayoutDirty();
+  }
+
+  /**
+   * Sets the width of the textarea
+   */
+  setWidth(width: number): void {
+    this.setSize(width, this.props.height);
+  }
+
+  /**
+   * Gets the current width
+   */
+  getWidth(): number {
+    return this.props.width;
+  }
+
+  /**
+   * Gets the current height
+   */
+  getHeight(): number {
+    return this.props.height;
+  }
+
+  /**
+   * Recreates visual elements (used after size change)
+   */
+  private recreateVisuals(): void {
+    // Remove old visuals
+    this.background.destroy();
+    this.container.removeChild(this.textDisplay);
+    this.textDisplay.destroy();
+
+    // Recreate background
+    const bgColor = this.focused
+      ? this.resolveColor('focus', this.colorOverrides.backgroundColor)
+      : this.resolveColor('background', this.colorOverrides.backgroundColor);
+
+    this.background = new UIPanel({
+      backgroundColor: bgColor,
+      width: this.props.width,
+      height: this.props.height,
+      borderRadius: this.props.borderRadius
+    });
+    this.container.addChildAt(this.background.container, 0);
+
+    // Recreate text display with new word wrap width
+    const displayText = this.getDisplayText();
+    const dprScale = UI_DEFAULTS.DPR_SCALE;
+    const value = this.stateManager.getValue();
+    const textColor = value
+      ? this.resolveTextColor(this.colorOverrides.textColor)
+      : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
+
+    this.textDisplay = asTextDPR({
+      text: displayText,
+      style: {
+        fontFamily: UI_DEFAULTS.FONT_FAMILY,
+        fontSize: this.props.fontSize,
+        fill: textColor,
+        align: 'left',
+        wordWrap: true,
+        wordWrapWidth: (this.props.width - 24) * dprScale,
+        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
+      },
+      dprScale,
+      pixelPerfect: true
+    });
+    this.textDisplay.position.set(12, 12);
+    this.textDisplay.roundPixels = true;
+    // Insert before cursor (cursor should be last)
+    this.container.addChildAt(this.textDisplay, this.container.children.length - 1);
+
+    // Update cursor position
+    this.updateCursor();
+  }
+
+  /**
    * Cleanup when destroying
    */
   destroy(): void {

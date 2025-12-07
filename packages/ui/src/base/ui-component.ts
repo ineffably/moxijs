@@ -354,6 +354,36 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
   }
 
   /**
+   * Gets the x position of this component
+   */
+  public get x(): number {
+    return this.container.x;
+  }
+
+  /**
+   * Sets the x position of this component
+   */
+  public set x(value: number) {
+    this.computedLayout.x = value;
+    this.container.x = value;
+  }
+
+  /**
+   * Gets the y position of this component
+   */
+  public get y(): number {
+    return this.container.y;
+  }
+
+  /**
+   * Sets the y position of this component
+   */
+  public set y(value: number) {
+    this.computedLayout.y = value;
+    this.container.y = value;
+  }
+
+  /**
    * Sets the position of this component
    */
   public setPosition(x: number, y: number): void {

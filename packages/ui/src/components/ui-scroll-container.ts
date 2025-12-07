@@ -69,7 +69,7 @@ export interface UIScrollContainerProps {
  * ```
  */
 export class UIScrollContainer extends UIComponent {
-  private props: Required<UIScrollContainerProps>;
+  private props: Required<Omit<UIScrollContainerProps, 'fontConfig'>>;
   private background: PIXI.Graphics;
   private contentContainer: PIXI.Container;
   private contentMask: PIXI.Graphics;

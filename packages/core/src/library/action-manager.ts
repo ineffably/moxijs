@@ -1,24 +1,49 @@
 /**
- * ActionManager - Centralized event listener management utility
+ * ActionManager - Centralized event listener management utility.
  *
  * Prevents memory leaks by tracking all registered event listeners and providing
  * batch cleanup functionality. Particularly useful for Logic components that need to
  * register multiple window/document listeners and clean them up on destroy.
  *
+ * ## Why Use ActionManager?
+ * When adding event listeners in game logic, forgetting to remove them causes memory leaks.
+ * ActionManager tracks all listeners and provides a single `removeAll()` call for cleanup.
+ *
+ * ## Common Event Targets
+ * - `window` - Global events like resize, blur, focus
+ * - `document` - Keyboard events, pointer events that shouldn't be canvas-bound
+ * - `renderer.canvas` - Canvas-specific events
+ * - Any DOM element
+ *
+ * ## Common Event Types
+ * - Pointer: 'pointerdown', 'pointermove', 'pointerup', 'pointercancel'
+ * - Mouse: 'mousedown', 'mousemove', 'mouseup', 'wheel', 'contextmenu'
+ * - Keyboard: 'keydown', 'keyup'
+ * - Window: 'resize', 'blur', 'focus', 'visibilitychange'
+ *
  * @example
  * ```ts
+ * // In a Logic component - drag handling with cleanup
  * class DragLogic extends Logic<Container> {
  *   private actions = new ActionManager();
  *
  *   init(entity: Container) {
+ *     // Add listeners - they're tracked automatically
  *     this.actions.add(window, 'pointermove', this.onMove.bind(this));
  *     this.actions.add(window, 'pointerup', this.onUp.bind(this));
+ *     this.actions.add(window, 'blur', this.onBlur.bind(this));
  *   }
  *
  *   destroy() {
+ *     // Clean up all listeners at once - no memory leaks!
  *     this.actions.removeAll();
  *   }
  * }
+ *
+ * // Removing individual actions
+ * const wheelAction = actions.add(window, 'wheel', onWheel);
+ * // ... later ...
+ * actions.remove(wheelAction); // Remove just this one
  * ```
  */
 

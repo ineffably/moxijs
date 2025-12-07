@@ -12,7 +12,7 @@ import { loadFonts } from './library/font-loader';
 import { asEntity, MoxiEntity } from './main/moxi-entity';
 import { Camera, CameraLogic } from './main/camera';
 import { asTextureFrames } from './library/texture-frames';
-import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, asMSDFText, PixiProps, TextDPROptions } from './library/as-pixi';
+import { asBitmapText, asSprite, asText, asTextDPR, asGraphics, asContainer, asMSDFText, asEntityGraphics, asEntitySprite, asEntityContainer, asEntityText, PixiProps, TextDPROptions } from './library/as-pixi';
 import { TextureFrameSequences, SequenceInfo } from './library/texture-frame-sequences';
 import { createResizeHandler, setupResponsiveCanvas, ResizeHandlerOptions } from './library/resize-handler';
 import { StateMachine } from './library/state-machine';
@@ -64,8 +64,8 @@ export type {
 } from './library/physics';
 export type { SVGToTextureOptions } from './library/svg-utils/svg-to-texture';
 export type { PixelGridConfig, BorderConfig } from './library/pixel-grid';
-export type { SpriteOptions, TextOptions, TextDPROptions, BitmapTextOptions, PixiProps, MSDFTextOptions } from './library/as-pixi';
-export type { SetupMoxiArgs, PixelPerfectOptions } from './library/setup';
+export type { SpriteOptions, TextOptions, TextDPROptions, BitmapTextOptions, PixiProps, PixiPropsWithEntity, MSDFTextOptions, GraphicsDrawOptions } from './library/as-pixi';
+export type { SetupMoxiArgs, PixelPerfectOptions, ScaleMode } from './library/setup';
 export type { AssetLoaderEvents } from './main/asset-loader';
 
 export type Asset = { src: string, alias?: string };
@@ -109,6 +109,10 @@ const exportedObjects = {
   asGraphics,
   asContainer,
   asMSDFText,
+  asEntityGraphics,
+  asEntitySprite,
+  asEntityContainer,
+  asEntityText,
   Logic,
   Camera,
   CameraLogic,
@@ -169,6 +173,10 @@ export {
   asGraphics,
   asContainer,
   asMSDFText,
+  asEntityGraphics,
+  asEntitySprite,
+  asEntityContainer,
+  asEntityText,
   Logic,
   Camera,
   CameraLogic,

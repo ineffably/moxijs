@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, UIFontConfig } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { EdgeInsets } from '../base/edge-insets';
 import { LayoutEngine } from '../services';
@@ -43,6 +43,11 @@ export interface UIScrollContainerProps {
    * (default: 0)
    */
   scrollPaddingBottom?: number;
+  /**
+   * Font configuration that children will inherit (like CSS).
+   * Allows setting fontFamily, fontSize, etc. once at container level.
+   */
+  fontConfig?: UIFontConfig;
 }
 
 /**
@@ -96,6 +101,10 @@ export class UIScrollContainer extends UIComponent {
   constructor(props: UIScrollContainerProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
+    // Set font config if provided (children will inherit this)
+    if (props.fontConfig) {
+      this.setFontConfig(props.fontConfig);
+    }
 
     this.props = {
       width: props.width,
@@ -469,8 +478,8 @@ export class UIScrollContainer extends UIComponent {
    * Adds a child to the scrollable content
    */
   addChild(child: UIComponent): void {
-    // Set parent reference for scroll-into-view support
-    child.parent = this as any;
+    // Set parent reference for font inheritance and scroll-into-view support
+    child.parent = this;
 
     // Track child for focus manager discovery
     this.children.push(child);

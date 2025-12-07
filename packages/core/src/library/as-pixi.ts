@@ -1,4 +1,5 @@
 import PIXI from 'pixi.js';
+import { asEntity, AsEntity } from '../main/moxi-entity';
 
 /**
  * Options for creating a BitmapText instance
@@ -62,6 +63,17 @@ export interface PixiProps {
   visible?: boolean;
   eventMode?: 'none' | 'passive' | 'auto' | 'static' | 'dynamic';
   pivot?: { x?: number; y?: number } | number;
+}
+
+/**
+ * Props with optional entity wrapping
+ */
+export interface PixiPropsWithEntity extends PixiProps {
+  /**
+   * If true, wrap the result with asEntity() for logic component support.
+   * The returned object will have a `moxiEntity` property for adding Logic.
+   */
+  entity?: boolean;
 }
 
 /**
@@ -333,5 +345,110 @@ export function asMSDFText(
 ): PIXI.BitmapText {
   const text = new PIXI.BitmapText(constructorArgs as any);
   return applyProps(text, props);
+}
+
+// ============================================================================
+// Entity-wrapped helpers
+// These return objects with moxiEntity property for logic component support
+// ============================================================================
+
+/**
+ * Options for asGraphics with draw callback
+ */
+export interface GraphicsDrawOptions extends PixiProps {
+  /** Optional draw callback to set up graphics commands */
+  draw?: (g: PIXI.Graphics) => void;
+}
+
+/**
+ * Creates a Graphics instance wrapped as an entity for logic support.
+ *
+ * @example
+ * ```typescript
+ * const player = asEntityGraphics({
+ *   x: 100,
+ *   y: 200,
+ *   draw: (g) => g.circle(0, 0, 20).fill(0xff0000)
+ * });
+ * player.moxiEntity.addLogic(new PlayerController());
+ * scene.addChild(player);
+ * ```
+ */
+export function asEntityGraphics(props?: GraphicsDrawOptions): AsEntity<PIXI.Graphics> {
+  const { draw, ...pixiProps } = props || {};
+  const graphics = new PIXI.Graphics();
+
+  if (draw) {
+    draw(graphics);
+  }
+
+  const result = applyProps(graphics, pixiProps);
+  return asEntity(result);
+}
+
+/**
+ * Creates a Sprite instance wrapped as an entity for logic support.
+ *
+ * @example
+ * ```typescript
+ * const player = asEntitySprite(
+ *   { texture },
+ *   { x: 100, y: 100, anchor: 0.5 }
+ * );
+ * player.moxiEntity.addLogic(new PlayerController());
+ * scene.addChild(player);
+ * ```
+ */
+export function asEntitySprite(
+  constructorArgs: SpriteOptions,
+  props?: PixiProps
+): AsEntity<PIXI.Sprite> {
+  const sprite = new PIXI.Sprite(constructorArgs as any);
+  const result = applyProps(sprite, props);
+  return asEntity(result);
+}
+
+/**
+ * Creates a Container instance wrapped as an entity for logic support.
+ *
+ * @example
+ * ```typescript
+ * const group = asEntityContainer({ x: 100, y: 100 });
+ * group.moxiEntity.addLogic(new GroupLogic());
+ * scene.addChild(group);
+ * ```
+ */
+export function asEntityContainer(props?: PixiProps): AsEntity<PIXI.Container> {
+  const container = new PIXI.Container();
+  const result = applyProps(container, props);
+  return asEntity(result);
+}
+
+/**
+ * Creates a Text instance wrapped as an entity for logic support.
+ *
+ * @example
+ * ```typescript
+ * const label = asEntityText(
+ *   { text: 'Score: 0', style: { fontFamily: 'Arial', fontSize: 24 } },
+ *   { x: 10, y: 10 }
+ * );
+ * label.moxiEntity.addLogic(new ScoreDisplay());
+ * scene.addChild(label);
+ * ```
+ */
+export function asEntityText(
+  constructorArgs: TextOptions,
+  props?: PixiProps
+): AsEntity<PIXI.Text> {
+  const { pixelPerfect, ...textArgs } = constructorArgs;
+  const text = new PIXI.Text(textArgs as any);
+
+  if (pixelPerfect) {
+    text.roundPixels = true;
+  }
+
+  const result = applyProps(text, props);
+  return asEntity(result);
 }
 

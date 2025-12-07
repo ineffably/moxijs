@@ -26,7 +26,13 @@ export interface UILabelProps {
   wordWrapWidth?: number;
   /** Font weight */
   fontWeight?: string;
-  /** Line height multiplier */
+  /**
+   * Line height as a multiplier of fontSize (like CSS unitless line-height).
+   * - 1.0 = no extra spacing (tight)
+   * - 1.2 = 20% extra spacing (default)
+   * - 2.0 = double spacing
+   * Note: This is NOT absolute pixels - use 1.2, not 24 for an 18px font.
+   */
   lineHeight?: number;
   /** MSDF font family name. If provided, uses MSDF (Multi-channel Signed Distance Field) text rendering for crisp text at any scale. Must match the loaded MSDF font's family name. */
   msdfFontFamily?: string;
@@ -65,6 +71,8 @@ export class UILabel extends UIComponent {
   private readonly dprScale = 2; // DPR scaling factor for crisp text
   /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
   private readonly localMsdfFontFamily?: string;
+  /** Local fontFamily prop (can be overridden by parent inheritance) */
+  private readonly localFontFamily?: string;
   /** Track if text object has been initialized */
   private textInitialized = false;
 
@@ -73,13 +81,14 @@ export class UILabel extends UIComponent {
   constructor(props: UILabelProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    // Store local prop - actual value will be resolved via inheritance
+    // Store local props - actual values will be resolved via inheritance
     this.localMsdfFontFamily = props.msdfFontFamily;
+    this.localFontFamily = props.fontFamily;
 
     this.props = {
       text: props.text,
       fontSize: props.fontSize ?? 16,
-      fontFamily: props.fontFamily ?? UI_DEFAULTS.FONT_FAMILY, // Default to pixel-perfect font
+      fontFamily: props.fontFamily ?? UI_DEFAULTS.FONT_FAMILY, // Default (may be overridden by inheritance)
       color: props.color ?? 0xffffff,
       align: props.align ?? 'left',
       wordWrap: props.wordWrap ?? false,
@@ -131,9 +140,12 @@ export class UILabel extends UIComponent {
 
   /** @internal */
   private getTextStyle(): { [key: string]: any } {
+    // Resolve fontFamily through inheritance chain (local -> parent -> default)
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+
     // Note: fontSize is multiplied by dprScale in asTextDPR, so we pass display size here
     const style: { [key: string]: any } = {
-      fontFamily: this.props.fontFamily,
+      fontFamily: effectiveFontFamily,
       fontSize: this.props.fontSize, // Display size - asTextDPR will multiply by dprScale
       fill: this.props.color,
       align: this.props.align,

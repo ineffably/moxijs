@@ -330,8 +330,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'blue',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     textColor: 0xffffff,
     onClick: () => console.log('Blue clicked!')
   });
@@ -346,8 +346,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'green',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     textColor: 0xffffff,
     onClick: () => console.log('Green clicked!')
   });
@@ -362,8 +362,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'red',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     textColor: 0xffffff,
     onClick: () => console.log('Red clicked!')
   });
@@ -391,8 +391,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'yellow',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     textColor: 0xffffff,
     onClick: () => console.log('Yellow clicked!')
   });
@@ -407,8 +407,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'white',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     textColor: 0x000000, // Black text for white button
     onClick: () => console.log('White clicked!')
   });
@@ -436,8 +436,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'blue',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     fontSize: 12,
     textColor: 0xffffff,
     onClick: () => console.log('Small clicked!')
@@ -453,8 +453,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'green',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     fontSize: 14,
     textColor: 0xffffff,
     onClick: () => console.log('Medium clicked!')
@@ -470,8 +470,8 @@ export async function createButtonsShowcase(fontConfig?: UIFontConfig): Promise<
       color: 'red',
       pixelPerfect: true
     },
-    useBitmapText: true,
-    bitmapFontFamily: 'Kenney Future',
+    fontFamily: 'Kenney Future',
+    fontType: 'bitmap',
     fontSize: 20,
     textColor: 0xffffff,
     onClick: () => console.log('Large clicked!')
@@ -725,7 +725,7 @@ function createSection(title: string): FlexContainer {
     gap: 10
   });
 
-  // msdfFontFamily will be inherited from parent container
+  // fontFamily and fontType will be inherited from parent container
   const titleLabel = new UILabel({
     text: title,
     fontSize: 18,

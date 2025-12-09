@@ -12,28 +12,15 @@ import {
   IFlexLayoutParticipant,
   syncBoxModelToLayoutStyle,
 } from '../layout/layout-participant';
+import { UIFontConfig, FontType, resolveFontType } from './font-config';
+
+// Re-export font config types for convenience
+export { UIFontConfig, FontType, FontProps } from './font-config';
 
 // Unique ID counter for layout nodes
 let nextLayoutId = 0;
 function generateLayoutId(): string {
   return `ui-${nextLayoutId++}`;
-}
-
-/**
- * Font configuration that can be inherited from parent containers.
- * Like CSS, these settings cascade down the component tree.
- */
-export interface UIFontConfig {
-  /** MSDF font family name for crisp text at any scale */
-  msdfFontFamily?: string;
-  /** Default font family for canvas text */
-  fontFamily?: string;
-  /** Default font size */
-  fontSize?: number;
-  /** Default font weight ('normal', 'bold', or numeric 100-900) */
-  fontWeight?: 'normal' | 'bold' | number;
-  /** Default text color */
-  textColor?: number;
 }
 
 /**
@@ -665,19 +652,20 @@ export abstract class UIComponent implements IFlexLayoutParticipant {
   }
 
   /**
-   * Gets the inherited MSDF font family (convenience method).
-   * @param localOverride - Optional local override
-   */
-  protected getInheritedMsdfFontFamily(localOverride?: string): string | undefined {
-    return this.resolveInheritedFont('msdfFontFamily', localOverride);
-  }
-
-  /**
    * Gets the inherited font family (convenience method).
    * @param localOverride - Optional local override
    */
   protected getInheritedFontFamily(localOverride?: string): string | undefined {
     return this.resolveInheritedFont('fontFamily', localOverride);
+  }
+
+  /**
+   * Gets the inherited font type (convenience method).
+   * @param localOverride - Optional local override
+   * @returns The resolved font type, defaults to 'canvas'
+   */
+  protected getInheritedFontType(localOverride?: FontType): FontType {
+    return resolveFontType(this.resolveInheritedFont('fontType', localOverride));
   }
 
   /**

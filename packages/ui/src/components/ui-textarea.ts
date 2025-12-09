@@ -1,11 +1,10 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, FontType } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
 import { UIFocusManager } from '../base/ui-focus-manager';
 import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
-// Theme resolver is now in base class
 import {
   FormStateManager,
   TextInputHandler
@@ -44,6 +43,21 @@ export interface UITextAreaProps {
   borderRadius?: number;
   /** Font size */
   fontSize?: number;
+  /**
+   * Font family name.
+   * For canvas: Any CSS font family (e.g., 'Arial', 'Helvetica')
+   * For MSDF/bitmap: Must match the loaded font's family name
+   */
+  fontFamily?: string;
+  /**
+   * Font rendering type.
+   * - 'canvas' (default): Standard PIXI.Text with DPR scaling
+   * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
+   * - 'bitmap': Pre-rendered bitmap font atlas
+   * 
+   * Note: Text areas currently only support 'canvas' mode for cursor positioning.
+   */
+  fontType?: FontType;
   /** Line height multiplier (e.g., 1.5 means 1.5x the font size) */
   lineHeight?: number;
   /** Number of visible rows */
@@ -71,12 +85,15 @@ export interface UITextAreaProps {
  */
 export class UITextArea extends UIComponent {
   // Props
-  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
+  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily' | 'fontType'>>;
+  /** Local fontFamily prop (can be overridden by parent inheritance) */
+  private localFontFamily?: string;
+  /** Local fontType prop (can be overridden by parent inheritance) */
+  private localFontType?: FontType;
   
   // Services (composition)
   private stateManager: FormStateManager<string>;
   private inputHandler: TextInputHandler;
-  // ThemeApplier removed - using base class helpers
   
   // Visual elements
   private background: UIPanel;
@@ -89,11 +106,8 @@ export class UITextArea extends UIComponent {
 
   // Event listener management
   private actions = new ActionManager();
-
-  // State is now in base class (enabled, focused, hovered, pressed)
   
   // Theme data
-  // Theme resolver is now in base class
   private colorOverrides: {
     backgroundColor?: number;
     textColor?: number;
@@ -120,6 +134,10 @@ export class UITextArea extends UIComponent {
       lineHeight: defaultLineHeight,
       rows: props.rows ?? 4
     };
+
+    // Store font props for inheritance
+    this.localFontFamily = props.fontFamily;
+    this.localFontType = props.fontType;
 
     // Store color overrides
     this.colorOverrides = {
@@ -185,10 +203,13 @@ export class UITextArea extends UIComponent {
       ? this.resolvePlaceholderColor(this.colorOverrides.placeholderColor)
       : this.resolveTextColor(this.colorOverrides.textColor);
 
+    // Resolve font family through inheritance
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+
     this.textDisplay = asTextDPR({
       text: displayText,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY,
+        fontFamily: effectiveFontFamily,
         fontSize: this.props.fontSize,
         fill: textColor,
         align: 'left',
@@ -338,13 +359,16 @@ export class UITextArea extends UIComponent {
     const cursorPos = this.inputHandler.getCursorPosition();
     const textUpToCursor = value.substring(0, cursorPos);
 
+    // Resolve font family through inheritance
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+
     // Create temporary text to measure
     // Note: wordWrapWidth needs to account for DPR scaling (multiply by dprScale)
     const dprScale = UI_DEFAULTS.DPR_SCALE;
     const tempText = new PIXI.Text({
       text: textUpToCursor,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
+        fontFamily: effectiveFontFamily,
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left',
@@ -368,7 +392,7 @@ export class UITextArea extends UIComponent {
     const lastLineText = new PIXI.Text({
       text: lastLine,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY, // Match the display font
+        fontFamily: effectiveFontFamily,
         fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
         fill: this.textDisplay.style.fill,
         align: 'left',
@@ -543,10 +567,13 @@ export class UITextArea extends UIComponent {
       ? this.resolveTextColor(this.colorOverrides.textColor)
       : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
 
+    // Resolve font family through inheritance
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+
     this.textDisplay = asTextDPR({
       text: displayText,
       style: {
-        fontFamily: UI_DEFAULTS.FONT_FAMILY,
+        fontFamily: effectiveFontFamily,
         fontSize: this.props.fontSize,
         fill: textColor,
         align: 'left',

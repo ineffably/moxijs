@@ -1,12 +1,11 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, FontType } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
 import { EdgeInsets } from '../base/edge-insets';
 import { UIFocusManager } from '../base/ui-focus-manager';
 import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
-// Theme resolver is now in base class
 import {
   FormStateManager,
   TextInputHandler
@@ -45,8 +44,21 @@ export interface UITextInputProps {
   borderRadius?: number;
   /** Font size */
   fontSize?: number;
-  /** Font family (inherits from parent if not specified) */
+  /**
+   * Font family name.
+   * For canvas: Any CSS font family (e.g., 'Arial', 'Helvetica')
+   * For MSDF/bitmap: Must match the loaded font's family name
+   */
   fontFamily?: string;
+  /**
+   * Font rendering type.
+   * - 'canvas' (default): Standard PIXI.Text with DPR scaling
+   * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
+   * - 'bitmap': Pre-rendered bitmap font atlas
+   * 
+   * Note: Text inputs currently only support 'canvas' mode for cursor positioning.
+   */
+  fontType?: FontType;
   /** Input type for validation */
   type?: 'text' | 'number';
   /** Optional ThemeResolver for automatic color resolution */
@@ -70,9 +82,11 @@ export interface UITextInputProps {
  */
 export class UITextInput extends UIComponent {
   // Props
-  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily'>>;
+  private props: Required<Omit<UITextInputProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily' | 'fontType'>>;
   /** Local fontFamily prop (can be overridden by parent inheritance) */
   private localFontFamily?: string;
+  /** Local fontType prop (can be overridden by parent inheritance) */
+  private localFontType?: FontType;
   
   // Services (composition)
   private stateManager: FormStateManager<string>;
@@ -124,8 +138,9 @@ export class UITextInput extends UIComponent {
       placeholderColor: props.placeholderColor
     };
 
-    // Store fontFamily for inheritance
+    // Store font props for inheritance
     this.localFontFamily = props.fontFamily;
+    this.localFontType = props.fontType;
 
     // Initialize theme resolver
     this.themeResolver = props.themeResolver;

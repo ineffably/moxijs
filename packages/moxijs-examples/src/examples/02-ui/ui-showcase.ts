@@ -19,7 +19,8 @@ import { createPanelsShowcase } from '../ui/panels-showcase';
 
 /** MSDF Font configuration for UI showcase - children inherit this */
 export const MSDF_FONT: UIFontConfig = {
-  msdfFontFamily: 'PixelOperator8'
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf'
 };
 
 /**
@@ -64,7 +65,7 @@ export async function initUIShowcase() {
     src: ASSETS.PIXEL_OPERATOR8_MSDF_JSON,
     data: { type: 'font' }
   });
-  console.log('✅ MSDF font loaded:', MSDF_FONT.msdfFontFamily);
+  console.log('✅ MSDF font loaded:', MSDF_FONT.fontFamily);
 
   // Create a single focus manager for all tabs
   const focusManager = new UIFocusManager();
@@ -158,7 +159,8 @@ export async function initUIShowcase() {
     text: 'Scroll: Zoom  |  Shift+Drag: Pan',
     fontSize: 14,
     color: 0xcccccc,
-    msdfFontFamily: MSDF_FONT.msdfFontFamily
+    fontFamily: MSDF_FONT.fontFamily,
+    fontType: MSDF_FONT.fontType
   });
   zoomInstructions.layout(260, 18);
   zoomInstructions.container.position.set(-100, 0);
@@ -169,7 +171,8 @@ export async function initUIShowcase() {
     text: 'Double-click: Reset  |  MSDF Text',
     fontSize: 14,
     color: 0xcccccc,
-    msdfFontFamily: MSDF_FONT.msdfFontFamily
+    fontFamily: MSDF_FONT.fontFamily,
+    fontType: MSDF_FONT.fontType
   });
   resetInstructions.layout(260, 18);
   resetInstructions.container.position.set(-100, 18);
@@ -180,7 +183,8 @@ export async function initUIShowcase() {
     text: 'Scale: 1.00x',
     fontSize: 14,
     color: 0xeeeeee,
-    msdfFontFamily: MSDF_FONT.msdfFontFamily
+    fontFamily: MSDF_FONT.fontFamily,
+    fontType: MSDF_FONT.fontType
   });
   scaleLabel.layout(100, 32);
   scaleLabel.container.position.set(270, 10);

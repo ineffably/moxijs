@@ -86,9 +86,9 @@ const ASSET_PATHS = {
   RAINYHEARTS_FONT: 'assets/custom-fonts/rainyhearts.ttf',
 
   // MSDF Fonts (SDF text rendering)
-  PIXEL_OPERATOR8_MSDF_JSON: 'assets/fonts/msdf/PixelOperator8.json',
+  PIXEL_OPERATOR8_MSDF_FNT: 'assets/fonts/msdf/PixelOperator8.fnt',
   PIXEL_OPERATOR8_MSDF_PNG: 'assets/fonts/msdf/PixelOperator8-MSDF.png',
-  KENVECTOR_FUTURE_MSDF_JSON: 'assets/fonts/msdf/kenvector_future.json',
+  KENVECTOR_FUTURE_MSDF_FNT: 'assets/fonts/msdf/kenvector_future.fnt',
   KENVECTOR_FUTURE_MSDF_PNG: 'assets/fonts/msdf/KenvectorFuture-MSDF.png',
 
   // UI Pack Space

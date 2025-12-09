@@ -62,8 +62,7 @@ export async function initUIShowcase() {
   // Load MSDF font for crisp UI text at any scale
   await Assets.load({
     alias: 'PixelOperator8-MSDF',
-    src: ASSETS.PIXEL_OPERATOR8_MSDF_JSON,
-    data: { type: 'font' }
+    src: ASSETS.PIXEL_OPERATOR8_MSDF_FNT
   });
   console.log('✅ MSDF font loaded:', MSDF_FONT.fontFamily);
 

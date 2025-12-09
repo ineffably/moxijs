@@ -21,7 +21,7 @@ import { Assets, Text, Graphics, Container, FederatedPointerEvent, BitmapFont, B
 import { ASSETS } from '../../assets-config';
 
 // Configuration
-const MSDF_FONT_JSON = ASSETS.PIXEL_OPERATOR8_MSDF_JSON;
+const MSDF_FONT_FNT = ASSETS.PIXEL_OPERATOR8_MSDF_FNT;
 const STANDARD_FONT = ASSETS.PIXEL_OPERATOR8_FONT;
 
 export async function initMsdfTextRendering() {
@@ -54,11 +54,10 @@ export async function initMsdfTextRendering() {
     data: { family: 'PixelOperator8' }
   });
 
-  // Load MSDF font - PixiJS needs to know it's a bitmap font
+  // Load MSDF font - PixiJS automatically recognizes .fnt files and loads the PNG texture
   await Assets.load({
     alias: 'PixelOperator8-MSDF',
-    src: MSDF_FONT_JSON,
-    data: { type: 'font' }  // Tell PixiJS this is a font
+    src: MSDF_FONT_FNT
   });
 
   // Install BitmapFont with 256px supersampling (for pixel-perfect rendering)

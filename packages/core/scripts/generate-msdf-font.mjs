@@ -13,7 +13,7 @@
  *   npm run generate-msdf-font -- fonts/PixelOperator8.ttf ./msdf
  */
 import { spawn } from 'child_process';
-import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, unlinkSync, renameSync } from 'fs';
 import { basename, join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -47,14 +47,14 @@ Examples:
   npm run generate-msdf-font -- fonts/PixelOperator8.ttf ./msdf
 
 Output:
-  - <output-name>.json  (font metrics for PixiJS)
+  - <output-name>.fnt   (font metrics for PixiJS)
   - <output-name>.png   (MSDF texture atlas)
 
 Usage in code:
   import { Assets } from 'pixi.js';
   import { asMSDFText } from '@moxijs/core';
 
-  await Assets.load('path/to/font.json');
+  await Assets.load('path/to/font.fnt');
   const text = asMSDFText({
     text: 'Hello',
     style: { fontFamily: 'FontName', fontSize: 24 }
@@ -87,12 +87,12 @@ writeFileSync(charsetFile, CHAR_SET);
 
 console.log('\nGenerating MSDF font...');
 console.log(`Input:  ${inputPath}`);
-console.log(`Output: ${outputPath}.json + ${outputPath}.png\n`);
+console.log(`Output: ${outputPath}.fnt + ${outputPath}.png\n`);
 
 // Use spawn with array args to avoid shell escaping
 const args = [
   'msdf-bmfont',
-  '-f', 'json',           // Output format (PixiJS reads JSON)
+  '-f', 'json',           // Output format - JSON with .fnt extension (PixiJS v8 requirement)
   '-o', outputPath,       // Output path (without extension)
   '-t', 'msdf',           // Field type: msdf, sdf, or psdf
   '--pot',                // Power of two texture
@@ -115,11 +115,31 @@ child.on('close', (code) => {
   try { unlinkSync(charsetFile); } catch {}
 
   if (code === 0) {
-    console.log(`\n✅ MSDF font generated successfully!`);
-    console.log(`\nUsage in code:`);
-    console.log(`  import { asMSDFText } from '@moxijs/core';`);
-    console.log(`  await Assets.load('${outputDir}/${outputName}.json');`);
-    console.log(`  const text = asMSDFText({ text: 'Hello', style: { fontFamily: '${outputName}', fontSize: 24 } });`);
+    // Rename .json to .fnt for PixiJS v8 compatibility
+    // PixiJS v8 only recognizes .fnt and .xml extensions for bitmap fonts
+    const jsonPath = `${outputPath}.json`;
+    const fntPath = `${outputPath}.fnt`;
+    
+    if (existsSync(jsonPath)) {
+      try {
+        renameSync(jsonPath, fntPath);
+        console.log(`\n✅ MSDF font generated successfully!`);
+        console.log(`   Renamed ${outputName}.json → ${outputName}.fnt (PixiJS v8 requirement)`);
+        console.log(`\nUsage in code:`);
+        console.log(`  import { asMSDFText } from '@moxijs/core';`);
+        console.log(`  await Assets.load('${outputDir}/${outputName}.fnt');`);
+        console.log(`  const text = asMSDFText({ text: 'Hello', style: { fontFamily: '${outputName}', fontSize: 24 } });`);
+      } catch (err) {
+        console.error(`\n⚠️  Font generated but failed to rename .json to .fnt: ${err.message}`);
+        console.log(`   You can manually rename ${outputName}.json to ${outputName}.fnt`);
+      }
+    } else {
+      console.log(`\n✅ MSDF font generated successfully!`);
+      console.log(`\nUsage in code:`);
+      console.log(`  import { asMSDFText } from '@moxijs/core';`);
+      console.log(`  await Assets.load('${outputDir}/${outputName}.fnt');`);
+      console.log(`  const text = asMSDFText({ text: 'Hello', style: { fontFamily: '${outputName}', fontSize: 24 } });`);
+    }
   } else {
     console.error(`\n❌ Failed to generate MSDF font (exit code: ${code})`);
     process.exit(1);

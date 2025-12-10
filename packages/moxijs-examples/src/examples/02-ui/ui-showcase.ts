@@ -98,7 +98,7 @@ export async function initUIShowcase() {
     }
   ];
 
-  // Create tabs - use full canvas dimensions
+  // Create tabs - use full canvas dimensions and pass MSDF font config
   const tabs = new UITabs({
     items: tabItems,
     defaultActiveKey: 'buttons',
@@ -106,6 +106,8 @@ export async function initUIShowcase() {
     width: 1600,
     height: 900,
     hashPrefix: 'ui-showcase',
+    fontFamily: MSDF_FONT.fontFamily,
+    fontType: MSDF_FONT.fontType,
     onChange: (key) => {
       console.log('Active tab changed to:', key);
 

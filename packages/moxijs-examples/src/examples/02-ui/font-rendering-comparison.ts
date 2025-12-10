@@ -538,22 +538,22 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
   const pixelPerfectFontSamplesContent = new FontSamplesContent(pixelPerfectContentContainer);
   pixelPerfectScrollView.addChild(pixelPerfectFontSamplesContent);
 
-  // Font showcase section - all fonts including new ones
-  // bitmapFontFamily is for BitmapText, cssFontFamily is for Text
+  // Font showcase section - demonstrates both PixiJS.Text and PixiJS.BitmapText rendering
+  // Note: fontBitmap is for BitmapText, fontCanvas is for Text
   const fontSamples = [
-    { name: 'Kenney Blocks', bitmapFontFamily: 'KenneyBlocks', cssFontFamily: 'Kenney Blocks', size: 20, lineHeight: 25 },
-    { name: 'Kenvector Future', bitmapFontFamily: 'KenvectorFuture', cssFontFamily: 'Kenvector Future', size: 20, lineHeight: 25 },
-    { name: 'Kenvector Future Thin', bitmapFontFamily: 'KenvectorFutureThin', cssFontFamily: 'Kenvector Future Thin', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator8 Regular', bitmapFontFamily: 'PixelOperator8', cssFontFamily: 'PixelOperator8', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator8 Bold', bitmapFontFamily: 'PixelOperator8Bold', cssFontFamily: 'PixelOperator8-Bold', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator Regular', bitmapFontFamily: 'PixelOperator', cssFontFamily: 'PixelOperator', size: 20, lineHeight: 25 },
-    { name: 'PixelOperator Bold', bitmapFontFamily: 'PixelOperatorBold', cssFontFamily: 'PixelOperator-Bold', size: 20, lineHeight: 25 },
-    { name: 'Minecraft', bitmapFontFamily: 'Minecraft', cssFontFamily: 'Minecraft', size: 20, lineHeight: 25 },
-    { name: 'Dogica Pixel Regular', bitmapFontFamily: 'DogicaPixel', cssFontFamily: 'Dogica Pixel', size: 20, lineHeight: 25 },
-    { name: 'Dogica Pixel Bold', bitmapFontFamily: 'DogicaPixelBold', cssFontFamily: 'Dogica Pixel Bold', size: 20, lineHeight: 25 },
-    { name: 'Retro Gaming', bitmapFontFamily: 'RetroGaming', cssFontFamily: 'Retro Gaming', size: 20, lineHeight: 25 },
-    { name: 'VHS Gothic', bitmapFontFamily: 'VHSGothic', cssFontFamily: 'VHS Gothic', size: 20, lineHeight: 25 },
-    { name: 'RainyHearts', bitmapFontFamily: 'RainyHearts', cssFontFamily: 'RainyHearts', size: 20, lineHeight: 25 }
+    { name: 'Kenney Blocks', fontBitmap: 'KenneyBlocks', fontCanvas: 'Kenney Blocks', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future', fontBitmap: 'KenvectorFuture', fontCanvas: 'Kenvector Future', size: 20, lineHeight: 25 },
+    { name: 'Kenvector Future Thin', fontBitmap: 'KenvectorFutureThin', fontCanvas: 'Kenvector Future Thin', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Regular', fontBitmap: 'PixelOperator8', fontCanvas: 'PixelOperator8', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator8 Bold', fontBitmap: 'PixelOperator8Bold', fontCanvas: 'PixelOperator8-Bold', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Regular', fontBitmap: 'PixelOperator', fontCanvas: 'PixelOperator', size: 20, lineHeight: 25 },
+    { name: 'PixelOperator Bold', fontBitmap: 'PixelOperatorBold', fontCanvas: 'PixelOperator-Bold', size: 20, lineHeight: 25 },
+    { name: 'Minecraft', fontBitmap: 'Minecraft', fontCanvas: 'Minecraft', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Regular', fontBitmap: 'DogicaPixel', fontCanvas: 'Dogica Pixel', size: 20, lineHeight: 25 },
+    { name: 'Dogica Pixel Bold', fontBitmap: 'DogicaPixelBold', fontCanvas: 'Dogica Pixel Bold', size: 20, lineHeight: 25 },
+    { name: 'Retro Gaming', fontBitmap: 'RetroGaming', fontCanvas: 'Retro Gaming', size: 20, lineHeight: 25 },
+    { name: 'VHS Gothic', fontBitmap: 'VHSGothic', fontCanvas: 'VHS Gothic', size: 20, lineHeight: 25 },
+    { name: 'RainyHearts', fontBitmap: 'RainyHearts', fontCanvas: 'RainyHearts', size: 20, lineHeight: 25 }
   ];
 
   const sampleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=';
@@ -579,7 +579,7 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
     const sample = new Text({
       text: sampleChars,
       style: {
-        fontFamily: font.cssFontFamily,
+        fontFamily: font.fontCanvas,
         fontSize: font.size,
         fill: 0xffffff
       },
@@ -610,7 +610,7 @@ function createFontSamplesColumn(scene: PIXI.Container, x: number, y: number, wi
     const sample = new BitmapText({
       text: sampleChars,
       style: {
-        fontFamily: font.bitmapFontFamily,
+        fontFamily: font.fontBitmap,
         fontSize: font.size,
         lineHeight: font.lineHeight
       }

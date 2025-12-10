@@ -55,10 +55,25 @@ export async function initMsdfTextRendering() {
   });
 
   // Load MSDF font - PixiJS automatically recognizes .fnt files and loads the PNG texture
-  await Assets.load({
+  const msdfFont = await Assets.load({
     alias: 'PixelOperator8-MSDF',
     src: MSDF_FONT_FNT
   });
+  
+  // Verify the font loaded correctly with texture
+  if (!msdfFont?.pageTextures || msdfFont.pageTextures.length === 0) {
+    console.error('❌ MSDF font failed to load texture!');
+  } else {
+    console.log('✅ MSDF font loaded with texture:', msdfFont.pageTextures);
+    
+    // Ensure texture is uploaded to GPU before rendering
+    for (const pageTexture of msdfFont.pageTextures) {
+      if (pageTexture?.source) {
+        await pageTexture.source.load();
+        console.log('✅ MSDF texture uploaded to GPU');
+      }
+    }
+  }
 
   // Install BitmapFont with 256px supersampling (for pixel-perfect rendering)
   BitmapFont.install({

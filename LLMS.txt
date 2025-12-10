@@ -180,17 +180,25 @@ All UI components are now in the separate `@moxijs/ui` package.
 import { 
   FlexContainer, FlexDirection, UIButton, UILabel, 
   UITextInput, UITextArea, UISelect, UIScrollContainer,
-  UITabs, UIPanel, UICheckbox, UIRadioGroup, CardPanel
+  UITabs, UIPanel, UICheckbox, UIRadioGroup, CardPanel,
+  FontType, UIFontConfig
 } from '@moxijs/ui';
 ```
 
+**Font Standardization:** All text-based UI components (`UILabel`, `UIButton`, `UITextInput`, `UITextArea`, `UISelect`, `UITabs`) support standardized font configuration:
+- `fontFamily?: string` - Font family name
+- `fontType?: FontType` - Rendering method: `'canvas'` (default), `'msdf'`, or `'bitmap'`
+
+Font properties inherit from parent components, allowing you to set fonts once at the container level.
+
 ### UILabel
-Text display with layout.
+Text display with layout. Supports font inheritance.
 ```ts
 const label = new UILabel({
   text: 'Score: 0',
   fontSize: 24,
-  fontFamily: 'Arial',
+  fontFamily: 'PixelOperator8',  // Font family name
+  fontType: 'msdf',               // 'canvas' | 'msdf' | 'bitmap'
   color: 0xffffff,
   align: 'center',
   wordWrap: true,
@@ -201,7 +209,7 @@ label.setColor(0xff0000);
 ```
 
 ### UIButton
-Interactive button.
+Interactive button with font support.
 ```ts
 const button = new UIButton({
   label: 'Start Game',
@@ -209,6 +217,8 @@ const button = new UIButton({
   height: 40,
   backgroundColor: 0x4444ff,
   textColor: 0xffffff,
+  fontFamily: 'PixelOperator8',  // Optional: inherits from parent
+  fontType: 'msdf',               // Optional: inherits from parent
   onClick: () => startGame(),
 });
 ```
@@ -250,10 +260,12 @@ const tabs = new UITabs({
 ```
 
 ### UITextInput / UITextArea
-Text input fields.
+Text input fields with font support.
 ```ts
 const input = new UITextInput({
   placeholder: 'Enter name...',
+  fontFamily: 'PixelOperator8',  // Optional: inherits from parent
+  fontType: 'canvas',             // Optional: inherits from parent
   onChange: (value) => console.log(value),
   onSubmit: (value) => saveName(value),
 });
@@ -394,6 +406,35 @@ const text = asTextDPR('Hello World', {
   color: 0xffffff,
   dpr: 2, // Default: 2 for 2× supersampling
 });
+```
+
+### asMSDFText
+Multi-channel Signed Distance Field text for crisp rendering at any scale. Requires .fnt font files.
+```ts
+// Load MSDF font first (PixiJS v8 requires .fnt extension)
+await Assets.load({
+  alias: 'PixelOperator8-MSDF',
+  src: 'assets/fonts/msdf/PixelOperator8.fnt'
+});
+
+// Create MSDF text
+const text = asMSDFText({
+  text: 'Hello World',
+  style: {
+    fontFamily: 'PixelOperator8',
+    fontSize: 32,
+    fill: 0xffffff
+  }
+});
+
+// MSDF stays crisp when scaled
+text.scale.set(4); // No blur!
+```
+
+Generate MSDF fonts:
+```bash
+npm run generate-msdf-font -- fonts/MyFont.ttf ./assets/msdf MyFont
+# Creates: MyFont.fnt (JSON with .fnt extension) and MyFont-MSDF.png
 ```
 
 ---
@@ -555,6 +596,147 @@ player.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
   tags: ['player'],
 }));
 player.moxiEntity.addLogic(new PlatformerControlLogic());
+```
+
+### MSDF Font UI with Inheritance
+```ts
+// Load MSDF font once
+await Assets.load({ alias: 'UI-Font', src: 'fonts/PixelOperator8.fnt' });
+
+// Set font at container level - all children inherit
+const uiContainer = new FlexContainer({
+  direction: FlexDirection.Column,
+  gap: 10,
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf'  // Children inherit crisp MSDF rendering
+});
+
+// All these inherit the MSDF font automatically
+uiContainer.addChild(new UILabel({ text: 'Title', fontSize: 24 }));
+uiContainer.addChild(new UIButton({ label: 'Start', onClick: start }));
+uiContainer.addChild(new UITextInput({ placeholder: 'Name' }));
+```
+
+### Game HUD with Dynamic Text
+```ts
+// Create HUD with MSDF fonts for crisp scaling
+const hud = new FlexContainer({
+  direction: FlexDirection.Row,
+  justify: FlexJustify.SpaceBetween,
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf',
+  padding: EdgeInsets.all(20)
+});
+
+const scoreLabel = new UILabel({ text: 'Score: 0', fontSize: 16 });
+const livesLabel = new UILabel({ text: 'Lives: 3', fontSize: 16 });
+
+hud.addChild(scoreLabel);
+hud.addChild(livesLabel);
+
+// Update dynamically
+engine.ticker.add(() => {
+  scoreLabel.setText(`Score: ${game.score}`);
+  livesLabel.setText(`Lives: ${game.lives}`);
+});
+```
+
+### Form with Validation
+```ts
+const form = new FlexContainer({
+  direction: FlexDirection.Column,
+  gap: 15,
+  padding: EdgeInsets.all(20),
+  fontFamily: 'Arial',
+  fontType: 'canvas'
+});
+
+const nameInput = new UITextInput({
+  placeholder: 'Username',
+  width: 200,
+  onChange: (value) => validateUsername(value)
+});
+
+const emailInput = new UITextInput({
+  placeholder: 'Email',
+  width: 200,
+  onChange: (value) => validateEmail(value)
+});
+
+const submitButton = new UIButton({
+  label: 'Register',
+  width: 200,
+  onClick: () => submitForm({ name: nameInput.value, email: emailInput.value })
+});
+
+form.addChild(nameInput);
+form.addChild(emailInput);
+form.addChild(submitButton);
+```
+
+### Tabs with Different Content
+```ts
+const tabs = new UITabs({
+  items: [
+    { key: 'inventory', label: 'Inventory', content: inventoryPanel },
+    { key: 'stats', label: 'Stats', content: statsPanel },
+    { key: 'settings', label: 'Settings', content: settingsPanel }
+  ],
+  defaultActiveKey: 'inventory',
+  width: 800,
+  height: 600,
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf',
+  onChange: (key) => console.log('Active tab:', key)
+});
+```
+
+### Scrollable Content Panel
+```ts
+const scrollPanel = new UIScrollContainer({
+  width: 300,
+  height: 400,
+  scrollDirection: 'vertical',
+  backgroundColor: 0x2d2d44
+});
+
+// Add many items
+for (let i = 0; i < 50; i++) {
+  const item = new UILabel({
+    text: `Item ${i}`,
+    fontSize: 14,
+    padding: EdgeInsets.symmetric(10, 15)
+  });
+  scrollPanel.addChild(item);
+}
+```
+
+### Theming System
+```ts
+import { ThemeManager, Theme } from '@moxijs/ui';
+
+const darkTheme: Theme = {
+  colors: {
+    primary: 0x4a90e2,
+    secondary: 0x50c878,
+    background: 0x1e1e1e,
+    surface: 0x2d2d44,
+    text: 0xffffff
+  },
+  fonts: {
+    primary: { family: 'PixelOperator8', type: 'msdf' },
+    secondary: { family: 'Arial', type: 'canvas' }
+  }
+};
+
+ThemeManager.getInstance().setTheme('dark', darkTheme);
+ThemeManager.getInstance().setActiveTheme('dark');
+
+// Components automatically use theme
+const button = new UIButton({
+  label: 'Themed Button',
+  useTheme: true  // Applies theme colors
+});
 ```
 
 ---

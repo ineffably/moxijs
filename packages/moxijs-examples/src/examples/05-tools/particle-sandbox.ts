@@ -170,6 +170,9 @@ class EnhancedParticleEmitter extends Container {
   }
 
   update(deltaTime: number): void {
+    // Safety check: don't update if not in scene hierarchy
+    if (!this.parent) return;
+
     // Emit particles
     if (this.isPlaying && this.config.rate > 0) {
       this.emissionTimer += deltaTime;
@@ -352,7 +355,8 @@ class EnhancedParticleEmitter extends Container {
 
   private updateParticleSprite(particle: Particle): void {
     const sprite = particle.sprite;
-    if (!sprite?.position) return;
+    // Safety: ensure sprite is valid and has texture before updating
+    if (!sprite?.position || !sprite.texture || sprite.texture.destroyed) return;
 
     sprite.position.set(particle.x, particle.y);
     sprite.scale?.set(particle.scale);
@@ -418,6 +422,18 @@ class EnhancedParticleEmitter extends Container {
       this.pool.recycle(particle);
     }
   }
+
+  destroy(): void {
+    // Destroy all particle sprites before container destruction
+    for (const particle of this.pool.getActiveParticles()) {
+      if (particle.sprite) {
+        particle.sprite.destroy();
+        particle.sprite = null;
+      }
+      particle.active = false;
+    }
+    super.destroy({ children: true });
+  }
 }
 
 // Cleanup function type
@@ -464,6 +480,10 @@ export async function initParticleEmitterSandbox(): Promise<CleanupFunction> {
   emitter.emitterY = renderer.height / 2;
   scene.addChild(emitter);
 
+  // Initialize scene FIRST before any emitter activity
+  scene.init();
+  engine.start();
+
   // Create a minimal app-like object for compatibility with UI controls
   // They need screen.width, screen.height, and ticker
   const appLike = {
@@ -476,14 +496,14 @@ export async function initParticleEmitterSandbox(): Promise<CleanupFunction> {
     ticker: engine.ticker
   } as any;
 
-  // Apply fire preset as default
-  applyPreset(appLike, emitter, config, 'fire');
-
   // Update loop using MoxiJS engine
   engine.ticker.add((ticker) => {
     const deltaTime = ticker.deltaTime / 60;
     emitter.update(deltaTime);
   });
+
+  // NOW apply fire preset after scene is initialized and rendering
+  applyPreset(appLike, emitter, config, 'fire');
 
   // Mouse/touch interaction - click to reposition emitter
   const canvas = renderer.canvas as HTMLCanvasElement;
@@ -501,18 +521,14 @@ export async function initParticleEmitterSandbox(): Promise<CleanupFunction> {
   // Create comprehensive UI controls
   createEnhancedControls(appLike, emitter, config, textures);
 
-  // Initialize and start the engine
-  scene.init();
-  engine.start();
-
   console.log('✅ Particle Emitter Sandbox loaded');
   console.log('💡 Click to reposition emitter, use controls to adjust settings!');
 
   // Return cleanup function
   return () => {
     canvas.removeEventListener('click', handleClick);
-    emitter.clearParticles();
     engine.stop();
+    emitter.destroy(); // Properly destroy emitter and all sprites
     scene.destroy({ children: true });
   };
 }

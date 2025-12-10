@@ -129,7 +129,7 @@ export async function loadParticleTextures(
   // Load all textures
   for (const [category, names] of Object.entries(textureGroups)) {
     for (const name of names) {
-      const path = `/assets/particles/${name}.png`;
+      const path = `assets/particles/${name}.png`;
       try {
         const texture = await Assets.load(path);
         textures[name] = texture;

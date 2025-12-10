@@ -85,6 +85,15 @@ export class FormStateManager<T> {
   }
 
   /**
+   * Set the value silently without triggering onChange callback.
+   * Use this for programmatic updates where the parent is setting the value
+   * and doesn't need to be notified (e.g., initializing from external state).
+   */
+  setValueSilent(value: T): void {
+    this.value = value;
+  }
+
+  /**
    * Whether this is in controlled mode
    */
   isControlledMode(): boolean {

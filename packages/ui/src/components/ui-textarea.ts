@@ -5,10 +5,7 @@ import { UIPanel } from './ui-panel';
 import { UIFocusManager } from '../base/ui-focus-manager';
 import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
-import {
-  FormStateManager,
-  TextInputHandler
-} from '../services';
+import { FormStateManager } from '../services';
 import { UI_DEFAULTS } from '../theming/theme-data';
 
 /**
@@ -54,7 +51,7 @@ export interface UITextAreaProps {
    * - 'canvas' (default): Standard PIXI.Text with DPR scaling
    * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
    * - 'bitmap': Pre-rendered bitmap font atlas
-   * 
+   *
    * Note: Text areas currently only support 'canvas' mode for cursor positioning.
    */
   fontType?: FontType;
@@ -90,23 +87,25 @@ export class UITextArea extends UIComponent {
   private localFontFamily?: string;
   /** Local fontType prop (can be overridden by parent inheritance) */
   private localFontType?: FontType;
-  
-  // Services (composition)
+
+  // State management
   private stateManager: FormStateManager<string>;
-  private inputHandler: TextInputHandler;
-  
+
+  // Cursor state (inlined from TextInputHandler)
+  private cursorPosition: number = 0;
+
   // Visual elements
   private background: UIPanel;
   private textDisplay: PIXI.Text;
   private cursor: PIXI.Graphics;
-  
+
   // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
 
   // Event listener management
   private actions = new ActionManager();
-  
+
   // Theme data
   private colorOverrides: {
     backgroundColor?: number;
@@ -117,7 +116,7 @@ export class UITextArea extends UIComponent {
   constructor(props: UITextAreaProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
 
-    const defaultLineHeight = props.lineHeight ?? 1.2; // Tighter spacing for pixel fonts
+    const defaultLineHeight = props.lineHeight ?? 1.2;
     const defaultHeight = (props.rows ?? 4) * (props.fontSize ?? 14) * defaultLineHeight + 24;
 
     this.props = {
@@ -148,19 +147,15 @@ export class UITextArea extends UIComponent {
 
     // Initialize theme resolver
     this.themeResolver = props.themeResolver;
-    
+
     this.stateManager = new FormStateManager({
       value: props.value,
       defaultValue: props.defaultValue,
       onChange: props.onChange
     });
-    // Initialize input handler - it now uses stateManager directly
-    this.inputHandler = new TextInputHandler({
-      stateManager: this.stateManager,
-      maxLength: this.props.maxLength,
-      type: 'text', // Textarea doesn't support number type
-      multiline: true
-    });
+
+    // Initialize cursor position
+    this.cursorPosition = this.stateManager.getValue().length;
 
     // Update component state
     this.enabled = !this.props.disabled;
@@ -187,7 +182,7 @@ export class UITextArea extends UIComponent {
   private createVisuals(): void {
     // Create background
     const bgColor = this.resolveColor('background', this.colorOverrides.backgroundColor);
-    
+
     this.background = new UIPanel({
       backgroundColor: bgColor,
       width: this.props.width,
@@ -269,10 +264,9 @@ export class UITextArea extends UIComponent {
     if (this.focused) return;
 
     super.onFocus();
-    // focused is already set by super.onFocus()
-    
-    // Set cursor position
-    this.inputHandler.setCursorPosition(this.stateManager.getValue().length);
+
+    // Set cursor position to end
+    this.cursorPosition = this.stateManager.getValue().length;
     this.cursor.visible = true;
     this.updateCursor();
     this.startCursorBlink();
@@ -288,7 +282,6 @@ export class UITextArea extends UIComponent {
     if (!this.focused) return;
 
     super.onBlur();
-    // focused is already set by super.onBlur()
     this.cursor.visible = false;
     this.stopCursorBlink();
 
@@ -296,29 +289,170 @@ export class UITextArea extends UIComponent {
     this.updateBackground();
   }
 
+  /**
+   * Handle keyboard input (inlined from TextInputHandler with multiline support)
+   */
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
+    const key = e.key;
+
     // Don't prevent default for Tab (allow tab navigation)
-    if (e.key === 'Tab') {
-      return; // Let tab navigation work
+    if (key === 'Tab') {
+      return;
     }
 
-    // Handle Enter/Escape for blur
-    if (e.key === 'Escape') {
+    // Handle Escape for blur
+    if (key === 'Escape') {
       this.onBlur();
       return;
     }
 
-    // Delegate keyboard handling to TextInputHandler
-    const handled = this.inputHandler.handleKeyDown(e);
+    let handled = false;
+
+    if (key === 'Enter') {
+      // Multiline: insert newline
+      this.insertCharacter('\n');
+      handled = true;
+    } else if (key === 'Backspace') {
+      this.handleBackspace();
+      handled = true;
+    } else if (key === 'Delete') {
+      this.handleDelete();
+      handled = true;
+    } else if (key === 'ArrowLeft') {
+      this.moveCursor(-1);
+      handled = true;
+    } else if (key === 'ArrowRight') {
+      this.moveCursor(1);
+      handled = true;
+    } else if (key === 'ArrowUp') {
+      this.moveCursorVertically(-1);
+      handled = true;
+    } else if (key === 'ArrowDown') {
+      this.moveCursorVertically(1);
+      handled = true;
+    } else if (key === 'Home') {
+      this.moveToLineStart();
+      handled = true;
+    } else if (key === 'End') {
+      this.moveToLineEnd();
+      handled = true;
+    } else if (key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      // Character input
+      this.insertCharacter(key);
+      handled = true;
+    }
+
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
-      // Handler updates stateManager directly, so we need to update visuals
       this.updateText();
       this.updateCursor();
     }
+  }
+
+  /**
+   * Insert a character at cursor position
+   */
+  private insertCharacter(char: string): void {
+    const value = this.stateManager.getValue();
+    if (value.length >= this.props.maxLength) return;
+
+    const newValue =
+      value.substring(0, this.cursorPosition) +
+      char +
+      value.substring(this.cursorPosition);
+    this.stateManager.setValue(newValue);
+    this.cursorPosition++;
+  }
+
+  /**
+   * Handle backspace key
+   */
+  private handleBackspace(): void {
+    if (this.cursorPosition > 0) {
+      const value = this.stateManager.getValue();
+      const newValue =
+        value.substring(0, this.cursorPosition - 1) +
+        value.substring(this.cursorPosition);
+      this.stateManager.setValue(newValue);
+      this.cursorPosition--;
+    }
+  }
+
+  /**
+   * Handle delete key
+   */
+  private handleDelete(): void {
+    const value = this.stateManager.getValue();
+    if (this.cursorPosition < value.length) {
+      const newValue =
+        value.substring(0, this.cursorPosition) +
+        value.substring(this.cursorPosition + 1);
+      this.stateManager.setValue(newValue);
+    }
+  }
+
+  /**
+   * Move cursor horizontally
+   */
+  private moveCursor(direction: number): void {
+    const value = this.stateManager.getValue();
+    this.cursorPosition = Math.max(0, Math.min(this.cursorPosition + direction, value.length));
+  }
+
+  /**
+   * Move cursor vertically (for multiline)
+   */
+  private moveCursorVertically(direction: number): void {
+    const value = this.stateManager.getValue();
+    const lines = value.split('\n');
+    let currentLine = 0;
+    let positionInLine = 0;
+    let charCount = 0;
+
+    // Find current line and position
+    for (let i = 0; i < lines.length; i++) {
+      if (charCount + lines[i].length >= this.cursorPosition) {
+        currentLine = i;
+        positionInLine = this.cursorPosition - charCount;
+        break;
+      }
+      charCount += lines[i].length + 1; // +1 for newline
+    }
+
+    // Move to target line
+    const targetLine = Math.max(0, Math.min(lines.length - 1, currentLine + direction));
+    if (targetLine === currentLine) return;
+
+    // Calculate new cursor position
+    let newPosition = 0;
+    for (let i = 0; i < targetLine; i++) {
+      newPosition += lines[i].length + 1;
+    }
+    newPosition += Math.min(positionInLine, lines[targetLine].length);
+
+    this.cursorPosition = newPosition;
+  }
+
+  /**
+   * Move cursor to start of current line
+   */
+  private moveToLineStart(): void {
+    const value = this.stateManager.getValue();
+    const lineStart = value.lastIndexOf('\n', this.cursorPosition - 1) + 1;
+    this.cursorPosition = lineStart;
+  }
+
+  /**
+   * Move cursor to end of current line
+   */
+  private moveToLineEnd(): void {
+    const value = this.stateManager.getValue();
+    let lineEnd = value.indexOf('\n', this.cursorPosition);
+    if (lineEnd === -1) lineEnd = value.length;
+    this.cursorPosition = lineEnd;
   }
 
   /**
@@ -327,16 +461,16 @@ export class UITextArea extends UIComponent {
   private updateText(): void {
     const value = this.stateManager.getValue();
     const displayText = this.getDisplayText();
-    
+
     this.textDisplay.text = displayText;
-    
+
     // Update text color based on whether showing placeholder
     const textColor = value
       ? this.resolveTextColor(this.colorOverrides.textColor)
       : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
-    
+
     this.textDisplay.style.fill = textColor;
-    this.updateCursor();
+    // Note: cursor update is handled separately by caller to avoid double updates
   }
 
   /**
@@ -356,67 +490,52 @@ export class UITextArea extends UIComponent {
    */
   private updateCursor(): void {
     const value = this.stateManager.getValue();
-    const cursorPos = this.inputHandler.getCursorPosition();
-    const textUpToCursor = value.substring(0, cursorPos);
+    const textUpToCursor = value.substring(0, this.cursorPosition);
+
+    // Ensure cursor position is valid
+    if (this.cursorPosition > value.length) {
+      this.cursorPosition = value.length;
+    }
 
     // Resolve font family through inheritance
     const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
-
-    // Create temporary text to measure
-    // Note: wordWrapWidth needs to account for DPR scaling (multiply by dprScale)
-    const dprScale = UI_DEFAULTS.DPR_SCALE;
-    const tempText = new PIXI.Text({
-      text: textUpToCursor,
-      style: {
-        fontFamily: effectiveFontFamily,
-        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
-        fill: this.textDisplay.style.fill,
-        align: 'left',
-        wordWrap: true,
-        wordWrapWidth: (this.props.width - 24) * dprScale,
-        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
-      }
-    });
-    // Ensure effects is initialized to prevent null reference errors
-    if (tempText.effects === null) {
-      tempText.effects = [];
-    }
-
-    // Get the bounds to find cursor position
-    const metrics = tempText.getLocalBounds();
 
     // For multi-line, we need to find the last line position
     const lines = textUpToCursor.split('\n');
     const lastLine = lines[lines.length - 1];
 
-    const lastLineText = new PIXI.Text({
-      text: lastLine,
-      style: {
-        fontFamily: effectiveFontFamily,
-        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
-        fill: this.textDisplay.style.fill,
-        align: 'left',
-        lineHeight: this.props.fontSize * this.props.lineHeight * dprScale
-      }
-    });
-    // Ensure effects is initialized to prevent null reference errors
-    if (lastLineText.effects === null) {
-      lastLineText.effects = [];
-    }
+    // Measure text width using canvas context (much faster than creating PIXI.Text)
+    // Must use scaled font size to match asTextDPR rendering (fontSize * dprScale, then scaled down)
+    const scaledFontSize = this.props.fontSize * UI_DEFAULTS.DPR_SCALE;
+    const scaledWidth = this.measureTextWidth(lastLine, effectiveFontFamily, scaledFontSize);
+    // Scale back down to match the visual text width
+    const lastLineWidth = scaledWidth / UI_DEFAULTS.DPR_SCALE;
 
-    // Account for DPR scaling when calculating cursor position
-    const cursorX = 12 + (lastLineText.width / dprScale);
+    const cursorX = 12 + lastLineWidth;
     const cursorY = 12 + (lines.length - 1) * (this.props.fontSize * this.props.lineHeight);
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
     const cursorColor = this.resolveTextColor(this.colorOverrides.textColor);
     this.cursor.fill({ color: cursorColor });
-
-    // Clean up temp objects
-    tempText.destroy();
-    lastLineText.destroy();
   }
+
+  /**
+   * Measure text width using canvas 2D context (much faster than PIXI.Text)
+   */
+  private measureTextWidth(text: string, fontFamily: string, fontSize: number): number {
+    // Use a shared canvas context for text measurement
+    if (!UITextArea.measureCanvas) {
+      UITextArea.measureCanvas = document.createElement('canvas');
+      UITextArea.measureContext = UITextArea.measureCanvas.getContext('2d')!;
+    }
+    UITextArea.measureContext.font = `${fontSize}px ${fontFamily}`;
+    return UITextArea.measureContext.measureText(text).width;
+  }
+
+  // Shared canvas for text measurement (static to avoid creating per instance)
+  private static measureCanvas: HTMLCanvasElement;
+  private static measureContext: CanvasRenderingContext2D;
 
   /**
    * Starts cursor blinking animation
@@ -449,7 +568,7 @@ export class UITextArea extends UIComponent {
       width: this.props.width,
       height: this.props.height
     };
-    
+
     return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
@@ -472,13 +591,29 @@ export class UITextArea extends UIComponent {
   }
 
   /**
-   * Sets the value programmatically
+   * Sets the value programmatically without triggering onChange.
+   * Use this when setting value from external state (e.g., parent component).
    */
   setValue(value: string): void {
-    this.stateManager.setValue(value);
-    // Handler uses stateManager directly, just update cursor position
-    this.inputHandler.setCursorPosition(value.length);
+    const currentValue = this.stateManager.getValue();
+
+    // If value hasn't changed, don't do anything (preserves cursor position)
+    if (currentValue === value) {
+      return;
+    }
+
+    this.stateManager.setValueSilent(value);
+
+    // Only reset cursor to end if not focused (external update)
+    // If focused, user is actively typing - preserve cursor position within bounds
+    if (this.focused) {
+      this.cursorPosition = Math.min(this.cursorPosition, value.length);
+    } else {
+      this.cursorPosition = value.length;
+    }
+
     this.updateText();
+    this.updateCursor();
   }
 
   /**
@@ -493,8 +628,7 @@ export class UITextArea extends UIComponent {
    */
   updateValue(value: string): void {
     this.stateManager.updateValue(value);
-    // Handler uses stateManager directly, just update cursor position
-    this.inputHandler.setCursorPosition(value.length);
+    this.cursorPosition = value.length;
     this.updateText();
   }
 

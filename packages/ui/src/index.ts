@@ -21,8 +21,6 @@ export {
   SizeConstraints,
   FormStateManager,
   FormStateConfig,
-  TextInputHandler,
-  TextInputHandlerConfig,
   ThemeApplier,
   ComponentState
 } from './services';

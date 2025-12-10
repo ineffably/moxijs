@@ -30,6 +30,8 @@ export interface UITextAreaProps {
   height?: number;
   /** Whether the textarea is disabled */
   disabled?: boolean;
+  /** Whether the textarea is read-only (displays text but not editable) */
+  readOnly?: boolean;
   /** Background color (overrides theme) */
   backgroundColor?: number;
   /** Text color (overrides theme) */
@@ -82,7 +84,7 @@ export interface UITextAreaProps {
  */
 export class UITextArea extends UIComponent {
   // Props
-  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily' | 'fontType'>>;
+  private props: Required<Omit<UITextAreaProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily' | 'fontType' | 'readOnly'>> & { readOnly: boolean };
   /** Local fontFamily prop (can be overridden by parent inheritance) */
   private localFontFamily?: string;
   /** Local fontType prop (can be overridden by parent inheritance) */
@@ -125,6 +127,7 @@ export class UITextArea extends UIComponent {
       width: props.width ?? 400,
       height: props.height ?? defaultHeight,
       disabled: props.disabled ?? false,
+      readOnly: props.readOnly ?? false,
       backgroundColor: props.backgroundColor ?? 0xffffff,
       textColor: props.textColor ?? 0x000000,
       placeholderColor: props.placeholderColor ?? 0x999999,
@@ -174,6 +177,12 @@ export class UITextArea extends UIComponent {
 
     // Setup interactivity
     this.setupInteractivity();
+
+    // Auto-layout if dimensions provided
+    // This ensures the textarea is ready to use immediately without manual layout() call
+    if (this.props.width > 0 && this.props.height > 0) {
+      this.layout(this.props.width, this.props.height);
+    }
   }
 
   /**

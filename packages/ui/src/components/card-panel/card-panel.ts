@@ -154,6 +154,7 @@ export class CardPanel extends UIComponent {
   // Containers
   private bodyContainer: PIXI.Container;
   private footerContainer: PIXI.Container;
+  private titleBarContainer: PIXI.Container;
   private bodyMask: PIXI.Graphics | null = null;
 
   // Title elements
@@ -203,10 +204,12 @@ export class CardPanel extends UIComponent {
     // Create containers
     this.bodyContainer = new PIXI.Container();
     this.footerContainer = new PIXI.Container();
+    this.titleBarContainer = new PIXI.Container();
 
     // Add to main container in correct order
     this.container.addChild(this.backgroundGraphics);
     this.container.addChild(this.headerGraphics);
+    this.container.addChild(this.titleBarContainer);
     this.container.addChild(this.bodyContainer);
     this.container.addChild(this.footerGraphics);
     this.container.addChild(this.footerContainer);
@@ -238,6 +241,28 @@ export class CardPanel extends UIComponent {
   }
 
   /**
+   * Get the title bar container for adding custom elements (like menu buttons)
+   * Elements added here will appear on top of the title bar
+   */
+  public getTitleBarContainer(): PIXI.Container {
+    return this.titleBarContainer;
+  }
+
+  /**
+   * Get the title bar height (useful for positioning custom elements)
+   */
+  public getTitleBarHeight(): number {
+    const hasTitle = !!this.props.title?.text;
+    const isDraggable = this.props.draggable ?? false;
+    if (hasTitle) {
+      return this.cardStyle.getTitleBarHeight(true);
+    } else if (isDraggable) {
+      return this.cardStyle.getDragStripHeight();
+    }
+    return 0;
+  }
+
+  /**
    * Get current body dimensions
    */
   public getBodySize(): { width: number; height: number } {
@@ -255,6 +280,26 @@ export class CardPanel extends UIComponent {
     this.props.bodyHeight = height;
     this.redraw();
     this.props.onResize?.(width, height);
+  }
+
+  /**
+   * Auto-size body to fit content.
+   * Measures the bounds of all children in the body container and resizes the panel.
+   * @param padding Optional extra padding to add around content bounds
+   */
+  public sizeToFit(padding: number = 0): void {
+    // Get bounds of all children in body container
+    const bounds = this.bodyContainer.getLocalBounds();
+
+    if (bounds.width > 0 && bounds.height > 0) {
+      // Size body to fit content bounds plus any padding
+      const newWidth = Math.max(this.props.bodyWidth, bounds.x + bounds.width + padding);
+      const newHeight = Math.max(this.props.bodyHeight, bounds.y + bounds.height + padding);
+
+      this.props.bodyWidth = newWidth;
+      this.props.bodyHeight = newHeight;
+      this.redraw();
+    }
   }
 
   /**
@@ -354,6 +399,9 @@ export class CardPanel extends UIComponent {
     } else {
       this.clearTitle();
     }
+
+    // Position title bar container (for custom elements like menu buttons)
+    this.titleBarContainer.position.set(borderInsets.left, borderInsets.top);
 
     // Position body container
     const bodyX = borderInsets.left + contentPadding.left;

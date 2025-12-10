@@ -27,6 +27,7 @@ export {
 
 // Layout (existing FlexContainer)
 export { FlexContainer, FlexDirection, FlexJustify, FlexAlign, FlexContainerProps } from './layout/flex-container';
+export { FlexContainerPanel, FlexContainerPanelProps } from './layout/flex-container-panel';
 
 // New Flex Layout System (flat structure)
 export {

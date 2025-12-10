@@ -2,10 +2,9 @@
  * JSON Viewer Component
  * Read-only scrollable display for JSON data with monospace font
  */
+import * as PIXI from 'pixi.js';
 import {
   UIComponent,
-  UIScrollContainer,
-  UILabel,
   BoxModel,
   MeasuredSize
 } from '@moxijs/ui';
@@ -26,11 +25,11 @@ export interface JSONViewerProps {
 }
 
 /**
- * A read-only scrollable JSON viewer with monospace font
+ * A read-only scrollable JSON viewer using native PIXI.Text
  */
 export class JSONViewer extends UIComponent {
-  private scrollContainer: UIScrollContainer;
-  private label: UILabel;
+  private textObject: PIXI.Text;
+  private background: PIXI.Graphics;
   private props: Required<JSONViewerProps>;
   private currentData: object | null = null;
 
@@ -48,35 +47,32 @@ export class JSONViewer extends UIComponent {
 
     this.currentData = this.props.data;
 
-    // Create scroll container
-    this.scrollContainer = new UIScrollContainer({
-      width: this.props.width,
-      height: this.props.height,
-      backgroundColor: this.props.backgroundColor,
-      borderRadius: 4,
-      scrollbarWidth: 8,
-      scrollbarTrackColor: 0x2a2a3a,
-      scrollbarThumbColor: 0x4a4a5a,
-      scrollbarThumbHoverColor: 0x6a6a7a,
-      smoothScroll: true,
-      scrollEasing: 0.2
-    });
+    // Create background
+    this.background = new PIXI.Graphics();
+    this.drawBackground();
+    this.container.addChild(this.background);
 
-    // Create label for JSON text
-    this.label = new UILabel({
+    // Create PIXI.Text directly
+    this.textObject = new PIXI.Text({
       text: this.formatJSON(this.currentData),
-      fontSize: this.props.fontSize,
-      color: this.props.textColor,
-      fontFamily: 'monospace',
-      wordWrap: true,
-      wordWrapWidth: this.props.width - 32 // Account for padding and scrollbar
+      style: {
+        fontFamily: 'Arial',
+        fontSize: this.props.fontSize,
+        fill: 0x88ff88,
+        wordWrap: true,
+        wordWrapWidth: this.props.width - 24
+      }
     });
+    this.textObject.position.set(12, 12);
+    this.container.addChild(this.textObject);
 
-    this.scrollContainer.addChild(this.label);
-    this.container.addChild(this.scrollContainer.container);
+    console.log('JSONViewer text created:', this.textObject.text.substring(0, 50));
+  }
 
-    // Initial layout
-    this.layout(this.props.width, this.props.height);
+  private drawBackground(): void {
+    this.background.clear();
+    this.background.rect(0, 0, this.props.width, this.props.height);
+    this.background.fill({ color: this.props.backgroundColor });
   }
 
   /**
@@ -99,11 +95,9 @@ export class JSONViewer extends UIComponent {
    */
   setData(data: object | null): void {
     this.currentData = data;
-    const text = this.formatJSON(data);
-    this.label.setText(text);
-
-    // Force scroll container to recalculate content height
-    this.scrollContainer.layout(this.props.width, this.props.height);
+    const jsonText = this.formatJSON(data);
+    this.textObject.text = jsonText;
+    console.log('JSONViewer setData:', jsonText.substring(0, 100));
   }
 
   /**
@@ -123,33 +117,40 @@ export class JSONViewer extends UIComponent {
   }
 
   measure(): MeasuredSize {
-    return this.layoutEngine.measure(this.boxModel, {
+    return {
       width: this.props.width,
       height: this.props.height
-    });
+    };
   }
 
   layout(availableWidth: number, availableHeight: number): void {
     this.props.width = availableWidth;
     this.props.height = availableHeight;
 
-    // Layout scroll container
-    this.scrollContainer.layout(availableWidth, availableHeight);
+    // Update background size
+    this.drawBackground();
+
+    // Update text wrap width
+    this.textObject.style.wordWrapWidth = availableWidth - 24;
 
     const measured = this.measure();
-    this.computedLayout = this.layoutEngine.layout(
-      this.boxModel,
-      measured,
-      { width: availableWidth, height: availableHeight }
-    );
+    this.computedLayout = {
+      x: 0,
+      y: 0,
+      width: measured.width ?? availableWidth,
+      height: measured.height ?? availableHeight,
+      contentX: 0,
+      contentY: 0,
+      contentWidth: measured.width ?? availableWidth,
+      contentHeight: measured.height ?? availableHeight
+    };
   }
 
   protected render(): void {
-    // Rendering handled by scroll container and label
+    // Rendering handled by PIXI
   }
 
   destroy(): void {
-    this.scrollContainer.destroy();
     super.destroy();
   }
 }

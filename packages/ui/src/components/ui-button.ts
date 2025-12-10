@@ -102,6 +102,10 @@ export interface UIButtonProps {
  *     pressed: pressedTexture
  *   }
  * });
+ *
+ * // When width/height are provided, layout() is called automatically:
+ * const btn = new UIButton({ label: 'Click Me', width: 100, height: 32 });
+ * myContainer.addChild(btn.container); // Ready to use immediately
  * ```
  */
 export class UIButton extends UIComponent {
@@ -204,6 +208,12 @@ export class UIButton extends UIComponent {
     if (this.enabled === false) {
       this.setState(ButtonState.Disabled);
     }
+
+    // Auto-layout if dimensions provided
+    // This ensures the button is ready to use immediately without manual layout() call
+    if (initialWidth > 0 && initialHeight > 0) {
+      this.layout(initialWidth, initialHeight);
+    }
   }
 
   /**
@@ -253,7 +263,7 @@ export class UIButton extends UIComponent {
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
-    if (this.isFocused() && this.props.enabled) {
+    if (this.isFocused() && this.enabled) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
 
@@ -265,7 +275,7 @@ export class UIButton extends UIComponent {
 
         // Return to hover state after a short delay (simulating button release)
         setTimeout(() => {
-          if (this.props.enabled) {
+          if (this.enabled) {
             this.setState(ButtonState.Normal);
           }
         }, 100);
@@ -274,7 +284,7 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerOver(): void {
-    if (this.props.enabled && this.state === ButtonState.Normal) {
+    if (this.enabled && this.state === ButtonState.Normal) {
       this.hovered = true;
       this.setState(ButtonState.Hover);
       this.safeInvokeCallback(this.onHover, 'onHover');
@@ -282,14 +292,14 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerOut(): void {
-    if (this.props.enabled && this.state !== ButtonState.Pressed) {
+    if (this.enabled && this.state !== ButtonState.Pressed) {
       this.hovered = false;
       this.setState(ButtonState.Normal);
     }
   }
 
   private handlePointerDown(): void {
-    if (this.props.enabled) {
+    if (this.enabled) {
       this.pressed = true;
       this.setState(ButtonState.Pressed);
 
@@ -307,7 +317,7 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerUp(): void {
-    if (this.props.enabled) {
+    if (this.enabled) {
       this.pressed = false;
       this.hovered = true;
       this.setState(ButtonState.Hover);
@@ -316,7 +326,7 @@ export class UIButton extends UIComponent {
   }
 
   private handlePointerUpOutside(): void {
-    if (this.props.enabled) {
+    if (this.enabled) {
       this.pressed = false;
       this.hovered = false;
       this.setState(ButtonState.Normal);

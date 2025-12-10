@@ -1,5 +1,12 @@
 # @moxijs/core
 
+<!-- TOC:START -->
+## API Quick Reference
+<!-- Auto-generated -->
+**Classes:** ActionManager(add, getCount, hasAction, remove, removeAll) | AssetLoader(off, on) | ClientEvents(isKeyDown, isKeyUp) | CollisionManager(offCollision, onCollision) | CollisionRegistry(bitsToTags, getBit, getTag, register, tagsToBits) | Engine(addPhysicsWorld, loadStage, start, stop) | LoadingScene(destroy, hide, init, show) | ParallaxBackgroundLogic(update) | PhysicsWorld(createBody, destroy, destroyBody, disableDebugRenderer, enableDebugRenderer...) | PixelGrid(px, units) | RenderManager(render) | StateLogic(entity, init, onEnter, onExit, update) | StateMachine(addState, currentState, setState, update) | TextureFrameSequences(addSequence, getFrame, getFrameFromSequence, getFrameSequence, getSequence) | TilingParallaxLayer(resize, updateParallax)
+**Interfaces:** AsTextureFramesOptions, AssetLoaderEvents, BitmapTextOptions, BorderConfig, CellPosition, ClientEventsArgs, CollisionEvent, FallingSquaresOptions, GraphicsDrawOptions, GridOptions, LoadingAnimation, LoadingAnimationContext, LoadingSceneOptions, MSDFTextOptions, MoxiEntityClass, OnAction, OnEvent, ParallaxBackgroundOptions, ParallaxLayerOptions, ParsedShape, PhysicsBodyOptions, PhysicsDebugOptions, PhysicsShapeMetadata, PhysicsWorldOptions, PixelGridConfig, PixelPerfectOptions, PixiProps, PixiPropsWithEntity, ResizeHandlerOptions, SVGToTextureOptions, SequenceInfo, SetupMoxiArgs, SetupMoxiResult, ShapeConfig, SpriteOptions, TextDPROptions, TextOptions, TilingParallaxLayerOptions
+<!-- TOC:END -->
+
 > Game framework on PIXI.js with ECS architecture and physics.
 
 ## Install

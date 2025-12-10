@@ -46,6 +46,19 @@ export interface UILayoutConfig {
  * Implements IFlexLayoutParticipant for integration with the new flex layout system.
  * Components can be added to a LayoutTree for automatic layout management.
  *
+ * IMPORTANT: UI components use a two-phase lifecycle:
+ * 1. Construction - creates the component structure
+ * 2. layout() - measures and positions internal elements
+ *
+ * When using FlexContainer, layout() is called automatically on children.
+ * When adding directly to a PIXI.Container, you MUST call layout() manually:
+ *
+ * ```typescript
+ * const btn = new UIButton({ label: 'Click', width: 100, height: 32 });
+ * btn.layout(100, 32);  // Required for label to render!
+ * pixiContainer.addChild(btn.container);
+ * ```
+ *
  * @category UI
  */
 export abstract class UIComponent implements IFlexLayoutParticipant {

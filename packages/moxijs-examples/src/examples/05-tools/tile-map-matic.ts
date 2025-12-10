@@ -15,16 +15,15 @@ import { setupMoxi } from '@moxijs/core';
 import {
   UILabel,
   UILayer,
-  UITabs,
-  UIPanel,
   UIFocusManager,
+  UIButton,
   FlexContainer,
   FlexDirection,
   FlexJustify,
   FlexAlign,
   EdgeInsets
 } from '@moxijs/ui';
-import { Sprite, Container, Graphics, Texture, Assets } from 'pixi.js';
+import { Sprite, Container, Graphics, Texture, Assets, Text } from 'pixi.js';
 import { ASSETS } from '../../assets-config';
 import {
   SpriteSheetProjectManager,
@@ -39,10 +38,10 @@ import {
   pixelToCell,
   cellToIndex
 } from '../tile-map-matic/sprite-sheet-grid';
+import { GridSettings } from '../tile-map-matic/sprite-sheet-data';
 import { SpriteCarousel, CarouselItem } from '../tile-map-matic/sprite-carousel';
 import { CanvasPanZoom } from '../tile-map-matic/canvas-pan-zoom';
-import { ContainerWrapper } from '../tile-map-matic/container-wrapper';
-import { JSONViewer } from '../tile-map-matic/json-viewer';
+// JSONViewer replaced with UITextArea
 
 type CleanupFunction = () => void;
 
@@ -87,7 +86,6 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
   const HEADER_HEIGHT = 50;
   const CAROUSEL_WIDTH = 140;
   const CONFIG_PANEL_WIDTH = 200;
-  const TAB_BAR_HEIGHT = 40;
   const CONTENT_PADDING = 10;
 
   // Calculate content area dimensions
@@ -160,13 +158,27 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
     }
   });
 
-  // === SHEET VIEW (Canvas Area for Tab 1) ===
+  // === SHEET VIEW (Canvas Area with mask for clipping) ===
+  const canvasContainer = new Container();
+  canvasContainer.position.set(contentX, contentY);
+  uiLayer.addChild(canvasContainer);
+
+  // Background
+  const canvasBg = new Graphics();
+  canvasBg.rect(0, 0, contentWidth, contentHeight);
+  canvasBg.fill({ color: 0x1a1a2e });
+  canvasContainer.addChild(canvasBg);
+
+  // Canvas area (holds sprite, grid, etc)
   const canvasArea = new Container();
-  const canvasWrapper = new ContainerWrapper({
-    content: canvasArea,
-    width: contentWidth,
-    height: contentHeight - TAB_BAR_HEIGHT
-  });
+  canvasContainer.addChild(canvasArea);
+
+  // Mask to clip content to bounds
+  const canvasMask = new Graphics();
+  canvasMask.rect(0, 0, contentWidth, contentHeight);
+  canvasMask.fill({ color: 0xffffff });
+  canvasContainer.addChild(canvasMask);
+  canvasArea.mask = canvasMask;
 
   // Sprite display state
   let spriteDisplay: Sprite | null = null;
@@ -232,53 +244,87 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
     });
   }
 
-  // === JSON VIEW (Tab 2) ===
-  const jsonViewer = new JSONViewer({
-    width: contentWidth,
-    height: contentHeight - TAB_BAR_HEIGHT,
-    backgroundColor: 0x1a1a2e,
-    textColor: 0x88ff88,
-    fontSize: 11
-  });
+  // === JSON DIALOG ===
+  // TODO: Text rendering causes black box issue - needs investigation
+  const JSON_DIALOG_WIDTH = 600;
+  const JSON_DIALOG_HEIGHT = 500;
+  const jsonDialog = new Container();
+  jsonDialog.visible = false;
 
-  // === TABS ===
-  const tabs = new UITabs({
-    items: [
-      { key: 'sheet', label: 'Sheet', content: canvasWrapper },
-      { key: 'json', label: 'JSON', content: jsonViewer }
-    ],
-    defaultActiveKey: 'sheet',
-    type: 'card',
-    width: contentWidth,
-    height: contentHeight,
-    tabBarHeight: TAB_BAR_HEIGHT,
-    tabBarBackgroundColor: 0x1e1e2e,
-    activeTabColor: 0x00d4ff,
-    inactiveTabColor: 0x2d2d44,
-    textColor: 0xaaaaaa,
-    activeTextColor: 0xffffff,
-    onChange: (key) => {
-      if (key === 'json') {
-        // Update JSON when switching to JSON tab
-        const activeSheet = projectManager.getActiveSheet();
-        if (activeSheet) {
-          const json = projectManager.exportSheetJSON(activeSheet.id);
-          jsonViewer.setData(json);
-        } else {
-          jsonViewer.setData(null);
-        }
-      } else if (key === 'sheet') {
-        // Re-init pan/zoom when switching back to sheet
-        initPanZoom();
-      }
+  // Backdrop
+  const jsonBackdrop = new Graphics();
+  jsonBackdrop.rect(0, 0, renderer.width, renderer.height);
+  jsonBackdrop.fill({ color: 0x000000, alpha: 0.6 });
+  jsonBackdrop.eventMode = 'static';
+  jsonBackdrop.cursor = 'default';
+  jsonBackdrop.on('pointerdown', () => { jsonDialog.visible = false; });
+  jsonDialog.addChild(jsonBackdrop);
+
+  // Dialog box
+  const jsonBox = new Container();
+  jsonBox.position.set(
+    (renderer.width - JSON_DIALOG_WIDTH) / 2,
+    (renderer.height - JSON_DIALOG_HEIGHT) / 2
+  );
+
+  const jsonBoxBg = new Graphics();
+  jsonBoxBg.roundRect(0, 0, JSON_DIALOG_WIDTH, JSON_DIALOG_HEIGHT, 8);
+  jsonBoxBg.fill({ color: 0x2a2a3a });
+  jsonBoxBg.stroke({ color: 0x505060, width: 2 });
+  jsonBox.addChild(jsonBoxBg);
+
+  // Title
+  const jsonTitle = new UILabel({
+    text: 'Sheet JSON',
+    fontSize: 16,
+    color: 0xffffff,
+    fontWeight: 'bold'
+  });
+  jsonTitle.layout(200, 30);
+  jsonTitle.container.position.set(20, 15);
+  jsonBox.addChild(jsonTitle.container);
+
+  // JSON viewer background
+  const jsonViewerBg = new Graphics();
+  jsonViewerBg.rect(0, 0, JSON_DIALOG_WIDTH - 40, JSON_DIALOG_HEIGHT - 70);
+  jsonViewerBg.fill({ color: 0x1a1a2e });
+  jsonViewerBg.position.set(20, 55);
+  jsonBox.addChild(jsonViewerBg);
+
+  // Close button
+  const closeBtn = new UIButton({
+    label: '×',
+    width: 32,
+    height: 32,
+    backgroundColor: 0x444455,
+    textColor: 0xffffff,
+    fontSize: 20,
+    onClick: () => { jsonDialog.visible = false; }
+  });
+  closeBtn.container.position.set(JSON_DIALOG_WIDTH - 44, 10);
+  jsonBox.addChild(closeBtn.container);
+
+  // JSON text content - removed due to black box rendering issue
+  // TODO: Investigate FlexContainerPanel approach for text rendering
+  const jsonViewer = { setValue: (_s: string) => { /* disabled */ } };
+
+  jsonDialog.addChild(jsonBox);
+  scene.addChild(jsonDialog);
+
+  function showJSONDialog(): void {
+    const activeSheet = projectManager.getActiveSheet();
+    if (activeSheet) {
+      const json = projectManager.exportSheetJSON(activeSheet.id);
+      jsonViewer.setValue(JSON.stringify(json, null, 2));
+      jsonTitle.setText(`${activeSheet.name} - JSON`);
+    } else {
+      jsonViewer.setValue('// Select a sprite sheet to see its JSON');
+      jsonTitle.setText('Sheet JSON');
     }
-  });
+    jsonDialog.visible = true;
+  }
 
-  tabs.layout(contentWidth, contentHeight);
-  tabs.container.position.set(contentX, contentY);
-  uiLayer.addChild(tabs.container);
-
-  // Init pan/zoom after tabs are set up
+  // Init pan/zoom
   initPanZoom();
 
   // === CONFIG PANEL (Right Side) ===
@@ -312,12 +358,16 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
           projectManager.clearProject();
           clearCanvasDisplay();
         }
+      },
+      onViewJSON: () => {
+        showJSONDialog();
       }
     },
     x: renderer.width - CONFIG_PANEL_WIDTH - 10,
     y: HEADER_HEIGHT + 10
   });
   scene.addChild(configPanel.getPanel().container);
+  scene.addChild(configPanel.getMenuDropdown()); // Add menu dropdown on top for z-order
 
   // Register focusable inputs with focus manager
   for (const input of configPanel.getFocusableInputs()) {
@@ -483,12 +533,6 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
     configPanel.setActiveSheet(entry);
     configPanel.setHasSheets(true);
     updateInfoLabel();
-
-    // Update JSON viewer if on JSON tab
-    if (tabs.getActiveKey() === 'json') {
-      const json = projectManager.exportSheetJSON(entry.id);
-      jsonViewer.setData(json);
-    }
   }
 
   // === GRID OVERLAY ===
@@ -553,11 +597,14 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
   }
 
   // === SELECTION HIGHLIGHT (Multi-cell) ===
-  function updateSelectionHighlight(gridSettings: { cellWidth: number; cellHeight: number }): void {
+  function updateSelectionHighlight(gridSettings: GridSettings): void {
     // Clear existing highlight
     clearCellHighlight();
 
-    if (selectedCells.length === 0) return;
+    if (selectedCells.length === 0) {
+      configPanel.clearRegionPreview();
+      return;
+    }
 
     // Create a combined graphics for all selected cells
     cellHighlight = new Graphics();
@@ -582,12 +629,16 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
         canvasArea.setChildIndex(cellHighlight, spriteIndex + 1);
       }
     }
+
+    // Update config panel preview
+    configPanel.updateRegionPreview(selectedCells, gridSettings);
   }
 
   // === CLEAR SELECTION ===
   function clearSelection(): void {
     selectedCells = [];
     clearCellHighlight();
+    configPanel.clearRegionPreview();
   }
 
   // === CLEAR CANVAS ===
@@ -609,7 +660,7 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
     regionOverlays = [];
     displayedSheetId = null;
     configPanel.setActiveSheet(null);
-    jsonViewer.setData(null);
+    jsonViewer.setValue('');
     updateInfoLabel();
   }
 
@@ -652,11 +703,6 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
         drawTileRegions(activeSheet.gridSettings);
         configPanel.setActiveSheet(activeSheet);
         updateInfoLabel();
-        // Update JSON viewer if on JSON tab
-        if (tabs.getActiveKey() === 'json') {
-          const json = projectManager.exportSheetJSON(activeSheet.id);
-          jsonViewer.setData(json);
-        }
       }
     } else {
       clearCanvasDisplay();

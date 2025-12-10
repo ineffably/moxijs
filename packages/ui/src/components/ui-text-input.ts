@@ -164,6 +164,12 @@ export class UITextInput extends UIComponent {
 
     // Setup interactivity
     this.setupInteractivity();
+
+    // Auto-layout if dimensions provided
+    // This ensures the input is ready to use immediately without manual layout() call
+    if (this.props.width > 0 && this.props.height > 0) {
+      this.layout(this.props.width, this.props.height);
+    }
   }
 
   /**

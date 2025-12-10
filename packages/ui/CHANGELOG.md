@@ -7,22 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2025-12-09
+
+### Font Standardization & MSDF Fixes
+
+This release introduces a unified font system across all UI components and fixes critical MSDF font loading issues with PixiJS v8.
+
 ### Added
+
+#### Font Standardization
+- `FontType` type: `'canvas' | 'msdf' | 'bitmap'` for specifying font rendering method
+- `FontProps` interface with `fontFamily` and `fontType` properties
+- Unified font configuration across all text-based components:
+  - `UILabel` - Now supports `fontFamily` and `fontType` props with inheritance
+  - `UIButton` - Now supports `fontFamily` and `fontType` props with inheritance
+  - `UITextInput` - Added `fontFamily` and `fontType` props with inheritance
+  - `UITextArea` - Added `fontFamily` and `fontType` props with inheritance
+  - `UISelect` - Added `fontFamily` and `fontType` props with inheritance
+  - `UITabs` - Added `fontFamily` and `fontType` props (inherited by tab labels)
+- Font inheritance system: child components inherit font settings from parent containers
+- `base/font-config.ts` - New centralized font configuration module
 
 #### UIComponent
 - `x` and `y` getters/setters for convenient positioning (no need to access `.container` directly)
+- `getInheritedFontFamily()` - Resolves font family from parent chain
+- `getInheritedFontType()` - Resolves font type from parent chain
 
 #### UITextInput
-- `fontFamily` prop for custom font support (inherits from parent if not specified)
 - `setSize(width, height?)` method for dynamic resizing
 - `setWidth(width)`, `getWidth()`, `getHeight()` convenience methods
 
 #### UITextArea
 - `setSize(width, height?)` method for dynamic resizing
 - `setWidth(width)`, `getWidth()`, `getHeight()` convenience methods
-
-#### UIButton
-- `fontFamily` prop for canvas text (in addition to existing `msdfFontFamily` and `bitmapFontFamily`)
 
 #### UIScrollContainer
 - Smooth scrolling enabled by default with new props:
@@ -32,19 +49,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scrollPaddingBottom` - Extra scrollable height at bottom (useful for chat UIs)
 - `setScrollPaddingBottom(padding)` and `getScrollPaddingBottom()` methods
 - `scrollTo(y, animate?)` now accepts optional `animate` parameter
+- `fontConfig` prop for font inheritance to nested children
 
 #### FlexContainer
 - `removeAllChildren()` method for clearing all children at once
 
-#### UIScrollContainer
-- `fontConfig` prop for font inheritance to nested children
-
-#### UILabel
-- Now uses `getInheritedFontFamily()` for proper font inheritance from parent containers
+### Changed
+- **Breaking**: Standardized font properties across all components
+  - Removed `msdfFontFamily` from `UILabel` (use `fontFamily` + `fontType: 'msdf'`)
+  - Removed `useBitmapText`, `bitmapFontFamily`, `msdfFontFamily` from `UIButton` (use `fontFamily` + `fontType`)
+- `UILabel` now creates `PIXI.BitmapText` when `fontType` is `'msdf'` or `'bitmap'`, otherwise uses `PIXI.Text`
+- Font inheritance now works through deeply nested containers
 
 ### Fixed
-- Font inheritance now works through deeply nested containers (FlexContainer → UIScrollContainer → UILabel)
+- Font inheritance now works correctly through deeply nested containers (FlexContainer → UIScrollContainer → UILabel)
 - Removed unnecessary `as any` cast in UIScrollContainer parent assignment
+- `UISelect` now properly requests focus when clicked (using `UIFocusManager`)
 
 ## [0.3.2] - 2025-12-06
 

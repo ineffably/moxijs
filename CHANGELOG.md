@@ -1,8 +1,27 @@
-# Changelog
+# MoxiJS Monorepo
 
-All notable feature changes to MOXIJS will be documented in this file.
+This is a monorepo containing multiple packages. Each package maintains its own CHANGELOG:
 
-## 2025-12-03
+- **[@moxijs/core](./packages/core/CHANGELOG.md)** - Game engine with ECS architecture
+- **[@moxijs/ui](./packages/ui/CHANGELOG.md)** - UI component library
+- **[@moxijs/examples](./packages/moxijs-examples/CHANGELOG.md)** - Examples and demos
+- **[@moxijs/mini-gui](./packages/mini-gui/CHANGELOG.md)** - Lightweight GUI framework
+- **[pikcell](./packages/pikcell/CHANGELOG.md)** - Pixel art sprite editor
+
+## Recent Releases
+
+### 2025-12-09
+- `@moxijs/core@0.3.3` - MSDF font generator improvements, enhanced documentation
+- `@moxijs/ui@0.3.3` - Font standardization (breaking changes), MSDF font fixes
+- `@moxijs/examples@0.3.1` - MSDF font file updates, enhanced examples
+
+---
+
+## Historical Changes
+
+See individual package CHANGELOGs for detailed history.
+
+### 2025-12-03
 
 - Added MSDF font generation and documentation
 - Added MSDF font rendering support for PixiJS v8

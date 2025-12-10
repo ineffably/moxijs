@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, FontType } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
 import { UILabel } from './ui-label';
@@ -8,7 +8,7 @@ import { EdgeInsets } from '../base/edge-insets';
 import { UIFocusManager } from '../base/ui-focus-manager';
 import { ThemeResolver } from '../theming/theme-resolver';
 import { ActionManager } from '@moxijs/core';
-// Theme resolver is now in base class
+import { UI_DEFAULTS } from '../theming/theme-data';
 import {
   FormStateManager
 } from '../services';
@@ -61,6 +61,19 @@ export interface UISelectProps {
   filterable?: boolean;
   /** Allow custom values in filterable mode (not just from options) */
   allowCustomValue?: boolean;
+  /**
+   * Font family name.
+   * For canvas: Any CSS font family (e.g., 'Arial', 'Helvetica')
+   * For MSDF/bitmap: Must match the loaded font's family name
+   */
+  fontFamily?: string;
+  /**
+   * Font rendering type.
+   * - 'canvas' (default): Standard PIXI.Text with DPR scaling
+   * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
+   * - 'bitmap': Pre-rendered bitmap font atlas
+   */
+  fontType?: FontType;
   /** Optional ThemeResolver for automatic color resolution */
   themeResolver?: ThemeResolver;
 }
@@ -85,7 +98,11 @@ export interface UISelectProps {
  * ```
  */
 export class UISelect extends UIComponent {
-  private props: Required<Omit<UISelectProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver'>>;
+  private props: Required<Omit<UISelectProps, 'onChange' | 'value' | 'defaultValue' | 'themeResolver' | 'fontFamily' | 'fontType'>>;
+  /** Local fontFamily prop (can be overridden by parent inheritance) */
+  private localFontFamily?: string;
+  /** Local fontType prop (can be overridden by parent inheritance) */
+  private localFontType?: FontType;
   private onChange?: (value: any) => void;
 
   // Services (composition)
@@ -143,6 +160,10 @@ export class UISelect extends UIComponent {
       filterable: props.filterable ?? false,
       allowCustomValue: props.allowCustomValue ?? false
     };
+
+    // Store font props for inheritance
+    this.localFontFamily = props.fontFamily;
+    this.localFontType = props.fontType;
 
     // Initialize theme resolver
     this.themeResolver = props.themeResolver;
@@ -215,12 +236,15 @@ export class UISelect extends UIComponent {
     } else {
       // Pure select mode: use label
       const displayText = this.getDisplayText();
+      const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+      const effectiveFontType = this.getInheritedFontType(this.localFontType);
       this.label = new UILabel({
         text: displayText,
         fontSize: 14,
         color: this.stateManager.getValue() ? this.props.textColor : 0x999999,
         align: 'left',
-        fontFamily: 'PixelOperator8' // Use pixel-perfect font
+        fontFamily: effectiveFontFamily,
+        fontType: effectiveFontType
       }, {
         padding: EdgeInsets.symmetric(8, 12)
       });
@@ -429,14 +453,25 @@ export class UISelect extends UIComponent {
     }
   }
 
-  private handlePointerDown(): void {
+  private handlePointerDown(e: PIXI.FederatedPointerEvent): void {
     if (this.props.disabled) return;
+
+    // Request focus through the focus manager
+    const focusManager = UIFocusManager.getInstance();
+    if (focusManager) {
+      focusManager.requestFocus(this);
+    } else {
+      // Fallback if no focus manager
+      this.onFocus();
+    }
 
     if (this.isOpen) {
       this.closeDropdown();
     } else {
       this.openDropdown();
     }
+
+    e.stopPropagation();
   }
 
   /**
@@ -565,7 +600,8 @@ export class UISelect extends UIComponent {
         fontSize: 14,
         color: option.disabled ? 0x999999 : this.props.textColor,
         align: 'left',
-        fontFamily: 'PixelOperator8' // Use pixel-perfect font
+        fontFamily: this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY,
+        fontType: this.getInheritedFontType(this.localFontType)
       }, {
         padding: EdgeInsets.symmetric(8, 12)
       });

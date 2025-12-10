@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-12-09
+
+### Added
+- Enhanced `llms.txt` in UI package with 7 UI-focused patterns (HUD, forms, dialogs, inventory, tabs, chat)
+- Common patterns section added to root LLMS.txt with cross-package examples
+
+### Changed
+- **MSDF Font Files**: Renamed all `.json` font descriptors to `.fnt` for PixiJS v8 compatibility
+  - `PixelOperator8.json` → `PixelOperator8.fnt`
+  - `kenvector_future.json` → `kenvector_future.fnt`
+- Updated all examples to use `.fnt` extension for MSDF fonts
+- `ui-showcase.ts` - Updated to pass font configuration to `UITabs` component
+- `msdf-text-rendering.ts` - Added texture load verification to prevent race conditions
+- `buttons-showcase.ts` - Updated to use new `fontFamily` + `fontType` properties
+- `panels-showcase.ts` - Updated to use new `fontType` property
+- `font-rendering-comparison.ts` - Renamed `bitmapFontFamily`/`cssFontFamily` to `fontBitmap`/`fontCanvas` for clarity
+- Asset configuration updated to use `_FNT` suffix instead of `_JSON` for MSDF fonts
+
+### Fixed
+- MSDF fonts now load correctly with PNG textures (PixiJS v8 requires `.fnt` or `.xml` extensions)
+- Race condition eliminated where MSDF text could render before texture was ready
+- Tab labels now properly inherit MSDF fonts when configured on parent
+
 ## [0.2.1] - 2025-12-06
 
 ### Removed

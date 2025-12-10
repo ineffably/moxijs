@@ -1,5 +1,4 @@
-import * as PIXI from 'pixi.js';
-import { UIComponent } from '../base/ui-component';
+import { UIComponent, FontType } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UILabel } from './ui-label';
 import { EdgeInsets } from '../base/edge-insets';
@@ -13,16 +12,16 @@ import {
 import { ThemeResolver } from '../theming/theme-resolver';
 import { ActionManager } from '@moxijs/core';
 import { UI_LAYOUT_DEFAULTS } from '../theming/theme-data';
-// Theme resolver is now in base class
-// ComponentState removed - using base class state properties
 
 /** Button visual states. */
-export enum ButtonState {
-  Normal = 'normal',
-  Hover = 'hover',
-  Pressed = 'pressed',
-  Disabled = 'disabled'
-}
+export const ButtonState = {
+  Normal: 'normal',
+  Hover: 'hover',
+  Pressed: 'pressed',
+  Disabled: 'disabled'
+} as const;
+
+export type ButtonState = (typeof ButtonState)[keyof typeof ButtonState];
 
 // Re-export SpriteBackgroundConfig for convenience
 export type { SpriteBackgroundConfig } from './button-background-strategy';
@@ -43,18 +42,23 @@ export interface UIButtonProps {
   textColor?: number;
   /** Font size */
   fontSize?: number;
-  /** Font family for canvas text (inherits from parent if not specified) */
+  /**
+   * Font family name.
+   * For canvas: Any CSS font family (e.g., 'Arial', 'Helvetica')
+   * For MSDF/bitmap: Must match the loaded font's family name
+   */
   fontFamily?: string;
+  /**
+   * Font rendering type.
+   * - 'canvas' (default): Standard PIXI.Text with DPR scaling
+   * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
+   * - 'bitmap': Pre-rendered bitmap font atlas
+   */
+  fontType?: FontType;
   /** Border radius (only used with backgroundColor) */
   borderRadius?: number;
   /** Padding inside button */
   padding?: EdgeInsets;
-  /** Use BitmapText instead of regular text */
-  useBitmapText?: boolean;
-  /** BitmapText font family (required if useBitmapText is true) */
-  bitmapFontFamily?: string;
-  /** MSDF font family name. If provided, uses MSDF (Multi-channel Signed Distance Field) text rendering for crisp text at any scale. Must match the loaded MSDF font's family name. */
-  msdfFontFamily?: string;
   /** Click callback */
   onClick?: () => void;
   /** Hover callback */
@@ -67,17 +71,25 @@ export interface UIButtonProps {
 
 /**
  * Interactive button component with hover, press, and disabled states.
- * Supports solid color or sprite-based backgrounds, bitmap text, and keyboard focus.
+ * Supports solid color or sprite-based backgrounds, and keyboard focus.
  *
  * @example
  * ```ts
- * // Basic button
+ * // Basic button with canvas text
  * const btn = new UIButton({
  *   label: 'Click Me',
  *   width: 150,
  *   height: 40,
  *   backgroundColor: 0x4a90e2,
  *   textColor: 0xffffff,
+ *   onClick: () => console.log('clicked')
+ * });
+ *
+ * // Button with MSDF text for crisp scaling
+ * const msdfBtn = new UIButton({
+ *   label: 'Crisp Button',
+ *   fontFamily: 'PixelOperator8',
+ *   fontType: 'msdf',
  *   onClick: () => console.log('clicked')
  * });
  *
@@ -95,32 +107,23 @@ export interface UIButtonProps {
 export class UIButton extends UIComponent {
   // Props
   private props: UIButtonProps;
-  private useBitmapText: boolean;
-  private bitmapFontFamily?: string;
-  /** Local msdfFontFamily prop (can be overridden by parent inheritance) */
-  private localMsdfFontFamily?: string;
   /** Local fontFamily prop (can be overridden by parent inheritance) */
   private localFontFamily?: string;
+  /** Local fontType prop (can be overridden by parent inheritance) */
+  private localFontType?: FontType;
   private onClick?: () => void;
   private onHover?: () => void;
-
-  // Services (composition) - ThemeApplier removed, using base class helpers
 
   // Button state
   private state: ButtonState = ButtonState.Normal;
   private backgroundStrategy: ButtonBackgroundStrategy;
   private label?: UILabel;
-  private bitmapLabel?: PIXI.BitmapText;
   /** Track if label has been initialized */
   private labelInitialized = false;
 
   // Cached label center position
   private labelCenterX: number = 0;
   private labelCenterY: number = 0;
-
-  // State is now in base class (enabled, focused, hovered, pressed)
-
-  // Theme resolver is now in base class
 
   // Event listener management
   private actions = new ActionManager();
@@ -145,10 +148,8 @@ export class UIButton extends UIComponent {
       ...props
     };
 
-    this.useBitmapText = props.useBitmapText ?? false;
-    this.bitmapFontFamily = props.bitmapFontFamily;
-    this.localMsdfFontFamily = props.msdfFontFamily;
     this.localFontFamily = props.fontFamily;
+    this.localFontType = props.fontType;
     this.onClick = props.onClick;
     this.onHover = props.onHover;
 
@@ -205,24 +206,6 @@ export class UIButton extends UIComponent {
     }
   }
 
-
-
-  /** @internal */
-  private createBitmapLabel(): void {
-    if (!this.bitmapFontFamily) return;
-
-    this.bitmapLabel = new PIXI.BitmapText({
-      text: this.props.label,
-      style: {
-        fontFamily: this.bitmapFontFamily,
-        fontSize: this.props.fontSize,
-        fill: this.props.textColor
-      }
-    });
-
-    this.container.addChild(this.bitmapLabel);
-  }
-
   /**
    * Ensures label is created (lazy initialization).
    * Called before measure/render to allow font inheritance from parent.
@@ -231,42 +214,26 @@ export class UIButton extends UIComponent {
     if (this.labelInitialized || !this.props.label) return;
     this.labelInitialized = true;
 
-    if (this.useBitmapText && this.bitmapFontFamily) {
-      this.createBitmapLabel();
-    } else {
-      // Resolve MSDF font family - check local prop first, then inherit from parent
-      const effectiveMsdfFont = this.getInheritedMsdfFontFamily(this.localMsdfFontFamily);
+    // Resolve font settings through inheritance
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily);
+    const effectiveFontType = this.getInheritedFontType(this.localFontType);
 
-      if (effectiveMsdfFont) {
-        // Use MSDF text rendering via UILabel (UILabel will also inherit)
-        this.label = new UILabel({
-          text: this.props.label,
-          fontSize: this.props.fontSize,
-          color: this.props.textColor,
-          align: 'center',
-          msdfFontFamily: effectiveMsdfFont
-        }, {
-          padding: EdgeInsets.zero()
-        });
-      } else {
-        // Regular canvas text - resolve font family from local or parent
-        const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily);
-        this.label = new UILabel({
-          text: this.props.label,
-          fontSize: this.props.fontSize,
-          color: this.props.textColor,
-          align: 'center',
-          fontFamily: effectiveFontFamily
-        }, {
-          padding: EdgeInsets.zero()
-        });
-      }
+    // Create UILabel with unified font props
+    this.label = new UILabel({
+      text: this.props.label,
+      fontSize: this.props.fontSize,
+      color: this.props.textColor,
+      align: 'center',
+      fontFamily: effectiveFontFamily,
+      fontType: effectiveFontType
+    }, {
+      padding: EdgeInsets.zero()
+    });
 
-      // Set parent for inheritance chain (important!)
-      this.label.parent = this;
-      this.label.container.position.set(0, 0);
-      this.container.addChild(this.label.container);
-    }
+    // Set parent for inheritance chain (important!)
+    this.label.parent = this;
+    this.label.container.position.set(0, 0);
+    this.container.addChild(this.label.container);
   }
 
   /** @internal */
@@ -380,9 +347,6 @@ export class UIButton extends UIComponent {
     // Apply depth offset to label
     if (this.label) {
       this.label.container.position.set(this.labelCenterX, this.labelCenterY + yOffset);
-    } else if (this.bitmapLabel) {
-      this.bitmapLabel.x = this.labelCenterX;
-      this.bitmapLabel.y = this.labelCenterY + yOffset;
     }
   }
 
@@ -444,12 +408,6 @@ export class UIButton extends UIComponent {
 
       // Position the label container
       this.label.container.position.set(this.labelCenterX, this.labelCenterY);
-    } else if (this.bitmapLabel) {
-      // Center the bitmap text
-      this.labelCenterX = (measured.width - this.bitmapLabel.width) / 2;
-      this.labelCenterY = (actualHeight - this.bitmapLabel.height) / 2;
-      this.bitmapLabel.x = this.labelCenterX;
-      this.bitmapLabel.y = this.labelCenterY;
     }
 
     this.layoutDirty = false;
@@ -465,9 +423,6 @@ export class UIButton extends UIComponent {
   setLabel(text: string): void {
     if (this.label) {
       this.label.setText(text);
-      this.markLayoutDirty();
-    } else if (this.bitmapLabel) {
-      this.bitmapLabel.text = text;
       this.markLayoutDirty();
     }
   }

@@ -74,9 +74,8 @@ const button = new UIButton({
   height: 40,
   backgroundColor: 0x4a90e2,
   textColor: 0xffffff,
-  fontFamily: 'PixelOperator',  // Optional: custom font for canvas text
-  // Or use MSDF for crisp scaling:
-  // msdfFontFamily: 'MyMsdfFont',
+  fontFamily: 'PixelOperator',  // Font family name
+  fontType: 'canvas',           // 'canvas' (default), 'msdf', or 'bitmap'
   onClick: () => console.log('Clicked!'),
   onHover: () => console.log('Hovered!')
 });

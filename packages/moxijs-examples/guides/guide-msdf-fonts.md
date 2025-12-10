@@ -104,7 +104,7 @@ The script uses these defaults (modify `generate-msdf-font.mjs` if needed):
 
 ```javascript
 {
-  format: 'json',        // PixiJS reads JSON format
+  format: 'json',        // JSON content (renamed to .fnt for PixiJS v8)
   fieldType: 'msdf',     // Multi-channel SDF
   fontSize: 48,          // Size in atlas (higher = more detail)
   distanceRange: 4,      // Edge sharpness range
@@ -114,6 +114,8 @@ The script uses these defaults (modify `generate-msdf-font.mjs` if needed):
 }
 ```
 
+**Note:** The generator creates JSON files and automatically renames them to `.fnt` for PixiJS v8 compatibility.
+
 ## Using MSDF Fonts in Code
 
 ### Loading the Font
@@ -121,12 +123,18 @@ The script uses these defaults (modify `generate-msdf-font.mjs` if needed):
 ```typescript
 import { Assets } from 'pixi.js';
 
-// Load MSDF font (PixiJS auto-detects MSDF from distanceField in JSON)
+// Load MSDF font - PixiJS v8 requires .fnt or .xml extension
+// The .fnt file contains JSON data and references the PNG texture
 await Assets.load({
   alias: 'PixelOperator8-MSDF',
-  src: 'assets/fonts/msdf/PixelOperator8.json',
-  data: { type: 'font' }
+  src: 'assets/fonts/msdf/PixelOperator8.fnt'
 });
+
+// PixiJS automatically:
+// 1. Recognizes .fnt files as bitmap fonts
+// 2. Parses the JSON data
+// 3. Loads the PNG texture referenced in the "pages" array
+// 4. Detects MSDF from the "distanceField" property
 ```
 
 ### Method 1: Using asMSDFText Helper (Recommended)
@@ -243,10 +251,10 @@ const CHAR_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 
 ### 3. Use Consistent Font Family Names
 
-The `fontFamily` in your code must match `info.face` in the JSON file:
+The `fontFamily` in your code must match `info.face` in the .fnt file:
 
 ```json
-// In PixelOperator8-MSDF.json
+// In PixelOperator8.fnt (JSON content with .fnt extension)
 {
   "info": {
     "face": "PixelOperator8"  // <-- Use this name
@@ -306,7 +314,13 @@ setupMoxi({
 
 **Cause**: Font family name mismatch.
 
-**Fix**: Check the `info.face` value in your MSDF JSON and use that exact name.
+**Fix**: Check the `info.face` value in your MSDF .fnt file and use that exact name.
+
+### PNG Texture Not Loading
+
+**Cause**: PixiJS v8 only recognizes `.fnt` and `.xml` extensions for bitmap fonts.
+
+**Fix**: Ensure your font descriptor file has a `.fnt` or `.xml` extension, not `.json`. The generator script automatically handles this.
 
 ### Characters Missing
 

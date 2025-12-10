@@ -21,7 +21,7 @@ import { Assets, Text, Graphics, Container, FederatedPointerEvent, BitmapFont, B
 import { ASSETS } from '../../assets-config';
 
 // Configuration
-const MSDF_FONT_JSON = ASSETS.PIXEL_OPERATOR8_MSDF_JSON;
+const MSDF_FONT_FNT = ASSETS.PIXEL_OPERATOR8_MSDF_FNT;
 const STANDARD_FONT = ASSETS.PIXEL_OPERATOR8_FONT;
 
 export async function initMsdfTextRendering() {
@@ -54,12 +54,26 @@ export async function initMsdfTextRendering() {
     data: { family: 'PixelOperator8' }
   });
 
-  // Load MSDF font - PixiJS needs to know it's a bitmap font
-  await Assets.load({
+  // Load MSDF font - PixiJS automatically recognizes .fnt files and loads the PNG texture
+  const msdfFont = await Assets.load({
     alias: 'PixelOperator8-MSDF',
-    src: MSDF_FONT_JSON,
-    data: { type: 'font' }  // Tell PixiJS this is a font
+    src: MSDF_FONT_FNT
   });
+  
+  // Verify the font loaded correctly with texture
+  if (!msdfFont?.pageTextures || msdfFont.pageTextures.length === 0) {
+    console.error('❌ MSDF font failed to load texture!');
+  } else {
+    console.log('✅ MSDF font loaded with texture:', msdfFont.pageTextures);
+    
+    // Ensure texture is uploaded to GPU before rendering
+    for (const pageTexture of msdfFont.pageTextures) {
+      if (pageTexture?.source) {
+        await pageTexture.source.load();
+        console.log('✅ MSDF texture uploaded to GPU');
+      }
+    }
+  }
 
   // Install BitmapFont with 256px supersampling (for pixel-perfect rendering)
   BitmapFont.install({

@@ -192,6 +192,260 @@ events.on('score', (n) => console.log(n));
 events.emit('score', 100);
 ```
 
+## Common Patterns
+
+### Player with Physics and Animation
+```ts
+import { asEntity, PhysicsBodyLogic, Logic, ClientEvents } from '@moxijs/core';
+
+const { scene, engine, physicsWorld } = await setupMoxi({
+  hostElement: container,
+  physics: { gravity: { x: 0, y: 20 } }
+});
+
+// Create player sprite with animation
+const playerTexture = await Assets.load('player.png');
+const frames = asTextureFrames(playerTexture, {
+  frameWidth: 32,
+  frameHeight: 32,
+  columns: 4,
+  rows: 1
+});
+
+const player = asEntity(new PIXI.AnimatedSprite(frames));
+player.animationSpeed = 0.15;
+player.play();
+
+// Add physics
+player.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
+  type: 'dynamic',
+  shape: { type: 'box', width: 32, height: 32 },
+  tags: ['player']
+}));
+
+// Add movement logic
+class PlayerControlLogic extends Logic<PIXI.AnimatedSprite> {
+  name = 'PlayerControl';
+  private input = ClientEvents.getInstance();
+  
+  update(entity, dt) {
+    const body = getPhysicsBody(entity);
+    const speed = 5;
+    
+    if (this.input.isKeyDown('ArrowRight')) {
+      body.setLinearVelocity({ x: speed, y: body.getLinearVelocity().y });
+      entity.scale.x = 1;
+    } else if (this.input.isKeyDown('ArrowLeft')) {
+      body.setLinearVelocity({ x: -speed, y: body.getLinearVelocity().y });
+      entity.scale.x = -1;
+    }
+    
+    if (this.input.isKeyPressed('Space')) {
+      body.applyLinearImpulse({ x: 0, y: -10 });
+    }
+  }
+}
+
+player.moxiEntity.addLogic(new PlayerControlLogic());
+scene.addChild(player);
+```
+
+### Enemy AI with State Machine
+```ts
+class PatrolState extends StateLogic<Enemy> {
+  name = 'patrol';
+  private speed = 2;
+  
+  update(entity, dt) {
+    entity.x += this.speed * dt;
+    
+    // Change direction at bounds
+    if (entity.x > 500 || entity.x < 100) {
+      this.speed *= -1;
+      entity.scale.x *= -1;
+    }
+    
+    // Detect player
+    if (distanceToPlayer < 150) {
+      this.machine.transition('chase');
+    }
+  }
+}
+
+class ChaseState extends StateLogic<Enemy> {
+  name = 'chase';
+  
+  update(entity, dt) {
+    // Move toward player
+    const dx = player.x - entity.x;
+    entity.x += Math.sign(dx) * 3 * dt;
+    
+    if (Math.abs(dx) < 30) {
+      this.machine.transition('attack');
+    } else if (Math.abs(dx) > 200) {
+      this.machine.transition('patrol');
+    }
+  }
+}
+
+const enemy = asEntity(enemySprite);
+const fsm = new StateMachine<Enemy>();
+fsm.addState(new PatrolState());
+fsm.addState(new ChaseState());
+enemy.moxiEntity.addLogic(fsm);
+fsm.start('patrol');
+```
+
+### Physics Platformer with Collision
+```ts
+const { scene, physicsWorld } = await setupMoxi({
+  hostElement: container,
+  physics: { gravity: { x: 0, y: 20 } }
+});
+
+// Ground
+const ground = new PIXI.Graphics();
+ground.rect(0, 0, 800, 50).fill(0x8B4513);
+const groundEntity = asEntity(ground);
+groundEntity.y = 550;
+
+groundEntity.moxiEntity.addLogic(new PhysicsBodyLogic(physicsWorld, {
+  type: 'static',
+  shape: { type: 'box', width: 800, height: 50 },
+  tags: ['ground']
+}));
+
+scene.addChild(groundEntity);
+
+// Player
+const player = asPhysicsEntity(playerSprite, physicsWorld, {
+  type: 'dynamic',
+  shape: { type: 'box', width: 32, height: 48 },
+  tags: ['player'],
+  friction: 0.3
+});
+
+player.x = 100;
+player.y = 400;
+scene.addChild(player);
+
+// Collision detection
+physicsWorld.onCollision('player', 'ground', (event) => {
+  if (event.type === 'begin') {
+    console.log('Player landed');
+  }
+});
+```
+
+### Camera Follow with Smooth Lerp
+```ts
+const { scene, camera } = await setupMoxi({ hostElement: container });
+
+const player = asEntity(playerSprite);
+scene.addChild(player);
+
+// Smooth camera follow
+class SmoothCameraLogic extends Logic<PIXI.Container> {
+  name = 'SmoothCamera';
+  
+  update(entity, dt) {
+    const target = player;
+    const lerpFactor = 0.1;
+    
+    camera.x = utils.lerp(camera.x, -target.x, lerpFactor);
+    camera.y = utils.lerp(camera.y, -target.y, lerpFactor);
+  }
+}
+
+camera.moxiEntity?.addLogic(new SmoothCameraLogic());
+```
+
+### Particle System
+```ts
+class ParticleLogic extends Logic<PIXI.Container> {
+  name = 'Particles';
+  private particles: PIXI.Sprite[] = [];
+  
+  spawnParticle(x: number, y: number) {
+    const particle = new PIXI.Sprite(circleTexture);
+    particle.position.set(x, y);
+    particle.tint = Math.random() * 0xffffff;
+    particle.scale.set(0.5);
+    particle.anchor.set(0.5);
+    
+    this.particles.push(particle);
+    this.entity.addChild(particle);
+  }
+  
+  update(entity, dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.y -= 2 * dt;
+      p.alpha -= 0.01 * dt;
+      
+      if (p.alpha <= 0) {
+        entity.removeChild(p);
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+}
+
+const particleSystem = asEntity(new PIXI.Container());
+particleSystem.moxiEntity.addLogic(new ParticleLogic());
+scene.addChild(particleSystem);
+```
+
+### Asset Loading with Progress
+```ts
+const { loadAssets } = await setupMoxi({ hostElement: container });
+
+const assets = [
+  { src: 'player.png', alias: 'player' },
+  { src: 'enemy.png', alias: 'enemy' },
+  { src: 'tileset.json', alias: 'tiles' },
+  { src: 'music.mp3', alias: 'bgm' }
+];
+
+await loadAssets(assets, (progress) => {
+  console.log(`Loading: ${Math.round(progress * 100)}%`);
+  updateLoadingBar(progress);
+});
+
+const playerTexture = Assets.get('player');
+const tiles = Assets.get('tiles');
+```
+
+### MSDF Text for UI
+```ts
+import { asMSDFText } from '@moxijs/core';
+
+// Load MSDF font (requires .fnt extension)
+await Assets.load({
+  alias: 'UI-Font',
+  src: 'fonts/PixelOperator8.fnt'
+});
+
+// Create crisp, scalable text
+const scoreText = asMSDFText({
+  text: 'Score: 0',
+  style: {
+    fontFamily: 'PixelOperator8',
+    fontSize: 24,
+    fill: 0xffffff
+  }
+});
+
+scoreText.position.set(20, 20);
+scene.addChild(scoreText);
+
+// Update dynamically - stays crisp at any scale
+game.on('scoreChange', (score) => {
+  scoreText.text = `Score: ${score}`;
+  scoreText.scale.set(1.5); // No blur!
+});
+```
+
 ## Exports Summary
 
 **Core:** `setupMoxi`, `Engine`, `Scene`, `asEntity`, `Logic`, `StateMachine`, `StateLogic`
@@ -200,7 +454,7 @@ events.emit('score', 100);
 
 **Camera:** `Camera`, `CameraLogic`
 
-**Helpers:** `asSprite`, `asText`, `asGraphics`, `asContainer`, `asTextureFrames`, `TextureFrameSequences`
+**Helpers:** `asSprite`, `asText`, `asGraphics`, `asContainer`, `asTextureFrames`, `TextureFrameSequences`, `asMSDFText`, `asTextDPR`
 
 **Input/Events:** `ClientEvents`, `EventEmitter`, `ActionManager`
 

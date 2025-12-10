@@ -5,6 +5,7 @@ import { UILabel } from './ui-label';
 import { UIPanel } from './ui-panel';
 import { LayoutEngine } from '../services';
 import { ActionManager } from '@moxijs/core';
+import { FontType, FontProps } from '../base/font-config';
 
 export interface TabItem {
   key: string;
@@ -13,7 +14,7 @@ export interface TabItem {
   disabled?: boolean;
 }
 
-export interface UITabsProps {
+export interface UITabsProps extends FontProps {
   items: TabItem[];
   activeKey?: string;
   defaultActiveKey?: string;
@@ -46,6 +47,8 @@ export class UITabs extends UIComponent {
   private textColor: number;
   private activeTextColor: number;
   private hashPrefix?: string;
+  private localFontFamily?: string;
+  private localFontType?: FontType;
 
   // Services (composition)
 
@@ -58,6 +61,9 @@ export class UITabs extends UIComponent {
 
   constructor(props: UITabsProps, boxModel?: Partial<BoxModel>) {
     super(boxModel);
+
+    this.localFontFamily = props.fontFamily;
+    this.localFontType = props.fontType;
 
 
     this.items = props.items || [];
@@ -176,13 +182,18 @@ export class UITabs extends UIComponent {
       const tabContainer = new PIXI.Container();
       tabContainer.x = xOffset;
 
-      // Tab label
+      // Tab label - inherit font configuration from parent
       const isActive = this.activeKey === item.key;
+      const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily);
+      const effectiveFontType = this.getInheritedFontType(this.localFontType);
+      
       const label = new UILabel({
         text: item.label,
         fontSize: 15,
         fontWeight: isActive ? 'bold' : 'normal',
-        color: isActive ? this.activeTextColor : this.textColor
+        color: isActive ? this.activeTextColor : this.textColor,
+        fontFamily: effectiveFontFamily,
+        fontType: effectiveFontType
       });
 
       // Measure label to determine tab width

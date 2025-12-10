@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2025-12-09
+
+### MSDF Font System Improvements
+
+This release fixes a critical compatibility issue with PixiJS v8's bitmap font loader and adds comprehensive LLM-friendly documentation with practical code patterns.
+
+**Key Fix**: PixiJS v8.14 only recognizes `.fnt` and `.xml` extensions for bitmap fonts (not `.json`). The MSDF font generator now automatically renames generated files to ensure compatibility and proper texture loading.
+
 ### Added
 
 #### setupMoxi
@@ -19,6 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `asEntityContainer(props)` - Creates Container wrapped with `asEntity()`
 - `asEntityText(constructorArgs, props)` - Creates Text wrapped with `asEntity()`
 
+#### MSDF Font Generator (`scripts/generate-msdf-font.mjs`)
+- **Critical Fix**: Auto-renames generated `.json` files to `.fnt` for PixiJS v8 compatibility
+  - PixiJS v8's bitmap font loader (`loadBitmapFont.mjs`) only recognizes `.fnt` and `.xml` extensions
+  - Without this, PNG textures referenced in the font data won't load automatically
+- Updated all documentation and console output to reference `.fnt` files
+- Added explanatory comments about PixiJS v8 extension requirements
+- Generator now displays: `Renamed MyFont.json → MyFont.fnt (PixiJS v8 requirement)`
+
 ### Changed
 
 #### ClientEvents
@@ -29,6 +45,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced JSDoc with comprehensive examples for adding/removing listeners
 - Documented common event targets (window, document, canvas) and event types
 - Added cleanup pattern documentation for Logic components
+
+#### Documentation (`llms.txt`)
+- **Major Enhancement**: Added 7 comprehensive gameplay patterns with complete, copy-paste ready code examples:
+  - Player with Physics and Animation (movement, physics body, input handling)
+  - Enemy AI with State Machine (patrol, chase, attack states)
+  - Physics Platformer with Collision (ground detection, player control)
+  - Camera Follow with Smooth Lerp (smooth tracking, camera logic)
+  - Particle System (spawn, update, cleanup patterns)
+  - Asset Loading with Progress (batch loading, progress callbacks)
+  - MSDF Text for UI (crisp scalable text rendering)
+- Each pattern is 20-50 lines, focused on a single concept
+- Real-world examples extracted from working demos
+- Demonstrates ECS architecture, physics integration, and state management
 
 ## [0.3.2] - 2025-12-06
 

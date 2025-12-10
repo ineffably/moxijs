@@ -9,8 +9,11 @@
 // Core
 export { EdgeInsets } from './base/edge-insets';
 export { BoxModel, ComputedLayout, MeasuredSize, SizeConstraint, createDefaultBoxModel } from './base/box-model';
-export { UIComponent, UIFontConfig } from './base/ui-component';
+export { UIComponent, UIFontConfig, FontType, FontProps } from './base/ui-component';
 export { UIFocusManager, Focusable } from './base/ui-focus-manager';
+
+// Font configuration
+export { resolveFontType, DEFAULT_FONT_TYPE } from './base/font-config';
 
 // Services (Composition services for UI components)
 export {

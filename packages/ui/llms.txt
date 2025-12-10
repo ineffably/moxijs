@@ -256,6 +256,198 @@ const ui = new UILayer({
 stage.addChild(ui);
 ```
 
+## Font Standardization
+
+All text components support unified font configuration with inheritance:
+
+```ts
+import { Assets } from 'pixi.js';
+import { FontType, UIFontConfig } from '@moxijs/ui';
+
+// Load MSDF font (requires .fnt extension for PixiJS v8)
+await Assets.load({ alias: 'GameFont', src: 'fonts/GameFont.fnt' });
+
+// Set font at container - all children inherit
+const container = new FlexContainer({
+  fontFamily: 'GameFont',
+  fontType: 'msdf' as FontType,  // 'canvas' | 'msdf' | 'bitmap'
+  direction: FlexDirection.Column
+});
+
+// Children automatically inherit font settings
+container.addChild(new UILabel({ text: 'Title' }));
+container.addChild(new UIButton({ label: 'Click' }));
+container.addChild(new UITextInput({ placeholder: 'Name' }));
+```
+
+## Common Patterns
+
+### Game HUD with MSDF Fonts
+```ts
+await Assets.load({ alias: 'UI-Font', src: 'fonts/PixelOperator8.fnt' });
+
+const hud = new FlexContainer({
+  direction: FlexDirection.Row,
+  justify: FlexJustify.SpaceBetween,
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf',
+  padding: EdgeInsets.all(20)
+});
+
+const score = new UILabel({ text: 'Score: 0', fontSize: 16 });
+const lives = new UILabel({ text: '❤️ × 3', fontSize: 16 });
+
+hud.addChild(score);
+hud.addChild(lives);
+
+// Update in game loop
+game.on('scoreChange', (s) => score.setText(`Score: ${s}`));
+```
+
+### Settings Form with Validation
+```ts
+const form = new FlexContainer({
+  direction: FlexDirection.Column,
+  gap: 15,
+  padding: EdgeInsets.all(20)
+});
+
+const volumeSlider = new UISelect({
+  width: 200,
+  options: [
+    { value: '0', label: 'Muted' },
+    { value: '50', label: 'Medium' },
+    { value: '100', label: 'Max' }
+  ],
+  value: '50',
+  onChange: (val) => setVolume(parseInt(val))
+});
+
+const graphicsSelect = new UIRadioGroup({
+  options: [
+    { value: 'low', label: 'Low' },
+    { value: 'high', label: 'High' }
+  ],
+  value: 'high',
+  onChange: (val) => setGraphicsQuality(val)
+});
+
+form.addChild(new UILabel({ text: 'Volume:' }));
+form.addChild(volumeSlider);
+form.addChild(new UILabel({ text: 'Graphics:' }));
+form.addChild(graphicsSelect);
+```
+
+### Dialog/Modal Panel
+```ts
+const modal = new CardPanel({
+  title: 'Confirm Action',
+  width: 400,
+  height: 250,
+  backgroundColor: 0x1e1e1e,
+  borderRadius: 12
+});
+
+const message = new UILabel({
+  text: 'Are you sure you want to quit?',
+  fontSize: 14,
+  align: 'center',
+  wordWrap: true,
+  wordWrapWidth: 350
+});
+
+const buttons = new FlexContainer({
+  direction: FlexDirection.Row,
+  justify: FlexJustify.Center,
+  gap: 10
+});
+
+buttons.addChild(new UIButton({
+  label: 'Cancel',
+  width: 100,
+  onClick: () => modal.destroy()
+}));
+
+buttons.addChild(new UIButton({
+  label: 'Quit',
+  width: 100,
+  backgroundColor: 0xff4444,
+  onClick: () => quitGame()
+}));
+
+modal.body.addChild(message);
+modal.body.addChild(buttons.container);
+```
+
+### Inventory Grid
+```ts
+const inventory = new FlexContainer({
+  direction: FlexDirection.Row,
+  gap: 8,
+  padding: EdgeInsets.all(10),
+  backgroundColor: 0x2d2d44,
+  flexWrap: 'wrap'  // Grid-like behavior
+});
+
+for (let i = 0; i < 20; i++) {
+  const slot = new UIPanel({
+    width: 64,
+    height: 64,
+    backgroundColor: 0x3d3d54,
+    borderRadius: 4
+  });
+  
+  slot.container.eventMode = 'static';
+  slot.container.cursor = 'pointer';
+  slot.container.on('pointerdown', () => selectItem(i));
+  
+  inventory.addChild(slot);
+}
+```
+
+### Tab-Based UI
+```ts
+const tabs = new UITabs({
+  width: 800,
+  height: 600,
+  fontFamily: 'PixelOperator8',
+  fontType: 'msdf',
+  items: [
+    { key: 'inventory', label: 'Inventory', content: inventoryPanel },
+    { key: 'skills', label: 'Skills', content: skillsPanel },
+    { key: 'map', label: 'Map', content: mapPanel }
+  ],
+  defaultActiveKey: 'inventory',
+  hashPrefix: 'game-ui',  // URL: #game-ui/inventory
+  onChange: (key) => console.log('Tab:', key)
+});
+```
+
+### Scrollable Chat Log
+```ts
+const chat = new UIScrollContainer({
+  width: 300,
+  height: 400,
+  scrollDirection: 'vertical',
+  backgroundColor: 0x1e1e1e,
+  scrollbarWidth: 8
+});
+
+function addMessage(text: string) {
+  const msg = new UILabel({
+    text,
+    fontSize: 12,
+    wordWrap: true,
+    wordWrapWidth: 280,
+    padding: EdgeInsets.all(8)
+  });
+  chat.addChild(msg);
+  chat.scrollToBottom();
+}
+
+game.on('chat', (msg) => addMessage(msg));
+```
+
 ## Exports Summary
 
 **Layout:** `FlexContainer`, `FlexDirection`, `FlexJustify`, `FlexAlign`, `EdgeInsets`, `BoxModel`
@@ -265,6 +457,8 @@ stage.addChild(ui);
 **Theming:** `ThemeManager`, `ThemeResolver`, `createDefaultDarkTheme`, `createDefaultLightTheme`
 
 **Base:** `UIComponent`, `UIFocusManager`, `UILayer`, `UIScaleMode`
+
+**Fonts:** `FontType`, `FontProps`, `UIFontConfig`
 
 ## See Also
 

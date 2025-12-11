@@ -1,5 +1,5 @@
 /**
- * [T]ile[Map]Matic
+ * TileMapMatic
  * Full-featured sprite sheet / tile map management with project persistence
  *
  * Features:
@@ -23,51 +23,71 @@ import {
   FlexAlign,
   EdgeInsets
 } from '@moxijs/ui';
-import { Sprite, Container, Graphics, Texture, Assets, Text } from 'pixi.js';
-import { ASSETS } from '../../assets-config';
+import { Sprite, Container, Graphics, Texture, Assets } from 'pixi.js';
 import {
   SpriteSheetProjectManager,
   SpriteSheetEntry
-} from '../tile-map-matic/sprite-sheet-project';
+} from './sprite-sheet-project';
 import {
   SpriteSheetConfigPanel
-} from '../tile-map-matic/sprite-sheet-config-panel';
+} from './sprite-sheet-config-panel';
 import {
   createGridOverlay,
   createCellHighlight,
   pixelToCell,
   cellToIndex
-} from '../tile-map-matic/sprite-sheet-grid';
-import { GridSettings } from '../tile-map-matic/sprite-sheet-data';
-import { SpriteCarousel, CarouselItem } from '../tile-map-matic/sprite-carousel';
-import { CanvasPanZoom } from '../tile-map-matic/canvas-pan-zoom';
-// JSONViewer replaced with UITextArea
+} from './sprite-sheet-grid';
+import { GridSettings } from './sprite-sheet-data';
+import { SpriteCarousel, CarouselItem } from './sprite-carousel';
+import { CanvasPanZoom } from './canvas-pan-zoom';
 
 type CleanupFunction = () => void;
 
 /**
+ * TileMapMatic configuration options
+ */
+export interface TileMapMaticOptions {
+  /** Host element to render into (default: looks for #app) */
+  hostElement?: HTMLElement;
+  /** Canvas width (default: 1280) */
+  width?: number;
+  /** Canvas height (default: 720) */
+  height?: number;
+  /** Background color (default: 0x1a1a2e) */
+  backgroundColor?: number;
+  /** Font asset path (optional - will use system font if not provided) */
+  fontPath?: string;
+}
+
+/**
  * Initialize TileMapMatic
  */
-export async function initTileMapMatic(): Promise<CleanupFunction> {
-  const root = document.getElementById('canvas-container');
-  if (!root) throw new Error('Canvas container not found');
+export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promise<CleanupFunction> {
+  const root = options.hostElement || document.getElementById('app');
+  if (!root) throw new Error('Host element not found');
+
+  const width = options.width ?? 1280;
+  const height = options.height ?? 720;
+  const backgroundColor = options.backgroundColor ?? 0x1a1a2e;
 
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
     showLoadingScene: false,
     renderOptions: {
-      width: 1280,
-      height: 720,
-      backgroundColor: 0x1a1a2e,
+      width,
+      height,
+      backgroundColor,
     }
   });
 
-  // Load required fonts before creating UI components
-  await Assets.load({
-    alias: 'PixelOperator8',
-    src: ASSETS.PIXEL_OPERATOR8_FONT,
-    data: { family: 'PixelOperator8' }
-  });
+  // Load required fonts if path provided
+  if (options.fontPath) {
+    await Assets.load({
+      alias: 'PixelOperator8',
+      src: options.fontPath,
+      data: { family: 'PixelOperator8' }
+    });
+  }
 
   // Initialize project manager (loads from localStorage)
   const projectManager = new SpriteSheetProjectManager();
@@ -106,7 +126,7 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
   });
 
   const titleLabel = new UILabel({
-    text: '[T]ile[Map]Matic',
+    text: 'TileMapMatic',
     fontSize: 22,
     color: 0x00d4ff,
     fontWeight: 'bold'
@@ -245,7 +265,6 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
   }
 
   // === JSON DIALOG ===
-  // TODO: Text rendering causes black box issue - needs investigation
   const JSON_DIALOG_WIDTH = 600;
   const JSON_DIALOG_HEIGHT = 500;
   const jsonDialog = new Container();
@@ -304,9 +323,8 @@ export async function initTileMapMatic(): Promise<CleanupFunction> {
   closeBtn.container.position.set(JSON_DIALOG_WIDTH - 44, 10);
   jsonBox.addChild(closeBtn.container);
 
-  // JSON text content - removed due to black box rendering issue
-  // TODO: Investigate FlexContainerPanel approach for text rendering
-  const jsonViewer = { setValue: (_s: string) => { /* disabled */ } };
+  // JSON text content - placeholder for now
+  const jsonViewer = { setValue: (_s: string) => { /* TODO: implement text rendering */ } };
 
   jsonDialog.addChild(jsonBox);
   scene.addChild(jsonDialog);

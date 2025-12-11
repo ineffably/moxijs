@@ -17,6 +17,8 @@ module.exports = (env, argv) => ({
       '@moxijs/core': path.resolve(__dirname, '../core/src/index.ts'),
       // Use local pikcell source for development
       'pikcell': path.resolve(__dirname, '../pikcell/src/index.ts'),
+      // Use local tilemap-matic source for development
+      'tilemap-matic': path.resolve(__dirname, '../tilemap-matic/src/index.ts'),
       // Use local mini-gui for development
       '@moxijs/mini-gui': path.resolve(__dirname, '../mini-gui/src/index.ts')
     }

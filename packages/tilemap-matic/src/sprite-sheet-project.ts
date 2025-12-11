@@ -17,7 +17,7 @@ import {
   createRegionFromCells
 } from './sprite-sheet-data';
 
-const PROJECT_STORAGE_KEY = 'sprite-sheet-editor-project';
+const PROJECT_STORAGE_KEY = 'tilemap-matic-project';
 
 /**
  * Result type for operations that can fail
@@ -409,7 +409,7 @@ export class SpriteSheetProjectManager {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'sprite-sheet-project.json';
+    a.download = 'tilemap-matic-project.json';
     a.click();
     URL.revokeObjectURL(url);
   }

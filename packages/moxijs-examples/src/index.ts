@@ -35,7 +35,7 @@ import { initNewtonsCradle } from './examples/06-physics/newtons-cradle';
 import { initSpriteLibrary } from './examples/05-tools/sprite-library';
 import { initSpriteEditor } from './examples/05-tools/sprite-editor';
 import { initParticleEmitterSandbox } from './examples/05-tools/particle-sandbox';
-import { initTileMapMatic } from './examples/05-tools/tile-map-matic';
+import { initTileMapMatic } from './examples/05-tools/tilemap-matic';
 
 // CodeMirror imports
 import { EditorView, basicSetup } from 'codemirror';
@@ -75,7 +75,7 @@ import newtonsCradleSource from './examples/06-physics/newtons-cradle.ts?raw';
 import spriteLibrarySource from './examples/05-tools/sprite-library.ts?raw';
 import spriteEditorSource from './examples/05-tools/sprite-editor.ts?raw';
 import particleSandboxSource from './examples/05-tools/particle-sandbox.ts?raw';
-import tileMapMaticSource from './examples/05-tools/tile-map-matic.ts?raw';
+import tileMapMaticSource from './examples/05-tools/tilemap-matic.ts?raw';
 
 // Cleanup function type - examples can return this to clean up resources
 type CleanupFunction = () => void;
@@ -249,8 +249,8 @@ const categories: Record<string, Category> = {
         init: initSpriteEditor,
         source: spriteEditorSource
       },
-      'tile-map-matic': {
-        name: '[T]ile[Map]Matic',
+      'tilemap-matic': {
+        name: 'TileMapMatic',
         description: 'Multi-sheet editor with project persistence and export',
         init: initTileMapMatic,
         source: tileMapMaticSource

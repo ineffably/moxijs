@@ -8,7 +8,8 @@
     "packages/ui",
     "packages/mini-gui",
     "packages/moxijs-examples",
-    "packages/pikcell"
+    "packages/pikcell",
+    "packages/tilemap-matic"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
@@ -23,6 +24,7 @@
     "test:watch": "npm run test:watch --workspace=@moxijs/core",
     "test:ci": "npm run test:ci --workspace=@moxijs/core && npm run test:ci --workspace=@moxijs/ui",
     "pikcell": "npm run dev --workspace=@moxijs/pikcell",
+    "tilemap-matic": "npm run dev --workspace=@moxijs/tilemap-matic",
     "publish:dry-run": "npx ts-node scripts/dry-run-publish.ts",
     "typedoc": "npm run typedoc --workspaces --if-present"
   },

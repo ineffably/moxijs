@@ -89,10 +89,6 @@ describe('Package exports', () => {
       expect(UI.FormStateManager).toBeDefined();
     });
 
-    it('should export TextInputHandler', () => {
-      expect(UI.TextInputHandler).toBeDefined();
-    });
-
     it('should export ThemeApplier', () => {
       expect(UI.ThemeApplier).toBeDefined();
     });

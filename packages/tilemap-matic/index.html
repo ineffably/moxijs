@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TileMapMatic - Sprite Sheet Editor</title>
+  <!-- Brackets highlight key letters: [T]ile[Map]Matic - intentional styling -->
+  <title>[T]ile[Map]Matic - Sprite Sheet Editor</title>
   <meta name="description" content="Sprite sheet and tilemap management tool built on MoxiJS and PIXI.js">
   <script src="https://pixijs.download/v8.14.0/pixi.min.js"></script>
   <link rel="stylesheet" href="index.css">
@@ -12,38 +13,16 @@
   <div id="app">
     <div id="loading">Loading TileMapMatic...</div>
   </div>
-
-  <!--
-    Smart Bundle Loading Strategy:
-    - In development: HtmlWebpackPlugin injects the bundle automatically
-    - In production (GitHub Pages): Fallback script below loads dist/bundle.js manually
-    - The bundle sets window._bundleLoaded = true when it executes
-    - This allows the same index.html to work in both dev and production environments
-  -->
+  <script src="dist/bundle.js"></script>
   <script>
+    // Hide loading indicator once the app loads
     window.addEventListener('load', function() {
-      // Wait a tick to see if HtmlWebpackPlugin injected bundle already loaded
       setTimeout(function() {
-        if (!window._bundleLoaded) {
-          console.log('Bundle not injected, loading manually for production');
-          var script = document.createElement('script');
-          script.src = 'dist/bundle.js';
-          script.async = false;
-          script.onload = function() {
-            console.log('TileMapMatic bundle loaded from dist/bundle.js');
-            var loading = document.getElementById('loading');
-            if (loading) loading.classList.add('hidden');
-          };
-          script.onerror = function(e) {
-            console.error('Failed to load bundle from dist/bundle.js', e);
-          };
-          document.body.appendChild(script);
-        } else {
-          console.log('Bundle already loaded by HtmlWebpackPlugin');
-          var loading = document.getElementById('loading');
-          if (loading) loading.classList.add('hidden');
+        var loading = document.getElementById('loading');
+        if (loading) {
+          loading.classList.add('hidden');
         }
-      }, 0);
+      }, 100);
     });
   </script>
 </body>

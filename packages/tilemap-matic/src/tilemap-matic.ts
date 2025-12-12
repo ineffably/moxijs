@@ -1,5 +1,5 @@
 /**
- * TileMapMatic
+ * [T]ile[Map]Matic
  * Full-featured sprite sheet / tile map management with project persistence
  *
  * Features:
@@ -21,9 +21,11 @@ import {
   FlexDirection,
   FlexJustify,
   FlexAlign,
-  EdgeInsets
+  EdgeInsets,
+  CardPanel,
+  FlatCardStyle
 } from '@moxijs/ui';
-import { Sprite, Container, Graphics, Texture, Assets } from 'pixi.js';
+import { Sprite, Container, Graphics, Texture, Assets, BitmapFont, AnimatedSprite, Rectangle, Text } from 'pixi.js';
 import {
   SpriteSheetProjectManager,
   SpriteSheetEntry
@@ -37,9 +39,10 @@ import {
   pixelToCell,
   cellToIndex
 } from './sprite-sheet-grid';
-import { GridSettings } from './sprite-sheet-data';
+import { GridSettings, AnimationSequence, TileRegion } from './sprite-sheet-data';
 import { SpriteCarousel, CarouselItem } from './sprite-carousel';
 import { CanvasPanZoom } from './canvas-pan-zoom';
+import { AnimationRegionLibraryPanel } from './animation-region-library-panel';
 
 type CleanupFunction = () => void;
 
@@ -55,8 +58,10 @@ export interface TileMapMaticOptions {
   height?: number;
   /** Background color (default: 0x1a1a2e) */
   backgroundColor?: number;
-  /** Font asset path (optional - will use system font if not provided) */
+  /** Font asset path (optional - will use default bundled font if not provided) */
   fontPath?: string;
+  /** Skip font loading (useful when fonts are already loaded by parent app) */
+  skipFontLoading?: boolean;
 }
 
 /**
@@ -68,7 +73,7 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
 
   const width = options.width ?? 1280;
   const height = options.height ?? 720;
-  const backgroundColor = options.backgroundColor ?? 0x1a1a2e;
+  const backgroundColor = options.backgroundColor ?? 0x18181b; // Neutral dark gray
 
   const { scene, engine, renderer } = await setupMoxi({
     hostElement: root,
@@ -80,13 +85,26 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     }
   });
 
-  // Load required fonts if path provided
-  if (options.fontPath) {
+  // Load fonts (unless skipped - e.g., when parent app already loaded them)
+  if (!options.skipFontLoading) {
+    const fontPath = options.fontPath || './assets/fonts/pixel_operator/PixelOperator8.ttf';
     await Assets.load({
       alias: 'PixelOperator8',
-      src: options.fontPath,
+      src: fontPath,
       data: { family: 'PixelOperator8' }
     });
+
+    // Install as BitmapFont for pixel-perfect text rendering
+    BitmapFont.install({
+      name: 'PixelOperator8Bitmap',
+      style: {
+        fontFamily: 'PixelOperator8',
+        fontSize: 16,
+        fill: 0xffffff,
+      }
+    });
+
+    console.log('🔤 TileMapMatic: PixelOperator8 font loaded');
   }
 
   // Initialize project manager (loads from localStorage)
@@ -111,7 +129,7 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   // Calculate content area dimensions
   const contentX = CAROUSEL_WIDTH;
   const contentY = HEADER_HEIGHT;
-  const contentWidth = renderer.width - CAROUSEL_WIDTH - CONFIG_PANEL_WIDTH - CONTENT_PADDING;
+  const contentWidth = renderer.width - CAROUSEL_WIDTH; // Fill to right edge, panels overlay
   const contentHeight = renderer.height - HEADER_HEIGHT;
 
   // === HEADER ===
@@ -122,13 +140,14 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     padding: EdgeInsets.symmetric(0, 20),
     width: renderer.width,
     height: HEADER_HEIGHT,
-    backgroundColor: 0x252538
+    backgroundColor: 0x2a2a2f
   });
 
+  // Brackets highlight key letters: [T]ile[Map]Matic - intentional styling
   const titleLabel = new UILabel({
-    text: 'TileMapMatic',
+    text: '[T]ile[Map]Matic (ALPHA!)',
     fontSize: 22,
-    color: 0x00d4ff,
+    color: 0x9acd32, // Muted lime green (yellowgreen)
     fontWeight: 'bold'
   });
   headerContainer.addChild(titleLabel);
@@ -144,20 +163,42 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   headerContainer.container.position.set(0, 0);
   uiLayer.addChild(headerContainer.container);
 
-  // === CAROUSEL (Left Side) ===
+  // === LIBRARY CARD PANEL (Left Side - contains carousel) ===
+  const LIBRARY_TITLE_HEIGHT = 28; // Approximate title bar height
+  const libraryCardPanel = new CardPanel({
+    title: { text: 'Library', fontSize: 12 },
+    bodyWidth: CAROUSEL_WIDTH,
+    bodyHeight: renderer.height - HEADER_HEIGHT - LIBRARY_TITLE_HEIGHT,
+    draggable: false,
+    style: new FlatCardStyle({
+      showShadow: true,
+      shadowOffset: 6,
+      shadowAlpha: 0.4
+    }),
+    colors: {
+      background: 0x222226,
+      border: 0x404045,
+      titleBar: 0x2a2a2e,
+      titleText: 0x9acd32 // Muted lime green to match app title
+    }
+  });
+  libraryCardPanel.container.position.set(0, HEADER_HEIGHT);
+  scene.addChild(libraryCardPanel.container);
+
+  // Carousel inside the library card panel body
   const carousel = new SpriteCarousel({
     width: CAROUSEL_WIDTH,
-    height: renderer.height - HEADER_HEIGHT,
+    height: renderer.height - HEADER_HEIGHT - LIBRARY_TITLE_HEIGHT,
     orientation: 'vertical',
     showAddButton: true,
     showLabels: true,
     thumbnailSize: 80,
     itemSpacing: 12,
-    backgroundColor: 0x1e1e2e,
-    reticleColor: 0x00d4ff
+    backgroundColor: 0x222226,
+    reticleColor: 0x9acd32
   });
-  carousel.position.set(0, HEADER_HEIGHT);
-  scene.addChild(carousel);
+  // Add carousel to the card panel body (no shadow since panel has it)
+  libraryCardPanel.getBodyContainer().addChild(carousel);
 
   // Hidden file input for add button
   const fileInput = document.createElement('input');
@@ -186,7 +227,7 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   // Background
   const canvasBg = new Graphics();
   canvasBg.rect(0, 0, contentWidth, contentHeight);
-  canvasBg.fill({ color: 0x1a1a2e });
+  canvasBg.fill({ color: 0x18181b }); // Neutral dark gray
   canvasContainer.addChild(canvasBg);
 
   // Canvas area (holds sprite, grid, etc)
@@ -208,37 +249,103 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   let displayedSheetId: string | null = null; // Track which sheet is currently displayed
   let regionOverlays: Graphics[] = []; // Visual overlays for tile regions
 
+  // Animation creation mode state
+  let animationCreationMode = false;
+  let animationFrames: Array<{ col: number; row: number }> = []; // Ordered frames for animation
+  let animationNumberOverlays: Container[] = []; // Number badges showing frame order
+  let animationPreviewSprite: AnimatedSprite | null = null; // Live preview of animation being created
+  let animationPreviewContainer: Container | null = null; // Container for preview
+
   // === DROP ZONE HINT ===
+  const dropHintContainer = new Container();
   const dropHint = new Graphics();
+  const dropHintText = new Text({
+    text: 'Drag your spritesheets here',
+    style: {
+      fontSize: 18,
+      fill: 0x4a5a28, // Very muted lime green
+      fontFamily: 'Arial'
+    }
+  });
+  dropHintText.anchor.set(0.5, 0.5);
+  dropHintContainer.addChild(dropHint);
+  dropHintContainer.addChild(dropHintText);
+
   function drawDropHint(active: boolean = false) {
     dropHint.clear();
+    dropHintContainer.visible = !projectManager.hasSheets();
+
     if (!projectManager.hasSheets()) {
-      const w = contentWidth - 100;
-      const h = 300;
-      const x = 50;
-      const y = 100;
+      const margin = 50;
+      const w = 400;
+      const h = 150;
+      const x = margin;
+      const y = margin;
+      const dashLen = 12;
+      const gapLen = 8;
+      const color = active ? 0x9acd32 : 0x4a5a28; // Muted lime green when inactive
 
-      dropHint.roundRect(x, y, w, h, 12);
-      dropHint.stroke({
-        color: active ? 0x00d4ff : 0x444466,
-        width: 2,
-        alpha: 0.8
-      });
-
-      // Dashed effect via multiple segments
-      const dashLen = 15;
-      const gapLen = 10;
-
+      // Draw dashed rectangle
       // Top edge
       for (let i = 0; i < w; i += dashLen + gapLen) {
         dropHint.moveTo(x + i, y);
         dropHint.lineTo(x + Math.min(i + dashLen, w), y);
       }
-      dropHint.stroke({ color: active ? 0x00d4ff : 0x444466, width: 2 });
+      // Bottom edge
+      for (let i = 0; i < w; i += dashLen + gapLen) {
+        dropHint.moveTo(x + i, y + h);
+        dropHint.lineTo(x + Math.min(i + dashLen, w), y + h);
+      }
+      // Left edge
+      for (let i = 0; i < h; i += dashLen + gapLen) {
+        dropHint.moveTo(x, y + i);
+        dropHint.lineTo(x, y + Math.min(i + dashLen, h));
+      }
+      // Right edge
+      for (let i = 0; i < h; i += dashLen + gapLen) {
+        dropHint.moveTo(x + w, y + i);
+        dropHint.lineTo(x + w, y + Math.min(i + dashLen, h));
+      }
+      dropHint.stroke({ color, width: 2 });
+
+      // Center the text
+      dropHintText.x = x + w / 2;
+      dropHintText.y = y + h / 2;
+      dropHintText.style.fill = color;
     }
   }
-  canvasArea.addChild(dropHint);
+  canvasArea.addChild(dropHintContainer);
   drawDropHint();
+
+  // === PAN/ZOOM STATE PERSISTENCE ===
+  const ZOOM_STATE_KEY = 'tilemap-matic-zoom-state';
+  let zoomSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  function saveZoomState(scale: number, x: number, y: number): void {
+    // Debounce saves to avoid excessive writes
+    if (zoomSaveTimeout) {
+      clearTimeout(zoomSaveTimeout);
+    }
+    zoomSaveTimeout = setTimeout(() => {
+      try {
+        localStorage.setItem(ZOOM_STATE_KEY, JSON.stringify({ scale, x, y }));
+      } catch (e) {
+        // Silently fail
+      }
+    }, 300);
+  }
+
+  function loadZoomState(): { scale: number; x: number; y: number } | null {
+    try {
+      const saved = localStorage.getItem(ZOOM_STATE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      // Silently fail
+    }
+    return null;
+  }
 
   // === PAN/ZOOM ===
   let panZoom: CanvasPanZoom | null = null;
@@ -247,10 +354,14 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     if (panZoom) {
       panZoom.destroy();
     }
+
+    const savedState = loadZoomState();
+
     panZoom = new CanvasPanZoom(canvasArea, renderer, {
       minScale: 0.25,
       maxScale: 10,
       zoomSpeed: 0.15,
+      initialScale: savedState?.scale ?? 1,
       onZoomChange: (scale) => {
         const pct = Math.round(scale * 100);
         const activeSheet = projectManager.getActiveSheet();
@@ -260,86 +371,21 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
             `${activeSheet.name} | ${activeSheet.width}x${activeSheet.height}px | Grid: ${gs.columns}x${gs.rows} | Zoom: ${pct}%`
           );
         }
+        // Save zoom state lazily
+        saveZoomState(scale, canvasArea.x, canvasArea.y);
+      },
+      onPanChange: (x, y) => {
+        // Save pan state lazily
+        if (panZoom) {
+          saveZoomState(panZoom.getScale(), x, y);
+        }
       }
     });
-  }
 
-  // === JSON DIALOG ===
-  const JSON_DIALOG_WIDTH = 600;
-  const JSON_DIALOG_HEIGHT = 500;
-  const jsonDialog = new Container();
-  jsonDialog.visible = false;
-
-  // Backdrop
-  const jsonBackdrop = new Graphics();
-  jsonBackdrop.rect(0, 0, renderer.width, renderer.height);
-  jsonBackdrop.fill({ color: 0x000000, alpha: 0.6 });
-  jsonBackdrop.eventMode = 'static';
-  jsonBackdrop.cursor = 'default';
-  jsonBackdrop.on('pointerdown', () => { jsonDialog.visible = false; });
-  jsonDialog.addChild(jsonBackdrop);
-
-  // Dialog box
-  const jsonBox = new Container();
-  jsonBox.position.set(
-    (renderer.width - JSON_DIALOG_WIDTH) / 2,
-    (renderer.height - JSON_DIALOG_HEIGHT) / 2
-  );
-
-  const jsonBoxBg = new Graphics();
-  jsonBoxBg.roundRect(0, 0, JSON_DIALOG_WIDTH, JSON_DIALOG_HEIGHT, 8);
-  jsonBoxBg.fill({ color: 0x2a2a3a });
-  jsonBoxBg.stroke({ color: 0x505060, width: 2 });
-  jsonBox.addChild(jsonBoxBg);
-
-  // Title
-  const jsonTitle = new UILabel({
-    text: 'Sheet JSON',
-    fontSize: 16,
-    color: 0xffffff,
-    fontWeight: 'bold'
-  });
-  jsonTitle.layout(200, 30);
-  jsonTitle.container.position.set(20, 15);
-  jsonBox.addChild(jsonTitle.container);
-
-  // JSON viewer background
-  const jsonViewerBg = new Graphics();
-  jsonViewerBg.rect(0, 0, JSON_DIALOG_WIDTH - 40, JSON_DIALOG_HEIGHT - 70);
-  jsonViewerBg.fill({ color: 0x1a1a2e });
-  jsonViewerBg.position.set(20, 55);
-  jsonBox.addChild(jsonViewerBg);
-
-  // Close button
-  const closeBtn = new UIButton({
-    label: '×',
-    width: 32,
-    height: 32,
-    backgroundColor: 0x444455,
-    textColor: 0xffffff,
-    fontSize: 20,
-    onClick: () => { jsonDialog.visible = false; }
-  });
-  closeBtn.container.position.set(JSON_DIALOG_WIDTH - 44, 10);
-  jsonBox.addChild(closeBtn.container);
-
-  // JSON text content - placeholder for now
-  const jsonViewer = { setValue: (_s: string) => { /* TODO: implement text rendering */ } };
-
-  jsonDialog.addChild(jsonBox);
-  scene.addChild(jsonDialog);
-
-  function showJSONDialog(): void {
-    const activeSheet = projectManager.getActiveSheet();
-    if (activeSheet) {
-      const json = projectManager.exportSheetJSON(activeSheet.id);
-      jsonViewer.setValue(JSON.stringify(json, null, 2));
-      jsonTitle.setText(`${activeSheet.name} - JSON`);
-    } else {
-      jsonViewer.setValue('// Select a sprite sheet to see its JSON');
-      jsonTitle.setText('Sheet JSON');
+    // Restore pan position if we have saved state
+    if (savedState) {
+      canvasArea.position.set(savedState.x, savedState.y);
     }
-    jsonDialog.visible = true;
   }
 
   // Init pan/zoom
@@ -377,8 +423,19 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
           clearCanvasDisplay();
         }
       },
-      onViewJSON: () => {
-        showJSONDialog();
+      onCopyJSON: async () => {
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          const json = projectManager.exportSheetJSON(activeSheet.id);
+          const jsonString = JSON.stringify(json, null, 2);
+          try {
+            await navigator.clipboard.writeText(jsonString);
+            // Brief visual feedback on the button
+            configPanel.showCopyFeedback();
+          } catch (err) {
+            console.error('Failed to copy JSON:', err);
+          }
+        }
       }
     },
     x: renderer.width - CONFIG_PANEL_WIDTH - 10,
@@ -390,6 +447,88 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   // Register focusable inputs with focus manager
   for (const input of configPanel.getFocusableInputs()) {
     focusManager.register(input);
+  }
+
+  // === LIBRARY PANEL (Animations & Regions) - Docked to left of config panel ===
+  const LIBRARY_PANEL_WIDTH = 180;
+  const libraryPanel = new AnimationRegionLibraryPanel({
+    x: renderer.width - CONFIG_PANEL_WIDTH - LIBRARY_PANEL_WIDTH - 30,
+    y: HEADER_HEIGHT + 10,
+    width: LIBRARY_PANEL_WIDTH,
+    height: 350,
+    callbacks: {
+      onSelectAnimation: (anim: AnimationSequence) => {
+        // Highlight animation frames on the grid
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          selectedCells = [...anim.frames];
+          updateSelectionHighlight(activeSheet.gridSettings);
+        }
+      },
+      onSelectRegion: (region: TileRegion) => {
+        // Highlight region cells on the grid
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          selectedCells = [];
+          for (let r = region.row; r < region.row + region.rowSpan; r++) {
+            for (let c = region.col; c < region.col + region.colSpan; c++) {
+              selectedCells.push({ col: c, row: r });
+            }
+          }
+          updateSelectionHighlight(activeSheet.gridSettings);
+        }
+      },
+      onClearSelection: () => {
+        clearSelection();
+      },
+      onRenameAnimation: (animationId: string, newName: string) => {
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          projectManager.updateAnimation(activeSheet.id, animationId, { name: newName });
+        }
+      },
+      onRenameRegion: (regionId: string, newName: string) => {
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          projectManager.updateRegionName(activeSheet.id, regionId, newName);
+        }
+      },
+      onDeleteAnimation: (animationId: string) => {
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          projectManager.removeAnimation(activeSheet.id, animationId);
+          updateLibraryPanel();
+          clearSelection();
+        }
+      },
+      onDeleteRegion: (regionId: string) => {
+        const activeSheet = projectManager.getActiveSheet();
+        if (activeSheet) {
+          projectManager.splitRegion(activeSheet.id, regionId);
+          updateLibraryPanel();
+          drawTileRegions(activeSheet.gridSettings);
+          clearSelection();
+        }
+      }
+    }
+  });
+  scene.addChild(libraryPanel.getPanel().container);
+
+  // Update library panel when sheet changes
+  function updateLibraryPanel(): void {
+    const activeSheet = projectManager.getActiveSheet();
+    if (activeSheet && spriteDisplay) {
+      const animations = projectManager.getAnimations(activeSheet.id);
+      const regions = projectManager.getTileRegions(activeSheet.id);
+      libraryPanel.updateWithData(
+        animations,
+        regions,
+        spriteDisplay.texture,
+        activeSheet.gridSettings
+      );
+    } else {
+      libraryPanel.updateWithData([], [], null, null);
+    }
   }
 
   // === LOAD IMAGE FILE ===
@@ -443,10 +582,22 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
   }
 
   // === DISPLAY SPRITE SHEET ===
-  async function displaySpriteSheet(entry: SpriteSheetEntry): Promise<void> {
+  async function displaySpriteSheet(entry: SpriteSheetEntry, restoreZoom: boolean = false): Promise<void> {
     clearCanvasDisplay();
     drawDropHint();
-    if (panZoom) panZoom.reset(); // Reset pan/zoom when switching sheets
+
+    // Reset or restore pan/zoom based on context
+    if (restoreZoom) {
+      // Restore saved zoom state (on initial load)
+      const savedState = loadZoomState();
+      if (savedState && panZoom) {
+        panZoom.setScale(savedState.scale);
+        canvasArea.position.set(savedState.x, savedState.y);
+      }
+    } else {
+      // Reset pan/zoom when switching sheets
+      if (panZoom) panZoom.reset();
+    }
 
     // Create texture from data URL
     const img = new Image();
@@ -516,6 +667,12 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
         cell.col >= 0 && cell.col < gridSettings.columns &&
         cell.row >= 0 && cell.row < gridSettings.rows
       ) {
+        // Animation creation mode - add frame to sequence
+        if (animationCreationMode) {
+          addAnimationFrame(cell.col, cell.row);
+          return;
+        }
+
         const nativeEvent = event.nativeEvent as PointerEvent;
 
         if (nativeEvent.shiftKey) {
@@ -551,6 +708,9 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     configPanel.setActiveSheet(entry);
     configPanel.setHasSheets(true);
     updateInfoLabel();
+
+    // Update library panel with animations and regions
+    updateLibraryPanel();
   }
 
   // === GRID OVERLAY ===
@@ -635,8 +795,8 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
         gridSettings.cellHeight
       );
     }
-    cellHighlight.fill({ color: 0x00d4ff, alpha: 0.3 });
-    cellHighlight.stroke({ color: 0x00d4ff, width: 2, alpha: 1 });
+    cellHighlight.fill({ color: 0x9acd32, alpha: 0.3 });
+    cellHighlight.stroke({ color: 0x9acd32, width: 2, alpha: 1 });
 
     canvasArea.addChild(cellHighlight);
 
@@ -661,10 +821,10 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
 
   // === CLEAR CANVAS ===
   function clearCanvasDisplay(): void {
-    // Remove all children except dropHint
+    // Remove all children except dropHintContainer
     const children = [...canvasArea.children];
     for (const child of children) {
-      if (child !== dropHint) {
+      if (child !== dropHintContainer) {
         canvasArea.removeChild(child);
         child.destroy();
       }
@@ -678,7 +838,6 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     regionOverlays = [];
     displayedSheetId = null;
     configPanel.setActiveSheet(null);
-    jsonViewer.setValue('');
     updateInfoLabel();
   }
 
@@ -721,10 +880,12 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
         drawTileRegions(activeSheet.gridSettings);
         configPanel.setActiveSheet(activeSheet);
         updateInfoLabel();
+        updateLibraryPanel();
       }
     } else {
       clearCanvasDisplay();
       drawDropHint();
+      updateLibraryPanel();
     }
     configPanel.setHasSheets(project.sheets.length > 0);
   });
@@ -829,8 +990,240 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     }
   }
 
+  // === ANIMATION CREATION MODE ===
+  function enterAnimationMode(): void {
+    if (animationCreationMode) return;
+
+    const activeSheet = projectManager.getActiveSheet();
+    if (!activeSheet) return;
+
+    animationCreationMode = true;
+    animationFrames = [];
+    clearAnimationOverlays();
+    clearSelection();
+
+    // Update config panel indicator
+    configPanel.setAnimationMode(true, 0);
+
+    infoLabel.setText('🎬 Animation Mode: Click cells in order | Enter to save | Escape to cancel');
+  }
+
+  function exitAnimationMode(save: boolean = false): void {
+    if (!animationCreationMode) return;
+
+    if (save && animationFrames.length > 0) {
+      const activeSheet = projectManager.getActiveSheet();
+      if (activeSheet) {
+        // Prompt for animation name
+        const name = prompt('Animation name:', `animation_${projectManager.getAnimations(activeSheet.id).length + 1}`);
+        if (name) {
+          const animation = projectManager.addAnimation(activeSheet.id, animationFrames, name);
+          if (animation) {
+            console.log(`Created animation: ${animation.name} with ${animationFrames.length} frames`);
+            updateLibraryPanel();
+          }
+        }
+      }
+    }
+
+    animationCreationMode = false;
+    animationFrames = [];
+    clearAnimationOverlays();
+    hideAnimationPreview();
+
+    // Hide config panel indicator
+    configPanel.setAnimationMode(false);
+
+    updateInfoLabel();
+  }
+
+  function clearAnimationOverlays(): void {
+    for (const overlay of animationNumberOverlays) {
+      canvasArea.removeChild(overlay);
+      overlay.destroy({ children: true });
+    }
+    animationNumberOverlays = [];
+  }
+
+  function addAnimationFrame(col: number, row: number): void {
+    if (!animationCreationMode) return;
+
+    const activeSheet = projectManager.getActiveSheet();
+    if (!activeSheet) return;
+
+    const { cellWidth, cellHeight } = activeSheet.gridSettings;
+
+    // Check if already in sequence
+    const existingIdx = animationFrames.findIndex(f => f.col === col && f.row === row);
+    if (existingIdx >= 0) {
+      // Remove this frame and all after it
+      animationFrames = animationFrames.slice(0, existingIdx);
+      // Rebuild overlays
+      clearAnimationOverlays();
+      animationFrames.forEach((f, i) => {
+        createFrameNumberOverlay(f.col, f.row, i + 1, cellWidth, cellHeight);
+      });
+      // Update config panel indicator with new frame count
+      configPanel.setAnimationMode(true, animationFrames.length);
+      infoLabel.setText(`🎬 Animation Mode: ${animationFrames.length} frame(s) | Enter to save | Escape to cancel`);
+      updateAnimationPreview();
+      return;
+    }
+
+    // Add new frame
+    animationFrames.push({ col, row });
+    createFrameNumberOverlay(col, row, animationFrames.length, cellWidth, cellHeight);
+
+    // Update config panel indicator with frame count
+    configPanel.setAnimationMode(true, animationFrames.length);
+
+    infoLabel.setText(`🎬 Animation Mode: ${animationFrames.length} frame(s) | Enter to save | Escape to cancel`);
+    updateAnimationPreview();
+  }
+
+  function createFrameNumberOverlay(col: number, row: number, frameNum: number, cellWidth: number, cellHeight: number): void {
+    const container = new Container();
+
+    // Simple semi-transparent overlay
+    const overlay = new Graphics();
+    overlay.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+    overlay.fill({ color: 0x000000, alpha: 0.4 });
+    container.addChild(overlay);
+
+    // Number text centered in cell
+    const numText = new Text({
+      text: String(frameNum),
+      style: {
+        fontSize: Math.min(cellWidth, cellHeight) * 0.6,
+        fill: 0xffffff,
+        fontFamily: 'Arial',
+        fontWeight: 'bold',
+        stroke: { color: 0x000000, width: 3 }
+      }
+    });
+    numText.anchor.set(0.5, 0.5);
+    numText.x = col * cellWidth + cellWidth / 2;
+    numText.y = row * cellHeight + cellHeight / 2;
+    container.addChild(numText);
+
+    canvasArea.addChild(container);
+    animationNumberOverlays.push(container);
+  }
+
+  /**
+   * Update the animation preview with current frames
+   */
+  function updateAnimationPreview(): void {
+    // Clean up existing preview
+    if (animationPreviewSprite) {
+      animationPreviewSprite.stop();
+      animationPreviewSprite.destroy();
+      animationPreviewSprite = null;
+    }
+
+    if (!animationPreviewContainer) {
+      // Create preview container (positioned in bottom-left of canvas area)
+      animationPreviewContainer = new Container();
+
+      // Background
+      const bg = new Graphics();
+      bg.roundRect(0, 0, 100, 120, 6);
+      bg.fill({ color: 0x222226, alpha: 0.95 });
+      bg.stroke({ color: 0x9acd32, width: 2 });
+      animationPreviewContainer.addChild(bg);
+
+      // Label
+      const label = new Text({
+        text: 'Preview',
+        style: { fontSize: 10, fill: 0x9acd32, fontFamily: 'Arial' }
+      });
+      label.x = 6;
+      label.y = 4;
+      animationPreviewContainer.addChild(label);
+
+      // Position at bottom-left of content area
+      animationPreviewContainer.x = 10;
+      animationPreviewContainer.y = contentHeight - 130;
+      scene.addChild(animationPreviewContainer);
+    }
+
+    // Need at least 1 frame to show preview
+    if (animationFrames.length === 0 || !spriteDisplay) {
+      animationPreviewContainer.visible = false;
+      return;
+    }
+
+    animationPreviewContainer.visible = true;
+
+    const activeSheet = projectManager.getActiveSheet();
+    if (!activeSheet) return;
+
+    const { cellWidth, cellHeight } = activeSheet.gridSettings;
+    const sheetTexture = spriteDisplay.texture;
+
+    // Create textures for each frame
+    const textures: Texture[] = [];
+    for (const frame of animationFrames) {
+      const frameRect = new Rectangle(
+        frame.col * cellWidth,
+        frame.row * cellHeight,
+        cellWidth,
+        cellHeight
+      );
+      const frameTexture = new Texture({
+        source: sheetTexture.source,
+        frame: frameRect
+      });
+      textures.push(frameTexture);
+    }
+
+    // Create animated sprite
+    animationPreviewSprite = new AnimatedSprite(textures);
+    animationPreviewSprite.animationSpeed = 0.1;
+    animationPreviewSprite.play();
+
+    // Scale to fit preview area (80x80 max)
+    const maxSize = 80;
+    const scale = Math.min(maxSize / cellWidth, maxSize / cellHeight, 2);
+    animationPreviewSprite.scale.set(scale);
+
+    // Center in preview box
+    animationPreviewSprite.x = 50 - (cellWidth * scale) / 2;
+    animationPreviewSprite.y = 65 - (cellHeight * scale) / 2;
+
+    animationPreviewContainer.addChild(animationPreviewSprite);
+  }
+
+  /**
+   * Hide and clean up animation preview
+   */
+  function hideAnimationPreview(): void {
+    if (animationPreviewSprite) {
+      animationPreviewSprite.stop();
+      animationPreviewSprite.destroy();
+      animationPreviewSprite = null;
+    }
+    if (animationPreviewContainer) {
+      animationPreviewContainer.visible = false;
+    }
+  }
+
   // === KEYBOARD SHORTCUTS ===
   function handleKeyDown(e: KeyboardEvent): void {
+    // Ctrl+A (or Cmd+A on Mac): Enter animation creation mode
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+      e.preventDefault();
+      enterAnimationMode();
+      return;
+    }
+
+    // Enter: Save animation (in animation mode)
+    if (e.key === 'Enter' && animationCreationMode) {
+      e.preventDefault();
+      exitAnimationMode(true);
+      return;
+    }
+
     // Ctrl+J: Join selected cells
     if (e.ctrlKey && e.key === 'j') {
       e.preventDefault();
@@ -845,9 +1238,13 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
       return;
     }
 
-    // Escape: Clear selection
+    // Escape: Cancel animation mode or clear selection
     if (e.key === 'Escape') {
-      clearSelection();
+      if (animationCreationMode) {
+        exitAnimationMode(false);
+      } else {
+        clearSelection();
+      }
       return;
     }
   }
@@ -889,7 +1286,7 @@ export async function initTileMapMatic(options: TileMapMaticOptions = {}): Promi
     const activeSheet = projectManager.getActiveSheet();
     if (activeSheet) {
       carousel.selectById(activeSheet.id);
-      await displaySpriteSheet(activeSheet);
+      await displaySpriteSheet(activeSheet, true); // Restore zoom on initial load
     }
 
     configPanel.setHasSheets(sheets.length > 0);

@@ -10,7 +10,8 @@ import {
   EdgeInsets,
   UILabel,
   UIButton,
-  UITextInput
+  UITextInput,
+  FlatCardStyle
 } from '@moxijs/ui';
 import { Graphics, Container } from 'pixi.js';
 import { SpriteSheetEntry } from './sprite-sheet-project';
@@ -29,7 +30,7 @@ export interface ConfigPanelCallbacks {
   onExportProject: () => void;
   onClearProject: () => void;
   onRemoveSheet?: () => void;
-  onViewJSON?: () => void;
+  onCopyJSON?: () => void;
 }
 
 /**
@@ -61,6 +62,10 @@ export class SpriteSheetConfigPanel {
   private regionInfoLabel: UILabel;
   private viewJSONBtn: UIButton; // In panel body, not menu
 
+  // Animation mode indicator
+  private animationModeContainer: Container;
+  private animationModeLabel: UILabel;
+
   // Menu buttons (in dropdown)
   private exportSheetBtn: UIButton;
   private exportProjectBtn: UIButton;
@@ -75,17 +80,22 @@ export class SpriteSheetConfigPanel {
 
     const PANEL_WIDTH = 180;
 
-    // Create the CardPanel first
+    // Create the CardPanel first with SE drop shadow
     this.panel = new CardPanel({
       title: { text: 'No Sheet', fontSize: 14 },
       bodyWidth: PANEL_WIDTH,
       bodyHeight: 100, // Initial height, will auto-size to fit content
       draggable: true,
+      style: new FlatCardStyle({
+        showShadow: true,
+        shadowOffset: 6,
+        shadowAlpha: 0.4
+      }),
       colors: {
-        background: 0x2a2a3a,
-        border: 0x404050,
-        titleBar: 0x333344,
-        titleText: 0xffffff
+        background: 0x28282c,
+        border: 0x404045,
+        titleBar: 0x333338,
+        titleText: 0x9acd32 // Muted lime green to match app title
       }
     });
 
@@ -96,7 +106,7 @@ export class SpriteSheetConfigPanel {
     this.menuButton = new UIButton({
       width: MENU_BTN_SIZE,
       height: MENU_BTN_SIZE,
-      backgroundColor: 0x3a3a4a, // Slightly darker background
+      backgroundColor: 0x38383c, // Slightly darker background
       borderRadius: 4,
       onClick: () => this.toggleMenu(),
       onHover: () => this.drawMenuButtonDots(true)
@@ -105,7 +115,7 @@ export class SpriteSheetConfigPanel {
     // Add border around the button (non-interactive so clicks pass through)
     const menuButtonBorder = new Graphics();
     menuButtonBorder.roundRect(0, 0, MENU_BTN_SIZE, MENU_BTN_SIZE, 4);
-    menuButtonBorder.stroke({ color: 0x606070, width: 1 });
+    menuButtonBorder.stroke({ color: 0x505055, width: 1 });
     menuButtonBorder.eventMode = 'none';
     this.menuButton.container.addChild(menuButtonBorder);
 
@@ -152,8 +162,8 @@ export class SpriteSheetConfigPanel {
     // Dialog background
     const menuBg = new Graphics();
     menuBg.roundRect(0, 0, MENU_WIDTH, MENU_HEIGHT, 8);
-    menuBg.fill({ color: 0x2a2a3a });
-    menuBg.stroke({ color: 0x505060, width: 2 });
+    menuBg.fill({ color: 0x28282c });
+    menuBg.stroke({ color: 0x48484d, width: 2 });
     menuDialog.addChild(menuBg);
 
     // Dialog title
@@ -241,7 +251,7 @@ export class SpriteSheetConfigPanel {
     const cellSizeLabel = new UILabel({
       text: 'Cell Size',
       fontSize: 11,
-      color: 0x888899
+      color: 0x888890
     });
     this.layout.addChild(cellSizeLabel);
 
@@ -261,7 +271,7 @@ export class SpriteSheetConfigPanel {
       onChange: () => this.handleGridChange()
     });
 
-    const xLabel = new UILabel({ text: '×', fontSize: 14, color: 0x666677 });
+    const xLabel = new UILabel({ text: '×', fontSize: 14, color: 0x666670 });
 
     this.heightInput = new UITextInput({
       width: 55,
@@ -272,7 +282,7 @@ export class SpriteSheetConfigPanel {
       onChange: () => this.handleGridChange()
     });
 
-    const pxLabel = new UILabel({ text: 'px', fontSize: 11, color: 0x666677 });
+    const pxLabel = new UILabel({ text: 'px', fontSize: 11, color: 0x666670 });
 
     inputRow.addChild(this.widthInput);
     inputRow.addChild(xLabel);
@@ -285,7 +295,7 @@ export class SpriteSheetConfigPanel {
     this.gridInfoLabel = new UILabel({
       text: '',
       fontSize: 10,
-      color: 0x556666
+      color: 0x707075
     });
     this.layout.addChild(this.gridInfoLabel);
 
@@ -297,7 +307,7 @@ export class SpriteSheetConfigPanel {
     this.regionInfoLabel = new UILabel({
       text: '',
       fontSize: 10,
-      color: 0x556666
+      color: 0x707075
     });
     this.layout.addChild(this.regionInfoLabel);
 
@@ -305,20 +315,49 @@ export class SpriteSheetConfigPanel {
     this.regionPreview = new Graphics();
     this.layout.container.addChild(this.regionPreview);
 
+    // Animation mode indicator (hidden by default)
+    this.animationModeContainer = new Container();
+    this.animationModeContainer.visible = false;
+
+    const animModeBg = new Graphics();
+    animModeBg.roundRect(0, 0, PANEL_WIDTH - 20, 50, 6);
+    animModeBg.fill({ color: 0xffaa00, alpha: 0.2 });
+    animModeBg.stroke({ color: 0xffaa00, width: 2 });
+    this.animationModeContainer.addChild(animModeBg);
+
+    const animModeTitle = new UILabel({
+      text: '🎬 Animation Mode',
+      fontSize: 12,
+      color: 0xffaa00,
+      fontWeight: 'bold'
+    });
+    animModeTitle.container.position.set(8, 6);
+    this.animationModeContainer.addChild(animModeTitle.container);
+
+    this.animationModeLabel = new UILabel({
+      text: 'Click cells in order',
+      fontSize: 10,
+      color: 0xddaa44
+    });
+    this.animationModeLabel.container.position.set(8, 26);
+    this.animationModeContainer.addChild(this.animationModeLabel.container);
+
+    this.layout.container.addChild(this.animationModeContainer);
+
     // Spacer to push button to bottom
     const bottomSpacer = new FlexContainer({ height: 8 });
     this.layout.addChild(bottomSpacer);
 
-    // View JSON button at bottom of panel
+    // Copy JSON button at bottom of panel
     this.viewJSONBtn = new UIButton({
-      label: 'View JSON',
+      label: 'Copy JSON',
       width: PANEL_WIDTH - 20,
       height: 32,
-      backgroundColor: 0x4a5a7a,
+      backgroundColor: 0x4a90e2,
       textColor: 0xffffff,
       fontSize: 12,
       onClick: () => {
-        this.callbacks.onViewJSON?.();
+        this.callbacks.onCopyJSON?.();
       }
     });
     this.layout.addChild(this.viewJSONBtn);
@@ -510,5 +549,33 @@ export class SpriteSheetConfigPanel {
    */
   getFocusableInputs(): UITextInput[] {
     return [this.widthInput, this.heightInput];
+  }
+
+  /**
+   * Set animation mode indicator visibility and frame count
+   * @param active - Whether animation mode is active
+   * @param frameCount - Number of frames selected (shown when active)
+   */
+  setAnimationMode(active: boolean, frameCount: number = 0): void {
+    this.animationModeContainer.visible = active;
+
+    if (active) {
+      if (frameCount === 0) {
+        this.animationModeLabel.setText('Click cells in order');
+      } else {
+        this.animationModeLabel.setText(`${frameCount} frame${frameCount > 1 ? 's' : ''} selected`);
+      }
+    }
+
+    // Re-layout to adjust panel size
+    this.panel.sizeToFit();
+  }
+
+  /**
+   * Show brief "Copied!" feedback on the Copy JSON button
+   */
+  showCopyFeedback(): void {
+    this.viewJSONBtn.setLabel('Copied!');
+    setTimeout(() => this.viewJSONBtn.setLabel('Copy JSON'), 1500);
   }
 }

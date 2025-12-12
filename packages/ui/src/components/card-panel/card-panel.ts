@@ -626,30 +626,42 @@ export class CardPanel extends UIComponent {
     const edgeThickness = 8;
     const width = this.computedLayout.width;
     const height = this.computedLayout.height;
+    const titleBarHeight = this.getTitleBarHeight();
 
     for (const [direction, handle] of this.resizeHandles) {
       handle.clear();
 
-      // Draw hit area - use a visible color for debugging, can set alpha to 0 later
-      // For now using slight visibility so we can see the handles
+      // Draw hit area - handles should not overlap title bar
+      // Use titleBarHeight as top offset for vertical handles
       switch (direction) {
         case 'n':
-          handle.rect(handleSize, 0, width - handleSize * 2, edgeThickness);
+          // North handle at top edge (only if no title bar, otherwise skip)
+          if (titleBarHeight === 0) {
+            handle.rect(handleSize, 0, width - handleSize * 2, edgeThickness);
+          }
           break;
         case 's':
           handle.rect(handleSize, height - edgeThickness, width - handleSize * 2, edgeThickness);
           break;
         case 'e':
-          handle.rect(width - edgeThickness, handleSize, edgeThickness, height - handleSize * 2);
+          // East handle starts below title bar
+          handle.rect(width - edgeThickness, titleBarHeight + handleSize, edgeThickness, height - titleBarHeight - handleSize * 2);
           break;
         case 'w':
-          handle.rect(0, handleSize, edgeThickness, height - handleSize * 2);
+          // West handle starts below title bar
+          handle.rect(0, titleBarHeight + handleSize, edgeThickness, height - titleBarHeight - handleSize * 2);
           break;
         case 'ne':
-          handle.rect(width - handleSize, 0, handleSize, handleSize);
+          // Northeast corner - only if no title bar
+          if (titleBarHeight === 0) {
+            handle.rect(width - handleSize, 0, handleSize, handleSize);
+          }
           break;
         case 'nw':
-          handle.rect(0, 0, handleSize, handleSize);
+          // Northwest corner - only if no title bar
+          if (titleBarHeight === 0) {
+            handle.rect(0, 0, handleSize, handleSize);
+          }
           break;
         case 'se':
           handle.rect(width - handleSize, height - handleSize, handleSize, handleSize);
@@ -659,8 +671,8 @@ export class CardPanel extends UIComponent {
           break;
       }
 
-      // Fill AFTER drawing the shape - using slight alpha for visibility during debug
-      handle.fill({ color: 0x4a90e2, alpha: 0.3 });
+      // Fill AFTER drawing the shape - invisible hit areas
+      handle.fill({ color: 0x4a90e2, alpha: 0 });
     }
   }
 

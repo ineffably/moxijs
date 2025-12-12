@@ -3,7 +3,7 @@
  * The full implementation is in the @moxijs/tilemap-matic package.
  * This stub provides integration with the moxijs-examples gallery.
  */
-import { initTileMapMatic } from 'tilemap-matic';
+import { initTileMapMatic } from '@moxijs/tilemap-matic';
 
 type CleanupFunction = () => void;
 

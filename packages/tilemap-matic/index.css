@@ -1,4 +1,20 @@
 /* TileMapMatic - Shared styles */
+
+/* Font faces */
+@font-face {
+  font-family: 'PixelOperator8';
+  src: url('./assets/fonts/pixel_operator/PixelOperator8.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PixelOperator8-Bold';
+  src: url('./assets/fonts/pixel_operator/PixelOperator8-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;

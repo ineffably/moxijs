@@ -37,6 +37,24 @@ export interface TileRegion {
   name?: string;
 }
 
+/**
+ * An animation sequence - ordered collection of frames
+ * Frames reference cells by grid coordinates
+ */
+export interface AnimationSequence {
+  id: string;
+  /** Display name for the animation */
+  name: string;
+  /** Ordered frame references (cells in playback order) */
+  frames: Array<{ col: number; row: number }>;
+  /** Frame duration in milliseconds (default: 100) */
+  frameDuration: number;
+  /** Whether animation loops (default: true) */
+  loop: boolean;
+  /** Optional input binding (e.g., 'left', 'right', 'up', 'down') */
+  inputBinding?: string;
+}
+
 export interface FrameData {
   name: string;
   x: number;
@@ -45,16 +63,36 @@ export interface FrameData {
   h: number;
 }
 
+/**
+ * PIXI.js compatible SpriteSheet JSON format
+ * See: https://pixijs.download/dev/docs/assets.Spritesheet.html
+ */
 export interface SpriteSheetJSON {
   frames: Record<string, {
     frame: { x: number; y: number; w: number; h: number };
     sourceSize: { w: number; h: number };
+    anchor?: { x: number; y: number };
   }>;
+  /** Animation sequences - PIXI.js format: array of frame names */
+  animations?: Record<string, string[]>;
   meta: {
     image: string;
     format: string;
     size: { w: number; h: number };
     scale: string;
+    /** MoxiJS extension: grid settings used to slice the sprite sheet */
+    grid?: {
+      cellWidth: number;
+      cellHeight: number;
+      columns: number;
+      rows: number;
+    };
+    /** MoxiJS extension: additional animation metadata (duration, loop, bindings) */
+    animationData?: Record<string, {
+      frameDuration: number;
+      loop: boolean;
+      inputBinding?: string;
+    }>;
   };
 }
 
@@ -169,18 +207,55 @@ export function generateFrames(
 }
 
 /**
+ * Named cell for export - allows custom names for individual cells
+ */
+export interface NamedCell {
+  col: number;
+  row: number;
+  name: string;
+  description?: string;
+}
+
+/**
  * Convert frame data to PIXI.js-compatible JSON format
+ * Follows the standard PIXI.js Spritesheet format with MoxiJS extensions in meta
+ * @see https://pixijs.download/dev/docs/assets.Spritesheet.html
  */
 export function framesToJSON(
   frames: FrameData[],
   sheetName: string,
   sheetWidth: number,
-  sheetHeight: number
+  sheetHeight: number,
+  gridSettings?: GridSettings,
+  animations?: AnimationSequence[],
+  namedCells?: NamedCell[]
 ): SpriteSheetJSON {
+  // Build a lookup for named cells by position
+  const namedCellMap = new Map<string, NamedCell>();
+  if (namedCells) {
+    for (const cell of namedCells) {
+      namedCellMap.set(`${cell.col},${cell.row}`, cell);
+    }
+  }
+
   const framesObject: Record<string, any> = {};
 
-  frames.forEach(frame => {
-    framesObject[frame.name] = {
+  frames.forEach((frame, idx) => {
+    // Check if this frame has a custom name via namedCells
+    // For standard grid frames, calculate col/row from index
+    let frameName = frame.name;
+
+    if (gridSettings && namedCellMap.size > 0) {
+      // Calculate col/row for this frame (for non-region frames)
+      const col = idx % gridSettings.columns;
+      const row = Math.floor(idx / gridSettings.columns);
+      const namedCell = namedCellMap.get(`${col},${row}`);
+      if (namedCell) {
+        frameName = namedCell.name;
+      }
+    }
+
+    framesObject[frameName] = {
       frame: {
         x: frame.x,
         y: frame.y,
@@ -194,8 +269,42 @@ export function framesToJSON(
     };
   });
 
+  // Build PIXI.js animations object (simple array of frame names)
+  let animationsObject: Record<string, string[]> | undefined;
+  let animationDataObject: Record<string, { frameDuration: number; loop: boolean; inputBinding?: string }> | undefined;
+
+  if (animations && animations.length > 0 && gridSettings) {
+    animationsObject = {};
+    animationDataObject = {};
+
+    for (const anim of animations) {
+      // Convert cell coordinates to frame names
+      const frameNames = anim.frames.map(f => {
+        // Check if this cell has a custom name
+        const namedCell = namedCellMap.get(`${f.col},${f.row}`);
+        if (namedCell) {
+          return namedCell.name;
+        }
+        // Default frame name format: sheetName_XXX.png
+        const index = f.row * gridSettings.columns + f.col;
+        return `${sheetName}_${String(index).padStart(3, '0')}.png`;
+      });
+
+      // PIXI.js format: just array of frame names
+      animationsObject[anim.name] = frameNames;
+
+      // MoxiJS extension: additional metadata
+      animationDataObject[anim.name] = {
+        frameDuration: anim.frameDuration,
+        loop: anim.loop,
+        ...(anim.inputBinding && { inputBinding: anim.inputBinding })
+      };
+    }
+  }
+
   return {
     frames: framesObject,
+    ...(animationsObject && { animations: animationsObject }),
     meta: {
       image: `${sheetName}.png`,
       format: 'RGBA8888',
@@ -203,7 +312,17 @@ export function framesToJSON(
         w: sheetWidth,
         h: sheetHeight
       },
-      scale: '1'
+      scale: '1',
+      // MoxiJS extensions stored in meta
+      ...(gridSettings && {
+        grid: {
+          cellWidth: gridSettings.cellWidth,
+          cellHeight: gridSettings.cellHeight,
+          columns: gridSettings.columns,
+          rows: gridSettings.rows
+        }
+      }),
+      ...(animationDataObject && { animationData: animationDataObject })
     }
   };
 }
@@ -227,6 +346,13 @@ export function downloadJSON(data: SpriteSheetJSON, filename: string): void {
  */
 export function generateRegionId(): string {
   return `region_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Generate a unique ID for an animation sequence
+ */
+export function generateAnimationId(): string {
+  return `anim_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**

@@ -10,9 +10,11 @@ export { initTileMapMatic, TileMapMaticOptions } from './tilemap-matic';
 export {
   GridSettings,
   TileRegion,
+  AnimationSequence,
   FrameData,
   SpriteSheetJSON,
   LoadedSpriteSheet,
+  NamedCell,
   calculateGrid,
   guessCellSize,
   generateFrames,
@@ -20,6 +22,7 @@ export {
   framesToJSON,
   downloadJSON,
   generateRegionId,
+  generateAnimationId,
   getCellRegion,
   areCellsAdjacent,
   createRegionFromCells
@@ -73,3 +76,9 @@ export {
   JSONViewer,
   JSONViewerProps
 } from './json-viewer';
+
+export {
+  AnimationRegionLibraryPanel,
+  AnimationRegionLibraryPanelProps,
+  LibraryPanelCallbacks
+} from './animation-region-library-panel';

@@ -105,12 +105,12 @@ export class SpriteCarousel extends Container {
   }
 
   /**
-   * Draw background
+   * Draw background (no shadow - parent CardPanel provides it)
    */
   private drawBackground(): void {
     this.background.clear();
     this.background.rect(0, 0, this.config.width, this.config.height);
-    this.background.fill({ color: this.config.backgroundColor, alpha: 0.9 });
+    this.background.fill({ color: this.config.backgroundColor, alpha: 1 });
   }
 
   /**
@@ -149,7 +149,7 @@ export class SpriteCarousel extends Container {
     this.addButton.clear();
 
     const size = this.config.thumbnailSize - 16;
-    const color = hovered ? 0x5a9a5a : 0x4a7a4a;
+    const color = hovered ? 0x8ab832 : 0x7a9a32; // Muted lime green
 
     if (this.config.orientation === 'vertical') {
       // Position at bottom center
@@ -158,7 +158,7 @@ export class SpriteCarousel extends Container {
 
       this.addButton.roundRect(x, y, size, size, 8);
       this.addButton.fill({ color: color, alpha: 0.9 });
-      this.addButton.stroke({ color: 0x6aba6a, width: 2 });
+      this.addButton.stroke({ color: 0x9acd32, width: 2 });
 
       // Draw plus icon
       const centerX = x + size / 2;
@@ -177,7 +177,7 @@ export class SpriteCarousel extends Container {
 
       this.addButton.roundRect(x, y, size, size, 8);
       this.addButton.fill({ color: color, alpha: 0.9 });
-      this.addButton.stroke({ color: 0x6aba6a, width: 2 });
+      this.addButton.stroke({ color: 0x9acd32, width: 2 });
 
       // Draw plus icon
       const centerX = x + size / 2;

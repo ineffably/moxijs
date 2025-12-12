@@ -6,6 +6,7 @@
 import {
   GridSettings,
   TileRegion,
+  AnimationSequence,
   SpriteSheetJSON,
   calculateGrid,
   guessCellSize,
@@ -14,7 +15,8 @@ import {
   framesToJSON,
   downloadJSON,
   getCellRegion,
-  createRegionFromCells
+  createRegionFromCells,
+  generateAnimationId
 } from './sprite-sheet-data';
 
 const PROJECT_STORAGE_KEY = 'tilemap-matic-project';
@@ -29,6 +31,20 @@ export interface OperationResult<T = void> {
 }
 
 /**
+ * Named cell - a single cell with a custom name and optional description
+ */
+export interface NamedCell {
+  /** Grid column (0-indexed) */
+  col: number;
+  /** Grid row (0-indexed) */
+  row: number;
+  /** Custom name for this cell (e.g., "milk_jug") */
+  name: string;
+  /** Optional description */
+  description?: string;
+}
+
+/**
  * A single sprite sheet entry in the project
  */
 export interface SpriteSheetEntry {
@@ -40,6 +56,10 @@ export interface SpriteSheetEntry {
   gridSettings: GridSettings;
   /** Merged tile regions (cells combined into larger tiles) */
   tileRegions: TileRegion[];
+  /** Animation sequences (ordered frame collections) */
+  animations: AnimationSequence[];
+  /** Named individual cells */
+  namedCells: NamedCell[];
   createdAt: number;
   modifiedAt: number;
 }
@@ -214,6 +234,8 @@ export class SpriteSheetProjectManager {
       height: input.height,
       gridSettings,
       tileRegions: [],
+      animations: [],
+      namedCells: [],
       createdAt: now,
       modifiedAt: now
     };
@@ -291,7 +313,7 @@ export class SpriteSheetProjectManager {
 
   /**
    * Export a single sheet as PIXI.js JSON
-   * Includes tile regions as separate frames
+   * Includes grid settings, tile regions, animations, and named cells
    */
   exportSheetJSON(id: string): SpriteSheetJSON | null {
     const sheet = this.getSheet(id);
@@ -300,10 +322,20 @@ export class SpriteSheetProjectManager {
     // Use region-aware frame generation if there are tile regions
     // Handle legacy sheets that don't have tileRegions array
     const tileRegions = sheet.tileRegions ?? [];
+    const animations = sheet.animations ?? [];
+    const namedCells = sheet.namedCells ?? [];
     const frames = tileRegions.length > 0
       ? generateFramesWithRegions(sheet.name, sheet.gridSettings, tileRegions)
       : generateFrames(sheet.name, sheet.gridSettings);
-    return framesToJSON(frames, sheet.name, sheet.width, sheet.height);
+    return framesToJSON(
+      frames,
+      sheet.name,
+      sheet.width,
+      sheet.height,
+      sheet.gridSettings,
+      animations,
+      namedCells
+    );
   }
 
   /**
@@ -365,6 +397,201 @@ export class SpriteSheetProjectManager {
   getTileRegions(sheetId: string): TileRegion[] {
     const sheet = this.getSheet(sheetId);
     return sheet?.tileRegions ?? [];
+  }
+
+  // ==========================================
+  // Animation Management
+  // ==========================================
+
+  /**
+   * Add a new animation sequence from ordered cell selection
+   * @param sheetId - The sheet to add the animation to
+   * @param frames - Ordered array of cell coordinates
+   * @param name - Optional name (auto-generated if not provided)
+   * @returns The created animation or null if invalid
+   */
+  addAnimation(
+    sheetId: string,
+    frames: Array<{ col: number; row: number }>,
+    name?: string
+  ): AnimationSequence | null {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || frames.length < 1) return null;
+
+    // Initialize animations array if missing (legacy sheets)
+    if (!sheet.animations) {
+      sheet.animations = [];
+    }
+
+    const animation: AnimationSequence = {
+      id: generateAnimationId(),
+      name: name || `animation_${sheet.animations.length + 1}`,
+      frames: [...frames], // Copy to avoid mutation
+      frameDuration: 100, // Default 100ms per frame
+      loop: true
+    };
+
+    sheet.animations.push(animation);
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    console.log(`Added animation: ${animation.name} with ${frames.length} frames`);
+    return animation;
+  }
+
+  /**
+   * Update an existing animation
+   */
+  updateAnimation(
+    sheetId: string,
+    animationId: string,
+    updates: Partial<Omit<AnimationSequence, 'id'>>
+  ): boolean {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.animations) return false;
+
+    const animation = sheet.animations.find(a => a.id === animationId);
+    if (!animation) return false;
+
+    // Apply updates
+    if (updates.name !== undefined) animation.name = updates.name;
+    if (updates.frames !== undefined) animation.frames = [...updates.frames];
+    if (updates.frameDuration !== undefined) animation.frameDuration = updates.frameDuration;
+    if (updates.loop !== undefined) animation.loop = updates.loop;
+    if (updates.inputBinding !== undefined) animation.inputBinding = updates.inputBinding;
+
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    return true;
+  }
+
+  /**
+   * Remove an animation from a sheet
+   */
+  removeAnimation(sheetId: string, animationId: string): boolean {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.animations) return false;
+
+    const index = sheet.animations.findIndex(a => a.id === animationId);
+    if (index === -1) return false;
+
+    const removed = sheet.animations.splice(index, 1)[0];
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    console.log(`Removed animation: ${removed.name}`);
+    return true;
+  }
+
+  /**
+   * Get all animations for a sheet
+   */
+  getAnimations(sheetId: string): AnimationSequence[] {
+    const sheet = this.getSheet(sheetId);
+    return sheet?.animations ?? [];
+  }
+
+  /**
+   * Get a specific animation by ID
+   */
+  getAnimation(sheetId: string, animationId: string): AnimationSequence | null {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.animations) return null;
+    return sheet.animations.find(a => a.id === animationId) ?? null;
+  }
+
+  /**
+   * Update region name
+   */
+  updateRegionName(sheetId: string, regionId: string, name: string): boolean {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.tileRegions) return false;
+
+    const region = sheet.tileRegions.find(r => r.id === regionId);
+    if (!region) return false;
+
+    region.name = name;
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    return true;
+  }
+
+  // ==========================================
+  // Named Cell Management
+  // ==========================================
+
+  /**
+   * Set or update a named cell
+   * @param sheetId - The sheet ID
+   * @param col - Grid column
+   * @param row - Grid row
+   * @param name - Name for this cell
+   * @param description - Optional description
+   */
+  setNamedCell(sheetId: string, col: number, row: number, name: string, description?: string): boolean {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet) return false;
+
+    // Initialize namedCells if missing (legacy sheets)
+    if (!sheet.namedCells) {
+      sheet.namedCells = [];
+    }
+
+    // Check if cell already has a name
+    const existing = sheet.namedCells.find(c => c.col === col && c.row === row);
+    if (existing) {
+      existing.name = name;
+      existing.description = description;
+    } else {
+      sheet.namedCells.push({ col, row, name, description });
+    }
+
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    return true;
+  }
+
+  /**
+   * Remove a named cell
+   */
+  removeNamedCell(sheetId: string, col: number, row: number): boolean {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.namedCells) return false;
+
+    const index = sheet.namedCells.findIndex(c => c.col === col && c.row === row);
+    if (index === -1) return false;
+
+    sheet.namedCells.splice(index, 1);
+    sheet.modifiedAt = Date.now();
+    this.saveToStorage();
+    this.notify();
+
+    return true;
+  }
+
+  /**
+   * Get named cell at position
+   */
+  getNamedCell(sheetId: string, col: number, row: number): NamedCell | null {
+    const sheet = this.getSheet(sheetId);
+    if (!sheet || !sheet.namedCells) return null;
+    return sheet.namedCells.find(c => c.col === col && c.row === row) ?? null;
+  }
+
+  /**
+   * Get all named cells for a sheet
+   */
+  getNamedCells(sheetId: string): NamedCell[] {
+    const sheet = this.getSheet(sheetId);
+    return sheet?.namedCells ?? [];
   }
 
   /**

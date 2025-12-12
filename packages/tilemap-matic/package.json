@@ -2,10 +2,12 @@
   "name": "@moxijs/tilemap-matic",
   "version": "0.1.0",
   "description": "Sprite sheet and tile map management tool built on MoxiJS and PIXI.js",
-  "main": "dist/bundle.js",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "scripts": {
     "dev": "webpack serve --mode development",
     "build": "webpack --mode production",
+    "build:app": "webpack --mode development",
     "watch": "webpack --mode development --watch",
     "clean": "rimraf dist"
   },

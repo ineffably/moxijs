@@ -36,7 +36,7 @@ jobs:
         run: npm run build:app --workspace=@moxijs/pikcell
 
       - name: Build tilemap-matic app for Pages
-        run: npm run build --workspace=@moxijs/tilemap-matic
+        run: npm run build:app --workspace=@moxijs/tilemap-matic
 
       - name: Generate documentation
         run: npm run typedoc

@@ -35,6 +35,9 @@ jobs:
       - name: Build pikcell app for Pages
         run: npm run build:app --workspace=@moxijs/pikcell
 
+      - name: Build tilemap-matic app for Pages
+        run: npm run build:app --workspace=@moxijs/tilemap-matic
+
       - name: Generate documentation
         run: npm run typedoc
 
@@ -53,6 +56,13 @@ jobs:
           cp packages/pikcell/index.css _site/pikcell/
           cp packages/pikcell/dist/bundle.js _site/pikcell/
           cp -r packages/pikcell/assets _site/pikcell/assets
+
+          # TileMapMatic at /tilemap-matic/
+          mkdir -p _site/tilemap-matic
+          cp packages/tilemap-matic/index.html _site/tilemap-matic/
+          cp packages/tilemap-matic/index.css _site/tilemap-matic/
+          cp packages/tilemap-matic/dist/bundle.js _site/tilemap-matic/
+          cp -r packages/tilemap-matic/assets _site/tilemap-matic/assets
 
           # Package builds at /packages/*/lib/
           mkdir -p _site/packages/core/lib

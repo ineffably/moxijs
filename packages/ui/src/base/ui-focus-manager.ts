@@ -149,10 +149,23 @@ export class UIFocusManager {
   }
 
   /**
-   * Sorts components by tab index
+   * Sorts components by tab index, then by visual position (top-to-bottom, left-to-right)
+   * This matches HTML's default tab behavior when tabIndex values are equal
    */
   private sortByTabIndex(): void {
-    this.focusableComponents.sort((a, b) => a.tabIndex - b.tabIndex);
+    this.focusableComponents.sort((a, b) => {
+      // Primary sort: tabIndex (lower values first)
+      if (a.tabIndex !== b.tabIndex) {
+        return a.tabIndex - b.tabIndex;
+      }
+      // Secondary sort: visual position (top-to-bottom, then left-to-right)
+      const posA = a.container.getGlobalPosition();
+      const posB = b.container.getGlobalPosition();
+      if (posA.y !== posB.y) {
+        return posA.y - posB.y;
+      }
+      return posA.x - posB.x;
+    });
   }
 
   /**

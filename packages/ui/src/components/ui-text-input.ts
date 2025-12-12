@@ -2,14 +2,10 @@ import * as PIXI from 'pixi.js';
 import { UIComponent, FontType } from '../base/ui-component';
 import { BoxModel, MeasuredSize } from '../base/box-model';
 import { UIPanel } from './ui-panel';
-import { EdgeInsets } from '../base/edge-insets';
 import { UIFocusManager } from '../base/ui-focus-manager';
 import { asTextDPR, ActionManager } from '@moxijs/core';
 import { ThemeResolver } from '../theming/theme-resolver';
-import {
-  FormStateManager,
-  TextInputHandler
-} from '../services';
+import { FormStateManager } from '../services';
 import { UI_DEFAULTS } from '../theming/theme-data';
 
 /**
@@ -55,7 +51,7 @@ export interface UITextInputProps {
    * - 'canvas' (default): Standard PIXI.Text with DPR scaling
    * - 'msdf': Multi-channel Signed Distance Field for crisp text at any scale
    * - 'bitmap': Pre-rendered bitmap font atlas
-   * 
+   *
    * Note: Text inputs currently only support 'canvas' mode for cursor positioning.
    */
   fontType?: FontType;
@@ -87,17 +83,18 @@ export class UITextInput extends UIComponent {
   private localFontFamily?: string;
   /** Local fontType prop (can be overridden by parent inheritance) */
   private localFontType?: FontType;
-  
-  // Services (composition)
+
+  // State management
   private stateManager: FormStateManager<string>;
-  private inputHandler: TextInputHandler;
-  // ThemeApplier removed - using base class helpers
-  
+
+  // Cursor state (inlined from TextInputHandler)
+  private cursorPosition: number = 0;
+
   // Visual elements
   private background: UIPanel;
   private textDisplay: PIXI.Text;
   private cursor: PIXI.Graphics;
-  
+
   // Cursor blink state
   private cursorBlinkInterval?: number;
   private cursorVisible: boolean = true;
@@ -105,8 +102,6 @@ export class UITextInput extends UIComponent {
   // Event listener management
   private actions = new ActionManager();
 
-  // State is now in base class (enabled, focused, hovered, pressed)
-  
   // Theme resolver is now in base class
   private colorOverrides: {
     backgroundColor?: number;
@@ -144,19 +139,15 @@ export class UITextInput extends UIComponent {
 
     // Initialize theme resolver
     this.themeResolver = props.themeResolver;
-    
+
     this.stateManager = new FormStateManager({
       value: props.value,
       defaultValue: props.defaultValue,
       onChange: props.onChange
     });
-    // Initialize input handler - it now uses stateManager directly
-    this.inputHandler = new TextInputHandler({
-      stateManager: this.stateManager,
-      maxLength: this.props.maxLength,
-      type: this.props.type,
-      multiline: false
-    });
+
+    // Initialize cursor position
+    this.cursorPosition = this.stateManager.getValue().length;
 
     // Update component state
     this.enabled = !this.props.disabled;
@@ -173,6 +164,12 @@ export class UITextInput extends UIComponent {
 
     // Setup interactivity
     this.setupInteractivity();
+
+    // Auto-layout if dimensions provided
+    // This ensures the input is ready to use immediately without manual layout() call
+    if (this.props.width > 0 && this.props.height > 0) {
+      this.layout(this.props.width, this.props.height);
+    }
   }
 
   /**
@@ -181,7 +178,7 @@ export class UITextInput extends UIComponent {
   private createVisuals(): void {
     // Create background
     const bgColor = this.resolveColor('background', this.colorOverrides.backgroundColor);
-    
+
     this.background = new UIPanel({
       backgroundColor: bgColor,
       width: this.props.width,
@@ -265,10 +262,9 @@ export class UITextInput extends UIComponent {
     if (this.focused) return;
 
     super.onFocus();
-    // focused is already set by super.onFocus()
-    
-    // Set cursor position
-    this.inputHandler.setCursorPosition(this.stateManager.getValue().length);
+
+    // Set cursor position to end
+    this.cursorPosition = this.stateManager.getValue().length;
     this.cursor.visible = true;
     this.updateCursor();
     this.startCursorBlink();
@@ -284,7 +280,6 @@ export class UITextInput extends UIComponent {
     if (!this.focused) return;
 
     super.onBlur();
-    // focused is already set by super.onBlur()
     this.cursor.visible = false;
     this.stopCursorBlink();
 
@@ -292,24 +287,106 @@ export class UITextInput extends UIComponent {
     this.updateBackground();
   }
 
+  /**
+   * Handle keyboard input (inlined from TextInputHandler)
+   */
   private handleKeyDown(e: KeyboardEvent): void {
     if (!this.focused || this.props.disabled) return;
 
-    // Handle Enter/Escape for blur (before delegating to handler)
-    if (e.key === 'Enter' || e.key === 'Escape') {
+    const key = e.key;
+
+    // Handle Enter/Escape for blur
+    if (key === 'Enter' || key === 'Escape') {
       this.onBlur();
       return;
     }
 
-    // Delegate keyboard handling to TextInputHandler
-    const handled = this.inputHandler.handleKeyDown(e);
+    let handled = false;
+
+    if (key === 'Backspace') {
+      this.handleBackspace();
+      handled = true;
+    } else if (key === 'Delete') {
+      this.handleDelete();
+      handled = true;
+    } else if (key === 'ArrowLeft') {
+      this.moveCursor(-1);
+      handled = true;
+    } else if (key === 'ArrowRight') {
+      this.moveCursor(1);
+      handled = true;
+    } else if (key === 'Home') {
+      this.cursorPosition = 0;
+      handled = true;
+    } else if (key === 'End') {
+      this.cursorPosition = this.stateManager.getValue().length;
+      handled = true;
+    } else if (key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      // Character input with type validation
+      if (this.props.type === 'number' && !/[0-9.-]/.test(key)) {
+        handled = true; // Consume invalid character
+      } else {
+        this.insertCharacter(key);
+        handled = true;
+      }
+    }
+
     if (handled) {
       e.preventDefault();
       e.stopPropagation();
-      // Handler updates stateManager directly, so we just need to update visuals
       this.updateText();
       this.updateCursor();
     }
+  }
+
+  /**
+   * Insert a character at cursor position
+   */
+  private insertCharacter(char: string): void {
+    const value = this.stateManager.getValue();
+    if (value.length >= this.props.maxLength) return;
+
+    const newValue =
+      value.substring(0, this.cursorPosition) +
+      char +
+      value.substring(this.cursorPosition);
+    this.stateManager.setValue(newValue);
+    this.cursorPosition++;
+  }
+
+  /**
+   * Handle backspace key
+   */
+  private handleBackspace(): void {
+    if (this.cursorPosition > 0) {
+      const value = this.stateManager.getValue();
+      const newValue =
+        value.substring(0, this.cursorPosition - 1) +
+        value.substring(this.cursorPosition);
+      this.stateManager.setValue(newValue);
+      this.cursorPosition--;
+    }
+  }
+
+  /**
+   * Handle delete key
+   */
+  private handleDelete(): void {
+    const value = this.stateManager.getValue();
+    if (this.cursorPosition < value.length) {
+      const newValue =
+        value.substring(0, this.cursorPosition) +
+        value.substring(this.cursorPosition + 1);
+      this.stateManager.setValue(newValue);
+    }
+  }
+
+  /**
+   * Move cursor horizontally
+   */
+  private moveCursor(direction: number): void {
+    const value = this.stateManager.getValue();
+    this.cursorPosition = Math.max(0, Math.min(this.cursorPosition + direction, value.length));
   }
 
   /**
@@ -318,16 +395,16 @@ export class UITextInput extends UIComponent {
   private updateText(): void {
     const value = this.stateManager.getValue();
     const displayText = this.getDisplayText();
-    
+
     this.textDisplay.text = displayText;
-    
+
     // Update text color based on whether showing placeholder
     const textColor = value
       ? this.resolveTextColor(this.colorOverrides.textColor)
       : this.resolvePlaceholderColor(this.colorOverrides.placeholderColor);
-    
+
     this.textDisplay.style.fill = textColor;
-    this.updateCursor();
+    // Note: cursor update is handled separately by caller to avoid double updates
   }
 
   /**
@@ -347,41 +424,46 @@ export class UITextInput extends UIComponent {
    */
   private updateCursor(): void {
     const value = this.stateManager.getValue();
-    const cursorPos = this.inputHandler.getCursorPosition();
-    const textUpToCursor = value.substring(0, cursorPos);
-    
+    const textUpToCursor = value.substring(0, this.cursorPosition);
+
     // Ensure cursor position is valid
-    if (cursorPos > value.length) {
-      this.inputHandler.setCursorPosition(value.length);
-    }
-    const dprScale = UI_DEFAULTS.DPR_SCALE;
-    // Use same font family as display text
-    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
-    const tempText = new PIXI.Text({
-      text: textUpToCursor,
-      style: {
-        fontFamily: effectiveFontFamily, // Match the display font
-        fontSize: this.props.fontSize * dprScale, // Account for DPR scaling
-        fill: this.textDisplay.style.fill,
-        align: 'left'
-      }
-    });
-    // Ensure effects is initialized to prevent null reference errors
-    if (tempText.effects === null) {
-      tempText.effects = [];
+    if (this.cursorPosition > value.length) {
+      this.cursorPosition = value.length;
     }
 
-    // Account for DPR scaling when calculating cursor position
-    const cursorX = 12 + (tempText.width / dprScale);
+    // Measure text width using canvas context (much faster than creating PIXI.Text)
+    // Must use scaled font size to match asTextDPR rendering (fontSize * dprScale, then scaled down)
+    const effectiveFontFamily = this.getInheritedFontFamily(this.localFontFamily) ?? UI_DEFAULTS.FONT_FAMILY;
+    const scaledFontSize = this.props.fontSize * UI_DEFAULTS.DPR_SCALE;
+    const scaledWidth = this.measureTextWidth(textUpToCursor, effectiveFontFamily, scaledFontSize);
+    // Scale back down to match the visual text width
+    const textWidth = scaledWidth / UI_DEFAULTS.DPR_SCALE;
+
+    const cursorX = 12 + textWidth;
     const cursorY = (this.props.height - this.props.fontSize) / 2;
 
     this.cursor.clear();
     this.cursor.rect(cursorX, cursorY, 1, this.props.fontSize);
     const cursorColor = this.resolveTextColor(this.colorOverrides.textColor);
     this.cursor.fill({ color: cursorColor });
-
-    tempText.destroy();
   }
+
+  /**
+   * Measure text width using canvas 2D context (much faster than PIXI.Text)
+   */
+  private measureTextWidth(text: string, fontFamily: string, fontSize: number): number {
+    // Use a shared canvas context for text measurement
+    if (!UITextInput.measureCanvas) {
+      UITextInput.measureCanvas = document.createElement('canvas');
+      UITextInput.measureContext = UITextInput.measureCanvas.getContext('2d')!;
+    }
+    UITextInput.measureContext.font = `${fontSize}px ${fontFamily}`;
+    return UITextInput.measureContext.measureText(text).width;
+  }
+
+  // Shared canvas for text measurement (static to avoid creating per instance)
+  private static measureCanvas: HTMLCanvasElement;
+  private static measureContext: CanvasRenderingContext2D;
 
   /**
    * Starts cursor blinking animation
@@ -414,7 +496,7 @@ export class UITextInput extends UIComponent {
       width: this.props.width,
       height: this.props.height
     };
-    
+
     return this.layoutEngine.measure(this.boxModel, contentSize);
   }
 
@@ -437,12 +519,27 @@ export class UITextInput extends UIComponent {
   }
 
   /**
-   * Sets the value programmatically
+   * Sets the value programmatically without triggering onChange.
+   * Use this when setting value from external state (e.g., parent component).
    */
   setValue(value: string): void {
-    this.stateManager.setValue(value);
-    this.inputHandler.setValue(value);
-    this.inputHandler.setCursorPosition(value.length);
+    const currentValue = this.stateManager.getValue();
+
+    // If value hasn't changed, don't do anything (preserves cursor position)
+    if (currentValue === value) {
+      return;
+    }
+
+    this.stateManager.setValueSilent(value);
+
+    // Only reset cursor to end if not focused (external update)
+    // If focused, user is actively typing - preserve cursor position within bounds
+    if (this.focused) {
+      this.cursorPosition = Math.min(this.cursorPosition, value.length);
+    } else {
+      this.cursorPosition = value.length;
+    }
+
     this.updateText();
     this.updateCursor();
   }
@@ -458,9 +555,22 @@ export class UITextInput extends UIComponent {
    * Update value (for controlled mode)
    */
   updateValue(value: string): void {
+    const currentValue = this.stateManager.getValue();
+
+    // If value hasn't changed, don't do anything
+    if (currentValue === value) {
+      return;
+    }
+
     this.stateManager.updateValue(value);
-    // Handler uses stateManager directly, just update cursor position
-    this.inputHandler.setCursorPosition(value.length);
+
+    // Preserve cursor position if focused, otherwise reset to end
+    if (this.focused) {
+      this.cursorPosition = Math.min(this.cursorPosition, value.length);
+    } else {
+      this.cursorPosition = value.length;
+    }
+
     this.updateText();
     this.updateCursor();
   }

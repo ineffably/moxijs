@@ -54,6 +54,7 @@
     "@moxijs/ui": "file:../ui",
     "codemirror": "^6.0.2",
     "pikcell": "file:../pikcell",
+    "@moxijs/tilemap-matic": "file:../tilemap-matic",
     "pixi.js": "^8.14.0"
   }
 }

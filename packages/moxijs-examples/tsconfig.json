@@ -15,6 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "pikcell": ["../pikcell/src/index.ts"],
+      "@moxijs/tilemap-matic": ["../tilemap-matic/src/index.ts"],
       "@moxijs/mini-gui": ["../mini-gui/src/index.ts"]
     }
   },

@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2025-12-11
+
+### CardPanel Improvements & FlexContainerPanel
+
+This release adds FlexContainerPanel for wrapping FlexContainer layouts in CardPanel chrome, and fixes CardPanel resize handle positioning.
+
+### Added
+
+#### FlexContainerPanel
+- New `FlexContainerPanel` component combining CardPanel chrome with FlexContainer body
+- Supports all CardPanel options (title, draggable, resizable, collapsible, shadows)
+- FlexContainer body auto-flows content with flexbox layout
+- Body styling via `bodyGap`, `bodyPadding`, `bodyDirection`, `bodyWrap`, `bodyJustify`, `bodyAlign`
+- Access inner FlexContainer via `body` property
+
+#### UIComponent
+- `isVisible` getter to check visibility state
+
+#### FlexContainer
+- Debug visualization mode with `setDebugMode(enabled)`
+- Shows layout direction, alignment arrows, gap indicators, and dimension labels
+- `setBorder(color, width, radius)` method for visual borders
+
+### Changed
+
+#### CardPanel
+- Resize handles now respect title bar height, preventing overlap with title area
+- North handle disabled when title bar present
+- Corner handles (NE, NW) start below title bar
+- Edge handles (E, W) offset by title bar height
+
+### Fixed
+- CardPanel resize handles no longer overlap with title bar drag area
+- Proper resize handle hit areas when title bar is present
+
 ## [0.3.4] - 2025-12-09
 
 ### Font Standardization & MSDF Fixes

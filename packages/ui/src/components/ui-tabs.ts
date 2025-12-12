@@ -306,6 +306,9 @@ export class UITabs extends UIComponent {
     const activeItem = this.items.find(item => item.key === this.activeKey);
     if (!activeItem) return;
 
+    // Set parent for font inheritance
+    activeItem.content.parent = this;
+
     // Add content
     const contentHeight = this.height - this.tabBarHeight;
     activeItem.content.layout(this.width, contentHeight);

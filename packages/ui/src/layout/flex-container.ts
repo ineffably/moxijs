@@ -44,6 +44,10 @@ export interface FlexContainerProps {
   height?: number | 'fill';
   /** Font configuration that children will inherit (like CSS) */
   fontConfig?: UIFontConfig;
+  /** Enable visual debugging to show layout bounds and structure */
+  debug?: boolean;
+  /** Background color for the container */
+  backgroundColor?: number;
 }
 
 /**
@@ -74,8 +78,12 @@ export interface FlexContainerProps {
  * ```
  */
 export class FlexContainer extends UIComponent {
-  private props: Required<Omit<FlexContainerProps, 'padding' | 'width' | 'height' | 'fontConfig'>>;
+  private props: Required<Omit<FlexContainerProps, 'padding' | 'width' | 'height' | 'fontConfig' | 'debug' | 'backgroundColor'>>;
   public children: UIComponent[] = [];
+  private debugEnabled: boolean = false;
+  private bgColor?: number;
+  private debugGraphics?: PIXI.Graphics;
+  private backgroundGraphics?: PIXI.Graphics;
 
   constructor(props: FlexContainerProps = {}) {
     const boxModel: Partial<BoxModel> = {
@@ -105,6 +113,22 @@ export class FlexContainer extends UIComponent {
     // Set font config if provided (children will inherit this)
     if (props.fontConfig) {
       this.setFontConfig(props.fontConfig);
+    }
+
+    // Enable debug mode if requested
+    this.debugEnabled = props.debug ?? false;
+
+    // Store background color and create graphics if provided
+    if (props.backgroundColor !== undefined) {
+      this.bgColor = props.backgroundColor;
+      this.backgroundGraphics = new PIXI.Graphics();
+      this.container.addChildAt(this.backgroundGraphics, 0);
+    }
+
+    // Create debug graphics if enabled
+    if (this.debugEnabled) {
+      this.debugGraphics = new PIXI.Graphics();
+      this.container.addChild(this.debugGraphics);
     }
   }
 
@@ -291,6 +315,65 @@ export class FlexContainer extends UIComponent {
 
     this.layoutDirty = false;
     this.render();
+    
+    // Render background and debug visuals
+    this.renderBackgroundAndDebug();
+  }
+
+  /** Render background color and debug visualization */
+  private renderBackgroundAndDebug(): void {
+    const { width, height } = this.computedLayout;
+    const padding = this.boxModel.padding;
+
+    // Draw background
+    if (this.backgroundGraphics && this.bgColor !== undefined) {
+      this.backgroundGraphics.clear();
+      this.backgroundGraphics.rect(0, 0, width, height);
+      this.backgroundGraphics.fill({ color: this.bgColor, alpha: 0.9 });
+    }
+
+    // Draw debug visualization
+    if (this.debugGraphics && this.debugEnabled) {
+      this.debugGraphics.clear();
+
+      // Container bounds (outer box) - Blue
+      this.debugGraphics.rect(0, 0, width, height);
+      this.debugGraphics.stroke({ color: 0x0088ff, width: 2, alpha: 0.8 });
+
+      // Content area (inner box after padding) - Green
+      const contentX = padding.left;
+      const contentY = padding.top;
+      const contentWidth = width - padding.horizontal;
+      const contentHeight = height - padding.vertical;
+      
+      this.debugGraphics.rect(contentX, contentY, contentWidth, contentHeight);
+      this.debugGraphics.stroke({ color: 0x00ff88, width: 1, alpha: 0.6 });
+
+      // Draw gap lines (Red dashed)
+      if (this.props.gap > 0 && this.children.length > 1) {
+        const isRow = this.props.direction === FlexDirection.Row || this.props.direction === FlexDirection.RowReverse;
+        
+        this.children.forEach((child, i) => {
+          if (i > 0) {
+            const childContainer = child.container;
+            
+            if (isRow) {
+              // Vertical gap line
+              const gapX = childContainer.x - this.props.gap / 2;
+              this.debugGraphics!.moveTo(gapX, contentY);
+              this.debugGraphics!.lineTo(gapX, contentY + contentHeight);
+            } else {
+              // Horizontal gap line
+              const gapY = childContainer.y - this.props.gap / 2;
+              this.debugGraphics!.moveTo(contentX, gapY);
+              this.debugGraphics!.lineTo(contentX + contentWidth, gapY);
+            }
+          }
+        });
+        
+        this.debugGraphics.stroke({ color: 0xff4444, width: 1, alpha: 0.5 });
+      }
+    }
   }
 
   /** @internal */

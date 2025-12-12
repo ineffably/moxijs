@@ -65,6 +65,38 @@
       </div>
     </div>
   </div>
-  <script src="dist/bundle.js"></script>
+  
+  <!-- 
+    Smart Bundle Loading Strategy:
+    - In development: HtmlWebpackPlugin injects the bundle automatically
+    - In production (GitHub Pages): Fallback script below loads dist/bundle.js manually
+    - The bundle sets window._bundleLoaded = true when it executes
+    - This allows the same index.html to work in both dev and production environments
+  -->
+  <script>
+    window.addEventListener('load', function() {
+      // Wait a tick to see if HtmlWebpackPlugin injected bundle already loaded
+      setTimeout(function() {
+        if (!window._bundleLoaded) {
+          console.log('Bundle not injected, loading manually for production/GitHub Pages');
+          var script = document.createElement('script');
+          script.src = 'dist/bundle.js';
+          script.async = false;
+          script.onload = function() {
+            console.log('✅ Bundle loaded successfully from dist/bundle.js');
+            console.log('window._bundleLoaded =', window._bundleLoaded);
+          };
+          script.onerror = function(e) {
+            console.error('❌ Failed to load bundle from dist/bundle.js', e);
+          };
+          console.log('📦 Appending script tag for dist/bundle.js...');
+          document.body.appendChild(script);
+          console.log('📦 Script tag appended to body');
+        } else {
+          console.log('✅ Bundle already loaded by HtmlWebpackPlugin');
+        }
+      }, 0);
+    });
+  </script>
 </body>
 </html>

@@ -15,8 +15,12 @@ module.exports = (env, argv) => ({
       // Use local moxi source for development so webpack can properly handle externals
       'moxi': path.resolve(__dirname, '../core/src/index.ts'),
       '@moxijs/core': path.resolve(__dirname, '../core/src/index.ts'),
+      '@moxijs/ui': path.resolve(__dirname, '../ui/src/index.ts'),
       // Use local pikcell source for development
       'pikcell': path.resolve(__dirname, '../pikcell/src/index.ts'),
+      // Use local tilemap-matic source for development
+      'tilemap-matic': path.resolve(__dirname, '../tilemap-matic/src/index.ts'),
+      '@moxijs/tilemap-matic': path.resolve(__dirname, '../tilemap-matic/src/index.ts'),
       // Use local mini-gui for development
       '@moxijs/mini-gui': path.resolve(__dirname, '../mini-gui/src/index.ts')
     }

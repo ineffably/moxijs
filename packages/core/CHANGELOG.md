@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2025-12-11
+
+### LLM Documentation Enhancement
+
+### Added
+
+#### Documentation (`llms.txt`)
+- **API Quick Reference TOC**: Auto-generated table of contents at top of llms.txt
+  - Lists all exported classes with their key methods
+  - Lists all exported interfaces
+  - Generated via `node scripts/generate-llm-toc.js`
+  - Wrapped in `<!-- TOC:START -->` / `<!-- TOC:END -->` markers for easy regeneration
+
 ## [0.3.4] - 2025-12-09
 
 ### MSDF Font System Improvements
